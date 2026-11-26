@@ -1,0 +1,162 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: CarthageSoftware.Mago
+PackageVersion: 1.61.0
+PackageLocale: en-US
+Publisher: Carthage Software
+PublisherUrl: https://carthage.software/en/
+PublisherSupportUrl: https://github.com/carthage-software/mago/issues
+PackageName: Mago
+PackageUrl: https://mago.carthage.software/
+License: Apache-2.0
+LicenseUrl: https://github.com/carthage-software/mago/blob/main/LICENSE-MIT
+ShortDescription: Mago is a toolchain for PHP that aims to provide a set of tools to help developers write better code.
+Description: Mago is a comprehensive toolchain for PHP that helps developers write better code. Inspired by the Rust ecosystem, Mago brings speed, reliability, and an exceptional developer experience to PHP projects of all sizes.
+Moniker: mago
+Tags:
+- ast
+- dev
+- formatting
+- lint
+- php
+- semantic-checks
+- static-analysis
+ReleaseNotes: |-
+  Mago 1.61.0 adds an opt-in check for overly wide `@throws` types, a `no-legacy-constructor` rule, and semantics checks for code PHP rejects. It also fixes the nested-loop slowdown from 1.60.0 and brings about 200 fixes to the analyzer, type system, and stubs.
+
+  ## ✨ Features
+
+  ### Analyzer
+
+  • **Wide throws**：adds opt-in `find-overly-wide-throw-types` for `@throws` types that never escape. (#2501, #2526, f66a97a, 08432a0, 2c55f7a)
+  • **False array indexes**：reports possibly `false` values used as array indexes as `possibly-false-array-index`. (2e08ad6)
+
+  ### Codex
+
+  • **Constants in docblocks**：resolves global constants in docblock types, as in `int-mask<E_ERROR, E_WARNING>`. (0d40968)
+  • **New type names**：understands `non-empty-scalar`, `callable-array`, `callable-object` and `stringable-object`. (a1ff0f8)
+  • **`@phpstan-sealed`**：reads the classes allowed to extend a class from `@phpstan-sealed`. (c60a9f7)
+
+  ### Linter
+
+  • **`no-legacy-constructor`**：warns about class-named constructors, which PHP 8 runs as plain methods. (#2669, #2744, 2c4ffce)
+
+  ### Semantics
+
+  • **Redundant union types**：reports native unions that repeat a type or hold one another member covers, which PHP rejects. (8bcf464)
+
+  ### Twig Syntax
+
+  • **Attribute spreads**：parses `{{ ...attributes }}` in Symfony UX component tags. (#2739, 1f26c4f)
+
+  ### Reporting
+
+  • **JSON columns**：adds a column to each position in JSON output. (#2769, 5fc9c97)
+
+  ## 🐛 Bug Fixes
+
+  ### Analyzer
+
+  #### Performance
+
+  • **Nested loops**：removes the slowdown in deeply nested loops that came with 1.60.0. (#2742, 8ee16b4)
+  • **Loops over `mixed`**：stops nested loops over `mixed` values from taking exponential time. (#2763, #2764, 2e518e8)
+
+  #### Control Flow
+
+  • **Ternaries and `match`**：keeps variables assigned in one branch, and an arm condition's narrowing in its branch. (2ac2b07, cb88a2d)
+  • **`switch` variables**：gives a case body the variables its condition assigns, and tracks variables a case unsets. (7b41d1e, 19e9c79)
+  • **`switch` narrowing**：narrows after a `switch` whose matching cases all leave, and in empty `switch (true)` cases. (7c52b96, a117bdb)
+  • **`elseif`**：keeps variables an `elseif` defines when the `if` exits, and drops stale negations of reassigned variables. (8d670ab, a185dc6)
+  • **Short circuits**：keeps variables a skipped operand assigns possibly undefined, and what the left of `&&` says. (b3b790e, 4ec0089)
+  • **Returns**：lets a docblock return type with `void` end without `return`, and adds `null` to untyped closures that may. (58a5da0, 42e58f6)
+  • **Unreachable `else`**：an unreachable `else` still ends the way its statements do. (a7cfd50)
+  • **Possibly false returns**：stops reporting them when the declared return type is `bool`. (77b63a0)
+
+  #### Loops
+
+  • **Growing values**：widens ints, floats, and string literals that grow between loop passes. (9201857, e97a72c, db640ff)
+  • **Continues**：keeps what an always-entered loop's `continue` paths define. (a9e9ea1, 4cd2d96)
+  • **Breaks**：keeps a loop variable's normal exit type when a `break` also defines it, and when a `break` skips it. (28ccf39, 68b0d6b)
+  • **Endless loops**：treats a `for` loop with no condition or a true last condition as infinite. (c598ca3)
+  • **Always-ending loops**：an always-entered loop whose body always ends now ends the function. (a2eeee0)
+  • **Loop assignments**：counts `foreach` targets, `static` declarations, and nested `list()` targets. (c416fec)
+  • **Loop conditions**：keeps a `mixed` variable's pre-loop type, and sees offsets the loop unsets. (5febad0, 285c54c)
+  • **Loose `null` loop conditions**：builds them from the analyzed operand type. (629bec7)
+  • **`??` conditions**：narrows a loop condition that falls back to `false` with `??`. (38b58f6)
+  • **`isset()` in loops**：keeps the loop origin of `isset()` values through reads, and types offsets of `mixed` as `mixed`. (1be5986, 258744e)
+  • **Inner `continue`**：a `continue` in an inner loop no longer makes a narrowed property possibly `null`. (0dda743)
+
+  #### Narrowing
+
+  • **Nullsafe checks**：narrows a nullsafe fetch's receiver on `is_null()`, and reuses the plain fetch's narrowing. (#2740, bdc2200, 17455bb)
+  • **Truthy checks**：removes `0` from narrowed ints, and narrows non-empty strings other than `'0'` to non-falsy. (4898533, 9b11f6d)
+  • **Loose equality**：keeps `null` when a value loosely equals `0` or `''`, and `__toString()` objects against strings. (fcc3234, 37680ec)
+  • **Negated checks**：narrows `numeric` and templates correctly, and keeps objects `!instanceof static` cannot rule out. (784387b, cbe82ea)
+  • **Else branches**：narrows the `else` branch of `count()`, `strlen()`, and literal variable comparisons. (5f454fd)
+  • **String lengths**：narrows a string whose length equals a positive number to a non-empty string. (0a437fc)
+  • **Class names**：narrows `$var::class` compared with `static::class`, and values compared through `get_debug_type()`. (4393c9a, a5ac850)
+  • **Increments in conditions**：narrows the variable a prefix `++` or `--` in a condition changes. (3f20b6f)
+  • **`array_key_exists()`**：narrows the array it finds a key in. (63335e9)
+  • **`isset()` offsets**：narrows a scalar to a string when `isset()` finds an offset in it, and keeps strings. (60fc92b, f00c7be)
+  • **`empty()` on `mixed` keys**：keeps their falsy values. (5a1bd94)
+  • **`!isset()`**：no longer turns the parent of a missing array key into an array. (20e8525)
+  • **Type checks**：`is_resource()`, `is_object()`, and `is_array()` narrow the `mixed` part of a union. (0df29cb)
+  • **Empty `count()`**：an empty `count()` on `mixed` may be a `Countable` object. (a63ffa9)
+  • **Built-in assertions**：applies them only when a call resolves to the built-in function. (1fe44ff)
+  • **`assert()`**：applies the `$this` assertions of a method call. (8d02df0)
+  • **Offset clauses**：keeps clauses about an offset, minus single-variable ones, when `&&` or `case` narrows its array. (e87ee99, eae1d4a)
+  • **List offsets**：an offset found in a list proves that the offsets before it exist. (e158deb)
+  • **Stale offsets**：forgets an offset narrowing when its index variable changes, or a call may change its key property. (55dfff8, 10fd41d)
+  • **Array key writes**：drops a narrowing that the written value's own expression made. (dbf835a)
+  • **Member narrowing**：forgets narrowings a call in a conditional operand clears, and memoized results `unset()` removes. (85cea22, 472fcaf)
+
+  #### Variables and References
+
+  • **Property references**：checks a reference to a known object's property as a write, bound to the property type. (a327d43, c65e759, 4bafca0)
+  • **Superglobals by reference**：keeps the type a call writes to a superglobal passed by reference. (ef2b735)
+  • **`global` imports**：types a `global` import of a possibly unset variable as nullable. (255a23e)
+  • **Offset writes**：writing an offset of an undefined or possibly undefined variable defines it as an array. (7558d81, f264d9b)
+  • **By-reference captures**：a closure capturing by reference defines the variable for later arguments. (e36087a)
+  • **`extract()`**：no longer reports variables as undefined after `extract()`. (1a2216b)
+  • **Increments**：treats `++` and `--` as assignments of their operand. (f8210a3)
+
+  #### Arrays
+
+  • **`array_key_first()` and `array_key_last()`**：know that the key they return exists in the array. (#2735, b2115b6)
+  • **`array_merge()`**：places list positions only after a known prefix, returns lists for int keys, and merges `mixed`. (a48add8, 09bb435)
+  • **Nested writes**：starts an appended element as `[]`, and updates every array holding an element `unset()` removes. (1adfc48, 0bf5332)
+  • **Escaped string keys**：narrows a key written with escapes the same as the plain key. (be61a12)
+  • **Array or object indexes**：reports an index union that may be an array or an object. (4185425)
+  • **Numeric-string keys**：lets a numeric-string key be an `int`, and accepts integer strings and overlapping keys. (6475201, d53ef10)
+  • **Unsealed shapes**：keeps unknown keys of unsealed shapes on their fallback type. (cfd35e8)
+  • **Key coercion**：stores the key PHP uses for non-key offsets, and follows the largest int key for the next one. (bfcbb63, 4b4c187)
+  • **Required literal keys**：treats an offset read with required literal keys as defined. (94c06d6)
+  • **Impossible keys**：reports `array_key_exists()` with a string key on an int-keyed array as always false. (ddab607)
+  • **`is_callable()` arrays**：allows destructuring an array narrowed by `is_callable()`. (2458c2d)
+  • **Class constants in properties**：`get_object_vars()` and `array_column()` resolve them in property types. (03cec3b)
+  • **`ArrayAccess`**：checks `null` offsets against the key type, and binds open type arguments on the first write. (c9baf14, fcac374)
+
+  #### Strings and Numbers
+
+  • **Casts**：types `(object)` casts as `stdClass`, or `object` for `mixed`, and keeps int ranges through `(int)`. (dd88ff6, 0322b19)
+  • **String conversion**：`echo`, `print`, and `include` accept what PHP converts to a string, such as `Stringable`. (#2775, 99d2c3a)
+  • **`filter_var()`**：types it by `FILTER_DEFAULT`, `FILTER_FLAG_EMPTY_STRING_NULL`, and array inputs. (faba6d2)
+  • **`parse_url()` and Argon2**：a parsed URL path may be empty, and `PASSWORD_ARGON2_PROVIDER` depends on the build. (2a78ccb)
+
+  #### Generics
+
+  • **Int bounds**：narrows and compares templates bounded by `int`. (9468c98)
+  • **Intersections**：infers templates from the intersection member that extends the parameter type. (dd8dba7)
+  • **Conditional types**：evaluates a conditional type on a class template once the template is bound. (#2752, 60ba88c)
+  • **Conditional returns**：narrow their template in the branch that matches. (e5ab459)
+  • **Template comparisons**：keeps the template when compared to a float literal, class constant, or enum case. (d77a02d, 98f32a5)
+  • **Callbacks**：accepts a callback whose parameter takes every value a template allows. (7c17eec)
+  • **Bounds in `foreach`**：iterates every part of a template's boun
+ReleaseNotesUrl: https://github.com/carthage-software/mago/releases/tag/1.61.0
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://mago.carthage.software/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
