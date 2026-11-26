@@ -1,0 +1,27 @@
+# Rendered by packaging/build-feeds.ps1 - do not edit the generated copy.
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.28.0.schema.json
+
+PackageIdentifier: DonislawDev.ChronoMock.CLI
+PackageVersion: 0.5.0
+ReleaseDate: 2026-10-28
+InstallerType: zip
+NestedInstallerType: portable
+NestedInstallerFiles:
+- RelativeFilePath: chrono-cli\chrono.exe
+# Load-bearing. Without it WinGet starts chrono through a link in its own
+# links folder, and chrono looks for chrono_hook.dll, the calendars and the
+# presets beside the path it was started by - the link - and finds none of
+# them: every session stops with core.hook_dll_missing (tools/feeds/
+# symlink-probe.ps1 on Windows Server 2025, 2026-11-02). With it, WinGet makes
+# no link and puts the folder chrono.exe is in on PATH instead
+# (PortableInstaller.cpp in winget-cli, read 2026-11-02). That folder holds
+# only our own files.
+ArchiveBinariesDependOnPath: true
+Commands:
+- chrono
+Installers:
+- Architecture: x64
+  InstallerUrl: https://github.com/donislawdev/ChronoMock/releases/download/v0.5.0/ChronoMock-cli-win.zip
+  InstallerSha256: D93C802EE2A7C70658BF46545A9F311D3134168476A507241A3CC13256EC9747
+ManifestType: installer
+ManifestVersion: 1.28.0
