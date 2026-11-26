@@ -1,0 +1,49 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: poco-ai.Agentero
+PackageVersion: 0.18.4
+PackageLocale: zh-CN
+Publisher: poco-ai
+PublisherUrl: https://github.com/poco-ai
+PublisherSupportUrl: https://github.com/poco-ai/Agentero/issues
+PackageName: Agentero
+PackageUrl: https://github.com/poco-ai/Agentero
+License: MIT
+LicenseUrl: https://github.com/poco-ai/Agentero/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 poco-ai
+ShortDescription: Agent 友好的文献管理方式。
+Description: 传统文献管理器对 Agent 并不友好：阅读高亮和笔记被锁在单篇文件里，Agent 很难跨论文复用；每次对话都要重新提供上下文，缺少稳定的本地知识地图；PDF 对人友好，但对 Agent 来讲不是最舒服的阅读材料。Agentero 旨在构建 Agent 友好、Agent 原生的文献管理方式，探索人与 Agent 在文献管理中的协作方式。通过 ACP 连接本机 Agent（BYOA），支持划词对话、论文导入与 Skill 导入，兼容 Zotero 生态，提供论文翻译、双链与知识图谱、PDF 深度阅读等功能。
+Tags:
+- agent
+- pdf
+- zotero
+- 学术
+- 引用
+- 文献
+- 文献管理
+- 研究
+- 论文
+ReleaseNotes: |-
+  本次更新把 Agent 会话集中到整窗的 Agents Window，并继续打磨 PDF 译文的选择与导出：译文成品归入论文目录并成为独立的可选同步项，版面元素框选和行间公式的点选边界更准确；译文 PDF 只嵌入实际用到的字形并共用源页资源，体积降到约 5 MB。同时移除了 Azure 与 Google Cloud 两个自带翻译引擎。
+  新功能
+  - Agents Window: 顶栏新增 Agents Window 入口，把主窗口切换为整窗工作区。左侧栏按 Agent 列出会话历史，打开的会话以标签页并排排列，模型与协作选项收进输入框底栏，会话列可居中调整宽度；侧栏 Agent 节点恢复为普通文件夹展开。（commit by @Phil-Fan）
+  - 译文归档与可选同步：全文译文保存到论文目录的 translations/translated.pdf，双语导出去 translations/bilingual.pdf，导出对话框默认打开该目录。同步范围新增「译文」并默认关闭；即使 PDF、源码和附件全开，该目录也不会进入 Git 同步。（#1268 by @ffy6511）
+  改进
+  - 顶栏快速打开：居中的命令面板改为顶栏内联搜索框，结果在下方展开且不铺遮罩；Cmd+P、Shift+Cmd+P、Esc、点击外部与键盘导航保持可用。（commit by @Phil-Fan）
+  - 译文 PDF 体积：字体只嵌入译文实际用到的字形，同一源页的公式共用一份页面资源，不再为每个公式复制整页内容。10 页论文的译文约 5 MB，存储占用降低约 80%。（#1270 by @ffy6511）
+  修复
+  - 版面元素框选边界：⌘. 在译文上框选时只保留框覆盖的版面块，指针擦到下一节边界不会带入整句；确实覆盖两节时两节都保留。拖选范围按实际渲染行计算，点击与悬停落在句子上，保存的高亮在同页重新匹配。（#1266 by @ffy6511）
+  - 行间公式与正文选区：无编号的行间公式在版面元素模式下可点选，悬停显示 Formula，从公式起笔时保留指针下的公式。正文行不再被误判成行间公式，高亮不再挖掉句中的词，字母下伸部分也留在选区内。（#1267 by @ffy6511）
+  - 侧栏复制论文路径：译文 PDF 获得焦点后，WKWebView 会拒绝剪贴板写入；现在改为在点击时写入，已打开的 PDF 选区也不会覆盖从侧栏发起的复制。（#1271 by @ffy6511）
+  - Windows Claude 检测：PATH 中残留的 claude.cmd（对应 npm 包已删除）不再遮住原生 claude.exe；检测逐个尝试 PATH 候选取第一个可启动的入口，CLAUDE_CODE_EXECUTABLE 仍优先，显式指定但不可用时直接报错。（#1259 by @JiaheChen2002）
+  - 译文面板随正文关闭：关闭论文正文标签时成对关闭对照译文页；单独关闭 NOTES 或译文页仍保留正文。（commit by @Phil-Fan）
+  - 回收站清理译文缓存：论文进入回收站后删除其 reflow-ir 目录，并按内容哈希清掉对应的 reflow-build PDF；未映射的哈希与字体资产保留到整批清除。（#1268 by @ffy6511）
+  破坏性变更
+  - 移除 Azure 与 Google Cloud 翻译引擎：Microsoft Translator（Azure）与 Google Cloud Translate 两个 BYOK 提供商，连同设置卡片、Host 请求路径、Azure region 字段和 CLI 配置项一并移除。已保存的选择回退到默认引擎。（commit by @Phil-Fan）
+ReleaseNotesUrl: https://github.com/poco-ai/Agentero/releases/tag/v0.18.4
+Documentations:
+- DocumentLabel: 文档
+  DocumentUrl: https://agentero-docs.poco-ai.com/
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
