@@ -1,0 +1,165 @@
+# Created by Anthelion using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Mozilla.sccache
+PackageVersion: 0.20.0
+PackageLocale: en-US
+Publisher: Mozilla
+PublisherUrl: https://github.com/mozilla
+PublisherSupportUrl: https://github.com/mozilla/sccache/issues
+PackageName: sccache
+PackageUrl: https://github.com/mozilla/sccache
+License: Apache-2.0
+LicenseUrl: https://github.com/mozilla/sccache/blob/HEAD/LICENSE
+ShortDescription: Sccache is a ccache-like tool. It is used as a compiler wrapper and avoids compilation when possible. Sccache has the capability to utilize caching in remote storage environments, including various cloud storage options, or alternatively, in local storage.
+ReleaseNotes: |-
+  sccache 0.20.0
+
+  Summary
+  sccache 0.20.0 is mostly about speed: the released binaries are now built with profile-guided
+  optimization, cache hits do much less redundant work for both C/C++ and Rust, and client-side mode
+  lost its per-write latency. It also brings several cache-key correctness fixes, more Rust caching
+  across checkouts, and a working preprocessor cache on Windows.
+  Highlights:
+  - Performance: the released x86_64 Linux (musl), macOS and x86_64 Windows binaries are built
+    with PGO, and packagers are encouraged to do the same (#2943, #2950). In direct mode, the server
+    remembers file digests across lookups instead of re-hashing every header on each hit (#2940,
+    #2941, #2939). For Rust, the --emit=dep-info and --print file-names runs, which were most of
+    the work of a cache hit, are reused across compiles of the same crate (#2942). In client-side
+    mode, Nagle's algorithm no longer delays cache writes by up to 40ms each (#2996), and each
+    compile runs on a lighter runtime (#2997).
+  - Cache-key correctness: the input file name is now hashed for C/C++, so two sources that
+    preprocess to the same text no longer share an object (#2974). With basedirs, the preprocessor
+    cache re-roots recorded includes at the tree being compiled, so a second checkout with different
+    headers no longer gets the first one's object; an unreadable entry is now a miss instead of a
+    failed compile (#2868). clang-cl profiles (#2962) and Rust static libraries passed with link
+    modifiers (#2971) are hashed, an unset Rust env-dep is no longer confused with an empty one
+    (#3041), and -ftime-trace is cacheable again (#2956).
+  - Rust: SCCACHE_BASEDIRS now applies to Rust compiles (#2918, #3022), and
+    CARGO_TARGET_DIR / CARGO_BUILD_* are no longer hashed, so each target directory no longer
+    gets its own cache (#3050). Proc-macro externs are hashed by their crate metadata, fixing misses
+    on macOS (#2882). SCCACHE_ALLOW_INCREMENTAL=1 keeps caching the non-incremental parts of a
+    CARGO_INCREMENTAL=1 build, and SCCACHE_ALLOW_INCREMENTAL=cache caches incremental compiles
+    too (#2810, #3020). rustc uses the build's fifo: jobserver (#2979, #2978). Long command lines
+    on Windows are passed through a response file again, fixing os error 206 (#3026), and -l
+    without a kind is passed to rustc unchanged (#3049).
+  - MSVC: the preprocessor cache works on Windows (#2972, #2901), cache hits report the current
+    /showIncludes output instead of the one recorded in another directory (#3019), and response
+    files without a BOM are decoded in the ANSI code page (#2980).
+  - Storage: GCS exchanges a service account key for a token once per lifetime instead of once
+    per request (#2993), and HTTP backends use the system resolver instead of hickory-dns, fixing
+    stalls on macOS (#2988). Redis gained configurable IO timeouts (#2965), the cache read timeout is
+    configurable with SCCACHE_CACHE_READ_TIMEOUT_SECS (#2953), GHA retries temporary errors
+    (#2911), lookup read errors are preserved and counted (#2967), read-only disk caches work on
+    read-only mounts (#2901), and the disk cache directory is tagged with CACHEDIR.TAG (#2977).
+    An invalid SCCACHE_CACHE_SIZE is now reported instead of silently ignored (#3052).
+  Welcome to 28 new contributors!
+
+  Performance
+  - Build the released binaries with profile-guided optimization by @sylvestre in #2943
+  - docs: explain how to build sccache with PGO, and ask packagers to by @sylvestre in #2950
+  - pgo: write the training profile when clap exits by @sylvestre in #3054
+  - preprocessor cache: remember file digests across direct-mode lookups by @sylvestre in #2940
+  - preprocessor cache: decode include paths as byte buffers by @sylvestre in #2941
+  - util: reuse the hash read buffer instead of zeroing 128KB per file by @sylvestre in #2939
+  - rust: reuse dep-info and output lists across compiles of a crate by @sylvestre in #2942
+  - net: disable Nagle's algorithm on client connections by @sylvestre in #2996
+  - client-side: run each compile on a current-thread runtime by @sylvestre in #2997
+
+  Features
+  - Add SCCACHE_ALLOW_INCREMENTAL to keep caching the non-incremental parts of a build by @PHPCraftdream in #2810
+  - rust: cache incremental compiles with SCCACHE_ALLOW_INCREMENTAL=cache by @katout in #3020
+  - rust: add support for SCCACHE_BASEDIRS when hashing by @ghoulspa in #2918
+  - rust: let rustc use the build's fifo: jobserver by @macalinao in #2979
+  - commands: give local compiles the build's fifo: jobserver by @macalinao in #2978
+  - compiler: make the cache read timeout configurable by @saimskywalker in #2953
+  - redis: add configurable IO timeouts by @aw1cks in #2965
+  - Tag the disk cache directory with CACHEDIR.TAG by @katopz in #2977
+
+  Compiler support
+  - msvc: make the preprocessor cache work on Windows by @adriansmares in #2972
+  - msvc: hash profiles passed directly to clang-cl by @marcpems in #2962
+  - Support -Xclang -fobjc-dispatch-method flag for caching by @nunoleitao-ops in #2696
+  - fix(cc): recognize -sysroot and -resource-dir flags by @weihanglo in #2903
+  - clang: recognize -meabi by @arturkow2000 in #3046
+  - Make -ftime-trace hasheable as in pre 0.18 by @Felixoid in #2956
+  - feat: Play nicely with HIP's --offload-compress. by @sjuxax in #2788
+  - Don't cache ptxas PTX-verification passes by @tinglvv in #2809
+  - nvcc: handle dry runs without PATH assignments by @drahnr in #3012
+
+  Fixes
+  - compiler: hash the input file name for C/C++ compilations by @saimskywalker in #2974
+  - fix preprocessor cache mode vs basedirs by @avikivity in #2868
+  - gcc: Prevent double preprocessing of assembly files in dist mode by @pprkut in #2938
+  - msvc: use current /showIncludes output on cache hits by @ck0i in #3019
+  - msvc: decode response files without a BOM in the ANSI code page by @armadavalor in #2980
+  - rust: show what rustc wrote when its dep-info has no rule by @sylvestre in #2946
+  - rust: accept dep-info without a rule (-Zdep-info-omit-d-target) by @sylvestre in #2949
+  - rust: hash proc-macro externs by their crate metadata by @xdustinface in #2882
+  - rust: hash listed env-deps verbatim with basedirs by @katout in #3022
+  - rust: hash an unset env-dep apart from an empty one by @Shriraj1901 in #3041
+  - rust: hash static libraries passed with link modifiers by @tiny-ac in #2971
+  - rust: exclude CARGO_TARGET_DIR and CARGO_BUILD_* from the hash key by @art-shen in #3050
+  - rust: treat the -C profile-use file as an input, not an output by @feder-cr in #2961
+  - rust: spawn a long command line through a response file by @katout in #3026
+  - Do not set library kind to dylib if not specified by @anti-social in #3049
+  - dist: include directories traversed by '..' in Rust input archives by @ychampion in #3033
+  - disk: don't touch entry file times on read-only hits by @ualtinok in #2901
+  - cache: preserve and count lookup read errors by @aw1cks in #2967
+  - gha: retry temporary cache errors by @codeandsolder in #2911
+  - gcs: default external_account credential format to text in memory by @akasakariko in #2889
+  - gcs: exchange a service account key for a token once per lifetime by @sylvestre in #2993
+  - http: resolve names with the system resolver instead of hickory-dns by @sylvestre in #2988
+  - config: reject an invalid SCCACHE_CACHE_SIZE instead of ignoring it by @ranjithguggilla in #3052
+  - server: serialize Unix socket startup by @NUAAwqy in #2920
+  - server: do not print the top-level error twice by @sylvestre in #2947
+  - client: say the server hung up instead of "failed to fill whole buffer" by @sylvestre in #2948
+  - doc: fix the logging variable that disables client-side mode by @tiny-ac in #2969
+
+  Dependencies
+  - deps: bump rustls-webpki, webpki-roots and webpki-root-certs (emSign distrust) by @saimskywalker in #2973
+  - chore: update to cc 1.9.0 by @MQ-mengqing in #2923
+  - deps: update zip to 9 by @codeandsolder in #2916
+  - deps: refresh Cargo.lock by @loganrosen in #3010
+  - deps: bump object to 0.40 by @loganrosen in #3017
+  - Update dependencies by @sylvestre in #3018
+  - deps: drop serde_json version cap by @loganrosen in #3023
+  - deps: replace number_prefix with unit-prefix by @loganrosen in #3030
+  - deps: bump base64 to 0.23 by @loganrosen in #3034
+
+  Tests & CI
+  - bench: cover direct-mode lookups of the preprocessor cache by @sylvestre in #2951
+  - test: make integration tests work with podman, not just docker by @avikivity in #2859
+  - rust: give the basedir env-dep test the environment rustc would see by @sylvestre in #2989
+  - rust: use #2982's fix for the env-dep basedir test by @sylvestre in #2990
+  - tests: use temp-env instead of unsafe env::set_var by @loganrosen in #3039
+  - server: avoid fd inheritance race in Unix socket test by @loganrosen in #3036
+  - ci: move the macOS arm64 jobs from macos-14 to macos-15 by @saimskywalker in #2976
+  - ci: build the Windows PGO OpenSSL with Strawberry Perl by @xdustinface in #2991
+  - ci: fail the grcov download on HTTP errors by @avikivity in #3008
+  - chore: bump codspeed gha to v5 by @drahnr in #3014
+
+  Cleanup
+  - Move Storage trait and RemoteStorage struct to src/cache/storage.rs by @xis19 in #2987
+  - Split the Storage trait into CacheStorage and PreprocessorCacheStorag… by @xis19 in #3007
+  - Micro cleanups by @ahartmetz in #2743
+  - fix: clippy lints 1.99.1 by @drahnr in #3013
+  - clippy: disallow std::env::set_var and remove_var by @loganrosen in #3040
+  - pre-commit: run rustfmt at the crate edition by @jetm in #2958
+  - prepare release 0.20.0 by @sylvestre in #3055
+
+  New Contributors
+  - @saimskywalker made their first contribution in #2953
+  - @tiny-ac made their first contribution in #2969
+  - @jetm made their first contribution in #2958
+  - @MQ-mengqing made their first contribution in #2923
+  - @ghoulspa made their first contribution in #2918
+  - @tinglvv made their first contribution in #2809
+  - @ualtinok made their first contribution in #2901
+  - @sjuxax made their first contribution in #2788
+  - @akasakariko made their first contribution in #2889
+  - @NUAAwqy made their first contribution in #2920
+  - @nunoleitao-ops made their first contribution in #2696
+ReleaseNotesUrl: https://github.com/mozilla/sccache/releases/tag/v0.20.0
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
