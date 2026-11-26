@@ -1,0 +1,99 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: sparrowwallet.sparrow
+PackageVersion: 2.5.7
+PackageLocale: en-US
+Publisher: Sparrow Wallet
+PublisherUrl: https://github.com/sparrowwallet
+PublisherSupportUrl: https://github.com/sparrowwallet/sparrow/issues
+PackageName: Sparrow Bitcoin Wallet
+PackageUrl: https://github.com/sparrowwallet/sparrow
+License: Apache-2.0
+LicenseUrl: https://github.com/sparrowwallet/sparrow/blob/HEAD/LICENSE
+ShortDescription: Desktop Bitcoin Wallet focused on security and privacy. Free and open source.
+Description: |-
+  Sparrow is a modern desktop Bitcoin wallet application supporting most hardware wallets and built
+  on common standards such as PSBT, with an emphasis on transparency and usability.
+Tags:
+- bitcoin
+- bitcoin-wallet
+ReleaseNotes: |-
+  • Upgrade the bundled Tor to v0.4.9.16, reproducibly built for all supported platforms
+  • Wait for a slow Electrum server response instead of resending the request, halving batch page sizes only after a request goes unanswered
+  • Retry the keepalive ping only once and skip it while another request is awaiting its response
+  • Keep the other pages of a batched server request when one page returns an error, and resend requests left out of an oversized batch response, so large wallet histories sync on slow servers
+  • Keep the start of a server response that arrives across socket read timeouts instead of dropping it, and ignore server notifications that match no subscription
+  • Add testnet5 network support and two libbitcoin testnet5 public Electrum servers (@eynhaender)
+  • Refuse descriptors that do not derive on the standard receive and change chains when importing a wallet or keystore, warning of them in the descriptor editor, and apply the child derivations of keys in scanned output descriptors
+  • Refuse the BWT fallback for Bitcoin Core over https, ignoring the legacy wallet setting for it (Bitcoin Core before v24 must be upgraded to connect over https)
+  • Reduce the minimum window width to 750, fitting the Send tab, transaction diagram and transaction tab to narrow windows
+  • Add a `1 234,56` unit format, and use the unit format rather than the system locale for fee rates, sizes, percentages and chart labels
+  • Upgrade tern to v1.1.4 and use it for Bitcoin Core RPC and PayNym avatar requests, pointing to `rpcallowip` when Bitcoin Core resets the RPC connection before connecting or as the request is sent
+  • Request Bitcoin Core wallet spends in batches from v28 when starting Cormorant, and wait for the initial load before polling
+  • Refuse silent payment outputs in a PSBT with an input spending a segwit version 2 or higher output
+  • Verify the silent payment outputs of a PSBT that has not been finalized when it is exported or combined, where an open wallet provides all of its inputs
+  • Always apply the required `SIGHASH_ALL` to the inputs of a PSBT with silent payment outputs in the transaction tab, and check each input a card will sign before it signs any
+  • Save silent payments found by a scan when fetching their history fails, load wallets whose silent payment indexes are not contiguous, and fetch a silent payments transaction the server cannot return again on the next refresh
+  • Warn when a BIP353 name resolves to a silent payment address for a different network, or places one under the wrong network parameter, on the Send tab and in Send to Many
+  • Check a merkle proof that does not reconstruct against the server chain before reporting it, sync to the announced tip before serving a stored header when a reorg lengthens the chain, and compare a re-announced chain tip by block
+  • Show a transaction tab height as unverified when the proof request fails, as well as when the proof is refused, and fetch a status reported by the previous server again after the server changes
+  • Restart the stale tip warning clock only when the server announces a block it has not announced before
+  • Prevent viewing a wallet transaction in a transaction tab from changing the copy the wallet stores, and lock the locktime of a PSBT with an input requiring one, showing the locktime that will be signed
+  • List payments to other addresses in the summary of a transaction paying premix outputs
+  • Refuse an extended private key in place of an xpub in imported wallet files, and create a signing wallet rather than a watch only one from an output descriptor with a master xprv followed by an account path
+  • Rederive node addresses rather than using stored addresses when importing a Sparrow wallet file
+  • Parse multisig setup files line by line with case-insensitive labels and a strict policy value, replace control characters in imported cosigner labels, and refuse EC or duplicate keys in a scanned multisig
+  • Import a descriptor wrapped over several lines or followed by other text in a PDF
+  • Apply the wallet name character filter to names suggested by imported wallet files, and reject a wallet file with an empty name
+  • Build the single share stored for imported SLIP39 shares from their original encrypted master secret, so the wallet decrypts it correctly with any provided passphrase
+  • Let a terminal user choose the script type when transactions are found for more than one type
+  • Prompt to accept an expired server certificate in Test Connection, and say an expired saved certificate has expired rather than changed
+  • Accept a proxy port given with the host, use the default port for a proxy given without one, and keep the saved proxy when the host is invalid in the desktop and terminal settings
+  • Reach an onion host written with a trailing dot over Tor, removing the dot from saved server URLs
+  • Always hold rates, version and currency requests and refuse auth47 and lnurl-auth logins while internal Tor is starting
+  • Treat a proxy's reply that it could not reach the server as a server failure, so it no longer turns off the proxy, and stop the external proxy status check while offline
+  • Stop a connection waiting to retry while the server settings are open, reconnecting on closing, and save a Bitcoin Core server chosen or scanned that differs only in protocol
+  • Find, rename and delete the backups of a wallet when its password is added or the wallet is renamed or deleted, including backups left in a previous wallets folder or made before migrating from JSON
+  • Report a wallet password change that fails while saving, and delete backups only once the file has been written with the new password
+  • Widen stored transactions to the consensus maximum size and skip larger ones fetched from the server
+  • Omit bound values from wallet database error messages, and the entered text from the terminal descriptor import log
+  • Keep the open wallet encrypted in memory while discovering accounts to add
+  • Save the freeze status and labels of nested wallet outputs to the wallet that stores them, and keep the label and status of outputs at an address the server briefly reports without history
+  • Keep a master wallet entry for a transaction otherwise held only by a PayNym wallet, so history continues to sync
+  • Extend the gap limit only for addresses actually paid by a fetched and verified transaction
+  • Ask before broadcasting a PayNym link transaction at a very high fee rate, and show the payment code when linking
+  • Keep stored and followed PayNym contacts over provided directory entries and their names, search the listed contacts, remove control and format characters from PayNym names, and refuse to sign a PayNym authentication token in another format
+  • Keep the entered address for a payment when showing its cached payment instruction name in the Send tab and Send to Many, and clear a selected PayNym before applying a scanned address or URI
+  • Read a positive amount below 1 pasted into the amount or fee field as BTC when sats are configured, and switch the field back to sats when the form is cleared
+  • Hide amounts in the transaction hex on the input and output views in the light theme, and for unselected outputs when an output is selected
+  • Omit the copy value actions from the transaction diagram context menus when amounts are hidden
+  • Include the non-witness UTXO in PSBTs for Jade keystores, including in the QR display when the PSBT has more than one input
+  • Open the device signing dialog for a card keystore in a multisig wallet that also holds seed and watch only keystores, and report the card status when a Satochip extended key request does not succeed
+  • Name the device and its fingerprint when a connected device does not match the wallet keystores
+  • Accept 64 byte `SIGHASH_DEFAULT` taproot signatures when verifying BIP322 messages
+  • Select the saved camera by its id before falling back to its name, and leave QR codes that ZBar can only return as transcoded text to the other scanners
+  • Freeze and unfreeze the row whose menu was opened from the keyboard when it is not in the selection, leaving spent outputs in a selection unchanged
+  • Request historical rates from CoinGecko in whole UTC days
+  • Show the remote Bitcoin Core node warning from the terminal server settings, and wrap terminal alert lines at the full width
+  • Cap `sparrow.log` at 10MB with one rolled backup
+  • Remove auth47 Soroban callback support
+  • Resolve all dependencies from Maven Central, publishing bwt-jni, fxsvgimage and bokmakierie under `com.sparrowwallet`
+  • Add test coverage for single signature output descriptors and multisig UR output descriptor exports (@aaron-leeb)
+  • Upgrade Java to v25.0.5.1
+  • Upgrade jzbar to v0.5.0
+  • Upgrade pgpainless to v1.7.8
+  • Upgrade flyway to v13.12.1
+  • Bug fix：Fix the main window staying blank with the Metal pipeline on macOS when it is over 4096 pixels wide
+  • Bug fix：Fix Shift-F10 and the menu key not opening table row actions on Linux
+  • Bug fix：Fix labelling a heavily reused address freezing the UI, and commit Receive tab labels on Enter so the whole label propagates
+  • Bug fix：Fix a node entry being created for every UTXO table address cell update (@gorrdy)
+  • Bug fix：Fix the monospaced font of UTXO addresses being lost when the table is refreshed
+  • Bug fix：Fix the Send tab transaction preview opening a cleared transaction in the expanded popup
+  • Bug fix：Fix sweeping by summing the swept key once per input when sweeping to a silent payment address, and refuse silent payment sweeps from uncompressed keys
+  • Bug fix：Fix the BIP352 derivation used for silent payment wallets in the import menu, terminal, SeedQR and account addition
+  • Bug fix：Fix an error labelling silent payment outputs from an open transaction tab before the wallet has fetched their transaction
+  • Bug fix：Fix applying a settings change that refreshes the wallet discarding the local record of silent payment addresses paid since the Settings tab was opened
+ReleaseNotesUrl: https://github.com/sparrowwallet/sparrow/releases/tag/2.5.7
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
