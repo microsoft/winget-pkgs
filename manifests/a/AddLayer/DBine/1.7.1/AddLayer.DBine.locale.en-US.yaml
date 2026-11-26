@@ -1,0 +1,93 @@
+# Created by Anthelion using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: AddLayer.DBine
+PackageVersion: 1.7.1
+PackageLocale: en-US
+Publisher: AddLayer
+PublisherUrl: https://dbine.com/
+PublisherSupportUrl: https://github.com/addlayer-io/dbine/issues
+Author: AddLayer
+PackageName: DBine
+PackageUrl: https://dbine.com/
+License: Apache-2.0
+LicenseUrl: https://github.com/addlayer-io/dbine/blob/HEAD/LICENSE
+ShortDescription: Manage SQL, NoSQL and analytical databases in one app
+Description: |-
+  DBine is a desktop database manager for relational, analytical, document, key-value, graph, time-series and search databases. One workbench connects to PostgreSQL, SQL Server, MySQL, MariaDB, SQLite, Oracle, MongoDB, Redis, Cassandra, ClickHouse, DuckDB, Snowflake, BigQuery, Elasticsearch, Neo4j, InfluxDB and many more engines.
+
+  Explore and query:
+  - A tree per connection and database, with saved queries kept inside each database
+  - A SQL editor with each engine's dialect, completion of tables and columns, and script execution
+  - A fast results grid with cell editing, filters, sorting, charts and a JSON tree view
+  - Graphical execution plans, a visual query builder and query optimization hints
+  - Search across object names, columns and stored code, and run code on several databases at once
+
+  Design and move data:
+  - Table designer, ER diagrams and script generation
+  - Compare schemas and data, then migrate, clone or sync databases between engines
+  - Import CSV, JSON, XLSX and XML; export results in many formats; generate test data and data subsets
+  - Rename objects with an impact analysis of everything that depends on them
+
+  Administer:
+  - Server monitor, live processes and a profiler of the queries clients run
+  - Users and permissions, backups, health checks and database properties
+  - SSH tunnels, including chains of bastions and the SSH agent
+  - Read-only connections and production safeguards
+
+  Assistant and integrations:
+  - An AI assistant that writes and explains queries with a local built-in model or Ollama; it never runs anything by itself
+  - A local MCP server so AI coding assistants can work with your connections, with every write approved in DBine
+  - End-to-end encrypted cloud sync of connections, queries and settings to your own account
+  - A script library and projects backed by git
+
+  Passwords are stored encrypted with a key kept in the system keychain, and never go into the state file or the logs.
+Moniker: dbine
+Tags:
+- clickhouse
+- database
+- database-manager
+- duckdb
+- mariadb
+- mongodb
+- mysql
+- nosql
+- oracle
+- postgresql
+- redis
+- sql
+- sql-client
+- sqlite
+- sqlserver
+ReleaseNotes: |-
+  DBine v1.7.1 installers.
+  New
+  - Analizar con IA on a failed query: next to a query's error, a button asks your AI (the one chosen in the assistant) why it failed. It sends only the SQL that ran, the error and the structure of the database, never rows, and only when you click. You see the model, the seconds and a Cancel button while it works, and the explanation streams in where the provider allows it. The corrected query appears in the editor as a proposal, with removed text in red and added text in green, and Accept and Reject on each change and for all of them. The text does not change until you accept, one Undo reverts it, and nothing is run. Connections of a company that does not allow the AI keep refusing it.
+  - Lineage across connections: the lineage follows a source outside the database into the connection that holds it. A Power BI table that reads a SQL Server, Databricks, PostgreSQL or other table shows that source as a grey card. One click finds the saved connection it points to (or asks once, or offers to create the connection from the source with the server and database already filled in), and the card becomes the real table, with what it uses, level by level. The other way round, Include other connections shows which Power BI tables read an object, and from there the semantic model and the reports and dashboards that read it, with the connection of each card marked. In DBine Enterprise the company's server resolves the sources to the connections each person may use, and Include other connections also works from an Enterprise connection.
+  - Following a lineage needs no connection in the explorer: clicking a source card that has one connection goes there at once. With none, the panel asks for a user and password right there (read-only, with Remember on this computer to keep the password in the system keychain) and the lineage connects by itself, without adding anything to the sidebar. Settings › Lineage sources lists those connections so you can forget them (with their remembered password) or add them to the explorer as regular connections.
+  - Filter the lineage by type: the lineage of a database or Power BI model has a Types list with a checkbox and a count for each type: tables, views, measures, procedures and the rest of the database's objects, and, each on its own, jobs (the server's and Databricks'), notebooks, pipelines, queries, reports, dashboards, files and other sources. Unchecking a type hides its cards and their lines.
+
+  Improvements
+  - Faster "View dependencies…": on PostgreSQL, Oracle, SAP HANA, MySQL, MariaDB, ClickHouse, Db2, Firebird and Power BI, what depends on a table, view, routine, sequence or column is read from the engine's own dependency catalog, filtered by that object, instead of reading the definition of every view, routine and trigger of the database one by one. The wait no longer grows with the number of routines. Code the catalog cannot see (dynamic SQL, procedural bodies) is read only when its text holds the name. In Power BI only the dependency rows that reference the object are asked for. If the server refuses the catalog, DBine reads the definitions as before and says so.
+  - Dependencies and lineage read less of the server: the references of a table with no foreign keys no longer read the structure of the whole database to say so, and the lineage of a database with scheduled jobs lists the server's databases once instead of once per job.
+  - A huge Power BI model's lineage fills in as it is read: instead of one long wait that ended in an error, the lineage of a model is read in short steps: tables and sources, relationships, the dependencies of measures and columns in batches, then the reports and dashboards. The diagram appears with the first step and is drawn again as each step ends, with a progress label and a "Partial lineage" notice until everything is there. What was read is saved after every step, so the next opening continues where it stopped. A step that fails is retried once, then marked with a button to read just that step again while the rest goes on.
+  - The lineage opens already resolved: DBine keeps the lineage of each database (and, for Power BI, the sources of each model) next to the explorer's cache and, once connected, reads it in the background, one database at a time. The first time you open it there is nothing to wait for. Opening the lineage shows the saved one at once, with how long ago it was read, and refreshes it behind the scenes. Settings › General has a switch to turn the precalculation off and a button to clear the saved lineage.
+  - Faster lineage search over large Power BI tenants: the search for who reads an object across Power BI models reads only each model's sources, with a time limit, and the number of models read at once is a Setting (1 to 16, 4 by default). If you are a Power BI administrator, DBine also asks Power BI's admin scanner API where every model reads from and opens only the models that can read the connection you are searching from. If it isn't available for your user, the models are read one by one, with a note.
+  - Power BI's admin API is asked for on request, never with the sign-in: the scanner needs an extra read-only permission that only an administrator can approve, so it is no longer part of the sign-in and nobody is blocked by it. DBine uses it silently when your account already has it. Otherwise the search reads the models one by one and says what is needed. In Settings › General, a switch turns it off, and Authorize the admin API… (one per Power BI connection) asks for the permission once in the browser. If you are not an administrator, you get Entra's refusal as a plain message.
+  - The wait when opening a lineage is a setting: opening the lineage, dependents or references of a very large model or database no longer gives up at 5 minutes. The limit is 15 minutes by default, and Settings lets you raise it. The wait per Power BI model (3 minutes by default) and the length of a search (15 minutes) can be raised the same way.
+  - Links in the lineage open in the browser: the web addresses in the lineage's detail panel (a Databricks job, notebook, pipeline, query or dashboard, a Power BI report) are links now, and a click opens them in the browser. A Databricks job or notebook that DBine can't connect to shows its page's link too.
+
+  Fixes
+  - DBine Enterprise: "Ver datos" and the connection no longer hang in "Conectando…": opening a table's data on a company connection could freeze that connection's channel to DBine Bastion, so every later action on it (connecting, listing databases, running a query) waited for ever. The channel now keeps answering. A connect that Bastion doesn't answer in 30 seconds fails with a message, and the next try opens a new channel. The explorer also no longer forgets every minute that a company connection is connected, nor hides its loaded databases and tables behind "Conectando…" while it connects again.
+  - DBine Enterprise: when the company ends your access, nothing of it stays: if your access is revoked, DBine disconnects from the company, closes its sessions and deletes the local data tied to it (connections, saved queries, history, explorer cache, lineage, results and the AI conversations that used it), and tells you why. It happens at once on a revocation, on a refused sign-in, when another person signs in on the computer, and after 24 hours without being able to verify your access.
+  - DBine Enterprise: losing part of your access removes only that part: if the company takes away a database, a connection or a group's access but you keep the rest, DBine closes the sessions on what you lost and deletes only its local data about it (explorer cache, lineage, saved queries, history, tabs and the AI conversations about it), leaving your other connections and databases untouched. It happens within seconds, and the next sync corrects it if DBine missed the notice. Losing your whole access still deletes everything.
+  - DBine Enterprise is back in the explorer: the Enterprise button and its sign-in are shown in every build again.
+  - The lineage of a Power BI model honors the wait you set: reading it in chunks gave up at 90 s whatever Settings said (the screen showed 15 minutes but the app used 90 s, and never more than 3 minutes). Each read now waits the time in Settings, 15 minutes by default.
+  - Opening a lineage no longer waits for another read of the same database: opening the lineage of a database or Power BI model while DBine was reading it in the background (or while a schema compare or a search across models read it) waited for that read to end, and could fail with "the connection is still busy reading the structure". Long reads of the same database now run side by side, up to three at once, and the dependencies of a large Power BI model are read three batches at a time.
+  - Searching Power BI no longer stops at 200 models: the lineage search and the background warm-up read every model of the workspace.
+  - Oracle: renaming with impact no longer lists the object as its own dependent: when the object came from the session's own schema, Oracle's dependents list (including the impact list of a rename) showed the object itself as one of its dependents. It no longer does.
+  - A failed SQL format no longer covers the editor: when the formatter could not parse the query, its message listed every token it expected and filled the window with no way to close it. Now the message shows only where it failed and what it did not expect, fits in the window, and has a close button. Your SQL stays untouched.
+  - Following a lineage source is safer: a connection DBine creates from a source in a lineage now uses verified TLS, like any new connection, instead of an unencrypted or unchecked one while you type a password. Sources that are files or paths (Access, dBase, SQLite, DuckDB, ODBC, network shares) or an engine DBine does not know are no longer opened from a lineage: add them by hand and confirm them yourself.
+ReleaseNotesUrl: https://github.com/addlayer-io/dbine/releases/tag/v1.7.1
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
