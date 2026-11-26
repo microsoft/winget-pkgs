@@ -1,0 +1,82 @@
+# Created with WinGet Releaser using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Nurkamol.SeoAudit
+PackageVersion: 1.42.1
+PackageLocale: en-US
+Publisher: Nurkamol Vakhidov
+PublisherUrl: https://github.com/nurkamol
+PublisherSupportUrl: https://github.com/nurkamol/seo-audit/issues
+Author: Nurkamol Vakhidov
+PackageName: SEO Audit
+PackageUrl: https://github.com/nurkamol/seo-audit
+License: MIT
+LicenseUrl: https://github.com/nurkamol/seo-audit/blob/main/LICENSE
+Copyright: MIT licensed
+ShortDescription: Crawl a site's sitemap and check every page
+Description: 'Audits every page a sitemap lists rather than only the homepage, and groups what it finds by the thing that has to change. Reports the checks that passed and the ones that did not apply, so a missing finding cannot be mistaken for a passing one. The crawl runs on your machine: it fetches the site you point it at, and your audit results are never sent to the publisher. Features you turn on yourself contact Google PageSpeed Insights and Search Console, and the app checks GitHub for new versions.'
+Moniker: seo-audit
+Tags:
+- audit
+- crawler
+- seo
+- sitemap
+- website
+ReleaseNotes: |-
+  Fixed
+  - A signed Shopify crawl still went at one page a second. A store's bare
+    domain is usually a redirect to www., and Shopify answers that redirect —
+    so the slow-down for an unsigned Shopify crawl began on the very first
+    response, before the signature for www. could be adopted, and nothing
+    lifted it afterwards. Adopting a signature now lifts a slow-down that was
+    applied on suspicion, and says so; one earned by an actual refusal stays,
+    signed or not. Found on the first real signed run: 6 pages in 14.7 seconds
+    before, 10 in 4.5 after.
+  - A signed run with nothing refused was told to go and get a signature. The
+    note on a crawl too short to look for orphans appended advice about refused
+    pages whether or not any were — and, on a Shopify store, that advice said to
+    create a crawler signature to a store that had just used one. It now speaks
+    only when pages were refused, says how many, and on a signed Shopify run says
+    the true thing: the signature was not accepted.
+  Installing on macOS
+  brew tap nurkamol/seo-audit https://github.com/nurkamol/seo-audit
+  brew trust nurkamol/seo-audit
+  brew install --cask seo-audit
+  Homebrew verifies the download against the checksum below and clears the
+  quarantine flag for you, so the app opens the first time.
+  Downloading the zip instead? macOS may say "SEO Audit is damaged and
+  can't be opened." It is not damaged. The app is ad-hoc signed rather than
+  notarised — notarising needs a paid Apple Developer account this project
+  does not have — and macOS refuses quarantined apps without a notarisation
+  ticket. Check what you downloaded first:
+  shasum -a 256 seo-audit-1.42.1-macos.zip
+  # d2aa054e3f7d9da941b8f5423cea83942a5d71df483ed1490386c518bb1a1ba4
+  Then, once it matches, clear the flag — no sudo needed:
+  xattr -dr com.apple.quarantine "/Applications/SEO Audit.app"
+  That is what right-click → Open does in the Finder, without the dialog.
+  Apple Silicon, macOS Tahoe or newer.
+  Windows and Linux
+  The setup.exe, .deb and .AppImage below are attached by a separate
+  job and may appear a few minutes after this release does.
+  The Windows installer is unsigned, so SmartScreen shows "Windows protected
+  your PC" — More info → Run anyway. Same reason as macOS: a code-signing
+  certificate is a paid, per-year thing this project does not have. The
+  .AppImage needs chmod +x before it will run.
+  Check any of them first. A SHA256SUMS.txt covering every file here is
+  attached alongside them, and the same checksums are listed at the end of
+  these notes:
+  shasum -a 256 --ignore-missing -c SHA256SUMS.txt
+  Checksums
+  Verify a download before you wave a warning away. With SHA256SUMS.txt
+  saved beside the file, in the same folder:
+  shasum -a 256 --ignore-missing -c SHA256SUMS.txt
+  18f400a80f3d44ca41bdd951f94dd29b30452445d24c81c101a4bc1e2d63c905  SEO.Audit_1.42.1_amd64.AppImage
+  df1a8bf6af7de6f0edb8d7479304981a72f5457f70017d7641f670d0206e5a47  SEO.Audit_1.42.1_amd64.deb
+  deb74b89abad2bbc4bf57f5605ac1905d750db34e265fc62ae0e20ac3b7ab786  SEO.Audit_1.42.1_x64-setup.exe
+  d2aa054e3f7d9da941b8f5423cea83942a5d71df483ed1490386c518bb1a1ba4  seo-audit-1.42.1-macos.zip
+  The macOS line appears twice in these notes on purpose: once above, computed
+  when the app was built, and once here, computed from what is actually attached.
+  They should agree.
+ReleaseNotesUrl: https://github.com/nurkamol/seo-audit/releases/tag/v1.42.1
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
