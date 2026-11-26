@@ -1,0 +1,84 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: g0orx.hpsdr-rs
+PackageVersion: 0.16.0
+PackageLocale: en-US
+Publisher: John Melton
+PublisherUrl: https://github.com/g0orx
+PublisherSupportUrl: https://github.com/g0orx/hpsdr-rs/issues
+Author: John Melton
+PackageName: hpsdr-rs
+PackageUrl: https://github.com/g0orx/hpsdr-rs
+License: GPL-2.0-or-later
+LicenseUrl: https://github.com/g0orx/hpsdr-rs/blob/HEAD/LICENSE
+ShortDescription: Desktop client for openHPSDR Protocol 1/2 SDR radios.
+Description: |-
+  A Rust/egui desktop client for openHPSDR Protocol 1 and Protocol 2 radios (Metis/Ozy-style and Hermes/Orion-style boards), using WDSP for DSP.
+
+  - Protocol 1 (Metis/Ozy) and Protocol 2 (Hermes/Orion) support, with standard openHPSDR UDP discovery
+  - Multiple simultaneous receivers, each with its own VFO, mode, filter width, and band memory
+  - Spectrum/waterfall display with adjustable dB range, palette, and Click-to-Tune (CTUN)
+  - SSB/CW/AM/FM/digital modes, per-mode/per-band filter width and mode memory
+  - Noise blanker (NB/NB2), noise reduction (NR/NR2/NNR), and SNB, independently switchable
+  - AGC with selectable Off/Long/Slow/Medium/Fast modes
+  - TX: mic audio through WDSP's TXA chain, ALC, TX power/SWR meter with per-band PA calibration, and a Tune button
+  - PureSignal (PA linearization/predistortion), on both Protocol 1 and Protocol 2
+  - rigctl (Hamlib-compatible), TCI (WebSocket), and CAT (Kenwood TS-2000 emulation) control servers
+  - Dual VFO (VFO A/B) with Split -- transmit on VFO B while receiving on VFO A
+  - Selectable RX output / TX input audio devices, independent of the OS default
+  - Per-radio settings persistence, keyed by the radio's MAC address
+  - FPGA firmware upload and static IP configuration
+Tags:
+- amateur-radio
+- dsp
+- ham-radio
+- openhpsdr
+- sdr
+ReleaseNotes: |-
+  Licence
+  - hpsdr-rs is now GPL-3.0-or-later (was GPL-2.0-or-later), so it can include piHPSDR's Saturn code (below). The hpsdr-proto, hpsdr-controller and hpsdr-remote crates stay GPL-2.0-or-later.
+  ANAN G2 (Saturn) over XDMA — untested
+  - Running on a G2's own Raspberry Pi, hpsdr-rs can drive the FPGA directly through the XDMA driver (/dev/xdma0_*), without p2app, as piHPSDR does. Stop p2app first; the radio shows in Discover as a Saturn with XDMA as its interface. HPSDR_SATURN_DEBUG=1 logs set-up and the receive stream.
+  - Ported from piHPSDR's Saturn code (G8NJJ, N1GP, DL1YCF). Not yet tried on a G2 — reports welcome.
+  Receive
+  - APF: CW audio peak filter (button in CW modes; Type, Tune, Bandwidth and Gain in Settings → CW).
+  - Manual notches (TNF): right-click the spectrum or waterfall to add, resize or remove notches; they stay on their RF frequency and apply to every receiver.
+  - Auto AGC, as Thetis's: the AGC threshold follows the noise floor (Auto beside AGC Gain; offset in Settings → RX, +20 dB by default).
+  - AGC speed is chosen from a menu, like NB and NR.
+  - With AGC Off, the AGC Gain slider becomes Fixed Gain (-20 to +120 dB).
+  - Pan slider after Mute, per receiver. Mute is now kept across restarts.
+  - The SNR is shown inside the S-meter, S reading left and SNR right.
+  VFOs and tuning
+  - Lock for VFO A and VFO B, and Sync (VFO B follows VFO A). VFO A's Lock also holds the mode, as Thetis.
+  - Frequency keypad: Enter kHz, Enter MHz and a decimal point.
+  - The VFO step is remembered per mode; FM channel steps 6.25, 12.5 and 25 kHz. Audio and Mic gain read in percent.
+  Transmit
+  - TX Filter: use the RX filter (default) or its own Low/High edges.
+  - TX Profiles: save and choose named sets of mic gain, TX EQ, Speech Processor, CESSB and TX filter.
+  - Monitor TX Audio has its own Volume.
+  TCI and CAT
+  - TCI (requested by ThetisLink users): second receiver's audio/IQ asked for before it opens, rx_step_att_ex, vfo_swap_ex, app_ex, mon_enable/mon_volume, rx_mute/mute, cw_keyer_speed, rx_balance, tx_profiles_ex/tx_profile_ex/tx_filter_band_ex, lock/vfo_lock/vfo_sync_ex, rx_apf_enable/rx_nf_enable, agc_auto_ex.
+  - CAT PC reads and sets the TX power (as a percentage of the maximum), so e.g. an SPE Expert amplifier can set the drive.
+  Web client and hpsdr-remote
+  - A tap lands on the nearest kHz (10 Hz in CW); a slide steps kHz to kHz.
+  - Spectrum and Waterfall on/off buttons, and a bar to size them; in the compact layout the toolbar moves up with them. These and Mute are remembered.
+  - NB, NR and AGC as drop-downs; band edge markers; -/+ beside the frequency.
+  - With no password set, web clients can listen and tune but not transmit.
+  - Phone layout fixes: frequency labels no longer overlap; a scrolling page on short (landscape) screens.
+  - The page reloads and reconnects if the browser loses its WebGL context.
+  Controllers
+  - Front-panel controller tuning knobs have clicks/step (1-20), so a single VFO step is easy to hit. hpsdr-rs and hpsdr-remote alike.
+  - Compact layout: the DSP popup puts the AGC on its own line with the RX gain.
+  Platforms
+  - Raspberry Pi: draws with OpenGL by default (Vulkan flickered).
+  - Linux: presents without vsync, so a hidden Settings window can no longer freeze the app.
+  - Linux packages add a Ham Radio menu for hpsdr-rs and hpsdr-remote (including on Raspberry Pi OS).
+  - Windows: all windows' title bars follow the dark/light theme (thanks K7MDL2, PR #19).
+  - Settings → Audio shows the device actually in use, and warns when the saved one is missing (issue #18).
+  - The FFTW wisdom file is saved inside its wdsp_wisdom folder (an existing misplaced one is moved there).
+  Documentation
+  - Manual updated for all of the above, with new and retaken screenshots.
+ReleaseNotesUrl: https://github.com/g0orx/hpsdr-rs/releases/tag/v0.16.0
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
