@@ -1,0 +1,82 @@
+# Created with komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: jcardama.LeopardWM
+PackageVersion: 0.4.0
+PackageLocale: en-US
+Publisher: jcardama
+PublisherUrl: https://github.com/jcardama
+PublisherSupportUrl: https://github.com/jcardama/LeopardWM/issues
+Author: jcardama
+PackageName: LeopardWM
+PackageUrl: https://github.com/jcardama/LeopardWM
+License: GPL-3.0
+LicenseUrl: https://github.com/jcardama/LeopardWM/blob/HEAD/LICENSE
+ShortDescription: Scroll-first tiling window manager for Windows 10 and 11.
+Description: LeopardWM is an open-source tiling window manager for Windows 10 and 11 that takes a scroll-first approach inspired by niri and PaperWM. Windows sit on a horizontal strip and the monitor acts as a viewport that scrolls over them, so navigation stays spatially consistent as windows are added — instead of constantly rebuilding split trees. Written in Rust on top of the Win32 API.
+Moniker: leopardwm
+Tags:
+- niri
+- paperwm
+- rust
+- scrollable
+- tiling
+- window-manager
+- windows
+- workspace
+ReleaseNotes: |-
+  Features
+  - Keep the PC and display awake. Turn on Keep Awake in the tray or Settings, or set [behavior] keep_awake = true, to stop Windows from sleeping or turning off the display while LeopardWM runs.
+  - Record a problem from the CLI. lwm record start captures debug logs separately under %LOCALAPPDATA%\leopardwm\recordings\ without changing the normal log level. Stop with lwm record stop; recording also stops after ten minutes by default or when the daemon exits.
+  - Report issues from Settings. Use Settings → Report an Issue to open GitHub with your text filled in and create a redacted diagnostic snapshot. The snapshot stays on your computer until you attach it; review it first. Nothing is posted until you post the issue yourself.
+  - Troubleshoot from Settings. Review current health problems, create redacted diagnostic snapshots, and find saved diagnostics in the new Troubleshooting section.
+  - Hold a key to move the mouse without changing focus. With focus follows mouse on, set [behavior] focus_lock_modifier (for example "Alt") or choose it in Settings; while it's held, moving over other windows doesn't focus them.
+  - Cross monitors at horizontal strip edges. Enable focus_crosses_monitors or move_crosses_monitors under [behavior] or in Settings to focus the neighboring monitor or move the focused column there.
+  - Center columns until the row fills. Set [layout] center_columns = "fit" or choose Until full under Settings → Layout → Center columns to center each row's active columns while they fit. The tray's Center Columns submenu also offers these settings. "single" keeps the previous single-column behavior, and the legacy center_single_column key still works.
+  - Turn off modifier-wheel navigation. Clear the scroll modifier in Settings or set [hotkeys] scroll_modifier = "none"; other wheel gestures remain available. Thanks to @gczark for the request. (#185)
+  - Floating windows now appear in the overview. They sit in a group at the start of each workspace row, where they can be activated, closed and moved like tiled windows. Thanks to @gczark for the request. (#184)
+  - Keep off-screen columns from overlapping neighboring monitors. Set [layout] offscreen_mode = "park" to opt in; the default remains "bleed". Thanks to @doutorferr0 for the suggestion. (#181, #106)
+  - Right-click while dragging to float a window. While dragging a tiled window by its title bar, press the right mouse button to drop it as a floating window where you release it. The click doesn't reach the app. Thanks to @gczark for the idea. (#183)
+  - Choose which drag gesture reorders columns. Set plain_drag_action to reorder in Settings or [behavior] to make plain drag reorder and Shift+drag merge. (#154)
+  - Resize tiled windows freely with the mouse. Choose free mouse resize in Settings or the layout config instead of snapping to presets. (#141)
+  - Yasb's stock GlazeWM workspaces widget can now connect to LeopardWM. Enable GlazeWM compatibility in Settings or the config to use the local workspace endpoint. (#170)
+  - Choose where floating windows open. action = "float" window rules accept x and y in logical pixels from the top-left of the monitor's work area and keep the window on screen. Thanks to @ShawnChiu for the design. (#166)
+  - Align the focused column to the left or right edge. align_column_left and align_column_right scroll the strip so the focused column sits against that edge of the screen, or move a focused floating window to that edge. They are unbound by default; bind them in Settings or [hotkeys]. Thanks to @Daiivy for the request. (#175)
+  - Nudge windows in small steps. nudge_left and nudge_right move a focused floating window by move_step, or shift the strip by that amount when a tiled window has focus. Bind them to the modifier and mouse wheel under [gestures] or to keys. (#142)
+  - Move and size floating windows from the keyboard. Move, width, height preset and center commands now act on focused floating windows. move_step controls movement in logical pixels and defaults to 50. Thanks to @ShawnChiu for the design. (#166)
+  - Switch focus between floating and tiled windows. Use focus_floating, focus_tiling, or switch_focus_floating_tiling to move between layers on the current workspace. Thanks to @ShawnChiu for the design. (#166)
+  - Set a window floating or tiled directly. The float and tile commands leave the focused window in the requested state, making them useful in scripts. Thanks to @ShawnChiu for the design. (#166)
+  - Workspaces can now use up to four independently scrolling rows. Rows are off by default; opt in under [layout.rows] or per workspace, and use Settings to configure splits, gaps, and row rules. Row focus commands are unbound by default; bind them in Settings or [hotkeys]. Move windows with row commands or cross-row drag, and assign tiled windows with a window rule row. Contributed by @azumafuji. (#150)
+  - Follow windows moved to another workspace. Enable follow_window_to_workspace in behavior settings to switch to the destination and keep the moved window focused. (#174)
+  - Workspace edge navigation can now stop at the ends instead of wrapping. Set workspace_edge_wrap to clamp to keep vertical focus and moves within workspaces 1 through 9. (#155)
+  - Customize focus borders per app. Window rules can hide the focus border or choose a color for matching windows. (#156)
+  - Focus commands now move between floating windows. While a floating window has focus, the focus_* commands pick another floating window on the same workspace instead of doing nothing: the directional commands go to the nearest window in that direction, and focus_start, focus_end, focus_next and focus_prev follow the windows' left edges. With workspace_edge_wrap on, focus_up and focus_down switch workspace when no floating window lies in that direction. Contributed by @ShawnChiu. (#166, #173)
+  Improvements
+  - Collect a redacted diagnostic snapshot for bug reports. Run lwm collect-logs to write a text file with configuration, health, layout structure and recent logs. Workspace names are masked, and paths outside your user folder are reduced to file names. The snapshot reports rejected configuration and recovered settings; while the daemon is running, repeated requests within a few seconds reuse the last snapshot. Private log values are quoted for redaction, and older, unmarked log entries are omitted.
+  - Unknown configuration keys are now reported. Check the daemon log or run lwm doctor to find misspelled or unrecognized settings.
+  - Fixed-size windows with a title bar and minimize button now open floating. Windows without a resize frame or maximize button keep their own size and position; set [behavior] fixed_size_windows = "tile" to tile them by default, or use a per-app action = "tile" rule to keep one tiled.
+  - Settings groups hotkeys by category. Monitor and LeopardWM start collapsed. Thanks to @gczark for the suggestion. (#182)
+  - Workspace snapshots now report rows. When a workspace uses more than one row, lwm query workspaces and workspace_state subscribers see its row count and each tiled window's row, so bars can group windows by row. Thanks to @azumafuji for the original proposal. (#150)
+  - The CLI now has a complete command reference and a refreshed bar integration guide.
+  Fixes
+  - Settings no longer saves old values after a configuration reload, an outdated GlazeWM port, or a row split that failed to save.
+  - Disconnected monitors regain their windows and layouts after LeopardWM restarts while you stay signed in. Windows closed or moved to another monitor while the display was away stay where they belong.
+  - Administrator diagnostics no longer write through redirected folders or files. Logs, diagnostic snapshots, and recordings refuse unsafe paths instead.
+  - Winget release manifests now check that both installer architectures and download links match the release.
+  - Settings preserves the update-check opt-out when saving.
+  - Incomplete row splits no longer change the layout while editing.
+  - Report an Issue now localizes Windows build labels.
+  - Report an Issue now limits the GitHub title to 256 characters. If shortened, the full draft is copied to the clipboard when available.
+  - Tray quick toggles now refresh Settings health after saving.
+  - The GlazeWM compatibility endpoint retries an unchanged configuration after a port conflict clears.
+  - Single-row window queries no longer show a redundant row number.
+  - Dragging a maximized column to another row, workspace, or monitor now restores its width from before the maximize. Dragging a window out of a maximized column does the same.
+  - Selecting a window in Overview now always brings it into view. An off-screen tiled window scrolls into view and is shown even when another window is fullscreen. Sticky floating windows leave fullscreen unchanged.
+  - Settings dropdowns now support keyboard navigation and screen readers. Accent buttons and selected options are also easier to read in dark and high contrast modes.
+  - Invalid or outdated settings can now fall back to defaults without resetting the entire configuration. When LeopardWM can identify the affected settings, it loads the rest and preserves the original as config.toml.corrupt before saving (or config.toml.corrupt.1 if needed); saving is blocked if neither copy can be kept. Saving a single-link config.toml replaces the file, so custom ACLs, file attributes, and alternate data streams are not kept; hard-linked configs are written in place so the links stay.
+  - Settings no longer undoes quick-toggle changes made from the tray while Settings is open.
+  - Turning off Center columns now slides automatically centered rows back into position, even when centering past the screen edges is enabled. With reduced motion, rows snap into place.
+  - Hotkeys no longer stop working after hours of use because failed batched window moves leak positioning handles. Thanks to @doutorferr0 for the report and measurements. (#180)
+ReleaseNotesUrl: https://github.com/jcardama/LeopardWM/releases/tag/v0.4.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
