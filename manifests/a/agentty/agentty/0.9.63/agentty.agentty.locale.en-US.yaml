@@ -1,0 +1,147 @@
+# Created with WinGet Releaser using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: agentty.agentty
+PackageVersion: 0.9.63
+PackageLocale: en-US
+Publisher: agentty
+PublisherUrl: https://agentty.org/
+PublisherSupportUrl: https://github.com/1ay1/agentty/issues
+PackageName: agentty
+PackageUrl: https://agentty.org/
+License: MIT
+LicenseUrl: https://github.com/1ay1/agentty/blob/HEAD/LICENSE
+Copyright: Copyright (c) agentty contributors
+ShortDescription: Blazing-fast Claude in your terminal — a C++26 alternative to claude-code.
+Description: agentty is a native C++26 terminal coding agent and a drop-in alternative to claude-code. A single static binary with sub-millisecond cold start, sandboxed by default, and one-command SSH air-gap. No Node, Python, or Electron. Signs in with your Claude Pro/Max subscription or an ANTHROPIC_API_KEY.
+Moniker: agentty
+Tags:
+- ai
+- claude
+- cli
+- coding-agent
+- developer-tools
+- terminal
+ReleaseNotes: |-
+  Fixed
+  - Subagent reads no longer fail as not found on paths like
+    main.go}},{. OpenAI-family models asked to batch reads sometimes
+    wrote their internal multi-call wrapper
+    ({"recipient_name":"functions.read","parameters":{…}}) inside one
+    call's arguments, and a host that holds output to the tool schema turned
+    it into path: "main.go}},{", symbol: "recipient_name". agentty ran
+    that and the model only heard "not found". Now a single wrapped call to
+    the right tool is unwrapped and runs. Anything else (several packed
+    calls, a call to another tool, wrapper debris in a path or symbol) is
+    refused as invalid arguments that tell the model to send each call
+    separately. The check is in the one place every tool body runs, so it
+    covers the main agent, subagents, ACP and mcp-serve alike. Subagent
+    arguments that don't parse at all now fail as bad arguments (with the
+    same hint when they are a wrapper) instead of running with {}.
+  - A leaked multi_tool_use.parallel call runs as the calls it holds.
+    When that pseudo tool (or a tool_uses list under a real tool's name)
+    reaches agentty, it is split at the stream into one real call per entry,
+    for the main agent and subagents alike, instead of failing as "unknown
+    tool". Ordinary calls are held only until their first argument key
+    arrives. tool_args.wrapper_leak / tool_calls.parallel_fanout lines in
+    agentty.log say when and with which arguments it happened.
+  - Project agents created mid-session are always seen. The agent
+    discovery cache keyed on file mtimes only, so an agent file caught while
+    still empty could be skipped for the whole process. It now keys on name,
+    size and mtime.
+  Changed
+  - Built on the latest jaal, with the platform decided in one place.
+    jaal now decides which OS, compiler and CPU agentty is being built for
+    (jaal/meta/target.hpp), and agentty sees that only through maya
+    (maya/core/target.hpp, the MAYA_OS_* and MAYA_CC_* macros). About
+    550 checks of raw compiler macros (_WIN32, __APPLE__, _MSC_VER,
+    __x86_64__, …) in agentty and maya were rewritten to those names. A
+    script compiled every changed file for 15 targets (Linux, Android, macOS,
+    the BSDs and Windows, on x86-64, arm64 and i386, with MSVC, clang-cl, GCC
+    and clang) and confirmed the same code is chosen on each one. The build
+    scripts ask the same headers too: cmake/AgenttyTarget.cmake instead of
+    if(WIN32) / if(APPLE). New one_os and one_os_cmake tests keep it
+    that way.
+  - Slow updates are logged with their message name. jaal's kernel times
+    each update and reports the specific message type that ran over budget,
+    e.g. loop.slow update msg::OpenPalette 23.1 ms. Before, agentty timed
+    updates itself and logged a domain plus an index (ComposerMsg#7).
+    Errors that jaal catches inside an update (an exception thrown while
+    handling a message) are now written to agentty.log as loop.fault too.
+    Before, they went only to stderr.log.
+  - Crash handlers use std::atomic_flag as the re-entry guard instead of
+    volatile sig_atomic_t. It is just as signal-safe, it is also correct if
+    two threads crash at once, and it passes jaal's concurrency checks.
+  - The activity bar explains what the stream is going through. Retries,
+    stalls and slow starts are shown inline next to the phase indicator
+    instead of in a banner that covered the bar:
+    ⠋ retry 7s HTTP 503: service unavailable · 2/6 ━━━━━━━───.
+    It shows the provider's reason and which attempt this is, and the bar runs
+    down until the next try. After that it reads "… · trying again" and goes
+    away at the first token. A stalled stream shows "no data for 47s ·
+    reconnecting". A slow first token shows "waiting for the first token", or
+    "the model is reading the prompt" on a local model. A working stream shows
+    nothing extra; the token chart says enough. On a narrow terminal the token
+    counts drop before the reason does.
+  - A message in the status bar no longer hides the gauges. Toasts used to
+    take over the whole row, so the context and cache gauges disappeared for
+    every "copied to clipboard" and for as long as any message stood. The
+    message now sits on the left and the gauges stay on the right. On a
+    terminal too narrow for both, the message wins.
+  - Retry countdowns update live. "retrying in 21s" counts down to the
+    next attempt, then shows "retrying now" while it connects, instead of
+    holding the first number for the whole wait. The phase chip counts down
+    too ("retry 12s"), so the wait is visible even after the message fades.
+  - Banner colours match what happened. Rate-limit retries are amber,
+    not the calm blue they had been painted (the line read "rate_limit —",
+    and the colour check missed it; it now reads "rate limited —").
+    "giving up after …", "could not …" and "… failed" are red.
+  Fixed
+  - Switching to a large thread is fast, and tmux no longer redraws the
+    whole conversation. Opening a thread used to print its entire history
+    into the terminal again, about 14 MB for a 2,200-message thread. That
+    took 3 to 5 seconds and showed every row scrolling past in tmux. Now only
+    the newest four screens are drawn, about 45 KB, and the thread is on
+    screen about 30 ms after Enter. The ^J preview starts loading the moment
+    the picker opens and settles 40 ms after you stop on a row (it was 90),
+    and a thread file is parsed on all cores, about 85 ms for 16 MB instead
+    of 280. The thread was also being read from disk twice: once for the ^J
+    preview and again on open. It is now read once, reused if the file hasn't
+    changed since the preview read it, and pressing Enter while the preview
+    is still loading waits for it instead of starting a second read. Appearance ›
+    Scrollback decides how much history is reprinted on open: on Auto (the
+    default) none is, which makes switching instant; a fixed level (1k, 5k, 20k
+    rows or the whole thread) reprints that much, which is slower on a big
+    thread. Older
+    messages are still in the conversation (^O) and in the file.
+  - The plan counter in the composer footer no longer jumps around while it
+    updates. Each todo update rewrites the whole list, and the partly-sent
+    list used to replace the plan every 120 ms. A plan at 3/5 showed 0/1,
+    1/2, 2/3 and so on while the update arrived, and a finished step whose
+    status hadn't arrived yet showed as undone. Now the items received so far
+    are combined with the rest of the current plan, so the total stays put
+    and a step's status changes as soon as it arrives. The exact new list
+    takes over when the update finishes, before the tool has even run. An
+    update that sends an empty list now clears the plan; before, it was
+    ignored.
+  - A retry message can't outlive its turn. When the turn ends, any
+    "retrying …" line goes with it. That includes "reasoning used the whole
+    budget · retrying with less…", which nothing had ever cleared.
+  - "in progress" lines leave when the work does. "refreshing OAuth
+    token…", "compacting context…", "rewinding to checkpoint…", "retrieving
+    context…" and the self-update download line are now tied to the work they
+    describe. Before, they cleared only on the success path, so a refresh that
+    turned out not to be due left "refreshing OAuth token…" up all session.
+  - OpenCode Go and Zen show the cache in the status bar. OpenCode
+    reports its cache only in its own usage.opencode.tokens (cache_read,
+    cache_write_5m/1h), not in OpenAI's prompt_tokens_details, so agentty
+    saw no cache at all and hid the CACHE gauge. It is read now.
+  - "retrying (upstream cut off)…" no longer sticks. On OpenAI-style
+    providers (OpenCode Go, OpenRouter, custom hosts) one retried request left
+    the banner up for the rest of the session, however well things went after.
+    It now clears as soon as the retried stream produces anything, and lapses
+    on its own after a few seconds regardless.
+  Full history: CHANGELOG.md
+ReleaseNotesUrl: https://github.com/agentty-org/agentty/releases/tag/v0.9.63
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
