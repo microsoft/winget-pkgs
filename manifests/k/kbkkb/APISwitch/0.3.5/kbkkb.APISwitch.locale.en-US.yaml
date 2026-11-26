@@ -1,0 +1,73 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: kbkkb.APISwitch
+PackageVersion: 0.3.5
+PackageLocale: en-US
+Publisher: kbkkb
+PublisherUrl: https://github.com/kbkkb
+PublisherSupportUrl: https://github.com/kbkkb/APISwitch/issues
+PackageName: APISwitch
+PackageUrl: https://github.com/kbkkb/APISwitch
+License: MIT
+LicenseUrl: https://github.com/kbkkb/APISwitch/blob/HEAD/LICENSE
+Copyright: Copyright © 2026 kbkkb
+ShortDescription: Provider switcher and local routing gateway for AI coding assistants.
+Description: |-
+  APISwitch is a lightweight desktop management tool and local protocol routing gateway for third-party API providers and Google Antigravity official subscriptions. It manages provider configurations for Google Antigravity, Claude Code, Claude Desktop, Codex, OpenCode, and Pi, switches Google accounts with credential snapshots, tracks quota usage, and bridges OpenAI/Anthropic protocols through a local gateway with hot reload.
+
+  ✨ Key Features
+  1. Unified Multi-Tool Management & Zero-Intrusion Switching
+  - Antigravity Quick Account Switching: Save credential snapshots and switch Google accounts with one click. Automatically captures and synchronizes the latest credentials before switching (preventing Refresh Token rotation expiration). Optionally auto-closes and smoothly restarts the IDE.
+  - Cross-Client Provider Sharing: One-click copy of provider configurations across Claude CLI, Claude Desktop, Codex, OpenCode, and Pi with intelligent field mapping (Auth Token ↔ Bearer Token / API Key). Enter once, use everywhere.
+  - Model Pool Management: Dedicated model pool mechanism for OpenCode and Pi, clearly distinguishing "In Config" from "Not in Config" states, supporting on-demand activation and batch maintenance.
+  - One-Click cc-switch Migration: Built-in migration wizard directly reads ~/.cc-switch/cc-switch.db, allowing checkbox selection to import existing providers with automatic deduplication and overwriting.
+  2. Built-in Local Protocol Routing Gateway
+  - High-Performance Local Gateway: Built-in lightweight HTTP gateway service (listening on 127.0.0.1:15725 by default, configurable Host and Port in settings, supports LAN sharing).
+  - Seamless Multi-Protocol Bridging:
+    - Codex Protocol Bridge: Translates standard OpenAI Chat Completions / Anthropic endpoints into Codex native Responses protocol.
+    - Claude CLI Protocol Bridge: Automatically manages authentication headers and request format mapping.
+    - Claude Desktop Model Mapping: Intercepts and rewrites claude-sonnet / opus / haiku requests to your designated upstream custom models.
+  - Long-Context Protection & Prompt Stripping: Automatically strips non-essential excessive system prompts and provides safeguards against massive 1M context overflows to prevent upstream 400 errors or unexpected costs.
+  - Zero-Restart Hot Reload: Point your client to the local gateway once. Provider switches reload instantly in the gateway with no client restarts needed.
+  3. Data Backup & Multi-Device Roaming
+  - One-Click Full Export: Bundle all tool provider configurations and Antigravity account data into a standardized JSON backup file.
+  - Flexible Restore Modes: Supports both "Merge & Append" (recommended: keeps existing configs while adding new or updating matching items) and "Full Overwrite" modes for seamless roaming across multiple machines.
+  - Direct Local Management: One click to open the local physical storage directory for full data ownership and transparency.
+
+  🔬 How It Works
+  - Google Antigravity: Login sessions are stored in VS Code's globalStorage SQLite database (ItemTable) under antigravityUnifiedStateSync.oauthToken and userStatus (base64-encoded Protobuf). APISwitch includes a lightweight Protobuf parser to safely extract email, subscription tier, and quota information. Account switching executes safe transactional writes with automatic .backup creation.
+  - Claude Code CLI: Precisely rewrites ANTHROPIC_* environment variables in ~/.claude/settings.json, strictly preserving all other configuration sections such as hooks and permissions.
+  - Claude Desktop: Manages Cowork inference gateway parameters (inferenceProvider, inferenceGatewayBaseUrl, inferenceGatewayApiKey, etc.). Switching back to "Official" cleanly removes these fields to restore native official login.
+  - OpenAI Codex: Configures model_provider and [model_providers.<id>] in ~/.codex/config.toml, synchronizing authentication with auth.json. Supports direct upstream connections or routing through the local gateway for protocol adaptation.
+  - OpenCode & Pi: Strictly adheres to their official specifications to read and write opencode.json and models.json / auth.json, ensuring immediate recognition by CLI and runtime environments.
+  - Safe Atomic Writes: All file modifications follow a "write temporary file → verify integrity → atomic replace" workflow, generating automatic .bak backups to prevent corruption from unexpected interruptions.
+Tags:
+- ai
+- api
+- gateway
+- proxy
+ReleaseNotes: |-
+  [New · Desktop Floating Widget for Antigravity]
+  - Compact Always-On-Top Capsule: Defaults to the bottom-right corner of the primary screen (independent of main window minimization or tray hiding), displaying live 5H + Weekly quotas (Gemini & Claude/GPT), single-client today's Antigravity token total, and latest step generation speed (tok/s).
+  - Expandable Detail Card & Zero-Drift Anchoring: Click the capsule to expand upward/inward into a clean dashboard featuring:
+  - Dual-column 5H + Weekly quota progress bars and countdown status pills;
+  - 3-column Antigravity daily usage card (Today tokens/requests/In-Out, Latest & Avg tok/s, Most recent model & TTFT);
+  - Collapsible Available Models chip drawer and 1-click Antigravity Account Switcher with live 5H/Weekly badges;
+  - Anti-misclick UX: removed top-right × close button in favor of a prominent Collapse ▾ pill; hiding or resetting position is cleanly handled via right-click menu, Tray menu, Settings, or the dedicated toggle button in the Antigravity toolbar. Canonical capsule anchor locking eliminates expand/collapse position drift.
+    • Real-Time Low-Overhead Collection: Watches ~/.gemini/antigravity/brain/**/transcript.jsonl with 1.5s debounce + 15s fallback sync (ScanAntigravityQuick) and caches parsed pricing_ledger_v1.json / conversation_summaries.db signatures in memory for zero-stutter updates.
+  [New · Smart Merged Model Picker & Anti-Close Fix]
+  - Official Picker Whitelist Filtering: Parses agentModelSorts and groupedModels from fetchAvailableModels to hide internal/disabled entries (tab_*, chat_*, *-tiered, *-sonar, *-image, flash-lite, gemini-2.5-*, gemini-3-flash, disabled slots), removing noisy per-model percentages.
+  - Merged Thinking-Effort Chips: Consolidates thinking variants of the same model family into a single sleek chip (e.g. Gemini 4 Neon [Low–XHigh], Claude Opus 5.5 [Low–High]).
+  - In-Place Refresh Stability: Replaced destructive Clear() / Items.Refresh() calls with in-place Profile.UpdateFrom() and targeted bindings so expanding the available models drawer never stutters or unexpectedly closes on focus/timer refresh.
+  [UI Refactor · Unified 6-Client Cards, Usage Monitor & Modern Tray Menu]
+  - Unified Card & Hero Design Across All 6 Tabs: Refactored Antigravity, Codex, Claude Code CLI, Claude Desktop, OpenCode, and Pi tabs with consistent 12px/14px rounded cards, left active accent bars, compact icon buttons (CardGhostBtn / CardDangerIconBtn), and 2-line metadata hierarchy.
+  - Usage Monitor Layout Polish & Export: Consolidated top view tabs, search bar, quick ranges, clock-dial date pickers, and the 10-client icon strip into one crisp control bar, refreshed the 5 KPI cards and table spacing, and added JSON / CSV call record export.
+  - Redesigned Tray Context Menu: Custom GDI+ painted rounded header with version pill and two-column quick-switch rows featuring color-coded G / C quota capsules plus quick Floating Widget toggle.
+  [Fixes & Engineering Refactor]
+  - Model Attribution Self-Heal: Fixed missing model names in StepCode (message.model + stepcode:model_fix_v1) and Codex/Pi (codex:model_fix_v1 header model carry-over).
+  - Pro Subscription Detection & Copy Cleanup: Refined paid Pro entitlement detection (gemini-4-neon / gemini-4-carbon) and cleaned up legacy Argon copy across locales.
+  - Modular Architecture: Split App.xaml.cs and MainWindow.xaml.cs into cohesive partial modules (App.SelfTest.cs, MainWindow.Antigravity.cs, MainWindow.Claude.cs, MainWindow.CodexAndRouter.cs, MainWindow.OpenCodeAndPi.cs, MainWindow.DragDrop.cs, MainWindow.FloatingWidget.cs, MainWindow.Tray.cs).
+ReleaseNotesUrl: https://github.com/kbkkb/APISwitch/releases/tag/v0.1.1
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
