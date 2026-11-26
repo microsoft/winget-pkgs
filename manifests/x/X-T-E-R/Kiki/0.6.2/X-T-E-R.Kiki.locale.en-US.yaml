@@ -1,0 +1,50 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: X-T-E-R.Kiki
+PackageVersion: 0.6.2
+PackageLocale: en-US
+Publisher: easyagent
+PublisherUrl: https://github.com/X-T-E-R
+PublisherSupportUrl: https://github.com/X-T-E-R/kiki/issues
+PackageName: Kiki
+PackageUrl: https://x-t-e-r.github.io/kiki/
+License: MIT
+LicenseUrl: https://github.com/X-T-E-R/kiki/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Moonshot AI
+ShortDescription: Multi-model AI agent workbench that runs a lead session with subagents across desktop, terminal and browser.
+Description: |-
+  Kiki is an open-source multi-model AI agent workbench. Hand it a folder and a task: it reads what is there, plans, and works in place. When a job divides, it hands parts to subagents that can be bound to different models, while goals, a message queue, and memory keep the work moving across turns.
+  Work files stay in the folder you choose, sessions, history, and configuration stay in your local Kiki home, and model requests go only to the providers or local servers you connect. The desktop app, the terminal UI, and the browser UI all connect to one local daemon, so a session started in one is the same session opened in another.
+  Permission levels decide how much Kiki may do on its own, from asking every time to full access, and sensitive files or dangerous commands still prompt. Sessions can be resumed, goals keep running across turns, and a plugin catalog adds capabilities such as local PDF, Office, and HTML extraction.
+Tags:
+- agent
+- agent-team
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- multi-agent
+- programming
+- subagent
+ReleaseNotes: |-
+  Kiki 0.6.2
+  This release ships a self-contained zero-dependency Windows runtime bundle, resolves the SEA age portable-space TDZ failure (40001) and eager Git Bash validation error (50001), offloads multi-GiB cold wire.jsonl journal replay to CPU workers with incremental checkpoints, overhauls branch Merge into a non-blocking checkpoint state machine, and hardens URL subscription plugin safety, foreground tool watchdogs, and gateway pool quotas.
+  Highlights
+  - Zero-dependency Windows desktop installer & lazy shell fallback. Embedded a self-contained portable Git Bash, core git, essential POSIX utilities, offline ripgrep 15.0.0 (rg.exe), and a zero-Node SEA node hook shim directly into the Windows installer while keeping existing user PATH installations first in priority. Fixed the SEA CJS const require TDZ crash (40001) in ageCodec and decoupled workspace/model catalog validation from Git Bash presence (50001), falling back cleanly to PowerShell when no Bash installation is present.
+  - Multi-GiB cold wire.jsonl worker replay, incremental checkpoints & SQLite bounds. Offloaded cold journal UTF-8 framing and JSON parsing onto ICpuWorkerService with periodic incremental replay checkpoints (>= 256 MiB / 8s) so interrupted large-session restores resume from verified byte offsets with < 12 ms P99 main-thread ticks, and added 4–8 MiB SQLite value guards to prevent oversized derived rows from starving ISessionIndex.
+  - Non-blocking branch Merge checkpoints & clean timeline folding. Replaced sealed-branch tool vetoes and implicit queue handbacks with intraturn-watermarked Merge checkpoints so branches can run follow-up checks and amendments mid-turn, displaying 已合入 · 可继续 only when idle and fully covered. Folded internal injection / hook_result / truncated <system-reminder> rows immediately, restricted inline quote selection to user/assistant content, fixed cross-turn composer elapsed timers, eliminated non-main space pre-paint skin flashes, and unified live session duration formatting.
+  - Subscription security, foreground tool watchdogs & pool quota deduplication. Held newly added or modified executable plugins during silent background auto-sync for interactive confirmation, uninstalled subscription-owned plugins on source purge, added DNS-pinned redirect/IPv6 (NAT64/6to4/Teredo) SSRF guards to downloadZip, decoupled resident pluginHost cold-boot activation from 3-second prompt-context timeouts, added autonomous watchdogs for foreground tools and Bash pre-registration, deduplicated /raw/<id> gateway pool quotas into a single row, and enabled cross-worktree AGENTS.md content-hash alias deduplication plus coalesced-step steering cadence.
+ReleaseNotesUrl: https://github.com/X-T-E-R/kiki/releases/tag/kiki-v0.6.2
+Documentations:
+- DocumentLabel: Installation guide
+  DocumentUrl: https://x-t-e-r.github.io/kiki/en/getting-started/installation
+- DocumentLabel: All features
+  DocumentUrl: https://x-t-e-r.github.io/kiki/en/features/
+- DocumentLabel: Changelog
+  DocumentUrl: https://x-t-e-r.github.io/kiki/en/release-notes/changelog
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
