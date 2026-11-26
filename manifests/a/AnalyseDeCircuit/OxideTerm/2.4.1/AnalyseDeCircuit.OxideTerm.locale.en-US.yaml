@@ -1,0 +1,133 @@
+# Created with WinGet Tracker using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: AnalyseDeCircuit.OxideTerm
+PackageVersion: 2.4.1
+PackageLocale: en-US
+Publisher: AnalyseDeCircuit
+PublisherUrl: https://github.com/AnalyseDeCircuit
+PublisherSupportUrl: https://github.com/AnalyseDeCircuit/oxideterm/issues
+Author: AnalyseDeCircuit
+PackageName: OxideTerm
+PackageUrl: https://github.com/AnalyseDeCircuit/oxideterm
+License: GPL-3.0
+LicenseUrl: https://github.com/AnalyseDeCircuit/oxideterm/blob/HEAD/LICENSE
+ShortDescription: Local-first SSH workspace for local shells and remote machines.Zero Electron, zero OpenSSL, zero telemetry, and no app subscription for core SSH workflows.
+Tags:
+- agent
+- ai-terminal
+- bring-your-own-key
+- filemanager
+- mcp
+- rag
+- russh
+- rust
+- sftp
+- ssh-client
+- tauri
+- terminal
+- terminal-emulator
+- tool-calling
+- wslg
+- xterm-js
+ReleaseNotes: |-
+  中文 | English
+  中文
+  OxideTerm 2.4.1 重做了新建连接表单，改进了 AI 的多轮工具调用和提示缓存，并让活动会话和会话管理侧栏支持多选批量删除。
+  🔌 连接与会话管理
+  - 新建连接表单重做：顶部协议栏加单开分类抽屉，基础字段按名称/分组与主机/端口/用户对齐，测试操作与反馈移到底部。隧道、SFTP 和 FTP 表单沿用同一布局，SSH 隧道表单调换了连接弹窗的轴向并重新设计。SSH 与 BLE 连接进度改为分阶段信号轨，SSH 算法在独立页面编辑，SFTP 独立端点和路由在表单中归组。
+  - 批量添加与跳板机编辑：批量添加弹窗重新设计，批量预览仅在本地生成，跳板机编辑更顺手；多语言下表单不再截断。
+  - 多选批量删除：活动会话和会话管理侧栏支持单击、Ctrl 切换、Shift 范围选择，批量删除会先断开在线节点，并提示被跳过的数量；折叠分组内的隐藏成员不会被 Shift 范围选中。终端标签右键菜单提供 SSH 节点操作。（PR #821、#848）
+  - 已关闭会话清理与空闲连接回收：已关闭的会话按保留策略清理，空闲的 SSH 连接会被回收。（PR #843）
+  - SSH 重连：多服务器分屏重连不再被全局多跳锁阻塞，已关闭或过期的连接句柄不再复用，物理传输断开时会如实报告；跳板链串行建立，冲突的重连会延后；MCP 租用目标前会等待跳板链就绪。
+  - RDP 与 VNC：支持保存并同步显式的空密码；修复 Windows 上剪贴板文件列表发布与重复复制的识别。
+  - 标签页：分离或折叠合并标签后恢复终端标题与图标。
+  🤖 AI
+  - 工具调用的上下文不再丢失：多轮工具调用会按发送给提供方的原样重放，OpenAI 兼容、Anthropic 和 Gemini 请求都保留工具轮次；子智能体与摘要轮次共用相同的工具定义，权限在执行时检查，摘要期间不会执行工具。
+  - 更稳定的提示缓存：各提供方的提示前缀保持稳定，系统提示与工具说明去除了重复内容，请求体更短，缓存更容易命中。
+  - 缓存用量可见：上下文弹窗新增“提示缓存”区域，显示上一次请求和本会话累计的命中率（缓存读取 / 输入 token），以及缓存写入量。预计的下次输入量以上次实际用量为基准，保留输出改为显示 token 数。
+  - 崩溃修复：刷新模型列表时设置页不再崩溃。
+  ⚡ 终端
+  - 渲染：增强终端渲染和语义着色，行高按像素对齐；macOS Metal 增加深色背景的字形边缘补偿；数字读数启用 OpenType 等宽数字；可选的 OLED 泛光和 CRT 效果覆盖各 GPU 后端；Windows 与 wgpu 复合着色器改用矢量边界；修复 Windows 丢失 DirectX 渲染器后的恢复。
+  - 提示与标签：可按连接配置视觉响铃，并高亮后台标签。
+  - 交互修复：拖选时鼠标移出窗口会正确结束选择；右键菜单从输出区域点击时，“上一条命令”会跳回该输出所属的命令；终端补充 Windows 与 Linux 的 emoji 字体回退；未启用 shell 集成时，df/free 输出按列着色；本地 shell 的命令历史绑定到各自使用的文件。（emoji、拖选与着色：PR #840）
+  - Zen 模式：可选择保留标签栏，退出按钮不再被标签遮挡。（PR #839）
+  🛠️ 设置与其他
+  - 设置：打开搜索结果后保持查询和结果可见。
+  - 布局：菜单、分段控件和选择器按各语言文本自适应宽度；主机工具的紧凑表格不再截断主标签；快捷命令编辑器字段不再溢出，翻译补齐，命令首尾空格得以保留。
+  - Markdown：文档排版、代码高亮和中日韩图表有所改进。
+  - 桌面：遵循窗口按钮布局，说明 macOS 登录项；记录发布版崩溃并支持重载桌面日志过滤。
+  - 依赖与构建：清理未使用依赖，更新 RustSec 公告涉及的锁定版本；调整 macOS Metal 着色器源码的解析方式；Windows 便携压缩包列入发布说明。（PR #819、#820）
+  👥 贡献者
+  - 感谢 @allegrox 实现活动会话侧栏的本地多选与批量删除（PR #848）。
+  - 感谢 @BilityLeu 实现已关闭会话保留与空闲 SSH 连接回收，以及 Zen 模式保留标签栏（PR #843、#839）。
+  - 感谢 @backkoom 完善终端拖选收尾、df/free 着色和 emoji 字体回退（PR #840）。
+  - 感谢 @moro-s 实现会话节点批量移除与侧栏多选删除（PR #821）。
+  - 感谢 @HarpeLm 清理未使用依赖并更新 RustSec 公告涉及的依赖（PR #819、#820）。
+  English
+  OxideTerm 2.4.1 rebuilds the new-connection form, improves AI multi-turn tool calls and prompt caching, and adds multi-select batch removal in Active Sessions and the session manager sidebar.
+  🔌 Connections and Session Manager
+  - Rebuilt new-connection form: A protocol rail at the top with single-open category drawers, basic fields aligned as name/group and host/port/user rows, and test actions and feedback in a footer. Tunnel, SFTP, and FTP forms share the layout, and the SSH tunnel form is redesigned with the connection modal axes swapped. SSH and BLE progress shows on a staged signal track, SSH algorithms are edited on a dedicated page, and standalone SFTP endpoints and routes are grouped in the form.
+  - Batch add and jump hosts: The batch add modal is redesigned, batch previews stay local, and jump-host editing is easier. Forms no longer truncate in any language.
+  - Multi-select batch removal: Active Sessions and the session manager sidebar support click, Ctrl-toggle, and Shift-range selection. Batch removal disconnects live nodes first and reports how many were skipped; hidden members of collapsed groups are not included in a Shift range. The terminal tab context menu offers SSH node actions. (PR #821, #848)
+  - Closed-session cleanup and idle connection retirement: Closed sessions are cleaned up under a retention policy and idle SSH connections are retired. (PR #843)
+  - SSH reconnects: Reconnecting split panes on several servers no longer waits on the global multi-hop lock, closed or stale connection handles are not reused, and transport loss is reported when a shell exits on a closed physical transport. Jump chains are built one at a time, conflicting reconnects are deferred, and MCP waits for the jump chain before leasing its target.
+  - RDP and VNC: Explicit empty passwords can be saved and synced, and Windows clipboard file lists are published and repeated copies recognized.
+  - Tabs: Terminal title and icon are restored when detaching or collapsing merged tabs.
+  🤖 AI
+  - Tool-call context is preserved: Multi-turn tool calls replay exactly as sent to the provider, and OpenAI-compatible, Anthropic, and Gemini requests keep their tool turns. Child agents and summary turns share the same tool definitions, permissions are checked at execution, and no tools run during a summary.
+  - More stable prompt caching: Provider prompt prefixes stay stable, and duplicated system prompt and tool descriptions were removed, so requests are shorter and caches hit more often.
+  - Cache usage is visible: The context popover has a new Prompt Cache section with the hit rate (cache reads / input tokens) for the last request and the session total, plus cache writes. The next-input estimate is anchored to the last actual usage, and reserved output now shows tokens.
+  - Crash fix: The settings page no longer crashes when refreshing the model list.
+  ⚡ Terminal
+  - Rendering: Improved terminal rendering and semantic coloring with pixel-snapped line height; Metal dark-background glyph edge compensation on macOS; OpenType tabular numerals for numeric readouts; optional OLED bloom and CRT effects across GPU backends; vector bounds in the Windows and wgpu composite shaders; and recovery after Windows loses a DirectX renderer.
+  - Bell and tabs: Visual bells can be configured per connection, and background tabs can be highlighted.
+  - Interaction fixes: A drag selection ends when the pointer leaves the window. Right-clicking inside command output makes “Previous command” jump to the command that owns it. Windows and Linux emoji fonts join the fallback chain, df/free output is colored by column without shell integration, and each local shell's command history is bound to the file it uses. (Emoji, drag selection, and coloring: PR #840)
+  - Zen Mode: The tab bar can stay visible, and the exit button no longer overlaps tabs. (PR #839)
+  🛠️ Settings and more
+  - Settings: Search results and the query stay visible after opening a match.
+  - Layout: Menus, segmented controls, and selects size to each language's text. Compact host-tool tables no longer truncate primary labels, and quick-command editor fields no longer overflow, with translations completed and leading and trailing spaces in commands preserved.
+  - Markdown: Improved document layout, code highlighting, and CJK diagrams.
+  - Desktop: Respects the window-button layout, clarifies macOS login items, records release-build panics, and reloads desktop log filters.
+  - Dependencies and build: Removed unused dependencies and updated locked versions for RustSec advisories, changed how macOS Metal shader sources are resolved, and listed Windows portable archives in the release notes. (PR #819, #820)
+  👥 Contributors
+  Thank you to the external contributors to this release:
+  - @allegrox: local multi-select and batch removal in the Active Sessions sidebar (PR #848).
+  - @BilityLeu: closed-session retention with idle SSH connection cleanup, and an optional tab bar in Zen Mode (PR #843, #839).
+  - @backkoom: drag-selection cleanup, df/free coloring, and emoji font fallbacks (PR #840).
+  - @moro-s: batch removal of session nodes and multi-select in the sidebar (PR #821).
+  - @HarpeLm: removed unused dependencies and updated dependencies for RustSec advisories (PR #819, #820).
+  📥 Download for your system
+  ────────────────┬───────────────────────────────────────┬───────────────────────────────────────
+  Operating system│x64                                    │ARM64
+  ────────────────┼───────────────────────────────────────┼───────────────────────────────────────
+  Windows         │Setup (.exe) · Portable (.zip)         │Setup (.exe) · Portable (.zip)
+  ────────────────┼───────────────────────────────────────┼───────────────────────────────────────
+  macOS           │DMG (Intel)                            │DMG (Apple Silicon)
+  ────────────────┼───────────────────────────────────────┼───────────────────────────────────────
+  Linux           │AppImage · DEB · RPM                   │AppImage · DEB · RPM
+  ────────────────┴───────────────────────────────────────┴───────────────────────────────────────
+  Additional portable archives, signatures, and sha256sums.txt remain available in the release assets below.
+  📌 Installation Tips / 安装提示
+  macOS
+  Downloaded .dmg files may be quarantined by Gatekeeper. Run in Terminal:
+  xattr -cr ~/Downloads/OxideTerm_*.dmg
+  # or after install / 或安装后
+  xattr -cr /Applications/OxideTerm.app
+  Windows
+  If SmartScreen warns, click More info -> Run anyway.
+  若 SmartScreen 弹出警告，点击 更多信息 -> 仍要运行。
+  Linux
+  # AppImage
+  chmod +x OxideTerm_*_linux_*.AppImage && ./OxideTerm_*_linux_*.AppImage
+  # Debian/Ubuntu
+  sudo dpkg -i OxideTerm_*_linux_*.deb && sudo apt-get install -f
+  # Fedora/RHEL-compatible systems
+  sudo dnf install ./OxideTerm_*_linux_*.rpm
+  🔗 Links
+  - Documentation: https://oxideterm.app
+  - GitHub Issues: https://github.com/AnalyseDeCircuit/oxideterm/issues
+  - Changelog: https://github.com/AnalyseDeCircuit/oxideterm/blob/main/.github/release-notes/stable-changelog.md
+ReleaseNotesUrl: https://github.com/AnalyseDeCircuit/oxideterm/releases/tag/v2.4.1
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
