@@ -1,0 +1,73 @@
+# Created using wingetcreate 1.12.13.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Xcomart.Rudbman
+PackageVersion: 0.3.10
+PackageLocale: en-US
+Publisher: Xcomart
+PublisherUrl: https://github.com/xcomart
+PublisherSupportUrl: https://github.com/xcomart/rudbman/issues
+Author: Dennis Soungjin Park
+PackageName: rudbman
+PackageUrl: https://github.com/xcomart/rudbman
+License: MIT
+LicenseUrl: https://github.com/xcomart/rudbman/blob/main/LICENSE
+Copyright: Copyright (c) 2026 Dennis Soungjin Park
+ShortDescription: A multi-platform GUI database workbench that talks to any database with a JDBC driver.
+Description: |-
+  rudbman is a desktop database workbench written in Rust and drawn with gpui, the
+  GPU-accelerated UI framework behind the Zed editor. It reaches a database through
+  that database's own JDBC driver over an embedded JVM bridge, so any product with a
+  JDBC driver is a supported product: drivers come from Maven Central by coordinate or
+  from disk, the driver class is detected from the JAR, and every connection gets an
+  isolated class loader so two vendors' drivers cannot collide.
+
+  Each connection is a tab with its own work area — a schema explorer over catalogs,
+  schemas, tables, views, sequences, routines and triggers, filtered by name or condition
+  and told per connection what to hide; a SQL editor with dialect-aware
+  highlighting, statement splitting, cancellation, execution plans and a searchable
+  history of the statements it ran, over a virtualized grid that
+  scrolls a million rows without loading a million rows; ERD diagrams laid out and
+  routed automatically; a visual query builder that turns dragged tables and columns
+  into SQL; and backup of a schema to a replayable .sql script. Connections can run
+  through an SSH tunnel, and secrets live in the Windows credential store rather than
+  on disk.
+
+  No JDK is required — the installer carries a Java runtime built with jlink and
+  rudbman uses the one next to its executable. The interface is available in English,
+  Korean, Japanese, Simplified Chinese, German, Spanish, French and Russian.
+Moniker: rudbman
+Tags:
+- database
+- database-client
+- dba
+- developer-tools
+- erd
+- gui
+- jdbc
+- mysql
+- oracle
+- postgresql
+- query-builder
+- rust
+- sql
+- sql-client
+- workbench
+ReleaseNotes: |-
+  rudbman 0.3.10 — drop and truncate from the explorer behind a typed confirmation, and statement bodies kept whole on more products: T-SQL, MariaDB, Db2, Firebird, Informix and Snowflake.
+  - Drop and truncate from the explorer. The explorer menu offers Drop for tables, views, sequences, schemas and databases, and Truncate for tables. Each opens a question that shows the exact statements and stays disabled until the object's name, or the verb over a selection, is typed back. The statements follow each product's own spelling, run with autocommit like the structure pane's apply, and are refused on read-only profiles and over another tab's open transaction.
+  - A T-SQL IF stays whole through the semicolon before its ELSE. IF @a = 1 SELECT 1; ELSE SELECT 2; was cut at the first ;, so the editor shaded the branches apart, Run statement sent half of it and Run all ran ELSE SELECT 2 as a statement of its own.
+  - PL/SQL routines on MariaDB and Db2 stay whole. A routine header ending in IS or AS with declarations before its BEGIN, as MariaDB's sql_mode=ORACLE and Db2's PL/SQL write it, was cut at its first semicolon. An ALTER that names a routine is now read as a CREATE is, which keeps Db2's ALTER MODULE … ADD PROCEDURE and MySQL's ALTER EVENT … DO BEGIN whole.
+  - Blocks, packages and routines without a header stay whole. MariaDB and Db2 blocks opened by DECLARE, MariaDB's BEGIN blocks, MariaDB 11.4 packages written in SQL/PSM, Firebird DECLARE sections, sub-routines and EXECUTE BLOCK, Informix routines that run to END PROCEDURE or END FUNCTION, and Snowflake blocks whose first declaration is a cursor. Db2's DECLARE GLOBAL TEMPORARY TABLE, and a DECLARE c CURSOR followed by a statement, stay statements of their own. Script restores still stream line by line.
+  - The about dialog opens the project page at https://xcomart.github.io/rudbman/ instead of the repository.
+  - async-executor and crypto-bigint move past their yanked releases, to 1.14.1 and 0.7.9.
+
+  Requirements
+  - Linux: glibc 2.35 or newer: Ubuntu 22.04, Debian 12 and later, or a distribution built on them, MX Linux 23 among them.
+
+  What's Changed
+  - chore: merge dev into main by @xcomart in #64
+  - chore: release 0.3.10 by @xcomart in #65
+ReleaseNotesUrl: https://github.com/xcomart/rudbman/releases/tag/v0.3.10
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

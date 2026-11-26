@@ -1,0 +1,146 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: aelassas.Servy
+PackageVersion: '8.4'
+PackageLocale: en-US
+Publisher: Akram El Assas
+PublisherUrl: https://github.com/aelassas
+PublisherSupportUrl: https://github.com/aelassas/servy/issues
+Author: Akram El Assas
+PackageName: Servy
+PackageUrl: https://servy-win.github.io/
+License: MIT
+LicenseUrl: https://github.com/aelassas/servy/blob/HEAD/LICENSE.txt
+Copyright: Copyright (c) 2025 Akram El Assas
+ShortDescription: Servy lets you run any app as a native Windows service with full control over working directory, startup type, process priority, logging, health checks, pre-launch scripts and parameters.
+Description: |-
+  Servy lets you run any app as a native Windows service with full control over the working directory, startup type, process priority, logging, health checks, environment variables, dependencies, pre-launch and post-launch hooks, pre-stop and post-stop hooks, and parameters. It's designed to be a full-featured alternative to NSSM, WinSW, and FireDaemon Pro.
+
+  Servy is digitally signed using a trusted code-signing certificate provided by the SignPath Foundation. This ensures that all Servy executables and installers are verified and secure, giving you peace of mind when using the tool.
+
+  Servy offers a desktop app, a CLI, and a PowerShell module that let you create, configure, and manage Windows services interactively or through scripts and CI/CD pipelines. It also includes a Manager app for easily monitoring and managing all installed services in real time.
+
+  Features:
+  - Clean, simple UI
+  - Monitor and manage all installed services with Servy Manager
+  - Real-time CPU and RAM monitoring with live performance graphs for installed services
+  - Real-time service stdout and stderr output preview in Servy Console
+  - Service dependency tree visualization with status indicators
+  - CLI and PowerShell module for full scripting and automated deployments
+  - Run any executable as a Windows service
+  - Set service name, description, startup type, priority, working directory, environment variables, and dependencies
+  - Environment variable expansion supported in parameters, process paths and startup directories
+  - Run services as Local System, local or domain accounts, Active Directory accounts, or gMSAs
+  - Redirect stdout/stderr to log files with automatic size-based and date-based rotations
+  - Run pre-launch hook before starting the service, with retries, timeout, logging and failure handling
+  - Run post-launch hook after the application starts successfully
+  - Run pre-stop and post-stop hooks before the application stops and after the application stops
+  - Supports Ctrl+C for command-line apps, close-window for GUI apps, and force kill if unresponsive
+  - Prevent orphaned/zombie processes with improved lifecycle management and ensuring resource cleanup
+  - Health checks and automatic service recovery
+  - Browse and search logs by level, date, and keyword for faster troubleshooting from Servy Manager
+  - Export/Import service configurations for easy backups and automation
+  - Service Event Notification alerts on service failures via Windows notifications and email
+  - Compatible with Windows 7-11 x64 and Windows Server editions
+
+  Who is it for?
+  - Developers: Run development servers, scripts, or custom tools as services without extra setup.
+  - Sysadmins & IT professionals: Ensure critical background processes stay alive, monitored, and properly logged.
+  - Teams or organizations: Automate background services reliably across multiple machines.
+Moniker: servy
+Tags:
+- admin
+- automation
+- background-service
+- cli
+- devops
+- dotnet
+- nssm
+- powershell
+- scm
+- service-manager
+- service-supervisor
+- service-wrapper
+- watchdog
+- windows-service
+- windows-tools
+- winsw
+ReleaseNotes: |-
+  Servy 8.4 introduces enhanced recovery orchestration, improved security protocols, and significant performance optimizations across the entire service ecosystem.
+  Key Highlights
+  - Advanced Recovery Orchestration: New configuration options to ensure critical services maintain high availability through complex failure states.
+  - Granular Configuration: Expanded settings for process management and lifecycle handling, offering deeper flexibility for specialized environments.
+  - Hardened Security & Stability: Under-the-hood improvements to core security logic and stability, ensuring safer operation in production settings.
+  - System Maintenance: Comprehensive bug fixes and optimizations for a more reliable developer and operator experience.
+  The full changelog is available below.
+  Full Changelog
+  Click to expand release notes!
+  - feat(core): recovery for when the service process exits cleanly (#1311)
+  - fix(core): Timing/retry magic numbers scattered across LogTailer, ServiceHelper, DapperExecutor, ProcessHelper, RotatingStreamWriter - consolidate into AppConfig (#818)
+  - fix(core): ProcessKiller.KillProcessTree - GetParentProcessId called O(N×depth) times during recursion (#826)
+  - fix(core): Helper.IsRunningInUnitTest - only detects xUnit; NUnit/MSTest assemblies fall through to production code paths (#830)
+  - fix(core): ServiceManager constructor - missing ArgumentNullException guards (inconsistent with rest of codebase) (#839)
+  - fix(core): Logger.cs - Log timestamp lacks UTC/local indicator, ambiguous when UseLocalTimeForRotation is enabled (#842)
+  - fix(core): DefaultRotationSize is duplicated between AppConfig and Logger (DRY) (#845)
+  - fix(core): DapperExecutor.cs - unreachable 'return default' after for-loops with const retry counts (#850)
+  - fix(core): NativeMethods.cs - duplicate Win32 status struct (ServiceStatus and SERVICE_STATUS) - name also collides with the public ServiceStatus enum (#865)
+  - fix(core): ServiceManager.cs - Win32 access-right and service-type constants are re-declared shadowing the same names in NativeMethods.cs (#867)
+  - fix(core): IServiceManager - async lifecycle methods (Start/Stop/Restart/Install) lack CancellationToken while Uninstall and read methods accept one (#871)
+  - fix(core): Helper.EscapeArgs and ProcessHelper.EscapeProcessArgument implement the same Win32 algorithm in two different files (#872)
+  - fix(core): ProcessHelper.ResolvePath - XML doc and inline comment claim 'SERVICE’s environment' but the call expands the CALLER's environment (#878)
+  - fix(core): ServiceMapper.ToDomain - RecoveryAction default hardcoded as 'RecoveryAction.RestartService' instead of using 'AppConfig.DefaultRecoveryAction' (#892)
+  - fix(core): Service.cs (Domain) - RecoveryAction property has no default initializer; falls back to enum 0 (None) instead of AppConfig.DefaultRecoveryAction (RestartService) (#893)
+  - fix(core): Two parallel ServiceDto validators with different rule sets - XML/JSON imports skip upper-bound checks that CLI install enforces (#898)
+  - fix(core): EnvironmentVariablesValidator and EnvironmentVariableParser - duplicated 'SplitByUnescapedDelimiters' and 'IndexOfUnescapedChar' implementations (DRY) (#901)
+  - fix(core): ServiceDependenciesValidator - XML doc, inline comment, and error message all say 'letters/digits/hyphens/underscores' but the regex also allows '.' (#902)
+  - fix(core): Servy.Core Helper.GetBuiltWithFramework - naive 'net' prefix strip mangles 'netstandard*' TFMs into '.NET standard*' (#917)
+  - fix(core): Helper.EnsureEventSourceExists & Servy.Restarter Program.cs - Logger.Error duplicates ex.Message in formatted text and again in the exception parameter (#918)
+  - fix(core): AppFoldersHelper.EnsureFolders - hand-rolled connection-string parser fails on quoted paths and paths containing semicolons (#922)
+  - fix(core): Logger.Initialize - default parameter value '10' for logRotationSizeMB hardcoded instead of DefaultLogRotationSizeMB constant (#923)
+  - fix(core): ServiceDtoHelper.ApplyDefaults silently clobbers RunAsLocalSystem/UserAccount/Password - XML/JSON imports always force LocalSystem (#930)
+  - fix(core): ProcessHelper.MaintainCache - races with GetLockForPid users; cleanup can hand out a NEW lock object for the same PID, defeating per-PID serialization (#934)
+  - fix(core): ServiceHelper.GetRunningServices - naive ImagePath parser splits on first space when no quotes, mangles legacy unquoted paths under 'Program Files' (#937)
+  - fix(core): AppConfig - DefaultStopTimeout (5s) and DefaultServiceStopTimeoutSeconds (60s) are two parallel 'stop timeout' defaults with no documented relationship; produces 12x asymmetry between Manager and Service (#942)
+  - fix(core): ServiceValidationRules.Validate - service-name / display-name / description length checks emit Warnings (non-blocking) for hard SCM limits, allowing invalid configs to pass validation (#943)
+  - fix(core): ServiceValidationRules.Validate - calls Helper.CreateParentDirectory side-effect for stdout/stderr paths during what should be a read-only validation (#944)
+  - fix(core): AppConfig - MaxConfigFileSizeMB (10MB) and MaxImportPayloadSizeChars (~2MB) reject the same import inconsistently (#960)
+  - fix(core): ServiceManager.InstallServiceAsync - EnablePreShutdown only refreshes timeout on initial create, not on existing-service update (#962)
+  - fix(core): ServiceManager.InstallServiceAsync - gMSA detection via EndsWith("$") misclassifies regular accounts whose name happens to end in $ (#966)
+  - fix(core): EventLogService.SearchAsync - sourceName constructor parameter is silently overridden by hardcoded AppConfig.EventSource filter at result-time (#969)
+  - fix(core): EventLogLogger.CreateScoped - every scoped logger allocates a fresh EventLog handle (resource leak across scopes) (#973)
+  - fix(core): ServiceManager.UninstallServiceAsync - ChangeServiceConfig called on a handle opened without SERVICE_CHANGE_CONFIG (silent ERROR_ACCESS_DENIED) (#985)
+  - fix(core): ServiceManager.GetAllServices - trackedTasks ConcurrentBag is declared and joined but never populated (dead safety gate) (#986)
+  - fix(core): ProcessKiller.KillProcessTreeAndParents(string) - root process name is not checked against CriticalSystemProcesses safelist (#990)
+  - fix(core): ProtectedKeyProvider.GetMachineEntropy - uses Registry.LocalMachine which silently falls back to MachineName entropy when run as 32-bit (WoW64 redirection) (#993)
+  - fix(core): HandleHelper.GetProcessesUsingFile - synchronous StandardOutput.ReadToEnd defeats HandleExeTimeoutMs (handle.exe hang would block forever) (#996)
+  - fix(core): ResourceHelper.TerminateBlockingProcesses - extension and targetFileName parameters are unused (kept for 'signature compatibility') (#999)
+  - fix(core): ServiceExporter.ExportJson and JsonServiceSerializer.Serialize use different JsonSerializerSettings - asymmetric JSON output (#1000)
+  - fix(core): SecureData.Dispose - _disposed flag set after ZeroMemory; concurrent Dispose calls can race through the guard (#1004)
+  - fix(core): ProcessHelper.GetProcessTreeMetrics - comment claims sum can exceed 100% but the per-process formula is normalized to whole-machine capacity (#1005)
+  - fix(core): NativeMethods.AtomicSecureMove - name promises atomicity but MoveFileEx falls back to copy+delete across volumes (#1014)
+  - fix(core): NativeMethods.GetFileIdentity - two empty catch blocks with stale 'Fallback or log failure here if necessary' TODO comments (#1015)
+  - fix(core): NativeMethods.ValidateCredentials - silently passes for non-gMSA accounts when password is null/empty (function name promises validation) (#1016)
+  - fix(core): EnvironmentVariableParser.Parse - surrounding quotes are unconditionally stripped, no way to set an env var whose literal value starts and ends with double quotes (#1074)
+  - fix(core): AppConfig - TFM 'net10.0-windows' hardcoded into three path constants (silently stale on TFM upgrade) (#1027)
+  - fix(core): AppConfig - three near-identical Get*ServicePath / GetHandleExePath methods (DRY) (#1028)
+  - fix(core): EventIds.ScriptInfo (1100) and EventIds.ScriptWarning (2100) constants are defined but never referenced anywhere in the codebase (#1039)
+  - fix(core): ServiceManager.UninstallServiceAsync - bypasses _win32ErrorProvider with direct Marshal.GetLastWin32Error() in 2 places (test-seam violation) (#1041)
+  - fix(core): ServiceManager - MapStartupType returns Manual for ServiceStartMode.Boot/System but GetServiceStartupType returns null (silent data drift in batch list) (#1042)
+  - fix(core): ProcessKiller - Process.GetCurrentProcess() handle leaked in 2 places (lines 216, 286), inconsistent with line 78 (#1045)
+  - fix(core): ProcessHelper.ResolvePath - Regex.Match called inline (uncompiled) on every path validation (#1046)
+  - fix(core): ResourceHelper - ResourceStalenessThresholdMinutes (20 min) hardcoded as private const, should live in AppConfig (#1047)
+  - fix(core): Servy.Core ServiceMapper.ToDto is dead code in src/ (only tests call it) (#1049)
+  - fix(core): Logger.cs hardcodes 'logs' subdirectory in 3 places (lines 91, 120, 349) (#1051)
+  - fix(core): ProcessKiller.KillProcessTreeAndParents - calls Toolhelp32 snapshot twice per invocation (BuildProcessSnapshotNative + BuildParentChildMapNative) (#1059)
+  - fix(core): Helper.WriteFileAtomic and Helper.WriteFileAtomicAsync are ~95% duplicated (DRY) (#1060)
+  - fix(core): RotatingStreamWriter - Thread.Sleep called while holding _lock blocks all writers for up to 100ms during rotation retries (#1066)
+  - fix(core): RotatingStreamWriter._rotationDisabled is one-way: a single non-IO exception silently disables rotation forever, file grows unbounded (#1067)
+  - fix(core): RotatingStreamWriter.EnforceMaxRotations regex misses double-collision filenames produced by GenerateUniqueFileName, those rotated logs accumulate forever (#1068)
+  - fix(core): ProtectedKeyProvider.GetKey/GetIV - no in-memory caching, full DPAPI roundtrip + 3-retry file read on every call #1069
+ReleaseNotesUrl: https://github.com/aelassas/servy/releases/tag/v8.4
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/aelassas/servy/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

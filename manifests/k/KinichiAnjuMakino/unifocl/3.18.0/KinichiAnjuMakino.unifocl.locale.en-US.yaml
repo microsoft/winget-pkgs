@@ -1,0 +1,21 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: KinichiAnjuMakino.unifocl
+PackageVersion: 3.18.0
+PackageLocale: en-US
+Publisher: Kinichi Anju Makino
+PublisherUrl: https://github.com/Kiankinakomochi
+PublisherSupportUrl: https://github.com/Kiankinakomochi/unifocl/issues
+PackageName: unifocl
+PackageUrl: https://github.com/Kiankinakomochi/unifocl
+License: Apache-2.0
+LicenseUrl: https://github.com/Kiankinakomochi/unifocl/blob/HEAD/LICENSE
+ShortDescription: A CLI/TUI operations layer for Unity, enabling deterministic project interaction for developers and AI agents without the Editor.
+ReleaseNotes: "## 3.18.0 - 2026-09-22\n### Added\n• Optional `probuilder` tool category for ProBuilder level geometry. Agents load it with\n  `use_category('probuilder')`; humans use `/probuilder <shape|mesh|face|edge> ...`. Tools:\n  `probuilder.shape.create` (12 primitives with bounding-box size, local position/rotation,\n  center/bottom pivot, material, segments/steps, optional MeshCollider), `probuilder.mesh.info`\n  (counts, bounds, per-face normal/center/direction), `probuilder.face.extrude`,\n  `probuilder.face.move`, `probuilder.face.set_material`, `probuilder.face.flip_normals`,\n  `probuilder.face.subdivide`, `probuilder.edge.bevel`, `probuilder.face.delete`,\n  `probuilder.mesh.merge`, `probuilder.mesh.probuilderize`, and `probuilder.mesh.export`.\n  Faces are selected by index or by world direction (`up`, `left`, ...), objects by hierarchy\n  path. Every mutating tool supports dry-run previews.\n• The tools compile into a separate `UniFocl.EditorBridge.ProBuilder` assembly gated on\n  `com.unity.probuilder` 5.0+, so projects without ProBuilder are unaffected and simply do not\n  see the category. `use_category('probuilder')` explains how to enable it when the package is\n  missing. Re-run `/init` (or `/open`) after updating to install the new bridge files.\n\n### Fixed\n• A `dryRun` call to any `[UnifoclCommand]` custom tool reverted every earlier daemon mutation\n  since the last user input in the editor, not just its own changes, and the scene-restore step\n  then saved that reverted state. The editor only advances the Undo group on user input, so the\n  group captured before the dry-run still held that earlier work. The dry-run now opens its own\n  group first and reverts only that one. (The hierarchy, inspector and eval dry-runs share the\n  old pattern and are tracked in #223.)\n• Custom-tool failures (`/profiler`, `/recorder`, `/probuilder`, ...) were logged without a\n  leading `error`, so `unifocl exec --agentic` reported them as `status：success`. They now\n  surface as agentic errors.\n• Agentic logs lost the brackets of any Spectre-escaped text (`[[`/`]]`), which turned JSON arrays\n  in custom-tool results into unparseable fragments such as `\"faces\"：],`. Custom-tool results\n  are also rendered without `\\uXXXX` escapes for quotes and non-ASCII text.\n• Custom-tool arguments now decode `\\uXXXX` escapes, so string arguments containing non-ASCII\n  text (e.g. Japanese GameObject names) reach `[UnifoclCommand]` methods intact. Array and\n  object arguments are passed through as raw JSON instead of being truncated at the first comma,\n  and a JSON `null` now counts as an omitted argument."
+ReleaseNotesUrl: https://github.com/Kiankinakomochi/unifocl/releases/tag/v3.18.0
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/Kiankinakomochi/unifocl/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

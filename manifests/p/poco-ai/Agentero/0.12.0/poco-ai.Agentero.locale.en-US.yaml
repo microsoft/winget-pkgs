@@ -1,0 +1,56 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
+
+PackageIdentifier: poco-ai.Agentero
+PackageVersion: 0.12.0
+PackageLocale: en-US
+ShortDescription: Agent-friendly reference management.
+Description: 'Traditional reference managers are not agent-friendly: highlights and notes stay locked inside single files, making it hard for agents to reuse knowledge across papers; every conversation starts from scratch without a stable local knowledge map; PDFs are human-friendly but not the most comfortable reading material for agents. Agentero aims to build an agent-friendly, agent-native way to manage references, exploring how humans and agents collaborate on reference management. Connect your local agent via ACP (BYOA), select-text chat, import papers and Skills, stay compatible with the Zotero ecosystem, and get paper translation, bidirectional links with a knowledge graph, and deep PDF reading.'
+Tags:
+- academics
+- agent
+- article
+- literature
+- paper
+- pdf
+- reference
+- research
+- thesis
+- zotero
+ReleaseNotes: |-
+  0.12.0 turns each paper into an expandable multi-document workspace: the file tree shows extra notes and HTML at the paper root, the reading layout maximizes the active pane and can pin paper and notes into two columns, and rail widths and main-window state survive restarts. Sync gains a Git backend for full-vault sync and a headless agentero sync command, while self-hosted MinerU arrives alongside fixes for resize performance, PDF annotations, and agent installation.
+  Features
+  - Self-hosted MinerU: Settings gains a "Self-hosted API" switch, with the official cloud still the default; when enabled, the app detects MinerU 4.0+ V1 and 3.x /tasks deployments automatically, supports LAN http and Bearer auth, and routes both layout analysis and PAPER.md body parsing through the self-hosted service. (#763 by @exciton00)
+  - Full-vault Git sync: Settings → Sync adds a Git backend where the Vault root is the work tree; configure a remote and branch (default main) for GitHub, GitLab, self-hosted Git, or a local bare repository. It uses system Git credentials or SSH, supports manual and automatic sync, and uses Git's native three-way merge when conflicts occur; conflicting passes abort without auto-resolving. (93ba55b9 by @qychen2001)
+  Improvements
+  - Resize and long-note performance: Dragging a panel sash, the side rails, or resizing the window no longer re-runs container queries every frame; PDF viewport metrics and Markdown relayout share one resize-gesture signal, the TOC observer has a long lifetime, and math is rendered only near the viewport with its previous size preserved. In the reproduction case, document DOM nodes dropped from 202,986 to 13,424. (#777 by @Fengsuid)
+  Fixes
+  - Silent long-note truncation: Notes containing LaTeX braces or MDX-sensitive text such as $\rho<1$ are no longer rendered partially with the rest silently dropped; if MDX parsing still fails, the whole body is re-parsed without MDX, and the status-bar count now includes equation text. (#777 by @Fengsuid)
+  - PDF annotation deletion and translated hit testing: Highlight deletions persist immediately and are no longer dropped by the commit lock; deleted annotations are excluded from rendering, hit testing, and editing. With full-text translation visible, clicking a translated highlight still opens the annotation menu. (a745a446 by @qychen2001)
+  - Rail widths after launch: On macOS, rail ratios are reapplied after the restored or maximized window settles during launch, so the Agent rail no longer starts narrow. (88283547 by @Phil-Fan)
+  - Windows touchpad pinch zoom: Windows precision touchpads can pinch to zoom PDFs without holding Ctrl, and pinching outside the PDF no longer scales the whole app window. (dc3ea261 by @JiaheChen2002)
+  Resolved Issues
+  - Multi-document papers: When a paper root holds multiple .md / .html / .htm documents, the file tree lists the extra notes and snapshots, and PAPER.md is no longer duplicated as a child. The paper row context menu can create files, opening another note in reading layout reuses the existing NOTES pane, and switching papers or notes no longer blanks the tree. (#738 by @Phil-Fan)
+  - Paper and notes two-column layout: When the workspace has exactly two side-by-side columns, new paper bodies open in the left column and their NOTES companions in the right instead of following the focused group; other layouts keep free placement. (#749, #785 by @Phil-Fan)
+  - Reading layout: Reading mode collapses both rails and maximizes the active pane, including multi-tab and multi-column workspaces; toggling it again restores the previous preset or custom rails. (#764 by @Phil-Fan)
+  - Rail collapse animation: Collapse and expand now commit the final layout once instead of tweening for 200 ms, so PDF fit-width no longer zooms back and forth while a rail folds. (#757 by @Phil-Fan)
+  - Agent rail and window state: The Agent rail keeps one width across layout presets and restarts, legacy per-slot widths migrate automatically, and the main window restores its size, position, and maximized state. (#782 by @qychen2001)
+  - File rename: Enter now starts inline rename in the file tree; renaming a file to an extensionless name converts it into a folder and moves the file inside with its original suffix. (#759 by @Phil-Fan)
+  - Markdown outline markers: Collapsed-rail heading markers stay pinned to the right edge and no longer shift left when hover expands the labels. (#758 by @Phil-Fan)
+  - Zotero entry point: Zotero migration and sync actions moved into the vault switcher, making them easier to find. (#750 by @Phil-Fan)
+  - Paper code repository: Paper metadata gains a manually maintained code-repository link, shown as a GitHub chip in Paper Info and editable in the metadata dialog. (#753 by @qychen2001)
+  - Trash titles: The recycle bin lists paper titles instead of identifiers. (#754 by @qychen2001)
+  - CLI cloud sync: The new agentero sync command (S3/R2, WebDAV) serves machines without a desktop app, sharing the same sync engine and configuration as the desktop app with status / configure / test / now / disconnect. Desktop, CLI, and cron passes over the same Vault serialize through a cross-process lock and fail fast with sync_busy when held. (#778 by @qychen2001)
+  - ACP session-load timeout: Loading a historical session now has its own 60-second budget instead of the 15-second interactive timeout, so restoring long sessions such as Pi no longer times out repeatedly. (#779 by @JiaheChen2002)
+  - Agent install permissions: On Unix, npm install, fallback, and uninstall for Codex and other agent CLIs now target the ~/.local prefix, avoiding EPERM from a root-owned /usr/local under the official Node installer; Windows keeps the global install. (#791 by @Phil-Fan)
+  - Windows Skill import console: Installing a recommended Skill on Windows no longer flashes gh console windows. (#741 by @qychen2001)
+  - Third-party open-source notices: Added disclosure of the third-party open-source components used by the project. (#736 by @Phil-Fan)
+  Known Limitations
+  - Git sync is a full mirror: v1 does not use Git LFS or per-paper on-demand fetching, so PDFs and TeX files stay in Git history permanently and repository size is borne by the user. (93ba55b9 by @qychen2001)
+  Full Changelog: https://github.com/poco-ai/Agentero/compare/v0.11.9...v0.12.0
+ReleaseNotesUrl: https://github.com/poco-ai/Agentero/releases/tag/v0.12.0
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://agentero-docs.poco-ai.com/
+ManifestType: locale
+ManifestVersion: 1.12.0

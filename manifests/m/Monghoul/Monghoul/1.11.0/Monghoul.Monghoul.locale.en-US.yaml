@@ -1,0 +1,84 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Monghoul.Monghoul
+PackageVersion: 1.11.0
+PackageLocale: en-US
+Publisher: Kontsedal
+PublisherUrl: https://github.com/Kontsedal
+PublisherSupportUrl: https://github.com/Kontsedal/monghoul-public/issues
+PackageName: Monghoul
+PackageUrl: https://github.com/Kontsedal/monghoul-public
+License: Proprietary
+ShortDescription: A fast, beautiful MongoDB GUI for developers
+Tags:
+- gui
+- ide
+- mongodb
+ReleaseNotes: |-
+  Monghoul 1.11.0
+  This release is about the query editor knowing MongoDB. Autocomplete was improved to cover every 8.x operator and to answer with what the cursor position actually accepts, down to an operator's own options and their permitted values. Alongside it, AI Access grows a mode that returns results without touching your workspace, write protection closes the paths that got around it, and the interface stops breaking in a narrow or short window. There are fixes here for silent failures: a confirmed write that did nothing, an import that duplicated rows, a timeout reported as something you had cancelled.
+  Highlights
+  - Autocomplete knows MongoDB 8.x — all 49 pipeline stages, every expression, accumulator and window operator, and each operator's own options with their permitted values.
+  - Suggestions match the position — a $match predicate, a $project value and an options bag each get the family MongoDB accepts there, and nothing else.
+  - Hybrid search is in the editor — $rankFusion, $scoreFusion and $score, with working templates.
+  - An assistant can query without opening tabs — and can see which connections are write-protected before it asks.
+  - Write protection covers more paths — collection validators, sibling databases, and the write stages that used to slip past it.
+  - The interface holds together in a small window — panels, drawers, modals and dialogs.
+  - An import no longer duplicates rows — one document without an _id used to turn its whole batch into plain inserts.
+  New
+  - Every MongoDB 8.x operator is suggested — autocomplete now covers all 49 pipeline stages, every expression, accumulator and window operator, the geospatial shapes and the array update modifiers.
+  - Hybrid search is in the editor — $rankFusion, $scoreFusion and $score are offered with working templates, in the code editor and in the visual pipeline builder.
+  - The shell's database helpers work — getCollection, getSiblingDB, getCollectionNames, getCollectionInfos, runCommand, adminCommand, version and getName are on db, and are awaited rather than read directly.
+  - Write protection covers validators and siblings — changing a collection's validator on a protected connection asks first, because a validator is a guard on the data; and db.getSiblingDB() is scoped by that database's own settings.
+  - An assistant can see what is write-protected — listing connections now reports which ones are protected and what the protection covers, so it can say a query will need your approval instead of springing one.
+  - An assistant can query without opening tabs — a new AI Access setting returns results straight to it and leaves the workspace alone. Queries needing approval, and destructive ones on a protected connection, still open a tab.
+  - Close all the tabs an AI client opened — a tab's context menu counts every tab an MCP client left behind, across the whole window, and closes them in one action.
+  Improved
+  - First run asks for one thing — it opened with four switches and a dropdown; it now asks only about anonymous analytics, with what is and is not collected stated in full rather than on hover.
+  - Autocomplete goes a level deeper — an operator's own options are offered inside it, required first, and so are their fixed values, a $jsonSchema's keywords, Atlas Search clause keys and $meta's metadata.
+  - Controls in a row are set alike — one filled control per row and it is the one that acts, a md field no longer renders two pixels under the button beside it, and a control's outline stops going near-white in dark themes.
+  - A Pro control offers the upgrade — the Chart view and Show Diff responded only from the small PRO badge inside them, and picking a Pro authentication method did nothing at all: no message, no upgrade path.
+  - Empty states say what to do next — a run that matched nothing says so and whether an index was used, the empty workspace offers the new-tab control, and the command palette states emptiness once rather than three ways.
+  - Document Diff steps through the differences — it counts them and gives you arrows, instead of leaving you to scroll a mostly-identical document; and two documents with the same _id are told apart.
+  - Panels, drawers and modals use their width — the pipeline builder, query plan and monitor sat in narrow centred columns, two docked drawers shredded the sidebar's labels, and a modal's tab bar and pickers ran past their edges.
+  - A new query tab leaves room for its results — the editor took 60% of the tab before anything was typed; it takes a third now, and the pipeline builder keeps more. A tab you have resized is untouched.
+  - The tier badge warns before a limit blocks you — nothing said anything between "fine" and "that failed", so the first sign of a full quota was a save being refused.
+  Accessibility
+  - Collapsible sections say whether they are open — three hand-built toggles across the export, connection and schema dialogs announced nothing, and the schema one signalled by colour alone. All three are keyboard-operable now.
+  - Modal tabs are reachable by keyboard as tabs — arrow keys move along General / Security / Advanced instead of Tab stepping through each one, and a screen reader says which is selected.
+  Fixed
+  AI Access
+  - A damaged access scope denies rather than grants — an AI Access scope the app could not have written was read as unrestricted, handing an assistant every connection; it now reaches nothing until you pick one again.
+  - The approval shortcut reaches a waiting request — pressing it before the queue had loaded did nothing at all, which is exactly the case for an approval restored when the window opened.
+  - Deleting a connection through an assistant closes it — its open socket, its SSH tunnel and its remembered password all survived the delete for the rest of the session.
+  Write protection
+  - Write stages can no longer slip past protection — $out and $merge were judged by the collection being READ, so writing into a protected collection from an unprotected one went through; so did a database-level db.aggregate().
+  - db.admin() works again on unprotected databases — with protection enabled for some other database it returned nothing instead of the admin handle.
+  Connections
+  - A confirmed write survives its panel closing — a confirmed drop, delete or clear did nothing at all when the sidebar was hidden with the dialog still open, and a licence the server had accepted reported "Something went wrong: Aborted".
+  - A failed connection says why — a wrong CA certificate path came back as an opaque TLS failure naming neither the file nor the setting, and a pasted URI lost its authentication database to authSource=admin.
+  - An empty database filter hides nothing — a connection set to "show only these" with nothing picked yet listed every database in the sidebar and none in the query tab.
+  Users and roles
+  - A user's most powerful role is always shown — the table prints four role badges and rolls the rest into +N, in server order, so a root grant in fifth place was invisible; the strongest come first now.
+  Query editor
+  - Suggestions match the position — a $match predicate, a $project value, a nested $or, an options bag and a replacement document each offered a family MongoDB rejects there; a pipeline position listed expressions too.
+  - Stages appear only where they are legal — $geoNear, $search and thirteen more are offered only at a pipeline's first position, $documents only on db.aggregate(), and $out and $merge never in a sub-pipeline that rejects them.
+  - Field names come from the right collection — the db.orders shorthand resolved to no collection, so fields came from every collection at once; a dotted prefix re-offered the top level; and five stages named fields the documents do not have.
+  - Autocomplete stops going silent — an apostrophe inside a regex, a template literal, a half-typed $ and a query inside a ${ … } hole each suppressed what followed; and typing $ in a comment offered the whole operator list.
+  - Only calls the driver has complete — collection.stats() and cursor.noCursorTimeout() were suggested and threw when used, eight more calls opened all 255 operators, and chained cursor methods vanished at the first keystroke.
+  - Valid code stops being underlined as broken — db.command(), db.aggregate() and ten more db methods, and every stage in the pipeline builder when the editor's language support loaded a moment late.
+  - Explain answers about the query on screen — it read the tab's last saved code, so a query typed and explained without running first was explained stale or empty; and every index it suggested was called compound.
+  Import
+  - Upsert stays an upsert for the whole file — a single document without an _id turned its entire 1,000-document batch into plain inserts, so importing the same file twice could duplicate rows.
+  - "Insert Only (Skip duplicates)" skips them — documents the server refused as already present were counted and reported as failures, so re-importing a partly imported file read as a broken import.
+  Cluster monitor
+  - The cluster monitor leads with what matters — nine equal cards became four lead metrics with threshold bars, a compact band behind them, and lifetime totals folded away; every rate shows its trend.
+  - Concurrency tickets read right on MongoDB 7.0+ — both ticket bars showed 0 / 128 free in full red on any healthy server, because the counters moved in 7.0 and a missing value was read as none free.
+  Query results
+  - Truncated document values can be read in full — the tree view clipped keys and values with no tooltip behind them, so a value wider than its column had no way to be read at all.
+  - A .skip() no longer disables the result limit — a skip with no limit counted as the user's own cap, so the result limit was skipped and every remaining document was materialized.
+  - Your work survives a re-run and a failure — pressing Run while configuring a chart closed the wizard and discarded the settings, and an error reset the result view, losing column widths, expanded rows and a chart in progress.
+ReleaseNotesUrl: https://github.com/Kontsedal/monghoul-public/releases/tag/v1.11.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

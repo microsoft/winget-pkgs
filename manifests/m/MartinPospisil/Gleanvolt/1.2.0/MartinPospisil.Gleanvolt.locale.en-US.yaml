@@ -1,0 +1,110 @@
+# Created with WinGet Releaser using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: MartinPospisil.Gleanvolt
+PackageVersion: 1.2.0
+PackageLocale: en-US
+Publisher: Martin Pospisil
+PublisherUrl: https://github.com/mpospisil
+PublisherSupportUrl: https://github.com/mpospisil/gleanvolt/issues
+PrivacyUrl: https://github.com/mpospisil/gleanvolt/blob/main/docs/PRIVACY.md
+PackageName: Gleanvolt
+PackageUrl: https://github.com/mpospisil/gleanvolt
+License: PolyForm Noncommercial License 1.0.0
+LicenseUrl: https://github.com/mpospisil/gleanvolt/blob/main/LICENSE
+Copyright: Copyright (c) 2026 Martin Pospisil
+CopyrightUrl: https://github.com/mpospisil/gleanvolt/blob/main/LICENSE
+ShortDescription: Locally hosted controller for a SolaX hybrid inverter and EV charger, over Modbus TCP.
+Description: |-
+  A standalone background service for managing and monitoring a SolaX X3-HYB-G4 PRO hybrid inverter and a SolaX X1/X3-HAC EV charger. It operates entirely within the local network over Modbus TCP, with no cloud dependency, so polling is immediate and the data stays on the premises.
+  It reads PV generation, battery state of charge and grid power flow, and uses them to drive EV charging and home-battery use from household surplus: charging the car on live solar, holding the battery back when the forecast says it will be needed, and targeting a departure time. A web UI is built in, and it can publish itself to Home Assistant over MQTT.
+  The built-in web interface requires a password. A fresh installation serves only the page that asks you to set one, and shows no history and no controls until you have; it then asks you to sign in. Authentication can be switched off deliberately for an isolated network, which is not the default. The interface speaks plain HTTP, so it belongs on a network you trust or behind a TLS proxy.
+  This build is free for any noncommercial purpose under the PolyForm Noncommercial License 1.0.0. Commercial use requires a separate licence -- see the LICENSE file.
+Moniker: gleanvolt
+Tags:
+- battery
+- ev-charger
+- home-assistant
+- inverter
+- modbus
+- solar
+- solax
+ReleaseNotes: |-
+  Install
+  Debian, Ubuntu, Raspberry Pi OS (64-bit)
+  Installs the controller and its web UI as a systemd service, started with the default
+  configuration. Run it again to upgrade; settings and data are kept.
+  curl -fsSL https://github.com/mpospisil/gleanvolt/releases/latest/download/install.sh | sudo sh
+  Or by hand, choosing amd64 or arm64:
+  wget https://github.com/mpospisil/gleanvolt/releases/download/v1.2.0/gleanvolt_1.2.0_arm64.deb
+  sudo apt install ./gleanvolt_1.2.0_arm64.deb
+  Then open http://<device>:8090 and set your inverter and charger addresses in
+  /etc/gleanvolt/gleanvolt.env.
+  Docker
+  docker pull ghcr.io/mpospisil/gleanvolt:1.2.0
+  Or download a self-contained build below and run it — no .NET installation needed.
+  gleanvolt-1.2.0-win-x64.zip for Windows, linux-arm64 for a Raspberry Pi,
+  linux-x64 for an x64 Linux host or NAS.
+  The .nupkg files are the libraries, for building on the controller directly.
+  They are attached here rather than pushed to a feed.
+  Verify your download
+  SHA256SUMS covers every file here. From the directory you downloaded into:
+  sha256sum -c --ignore-missing SHA256SUMS
+  --ignore-missing because you have probably taken one file rather than all of them.
+  On Windows, without installing anything:
+  Get-FileHash gleanvolt-1.2.0-win-x64.zip -Algorithm SHA256
+  and compare it with the line in SHA256SUMS. PowerShell prints the hash in upper case;
+  the file lists it in lower case, and they are the same hash.
+  Each zip, .deb, install.sh and .nupkg also carries a build provenance attestation, which says
+  which workflow run and which commit produced it rather than only that the bytes are
+  unchanged. That needs no trust in this page:
+  gh attestation verify gleanvolt-1.2.0-linux-arm64.zip --repo mpospisil/gleanvolt
+  Changes
+  - Release: expect the nine .nupkg the build now packs, by name (#384)
+  - Targeted: a Low tariff only option that pauses charging in high tariff (#382) (#383)
+  - Charge control: a full car that shows Stop one poll early still ends as complete (#381)
+  - Manual: the Czech translation (#329) (#380)
+  - Manual: point users at it, from the web UI, the README and docs/ (#329) (#379)
+  - Manual: how it works, troubleshooting, privacy and a glossary (#329) (#378)
+  - Tests: the mDNS foreign-name test waits for both announcements (#377)
+  - Manual: Sessions, Energy and Forecast (#329) (#376)
+  - Manual: the Overview and every charging mode (#329) (#375)
+  - Manual: the Setting up chapter (#329) (#374)
+  - Manual: the Installation chapter, and links checked on the built site (#329) (#373)
+  - Manual: Starlight skeleton, screenshots from the real pages, the setup wizard page (#329) (#372)
+  - Web: found on the LAN as gleanvolt.local, over mDNS (#363) (#371)
+  - Setup: the device search hint names no brand (#369) (#370)
+  - Docs: troubleshooting, Docker and account sign-up from the wiki into docs/ (#365) (#368)
+  - Docs: a short README for users, with the manual moved into docs/ (#365) (#367)
+  - NAS: a compose file of its own, and how to run it on each NAS (#327) (#366)
+  - Docs: inverters and chargers in pages of their own, grouped by manufacturer (#364)
+  - Chargers 6: chargers in discovery, setup and docs (#353) (#362)
+  - Chargers 5: go-e over its local HTTP API v2 (#352) (#361)
+  - Chargers 4: Huawei SCharger over Modbus TCP, readings only (#351) (#360)
+  - SolaX: the charger's fixtures are now real snapshots (#350) (#359)
+  - Chargers 3: charger snapshots and charger conformance tests (#350) (#358)
+  - Chargers 2: select the charger driver in configuration, Settings and the wizard (#349) (#356)
+  - Chargers 1: charger driver contract, with the SolaX X3-HAC behind it (#348) (#355)
+  - SolaX: the probe also asks for the serial number's model prefix (#319) (#346)
+  - SolaX: the battery-charging fixture is now a real snapshot (#319) (#345)
+  - Drivers 8: Huawei in discovery, setup and docs (#324) (#344)
+  - README: use at your own risk (#343)
+  - Drivers 7: Huawei battery hold through the maximum discharging power (#323) (#342)
+  - Drivers 6: Huawei behind an EMMA (#322) (#341)
+  - Drivers 5: Huawei single-phase SUN2000 L1/LC0 (#321) (#340)
+  - SolaX: real snapshot of a night EV charge in the conformance tests (#319) (#339)
+  - Drivers 4: Huawei SUN2000 readings through the SDongle (#320) (#337)
+  - SolaX: the night-import fixture is now a real snapshot (#319) (#338)
+  - Discovery tests: judge connection overlap from the requests, not the sockets (#336)
+  - SolaX: first real register snapshot in the conformance tests (#319) (#335)
+  - Drivers 3: replay Modbus client, driver conformance tests, register snapshot button (#319) (#334)
+  - Drivers 2: select the inverter driver in configuration, Settings and the wizard (#318) (#333)
+  - Drivers 1: inverter driver contract, with SolaX behind it (#317) (#332)
+  - Setup: only the devices block the start; land on the overview after it (#331)
+  - winget install smoke test: target 1.1.0, document the Nano Server time zone (#330)
+  - Product line 1.2 (#328)
+  Licence: free for any noncommercial purpose under the PolyForm Noncommercial
+  License 1.0.0. Commercial use requires a separate licence — see LICENSE.
+ReleaseNotesUrl: https://github.com/mpospisil/gleanvolt/releases/tag/v1.2.0
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

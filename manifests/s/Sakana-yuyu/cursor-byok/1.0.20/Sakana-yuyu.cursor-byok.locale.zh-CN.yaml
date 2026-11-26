@@ -1,0 +1,32 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Sakana-yuyu.cursor-byok
+PackageVersion: 1.0.20
+PackageLocale: zh-CN
+Publisher: Sakana
+PublisherUrl: https://github.com/Sakana-yuyu
+PublisherSupportUrl: https://github.com/Sakana-yuyu/cursor-byok/issues
+PackageName: Cursor助手
+PackageUrl: https://github.com/Sakana-yuyu/cursor-byok
+License: MIT
+LicenseUrl: https://github.com/Sakana-yuyu/cursor-byok/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 leookun
+ShortDescription: 面向 Cursor 的本地模型适配、代理网关、用量统计与 Agent 工作台。
+Description: 把自己的模型 API 接入 Cursor，在本地完成供应商管理、协议适配、模型路由、用量统计、自动委派和问题排查。Cursor 本身负责优秀的编辑器与 Agent 体验，Cursor助手负责把模型连接与本地运行链路整理好：你可以继续使用 Cursor 的工具调用和任务工作流，同时自由选择官方 API、兼容网关或自建服务。
+Tags:
+- byok
+- cursor
+- 代理
+ReleaseNotes: |-
+  v1.0.20
+  新功能
+  - 会话粘性（保护上游提示词缓存）：借鉴 magpie 网关的 prompt cache 亲和设计——同一对话在 5 分钟内的连续请求优先复用上次成功应答的渠道与密钥，不再每轮轮换，避免密钥轮换稀释上游 prompt cache，提升缓存命中率、降低 token 费用。粘性渠道失败、冷却或本轮已重试过时自动交回正常轮换，不会原地打转；新渠道成功后自动接管粘性。重启后粘性失效属预期（上游缓存同样已冷）。
+  - 单密钥并发上限：模型编辑器新增「单密钥并发上限」配置——限制同一把密钥（含备用密钥池）同时在途的请求数，防止并发子代理把单把密钥打爆触发上游限流。超出上限的请求在本地排队等待（最长 30 秒），排队不算失败、不触发冷却；等待超时自动换下一个候选渠道。留空或 0 = 不限制（默认行为不变）。
+  优化
+  - 限流冷却更聪明：429 且上游未给 Retry-After 时，冷却时长按连续失败次数指数退避（1 分钟 → 2 → 4 → …封顶 30 分钟），不再固定 1 分钟「冷却一结束立刻撞墙」；30 分钟无新失败自动清零计数，限流恢复后立即回归正常轮换。上游给了 Retry-After 时仍优先尊重上游信号。
+  - 余额/配额耗尽（402）冷却延长到 15 分钟：比鉴权错误冷却更久，减少反复撞计费墙。
+  Windows 用户注意：安装时若被 SmartScreen 拦截，点击「更多信息」->「仍要运行」即可。
+ReleaseNotesUrl: https://github.com/Sakana-yuyu/cursor-byok/releases/tag/v1.0.20
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

@@ -1,0 +1,138 @@
+# Created by Anthelion using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Rustlang.Rust.GNU.LLVM
+PackageVersion: 1.100.0
+PackageLocale: en-US
+Publisher: The Rust Project Developers
+PublisherUrl: https://www.rust-lang.org/
+PublisherSupportUrl: https://users.rust-lang.org/
+PrivacyUrl: https://rustfoundation.org/policy/privacy-policy/
+Author: The Rust Project Developers
+PackageName: Rust (GNU LLVM)
+PackageUrl: https://www.rust-lang.org/
+License: Apache-2.0 AND MIT
+LicenseUrl: https://github.com/rust-lang/rust/blob/HEAD/COPYRIGHT
+Copyright: Copyright (c) The Rust Project Contributors
+CopyrightUrl: https://github.com/rust-lang/rust/blob/HEAD/COPYRIGHT
+ShortDescription: A language empowering everyone to build reliable and efficient software.
+Description: The Rust programming language helps you write faster, more reliable software. High-level ergonomics and low-level control are often at odds in programming language design; Rust challenges that conflict. Through balancing powerful technical capacity and a great developer experience, Rust gives you the option to control low-level details (such as memory usage) without all the hassle traditionally associated with such control.
+Moniker: rust-gnu-llvm
+Tags:
+- cargo
+- clippy
+- gnu-toolchain
+- llvm
+- rustc
+- rustdoc
+- rustup
+ReleaseNotes: |-
+  Language
+  - Stabilize never type
+  - Lint against repeated #[repr(..)] attributes
+  - Stabilize extern "custom"
+  - Extend dropping_references, dropping_copy_types and undropped_manually_drops lints to drop_in_place
+  - unfulfilled_lint_expectations no longer fires on #[expect(dead_code)] inside code that is covered by a dead parent's diagnostic
+  - Turn the error for repr(align) fields in a repr(packed) type into a deny-by-default lint aligned_fields_in_packed
+  - volatile: allow accesses to non-AM memory to trap
+
+  Compiler
+  - Stabilize -Cprofile-sample-use
+  - Enable next solver by default in orphanck
+
+  Platform Support
+  - i686-pc-windows-gnu is now a tier 2 without host tools target
+  - Promote wasm32-wasip3 to Tier 2
+  - Add new Tier 3 target powerpc64-sony-ps3
+  Refer to Rust's platform support page for more information on Rust's tiered platform support.
+
+  Libraries
+  - Stabilize custom allocators
+  - Map ENOTSUP to ErrorKind::Unsupported
+  - Fix soundness issues in std::sys::pal::sgx::waitqueue::unsafe_list
+
+  Stabilized APIs
+  - impl PartialEq<Cow<'_, [U]>> for Vec<T, A>
+  - impl PartialEq<Cow<'_, [U]>> for &[T]
+  - impl PartialEq<Cow<'_, [U]>> for &mut [T]
+  - std::alloc::Allocator
+  - std::alloc::Global
+  - std::alloc::System
+  - impl Allocator for Global
+  - impl Allocator for System
+  - impl<A: Allocator> Allocator for &A
+  - impl<T: Allocator, A: Allocator> Allocator for Box<T, A>
+  - impl<A: Allocator> Allocator for &mut A
+  - impl<T: Allocator, A: Allocator> Allocator for Arc<T, A>
+  - impl<T: Allocator, A: Allocator> Allocator for Rc<T, A>
+  - Box::new_in
+  - Box::from_raw_in
+  - Box::from_non_null_in
+  - Box::into_raw_with_allocator
+  - Box::into_non_null_with_allocator
+  - Box::allocator
+  - Vec::new_in
+  - Vec::with_capacity_in
+  - Vec::from_raw_parts_in
+  - Vec::from_parts_in
+  - Vec::into_raw_parts_with_allocator
+  - Vec::into_parts_with_allocator
+  - Vec::allocator
+  - Child::main_thread_handle
+  - impl Default for std::sync::Once
+  - bool::toggle
+  - Box::take
+  - Box::map
+  - Rc::map
+  - Arc::map
+  - impl AsRef<T> for !
+  - impl AsMut<T> for !
+  - core::mem::DropGuard
+  - core::mem::conjure_zst
+  - UnsafeCell::replace
+  - UnsafeCell::as_ref_unchecked
+  - UnsafeCell::as_mut_unchecked
+  - str::trim_prefix
+  - str::trim_suffix
+  - [T]::trim_prefix
+  - [T]::trim_suffix
+  - Path::trim_prefix
+  - Vec::from_fn
+  - os::windows::process::CommandExt::show_window
+
+  Cargo
+  - Introduced Cargo's own linting system: some Cargo warnings are now emitted as lints that users can control in the [lints.cargo] table. This includes a new built-in unused dependency check via the cargo::unused_dependencies lint. docs #17298
+  - Introduced minimum publish age configurations, also known as dependency cooldowns. When the relevant config is set, the resolver ignores versions published more recently than that, unless they are already in Cargo.lock. (RFC 3923) docs #17335
+  - cargo-install: now uses the existing lockfile in the .crate tarball by default. --locked in cargo install becomes a no-op. #17388
+  - Cargo now uses a new directory layout for intermediate build artifacts. Tools that inspect the build directory may need to use Cargo’s JSON messages to locate build artifacts instead of relying on the build directory layout. The layout is not a stable interface and is subject to change. (build cache doc) #17354
+
+  Rustdoc
+  - Add new invalid_markdown_table rustdoc lint
+
+  Compatibility Notes
+  - Closures now more precisely capture variables used in if let. This may cause new errors
+  - Check dyn-compatibility of trait objects in more places
+  - Infallible is now a type alias to !
+  - The never type fallback was changed to ! on all editions
+  - box patterns are no longer syntactically allowed
+  - Report Query Cycle errors in more cases when computing the layout of enums with explicit discriminants
+  - Always escape grapheme extenders in str::escape_debug
+  - Make let-else respect macro_rules expr metavariable grouping
+  - Iterator::{min,max}(_by_key) changed which Ord methods they use. This cannot change behaviour (other than being potentially faster) for types correctly following the Ord rules, but may impact types with inconsistent trait implementations.
+  - Emit an error when trying to enable SSE/AVX on an x86 (32bit or 64bit) softfloat target
+  - Require windowed (and exception) for Xtensa ABI
+  - windows-gnullvm: always link libunwind statically
+  - From version 1.94 up to 1.100 a number of ARMv7-A hardfloat targets required the VFPv3-D32 FPU as a minimum, as they erroneously had the d32 feature in their baseline list of features. Breakage introduced as a result of correcting this can be fixed by passing -Ctarget-feature=+d32 to Rust.
+  - Change "Rust" ABI on x86 to use SSE registers if they are always-available for the current target
+  - Make the ambiguous_glob_imported_traits lint fire in slightly more cases
+  - Make +fix-cortex-a53-835769 a default feature for aarch64-unknown-fuchsia
+  - Some impls on Box have been generalised to arbitrary allocators, which may cause new type inference errors
+  - The standard library now uses Unicode version 18.0.0
+  - WASI SDK version was bumped from 33 to 34
+  - On ARM targets, -Ctarget-feature/-Ctarget-cpu values that would alter the ABI are rejected as hard errors now.
+
+  Other
+  - Test harness now allows passing --test-threads and --color multiple times, with later arguments overriding earlier ones
+ReleaseNotesUrl: https://github.com/rust-lang/rust/releases/tag/1.100.0
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

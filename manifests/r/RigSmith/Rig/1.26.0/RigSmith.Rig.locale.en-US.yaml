@@ -1,0 +1,36 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: RigSmith.Rig
+PackageVersion: 1.26.0
+PackageLocale: en-US
+Publisher: RigSmith
+PublisherUrl: https://rigsmith.dev/
+PublisherSupportUrl: https://github.com/rigsmith/rigsmith/issues
+Author: John Campion Jr
+PackageName: Rig
+PackageUrl: https://rigsmith.dev/
+License: MIT
+LicenseUrl: https://github.com/rigsmith/rigsmith/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 John Campion Jr
+ShortDescription: Convention-first dev launcher across .NET, Node, Go, and Rust
+Moniker: rig
+Tags:
+- cli
+- developer-tools
+- dotnet
+- go
+- rust
+ReleaseNotes: |-
+  🚀 Enhancements
+  - rig: rig can run your code with its secrets from Doppler. Add "doppler": { "project": "…", "dev": "dev", "ci": "ci", "release": "release" } to .rig.json and rig build, test, run, rebuild, verify, watch, coverage, publish and custom commands run under doppler run -p <project> -c <dev>, shown in the → echo and in -n. If the doppler CLI is missing or signed out rig refuses and says to run doppler login instead of running without secrets; --no-doppler skips it for one run, and in CI rig wraps nothing. rig secrets and rig info show the project and configs, and rig secrets ci NAME... prints the GitHub Actions steps that fetch a job's secrets (the fetch action pinned by commit, no injected env vars) and fail the job when the token or any secret is missing.
+  - changerig: A version already on disk can now have its first release. version --release-as <package>=<current version> writes that version's changelog entry without bumping anything, when the version has no git tag and isn't on its registry; it needs no changesets, and uses any that are pending, else --initial-message or "Initial release". A version that is tagged or published is refused. shiprig-action's releaseAs passes the same flag.
+  - shiprig: shiprig can read publishing credentials from Doppler. With a release config in the .rig.json doppler block, doppler:NAME works wherever shiprig takes a secret reference: a publish auth, a signing.env entry, or a release var's secret. A var can keep its keychain lookup beside it ("secret": "doppler:FEEDZ_API_KEY", "os": {…}); the keychain runs only while there is no release config. shiprig prints where each credential came from, by name only, and a missing or empty secret fails the release.
+  - shiprig: npm provenance no longer needs OIDC. node.provenance in .changeset/config.json decides it whatever the publish authenticates with: auto (the default) attests whenever the run is in GitHub Actions with an id-token (id-token: write), so a token publish, which every new package's first publish is, gets provenance too; always attests or fails the publish before anything is uploaded; off never attests. Whenever shiprig doesn't attest it passes --provenance=false, so an .npmrc's provenance=true can't turn it back on. npm attests only a package published with access public or already public on the registry, and only from a public GitHub repository, so auto skips any other and always fails on it before the upload. A token publish attests with npm 9.5.0 or newer; an OIDC publish still needs npm 11.5.1.
+  🩹 Fixes
+  - shiprig: shiprig publishes a pnpm workspace with real versions in place of workspace: ranges. In a pnpm workspace (a pnpm-workspace.yaml or pnpm-lock.yaml at or above the package), publish and pack have pnpm pack each npm package, so "workspace:*" ships as the exact version, and npm publishes that tarball with the same auth, OIDC, provenance and registry as before. The publish scripts still run, each once, in npm's order (prepublishOnly, pnpm pack's prepack/prepare/postpack, then publish and postpublish), with shiprig pack and --from-pack-dir too, unless ignore-scripts is set. Before, npm published the ranges as written, which no registry can resolve. Outside a pnpm workspace a workspace: dependency is now refused, a dry run included, rather than shipped. With a custom steps.publish action in the release config, shiprig publish now says that it doesn't run it (shiprig release --only publish does) instead of ignoring it silently.
+  - shiprig: shiprig no longer reads a failed npm visibility lookup as a new or private package. When a package is published with access other than public, shiprig asks the registry whether it already holds the package as public before attesting provenance. A lookup that failed (the registry unreachable, a refused token) used to count as "not public": under provenance: auto a public package then published without its attestation, and under always the publish failed saying the package was new or private. The lookup is now tried once more, then auto skips the attestation naming the failure ("registry visibility lookup failed: …") and always fails with it. A package the registry does not have (E404) is still treated as new or private.
+  - Build with Go 1.26.11 to include the net/http security fix for GO-2026-6859.
+ReleaseNotesUrl: https://github.com/rigsmith/rigsmith/releases/tag/v1.26.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

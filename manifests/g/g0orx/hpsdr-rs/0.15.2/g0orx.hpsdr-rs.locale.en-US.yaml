@@ -1,0 +1,56 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: g0orx.hpsdr-rs
+PackageVersion: 0.15.2
+PackageLocale: en-US
+Publisher: John Melton
+PublisherUrl: https://github.com/g0orx
+PublisherSupportUrl: https://github.com/g0orx/hpsdr-rs/issues
+Author: John Melton
+PackageName: hpsdr-rs
+PackageUrl: https://github.com/g0orx/hpsdr-rs
+License: GPL-2.0-or-later
+LicenseUrl: https://github.com/g0orx/hpsdr-rs/blob/HEAD/LICENSE
+ShortDescription: Desktop client for openHPSDR Protocol 1/2 SDR radios.
+Description: |-
+  A Rust/egui desktop client for openHPSDR Protocol 1 and Protocol 2 radios (Metis/Ozy-style and Hermes/Orion-style boards), using WDSP for DSP.
+
+  - Protocol 1 (Metis/Ozy) and Protocol 2 (Hermes/Orion) support, with standard openHPSDR UDP discovery
+  - Multiple simultaneous receivers, each with its own VFO, mode, filter width, and band memory
+  - Spectrum/waterfall display with adjustable dB range, palette, and Click-to-Tune (CTUN)
+  - SSB/CW/AM/FM/digital modes, per-mode/per-band filter width and mode memory
+  - Noise blanker (NB/NB2), noise reduction (NR/NR2/NNR), and SNB, independently switchable
+  - AGC with selectable Off/Long/Slow/Medium/Fast modes
+  - TX: mic audio through WDSP's TXA chain, ALC, TX power/SWR meter with per-band PA calibration, and a Tune button
+  - PureSignal (PA linearization/predistortion), on both Protocol 1 and Protocol 2
+  - rigctl (Hamlib-compatible), TCI (WebSocket), and CAT (Kenwood TS-2000 emulation) control servers
+  - Dual VFO (VFO A/B) with Split -- transmit on VFO B while receiving on VFO A
+  - Selectable RX output / TX input audio devices, independent of the OS default
+  - Per-radio settings persistence, keyed by the radio's MAC address
+  - FPGA firmware upload and static IP configuration
+Tags:
+- amateur-radio
+- dsp
+- ham-radio
+- openhpsdr
+- sdr
+ReleaseNotes: |-
+  VFOs
+  - Click (or tap, on a touch screen) VFO-A or VFO-B to open the frequency keypad. It was right-click or a long press.
+  - Scroll over a digit of a VFO to step that digit up or down, one per wheel notch. The digit under the mouse is underlined. In the main window and extra receivers.
+  - Scrolling the spectrum or waterfall now moves by the VFO step (beside VFO-A), landing on multiples of it, as the controller's VFO knob does. Shift (100 Hz, 10 Hz in CW), Alt (10 Hz) and Ctrl (10 kHz, 1 Hz in CW) keep their fixed steps. MIDI VFO Step Up/Down use the VFO step too.
+  - The window size popup shown while resizing is gone.
+  Receive-only radios
+  - An RTL-SDR, MSI.SDR, RX-888, or a Pluto on its wide stream can no longer be put into transmit from a controller, MIDI, CAT, TCI or a serial PTT line (its MOX button was already hidden). TCI tells clients receive_only:true for these.
+  Linux / Raspberry Pi audio
+  - (System Default) now plays and records through PipeWire or PulseAudio (ALSA's pipewire or pulse device) when there is one, so hpsdr-rs appears in pavucontrol and follows the output you choose there. If neither will open, it uses ALSA's own default as before.
+  - If PipeWire is running but ALSA can't reach it, Settings → Audio says so: install pipewire-alsa (sudo apt install pipewire-alsa) and restart. Without it, a Raspberry Pi's default is the bcm2835 headphone jack, so a USB headset or HDMI monitor stays silent.
+  - hpsdr-remote does the same for its default output and mic, with the warning on its status line.
+  - The audio output reopens itself if ALSA leaves it dead after a "POLLERR" error, instead of staying silent.
+  Documentation
+  - Manual: "No sound on Linux or a Raspberry Pi" in Settings: Audio; the manual PDF builds again.
+  - README features rewritten, and a project website: https://g0orx.github.io/hpsdr-rs/
+ReleaseNotesUrl: https://github.com/g0orx/hpsdr-rs/releases/tag/v0.15.2
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

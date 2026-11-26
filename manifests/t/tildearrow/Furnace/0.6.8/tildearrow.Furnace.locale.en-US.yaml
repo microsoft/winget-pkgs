@@ -1,0 +1,183 @@
+# Created with komac v2.11.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: tildearrow.Furnace
+PackageVersion: 0.6.8
+PackageLocale: en-US
+Publisher: tildearrow
+PublisherUrl: https://github.com/tildearrow
+PublisherSupportUrl: https://github.com/tildearrow/furnace/issues
+PackageName: Furnace
+PackageUrl: https://github.com/tildearrow/furnace
+License: GPL-2.0
+LicenseUrl: https://github.com/tildearrow/furnace/blob/HEAD/LICENSE
+ShortDescription: a multi-system chiptune tracker compatible with DefleMask modules
+Tags:
+- chiptune
+- emulator
+- music
+- tracker-music
+ReleaseNotes: |-
+  it's been a while since 0.6.7...
+  this is (hopefully) the final release in the 0.6 series. 0.7 development will begin very soon.
+  change log
+  - add Watara Supervision system
+    - a rather obscure console from Taiwan with two pulse channels, a noise and primitive sample channel
+  - add SID3 fantasy chip
+    - inspired by SID, this chip has 6 channels of analog-synth-like goodness, a boatload of macros and even one wave channel
+  - add OPL4 system
+    - OPL3 with 24 sample channels taken from the to-be-implemented MultiPCM
+  - fix 5E01 not producing sound at all
+  - SNES anti-click
+    - note that this does not eliminate clicks in samples with incompatible loop regions! it only applies to note playback.
+  - POKEY SAP type R export (playable by Altirra and lzss-sap on hardware)
+  - FamiTracker import improvements
+    - create instrument copies to represent what FamiTracker does (in particular, on VRC6 channels when using 2A03 instruments)
+    - fix Hxy effect for S5B (AY)
+    - fix virtual tempo going outside range
+    - fix VRC7 patch switch effect (Dn-FamiTracker) not being imported correctly
+  - find/replace improvements
+    - make the note selector a bit more comfortable
+    - search in selection now works on selected channels only (previously it would search on all channels... issue #2393)
+    - fix a possible crash (issue #2328)
+    - cut/delay policy is now lax
+    - set macro release mode to Active (issue #2376)
+  - C64 4-bit PCM/digi (using volume control)
+  - performance optimizations for certain chips
+    - up to 10 times less CPU usage during playback and faster audio exports
+    - optimized chips include: PC Speaker, GA20, Amiga, PC Engine, SCC, NES, MMC5, VRC6, TIA, Virtual Boy, AY (not so much), Nintendo DS, T6W28, SN, SM8521, Bubble System WSG and K007232
+  - new WonderSwan emulation core courtesy of asiekierka (#2401)
+  - Virtual Boy changes
+    - one notorious Virtual Boy quirk is that you cannot write to wave/modulation table memory unless all channels are disabled
+    - Furnace wasn't taking this quirk into account, which means that exported VGMs wouldn't play on hardware
+    - this release makes exported VGMs work on hardware by disabling all channels on wave change
+    - however, this means there will be a "click" on every wave change, which can get very annoying
+    - it is recommended you use static mode, or change waves sparingly...
+    - there's a setting to go back to the old behavior, but keep in mind this will break VGM export and is not hardware-accurate!
+  - TFM import improvements
+    - implement looping
+  - XM import improvements
+    - new envelope conversion algorithm
+  - add ability to set multiple key binds for actions
+  - FM 30xx (hard reset envelope) now working on VGM export
+  - OPZ improvements (per-op frequency control including arp/pitch macros)
+  - support for MSX2 .dmf (no, I am not going to support its weird AY manners. sorry!)
+  - add ability to create a sample from a wavetable
+  - per-op fixed octave/block setting in OPN, OPL and ESFM (useful for SSG-EG)
+  - CSM on all OPN chips
+  - Combat Vehicle improvements
+    - small stages, modifiers, special powerups and planes
+  - fix a possible crash on macOS when the font texture is too large
+  - fix two possible hangs in MIDI code when audio output isn't working
+  - fix crash when selecting all after expanding/collapsing/change-effect-counting channel
+  - OPN: fix possible crash when using FM effects on non-FM channels (issue #2286)
+  - fix some file loading exploits
+    - negative sample length (issue #2316)
+    - samples too long in .dmf
+    - invalid pitches in .dmf
+  - command palette improvements
+    - show shortcuts (for actions)
+    - color the search characters
+    - use non-greedy search to find optimal fuzzy match order
+  - fix the "Rendering..." window being too small at times
+  - add cursor undo/redo actions
+  - add the ability to set a channel visibility mask for user presets
+    - use chanMask in the Advanced parameter. for example: chanMask=0,2 will hide the first and third channel.
+  - fix certain things not marking song as modified
+  - fix preset patches not having DC, DM and KSL set correctly in the editor
+  - fix WaveTools in wavetable editor not updating wave in chips
+  - fix volume portamento inhibiting volume column after it has reached target
+  - add setting to auto-zoom macro editor depending on macro length(s)
+  - horizontal wavetable list
+  - fix an EDxx bug (issue #2014)
+  - add ctrlWheelModifier option for Alt
+  - slightly improve the welcome screen
+  - SID2: fix chan osc overflow
+  - remove party mode
+  - fix order nibble when moving cursor with keys (issue #2170)
+  - fix QSound ADPCM in VGM export
+  - OPL3: fix 4-op mode toggle corrupting volume (#2171)
+  - fix YMF289 in ymfm
+  - Y8950: fix ADPCM pitch (issue #2028)
+  - add a warning when importing a MOD/S3M/XM/IT file for the first time
+  - implement auto-fill file name when saving in system file picker (Windows and macOS only)
+  - fix DT2 effect in OPM and OPZ
+  - fix possible issue in config files when a line is too long (issue #2025)
+  - freaking workaround for Flatpak quirks (issue #2096)
+  - fix built-in file picker X scroll (issue #2190)
+  - don't show duty macro in beeper-type instrument if ZX Spectrum is not present
+  - add a little visual description for chip channels in the chip selector
+  - fix "play/repeat from beginning" not doing so from beginning at times (issue #2182)
+  - Lynx VGM export sample support
+  - Lynx Load LFSR macro fix
+  - allow the user to change octave when the built-in file picker is open (issue #1895)
+  - VIC-20: add option to disable filters
+  - fix PZI import (it did not import most of the samples before)
+  - fix moveSelected going out of bounds
+  - fix several problems with AtomicSSG
+  - work around some possible text overflow situations by implementing a scroll text (issue #1961)
+  - fix incorrect commands on VGM export (issue #2226)
+  - C64: fix global param again... (issue #2181)
+  - fix file remaining open when loading .dmc or .brr
+  - MSM6258: fix panning in VGM export (#2249)
+  - fix sample loop crossfade overflow (thanks Eknous)
+  - handle more errors in DirectX 9 backend
+  - fix orders not scrolling when pattern changes due to cursor movement
+  - fix sample drawing rounding in sample editor
+  - fix backup size calculation
+  - text wrap for sub-song notes
+  - OPL: kind of fix drum muting (issue #1945)
+  - fix song timer drift (issue #2189)
+  - add a command line parameter for exporting text files
+  - add a command line parameter for exporting ROM where supported
+  - PCE: fix DAC data being offset in VGM export
+  - correct cursor position on song stop (issue #2274)
+  - drag-and-drop in assets to reorder them
+  - fix user systems not loading when language is not set to English
+  - SegaPCM: fix sample offset effect moving loop (issue #2306)
+  - YMZ280B: fix sample offset effect moving loop (issue #2213)
+  - fix possible bug notes in .mod import
+  - fix paste overflow not changing order
+  - fix panning in command stream export
+  - add ability to copy by dragging selection
+  - add ability to skip intro immediately with keyboard... somebody made one heck of a complaint despite a skip feature already existing
+  - add a button in sample editor to preview selection
+  - don't sort note keys in settings until Apply or OK are clicked (issue #2345)
+  - add "set effect" option to randomize
+    - this sets the effect to a fixed value
+  - Amiga validation export improvements (now it uses VBlank interrupts and supports fast RAM)
+  - load fallback fonts in pattern font (issue #2312)
+    - this may use too much video memory so I have added an option to disable...
+  - WaveSynth: add change detection (don't update wave if it is intact... issue #2298)
+  - PCE: fix sample volume and linger in VGM export (issues #2319 and #2322)
+  - ES5506: increase precision in Amiga pitch mode (fixes cal-cal.xm and issue #2120)
+  - fix compilation when using CMake 4.0
+  - scroll pattern view horizontally when moving the mouse cursor out of bounds during selection
+  - optimize pattern view a bit
+  - optimize order window as well
+  - disable 32-bit float audio export in per-chip mode (issue #2389)
+  - add an audio load chart
+  - fix samples sometimes not triggering in Amiga
+  - note input improvements during playback
+  - add a "sweep" option to sample editor apply filter (you no longer have to type two frequencies when you just want to use one)
+  - SM8521: fix chip output rate
+  - add DC offset correction settings for per-channel osc view
+  - ES5506: fix memory overflow
+  - X1-010: fix envelope slides in low-latency mode
+  - fix macro list jumping around in single macro editor layout
+  - improve the progress bar in per-channel audio export (issue #2431)
+  - OPNA/B: fix ADPCM-A/RSS muting with LLE core
+  - OPZ: add FMS2/AMS2 macros
+  - fix range chevron in arp/pitch macro being too large if horizontal zoom was set to a high enough value
+  - DS: fix non-8/16/IMA sample formats
+  - NES: fix envelope mode not being set when playing song (which would cause everything to be silent in specific circumstances)
+  - new demo songs
+  - translation updates
+  - several documentation updates
+  note for Windows users
+  there are two 64-bit versions: the normal one, and a "console" version.
+  the console version has the subsystem set to console so you can use Furnace for parsing files and/or playing in console mode (with the -console parameter). be noted that a command prompt will pop up when launching it through Explorer!
+  if you don't need to do that, just get the regular version.
+ReleaseNotesUrl: https://github.com/tildearrow/furnace/releases/tag/v0.6.8
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0

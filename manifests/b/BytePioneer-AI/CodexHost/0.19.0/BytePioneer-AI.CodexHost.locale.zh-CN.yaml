@@ -1,0 +1,89 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: BytePioneer-AI.CodexHost
+PackageVersion: 0.19.0
+PackageLocale: zh-CN
+Publisher: codexhost
+PublisherUrl: https://github.com/BytePioneer-AI
+PublisherSupportUrl: https://github.com/BytePioneer-AI/codex-host/issues
+PrivacyUrl: https://github.com/BytePioneer-AI/codex-host/blob/HEAD/docs/PRIVACY.md
+Author: BytePioneer-AI
+PackageName: CodexHost
+PackageUrl: https://github.com/BytePioneer-AI/codex-host
+License: MIT
+LicenseUrl: https://github.com/BytePioneer-AI/codex-host/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 BytePioneer-AI
+ShortDescription: 在 Codex Desktop 中直接运行 Pi 和 Claude Code 等 Agent Harness
+Description: |-
+  CodexHost 是一个独立的非官方开源项目，让 Pi、Claude Code 等 Agent Harness 在 Codex Desktop 中运行，并支持跨 Agent 协作。
+  支持通过 SSH 和官方 Codex Desktop Remote Control 使用远程主机上的 Harness。
+  CodexHost 与 OpenAI 无隶属关系，也未获得 OpenAI 的背书。
+
+  我们认为 Codex Desktop 提供了目前最好的桌面开发交互体验。
+  但 Codex 并不是唯一优秀的 Agent Harness，也有人偏好 Claude Code 和 Pi Agent。
+  CodexHost 让你在 Codex Desktop 中选择真正执行任务的 Agent，同时保留 Codex 的原生体验，并让它们协作完成任务。
+  无需切换应用，Pi、Claude Code、OMP、Grok Build 和 DeepSeek Harness 都可以在同一个 Codex Desktop 窗口中直接使用。
+
+  跨 Agent 协作
+
+  你可以让当前 Agent 把独立任务交给另一个 Harness。例如：
+  让 @claude-code 独立审查这次修改，并指出兼容性风险。
+  让 @pi 调查这个测试为什么偶发失败。
+  让 @omp 实现这个功能，我继续整理文档。
+  CodexHost 会为目标 Harness 创建独立的 Native Session。委派会话将出现在 Codex Desktop 的会话列表中，你可以随时打开、查看进度或继续对话。
+Tags:
+- claude-code
+- codex
+- pi
+- 智能体
+- 编程智能体
+ReleaseNotes: |-
+  What's New
+  codexhost 0.19.0 makes it easier to keep track of work delegated between Agents. The Web sidebar groups delegated tasks under the task that started them, and you can start, follow and interrupt delegated tasks from CLI, HTTP or MCP while each runs in its own Git worktree. This release also greatly improves the remote experience, with smoother interactions for remote sessions, files and images.
+  更容易掌握 Agent 之间委派出去的任务，Web 侧栏会把它们归在发起它们的任务下面，还可以从 CLI、HTTP 或 MCP 启动、跟踪和打断委派任务、让它们在各自独立的 Git worktree 里运行。这一版还大幅优化了远程场景下的使用体验，远程会话、文件和图片的交互都顺畅了很多。
+  Features
+  - Delegation Thread tree in Web: nested child Threads are grouped under their delegation parent, with collapse summaries or compact status rings, automatic ancestor expansion, child pinning and cascading archive actions (#838)
+  - More capable delegation clients: CLI, HTTP and MCP can create isolated Git worktrees, watch new work, interrupt an active Turn before sending, and use consistent send/delegate controls. The CLI also accepts task/message files and human-readable text output
+  - Deeper Thread inspection: read absolute ranges of completed Turns, export a complete Thread snapshot to JSON, inspect live Host and project information, and retrieve linked result files through CLI, HTTP or MCP (#792, #799)
+  - Skills in external Harnesses: discover installed Skills and insert them from the Web /, @ and # menus or Desktop's # menu
+  - Full remote Web controls: browse paginated external-Harness history and change model, thinking and permission settings; native remote Codex sessions use the remote Host's model catalog and expose model, Fast mode and thinking controls (#819, #840)
+  - Faster image attachments: images upload as soon as they are selected, messages can be sent while uploads finish, and large JPEG/WebP files are compressed before transfer
+  - Clearer session identity: new Web sessions can receive background-generated titles without Desktop, delegated children use the task name instead of a parent-title suffix, and session rows reveal their working directory on hover
+  - Actionable watch notifications: Desktop notifications link directly to the Thread, while Web shows a matching Thread card with status and result
+  - Stronger Relay certificate flow: Relay can select a certificate authority per domain and tunnel ACME issuance for self-hosted deployments; connection QR codes hide access details by default
+  - Richer external-Harness child cards: native subagent cards preserve model and reasoning settings across supported Harnesses, including Kiro child summaries (#768)
+  Fixes
+  - Recover shared Host startup after a failed attempt, reject stale Desktop runtimes and handle Windows npm Codex shims and launcher readiness correctly (#808, #813, #837)
+  - Do not replay queued input when delivery is uncertain, keep external drafts out of official Codex prewarming, and recover enabled remote connections after confirmed failures (#829, #830, #831)
+  - Accept titled, anchored and literal-percent result-file links, keep long uploaded filenames usable, and forward Desktop's app-tools pipe to the Independent Host (#833, #834, #835)
+  - Keep the shared Host running when a Harness child closes stdin, and read the Hermes bridge correctly on Windows (#817, #823)
+  - Update DeepSeek Harness integration to DSH 0.2.2-rc.2, settle OMP background work before completing a Turn, and preserve Antigravity reasoning, recovered Turns and clone diagnostics (#737, #739, #810, #826, #827)
+  - Preserve child failure diagnostics and avoid stale inherited context in external Harness sessions (#828)
+  - Reuse the source Web proxy correctly, force Tailscale.app status checks through CLI mode, and make large Relay uploads more reliable (#822, #832)
+  - Improve mobile touch scrolling, approval/question layouts, oversized-image errors and collapsed Thread summary alignment
+  - Deduplicate multi-root project titles, keep browser titles stable and shut down detached Console processes when their Desktop session ends (#753, #803)
+  新功能
+  - Web 委派会话树： 子 Thread 按委派关系嵌套在父 Thread 下，可折叠并显示详细汇总或简洁状态环；支持自动展开祖先、置顶子 Thread，以及级联归档整棵子树 (#838)
+  - 更完整的委派客户端能力： CLI、HTTP 与 MCP 可创建隔离的 Git worktree、监听新任务、先中断活动 Turn 再发送消息，并使用一致的发送与委派参数；CLI 还支持从文件读取任务/消息和面向人阅读的文本输出
+  - 更深入的 Thread 读取： 可按绝对 Turn 区间读取已完成历史，将完整 Thread 快照导出为 JSON，查看实时 Host 与项目列表，并通过 CLI、HTTP 或 MCP 获取结果文件 (#792, #799)
+  - 外部 Harness 支持 Skills： 自动发现已安装 Skill；可从 Web 的 /、@、# 菜单或 Desktop 的 # 菜单插入
+  - 完整的远程 Web 控制： 可分页浏览外部 Harness 历史并修改模型、思考和权限；远程原生 Codex 会话使用远端 Host 的模型目录，并提供模型、Fast 模式和思考强度控制 (#819, #840)
+  - 更快的图片附件： 选中后立即上传，上传期间也能发送消息；大尺寸 JPEG/WebP 会在传输前自动压缩
+  - 更清晰的会话标识： 新 Web 会话无需 Desktop 即可在后台生成标题；委派子 Thread 只使用任务名，不再拼接父会话标题；悬停会话行可查看工作目录
+  - 可直接操作的监听通知： Desktop 通知可直接打开对应 Thread，Web 则显示带状态和结果的 Thread 卡片
+  - 更完善的 Relay 证书流程： Relay 可按域名选择证书颁发机构，并为自建部署通过隧道完成 ACME 签发；连接二维码默认隐藏访问凭据
+  - 更完整的外部 Harness 子 Agent 卡片： 支持的 Harness 会保留并显示原生子 Agent 的模型和推理设置，也支持 Kiro 子任务摘要 (#768)
+  修复
+  - 共享 Host 首次启动失败后可恢复重试；拒绝复用已删除的 Desktop 运行时文件；Windows npm Codex shim 与启动就绪检查处理正确 (#808, #813, #837)
+  - 投递状态不确定时不再自动重放排队输入；外部草稿不会被官方 Codex 预热消费；确认失败后可恢复已启用的远程连接 (#829, #830, #831)
+  - 结果文件链接支持标题、锚点和字面 %；长上传文件名保持可用；Desktop 的 app-tools pipe 会转发给独立 Host (#833, #834, #835)
+  - Harness 子进程关闭 stdin 时不会停止共享 Host；Hermes 网关在 Windows 上可正确读取桥接输入 (#817, #823)
+  - DeepSeek Harness 更新到 DSH 0.2.2-rc.2；OMP 会等待原生后台任务稳定后再结束 Turn；Antigravity 正确保留推理步骤、错误恢复后的成功状态和克隆诊断 (#737, #739, #810, #826, #827)
+  - 保留子任务失败诊断，并避免外部 Harness 会话继承过期上下文 (#828)
+  - 源码 Web 正确复用代理；Tailscale.app 状态检查强制使用 CLI 模式；大型 Relay 上传更可靠 (#822, #832)
+  - 改进手机触摸滚动、审批/提问卡片布局、超大图片错误提示，以及折叠 Thread 摘要的对齐
+  - 多根目录项目标题不再重复，浏览器标题保持稳定；Desktop 会话结束后会关闭分离的 Console 进程 (#753, #803)
+ReleaseNotesUrl: https://github.com/BytePioneer-AI/codex-host/releases/tag/v0.19.0
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

@@ -1,0 +1,56 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Corsinvest.cv4pve.report
+PackageVersion: 2.2.1
+PackageLocale: en-US
+Publisher: Corsinvest Srl
+PublisherUrl: https://www.corsinvest.it/
+PublisherSupportUrl: https://www.corsinvest.it/cv4pve
+PrivacyUrl: https://www.corsinvest.it/privacy
+Author: Corsinvest Srl
+PackageName: cv4pve-report
+PackageUrl: https://github.com/Corsinvest/cv4pve-report
+License: GPL-3.0
+LicenseUrl: https://github.com/Corsinvest/cv4pve-report/blob/HEAD/LICENSE.md
+Copyright: Copyright (c) 2026 Corsinvest Srl
+CopyrightUrl: https://github.com/Corsinvest/cv4pve-report/blob/master/LICENSE.md
+ShortDescription: Report Tool for Proxmox VE
+Description: |-
+  cv4pve-report exports your entire Proxmox VE infrastructure to a single
+  navigable Excel file — nodes, VMs, containers, storages, users, firewall
+  rules, backup jobs, resource pools and more. Every row is a hyperlink to
+  its detail sheet.
+
+  Features:
+  - Single .xlsx file with one sheet per node, VM and storage
+  - Fully navigable — summary rows link to detail sheets
+  - Cluster: users, API tokens, TFA, groups, roles, ACL, firewall, backup jobs, replication, SDN, pools
+  - Nodes: services, network, disks, SMART, RRD metrics, APT updates, SSL certificates, tasks
+  - VMs/CTs: config, network, disks, RRD metrics, backups, snapshots, firewall, QEMU agent info
+  - Storages: content inventory, RRD metrics
+  - Three profiles: Fast, Standard, Full
+  - Works with a read-only API token, no root access required
+Moniker: cv4pve-report
+Tags:
+- corsinvest
+- excel
+- infrastructure
+- inventory
+- proxmox
+- proxmoxve
+- report
+- xlsx
+ReleaseNotes: |-
+  Fixes
+  - EFI disk and TPM state now listed in the Disks sheet. efidisk0 and tpmstate0 were missing from the per-VM disk inventory because the underlying SDK consumed them into dedicated typed properties instead of leaving them in the generic disk dictionary. They now appear alongside scsi0, virtio0, etc. with the same columns (storage, format, size). Thanks @shaundeeb for the report (#37).
+  - SDN vnets no longer make VMs disappear from the network diagram. When a VM was attached to an SDN vnet that wasn't materialised in the node's /etc/network/interfaces (typical of zones whose apply hasn't been propagated, Simple/EVPN zones, or datacenter-only vnets), the diagram had no bridge to draw the VM on and the VM was silently dropped. The diagram now learns about SDN vnets from the cluster-wide config and injects the missing bridges as synthetic boxes on every node where the zone is active. Thanks @janrenard for the report (#36).
+  What's new
+  - Network sheet now includes an SDN Vnets table. Between Nodes Networks and VM Networks there is now a third table listing every SDN vnet with its zone, zone type, parent bridge, VLAN tag, alias and the nodes where it's active. Same data was already available in the Cluster sheet but it lives natively here too now, so the network view is self-contained.
+  What's Changed
+  - docs: unify format-xlsx/format-html structure + document Issues page by @franklupo in #35
+  - fix: efi/tpm disks listed, SDN vnets drawn in diagram (closes #37, #36) by @franklupo in #38
+  Full Changelog: v2.2.0...v2.2.1
+ReleaseNotesUrl: https://github.com/Corsinvest/cv4pve-report/releases/tag/v2.2.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

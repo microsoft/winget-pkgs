@@ -1,0 +1,29 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: BlackwellSystems.agent-lsp
+PackageVersion: 0.23.6
+PackageLocale: en-US
+Publisher: Blackwell Systems
+PublisherUrl: https://github.com/blackwell-systems
+PublisherSupportUrl: https://github.com/blackwell-systems/agent-lsp/issues
+PackageName: agent-lsp
+PackageUrl: https://github.com/blackwell-systems/agent-lsp
+License: MIT
+LicenseUrl: https://github.com/blackwell-systems/agent-lsp/blob/main/LICENSE
+ShortDescription: MCP server giving AI agents reliable access to language server protocol
+Description: agent-lsp is a stateful MCP server over real language servers. It keeps the language server's semantic index warm and adds a skill layer that turns multi-step code operations into single, correct workflows. 50 tools, 30 languages, persistent sessions.
+Tags:
+- ai
+- code-intelligence
+- developer-tools
+- language-server
+- lsp
+- mcp
+ReleaseNotes: |-
+  ### Changed
+  • **Workspace-level queries are no longer bound to the default server in multi-server mode** ([#55](https://github.com/blackwell-systems/agent-lsp/issues/55))：`find_symbol` has no file argument to route by, so in auto-detect multi-server mode it always hit the default client — with MQL and C/C++ sources in one workspace that is clangd, which answers `0` for MQL symbols that resolve fine in single-server mode (false empty results). It now fans out over every connected client and merges the per-server results with each symbol tagged by its producing server (the `server` field is omitted entirely in single-server mode, so the JSON shape is unchanged; hover enrichment uses the server that owns each symbol) and reports per-server query failures in the hint. Servers are queried four at a time, each capped at 30 s, so a server that does not answer is reported as such instead of stalling the call; with more than four hanging servers the call can take about ceil(n/4) times the cap. Single-server results are unchanged in JSON and basic GCF; hover-detail GCF gains an empty `Server` column. Contributed by [@davalillo](https://github.com/davalillo).
+  • **`get_server_capabilities` reports every connected server in multi-server mode** ([#55](https://github.com/blackwell-systems/agent-lsp/issues/55), [#72](https://github.com/blackwell-systems/agent-lsp/pull/72))：it has no file argument to route by, so in auto-detect multi-server mode it reported only the default server's capabilities. It now keeps the default server's fields at the top level and adds an `all_servers` array with one entry per initialized server; servers that are connected but not initialized are named in a note instead of being left out silently. Single-server responses are unchanged. Contributed by [@davalillo](https://github.com/davalillo).
+ReleaseNotesUrl: https://github.com/blackwell-systems/agent-lsp/releases/tag/v0.23.6
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

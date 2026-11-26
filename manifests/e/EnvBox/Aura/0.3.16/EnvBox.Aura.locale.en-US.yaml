@@ -1,0 +1,52 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: EnvBox.Aura
+PackageVersion: 0.3.16
+PackageLocale: en-US
+Publisher: EnvBox
+PublisherUrl: https://github.com/NGLSL
+PublisherSupportUrl: https://github.com/NGLSL/Aura/issues
+PackageName: Aura
+PackageUrl: https://github.com/NGLSL/Aura
+License: Apache-2.0
+LicenseUrl: https://github.com/NGLSL/Aura/blob/HEAD/LICENSE
+ShortDescription: A Windows process-level environment virtualization launcher that shows target apps virtualized locale, region, language, timezone, and DNS values.
+Description: |-
+  Aura (EnvBox) is a Windows process-level environment virtualization launcher. Target apps run on the host with full access to the filesystem, GPU, network, and user profile, but see Environment Profile values for locale, region, UI language, timezone, DNS view, environment variables, and whitelisted internationalization registry reads.
+
+  EnvBox does not provide a security boundary and is not a sandbox. It does not isolate files, registry writes, network, or privileges, and must not be used as a security control.
+
+  Principles
+  - Process-scoped: changes apply only to one runtime instance's process tree.
+  - Host-transparent: never modifies Windows global configuration.
+  - Environment-consistent: one profile keeps locale, region, language, timezone, DNS, and environment aligned.
+
+  The package includes a GUI for managing profiles and launching apps, the envbox CLI (envbox run / profile / app), and a Detours-based runtime DLL.
+Tags:
+- environment-variables
+- locale
+- localization
+- timezone
+ReleaseNotes: |-
+  Aura v0.3.16
+  本版本支持为已配置的应用创建桌面快捷方式，双击即可按绑定环境启动，无需先打开 Aura。
+  Changes
+  - 已保存应用的详情页新增“创建桌面快捷方式”。快捷方式按“应用名 - 环境配置名”命名，例如 ChatGPT - US Development，使用目标应用自身的图标。
+  - 快捷方式引用 Application UUID，每次启动读取应用最新保存的默认 Profile、参数、工作目录和终端宿主设置。修改应用配置后，原快捷方式继续生效；文件名保留创建时的环境名称。
+  - 新增无主窗口启动入口，在 GUI 单例检查前处理快捷方式请求。Aura 未运行或主窗口已打开时均可直接启动目标，成功后启动入口退出，独立后台会话继续托管进程树。
+  - Windows Terminal 启动会等待真实启动交接完成，保留应用选择的终端宿主；交接超时或失败时取消本次启动并显示错误。
+  - 修复商店应用快捷方式使用 Aura 图标的问题。按 AUMID 从 Windows 应用命名空间读取图标，应用列表与快捷方式共用图标解析；创建快捷方式时可按需取图标，不依赖界面异步加载完成。
+  - 图标缓存包含实际图标源，编辑同一应用的启动目标后会重新取图标；命令应用先解析 PATH 中的实际程序，避免裸命令名称导致快捷方式使用 Aura 图标。
+  - 同一应用、配置目录和启动入口的同名快捷方式可重复更新；与其他桌面文件重名时添加编号，不覆盖无关文件。应用或绑定 Profile 缺失、配置损坏及启动失败均给出可见提示，不退回本机环境启动。
+  Validation
+  - 已在开发版界面实际创建原生 .lnk，并通过 Windows 桌面启动路径验证无 Aura 主窗口时的启动和后台存活。
+  - 同一快捷方式先后使用日语／东京时区与英语／伦敦时区，实际 Probe 读数、环境变量和工作目录与保存配置一致。Windows Terminal 启动及绑定 Profile 缺失时的错误提示也已有实机验证。
+  - 已在本机验证 ChatGPT 商店应用图标生成与 Windows Shell 实际图标读取，保留原快捷方式的启动目标和环境参数。
+  - 用户已确认本次功能测试通过；当前 ChatGPT、Codex 与命令子进程的 Runtime 载入及美国环境读数已核验，未注入对照进程仍读取宿主原设置。
+  - 发布门禁沿用干净 Windows CI：完整工作区、双架构 Runtime／DNS fixture、独立会话及 CPU 渲染器检查。正式 Release 工作流使用项目安装脚本生成安装包及 SHA-256 校验文件。
+  Limitations
+  快捷方式启动的普通实例由独立后台会话托管，当前不自动显示在 Aura 的运行实例列表中。浏览器网页沙箱仍受既有 Runtime 覆盖范围限制。
+ReleaseNotesUrl: https://github.com/NGLSL/Aura/releases/tag/v0.3.16
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

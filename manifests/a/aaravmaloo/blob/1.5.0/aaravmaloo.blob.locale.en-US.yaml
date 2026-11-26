@@ -1,0 +1,122 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: aaravmaloo.blob
+PackageVersion: 1.5.0
+PackageLocale: en-US
+Publisher: Aarav Maloo
+PublisherUrl: https://github.com/aaravmaloo
+PublisherSupportUrl: https://github.com/aaravmaloo/blob/issues
+PackageName: blob
+PackageUrl: https://github.com/aaravmaloo/blob
+License: GPL-2.0
+LicenseUrl: https://github.com/aaravmaloo/blob/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Aarav Maloo
+ShortDescription: A minimal note manager that stays out of your way.
+Description: blob is a minimal notes manager, purely written in C. It supports many features out of the box, and even has addons support for adding features that were not included in the core.
+Moniker: blob
+Tags:
+- notes, minimal, terminal, notes_manager
+ReleaseNotes: |-
+  Release Notes v1.5.0
+  Disaster Girl meme: a house burns in the background labelled "blob needs fixes" while a smiling girl in front is labelled "me adding new features"
+  This release adds 21 reworked themes with 24-bit colour, a settings panel, redesigns the note list and plugin manager so the selected note is obvious and the screen is mostly notes, fixes screens leaving leftover text behind, makes Esc cancel text prompts, removes the main-list permanent delete key, and makes editor failures visible instead of silently returning to the list.
+  Added
+  Settings panel
+  - Added a settings panel — open it with ,, :settings / :config, or , inside the plugin manager. Five sections that Tab / Shift+Tab switch between, with an underline under the active one. ↑/↓ (or k/j) move, ←/→ (or h/l) cycle a value, Enter / Space toggles or edits text, Esc closes. Each setting shows a one-line explanation underneath. Changes are saved to the config file immediately and most apply live (theme, colours, sort, dates, notes per page).
+    - general: editor, theme (with each theme's description and its position, e.g. 5/21), sort by, reverse order, reopen last note.
+    - display: notes per page, dates (relative or absolute), colours (auto, 24-bit or 256), hint bar.
+    - notes: ask before trashing, open new notes in the editor, empty trash after (never, 7, 14, 30, 60, 90 or 180 days).
+    - plugins: plugin system on/off, find plugins on (local only, ask before GitHub, or always GitHub), ask before running, ask before installing, include ./addons, GitHub repo, GitHub branch.
+    - keys: open the keybinding editor, reset every core key to its default.
+  - Added new config keys, all optional and all editable from the panel:
+    ──────────────────────┬────────────────────┬───────────────
+    Key                   │Values              │Default
+    ──────────────────────┼────────────────────┼───────────────
+    restore_session       │true / false        │true
+    ──────────────────────┼────────────────────┼───────────────
+    visible_notes         │3–50                │12
+    ──────────────────────┼────────────────────┼───────────────
+    date_style            │relative / absolute │relative
+    ──────────────────────┼────────────────────┼───────────────
+    colors                │auto / truecolor /  │auto
+                          │256                 │
+    ──────────────────────┼────────────────────┼───────────────
+    show_hints            │true / false        │true
+    ──────────────────────┼────────────────────┼───────────────
+    confirm_trash         │true / false        │true
+    ──────────────────────┼────────────────────┼───────────────
+    open_after_create     │true / false        │true
+    ──────────────────────┼────────────────────┼───────────────
+    plugin_source         │local / ask / github│ask
+    ──────────────────────┼────────────────────┼───────────────
+    plugin_confirm_run    │true / false        │true
+    ──────────────────────┼────────────────────┼───────────────
+    plugin_confirm_install│true / false        │true
+    ──────────────────────┼────────────────────┼───────────────
+    plugin_scan_cwd       │true / false        │true
+    ──────────────────────┼────────────────────┼───────────────
+    plugin_repo           │GitHub owner/name   │aaravmaloo/blob
+    ──────────────────────┼────────────────────┼───────────────
+    plugin_branch         │branch name         │master
+    ──────────────────────┴────────────────────┴───────────────
+  Plugins
+  - Added plugin source control — plugin_source decides where the plugin manager looks: local never contacts GitHub, ask asks first (the prompt now names the repo: Check github.com/aaravmaloo/blob for plugins?), and github checks without asking.
+  - Added custom plugin repositories — plugin_repo and plugin_branch choose where plugins are downloaded from, instead of the hard-coded aaravmaloo/blob on master. Values are validated before use.
+  - Added permission prompt toggles — plugin_confirm_run and plugin_confirm_install turn off the "show permissions and ask" step for running and for installing/updating plugins. Both stay on by default, and plugins that need a newer blob API are still refused.
+  - Added plugin_scan_cwd to stop blob listing plugins from an addons folder in the directory it was started in.
+  - Added a source line to the plugin manager — each plugin shows where it comes from: installed (with its path in blob's data folder, shortened to ~), local (an addons folder in the current directory), or github (with the repo and branch it will be downloaded from), and notes when an installed plugin also exists on GitHub.
+  - Added the plugin version to the plugin manager's details.
+  - Added live config reload after plugins — blob re-reads its config and theme after any workspace plugin finishes, so a plugin that changes settings (like themes) takes effect without a restart.
+  - themes plugin 1.2.0: all 21 themes in a scrolling list (↑ more / ↓ more) with descriptions, a live preview of blob's note list (header, selected row, star, dates, search and hints) that recolours on every arrow or k/j press, Enter to apply, Esc to keep the current theme without touching the config, and support for the colors setting.
+  Themes
+  - Added 21 themes built from the official palettes of well-known colour schemes, with dark and light versions:
+    ────────────────┬────────────────
+    Dark            │Light
+    ────────────────┼────────────────
+    catppuccin-mocha│catppuccin-latte
+    ────────────────┼────────────────
+    tokyo-night     │tokyo-night-day
+    ────────────────┼────────────────
+    gruvbox-dark    │gruvbox-light
+    ────────────────┼────────────────
+    rose-pine       │rose-pine-dawn
+    ────────────────┼────────────────
+    dracula         │alucard
+    ────────────────┼────────────────
+    solarized-dark  │solarized-light
+    ────────────────┼────────────────
+    everforest      │everforest-light
+    ────────────────┼────────────────
+    kanagawa        │kanagawa-lotus
+    ────────────────┼────────────────
+    one-dark        │one-light
+    ────────────────┼────────────────
+    nord            │
+    ────────────────┴────────────────
+    plus default (your terminal's own palette) and mono (no colour, bold and dim only). Each theme uses one accent for the selection, a second for search, the scheme's muted grey for dates and hints, and its yellow (or a warm red on light themes) for stars. Every colour was checked against its scheme's background: note titles reach at least 4.5:1 contrast and accents, dates and hints at least 3:1.
+  - Added 24-bit colour — named themes use exact colours on terminals that support it (detected from COLORTERM, TERM, TERM_PROGRAM or Windows Terminal) and fall back to the nearest of the 256 xterm colours elsewhere, such as Apple Terminal. colors = truecolor|256 forces either mode.
+  - Added a star theme colour — the favourite star follows the active theme instead of always being terminal yellow.
+  Note list and keys
+  - Added a header summary — the top line now reads blob v1.5.0 · 14 notes · newest first, showing the note count and the current sort order (newest first, oldest first, a-z, z-a, smallest first, largest first). While searching it shows 3 of 14 notes.
+  - Added absolute dates — date_style = absolute shows Oct 03 14:20 instead of 3h ago; the date column widens to fit.
+  - Added the ? key to show and hide the full keybinding list (same as Ctrl+O).
+  - Added the , key for settings, shown in the full keybinding list.
+  - Added Shift+Tab key support.
+  Tests
+  - Added tests for title fitting (padding, ellipsis cutting, multi-byte titles), sort labels, settings parsing and save/load round trips, rejection of unsafe repo/branch values, 24-bit and 256-colour conversion, theme aliases, and the validity of every theme preset.
+  Changed
+  - Selected note is now unmistakable — the selected row gets a ▌ bar and a bold title in the theme's selection colour. Previously every row started with > and only those two characters changed colour, so the selection was invisible in monochrome or copied output.
+  - Long titles no longer break the date column — titles are cut with … to fit, and the column width adapts to the terminal (16 to 48 characters). Dates are right-aligned in one column.
+  - Help collapsed to a single line — the default view shows n new r rename d trash / search v view : cmd ? help q quit instead of 7 lines of shortcuts. On narrow terminals, lower-priority hints are dropped so the line never wraps; ? help and q quit always stay.
+  - Full help regrouped — ? shows four labelled rows (notes, move, more, ctrl) plus plugins, each under 80 characters. The old Ctrl row was 82 characters and wrapped on standard terminals.
+  - Removed the divider line and the blank lines around it; the screen around a 12-note list went from 13 lines to 5.
+  - Search shows as / query with a one-line enter open esc clear ↑↓ move hint.
+  - The empty state now says no notes yet, press n to create one.
+  - Creating a note no longer prints Created: <path> before the editor opens; the status bar shows created "<title>" afterwards.
+  - Text prompts show (enter to confirm, esc to cancel) next to the label.
+  - Themes reworked — the old presets mixed basic terminal colours with unrelated 256-colour codes, so accents clashed (for example a green selection next to cyan titles). Unselected note titles now use each theme's normal text colour instead of an accent, so only the selection stands out. The default theme now leaves titles in your terminal's normal text colour and uses cyan for the selection. The settings panel's theme row shows each theme's description and its position (5/21).
+  - Old theme names keep working: dark → tokyo-night, light → catppuccin-latte, solarized → solarized-dark. They are saved under the new name the next time settings are changed.
+ReleaseNotesUrl: https://github.com/aaravmaloo/blob/releases/tag/v1.5.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

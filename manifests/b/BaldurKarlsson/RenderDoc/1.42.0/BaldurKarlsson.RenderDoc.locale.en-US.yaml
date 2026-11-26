@@ -1,0 +1,79 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: BaldurKarlsson.RenderDoc
+PackageVersion: 1.42.0
+PackageLocale: en-US
+Publisher: Baldur Karlsson
+PublisherUrl: https://renderdoc.org/
+PublisherSupportUrl: https://github.com/baldurk/renderdoc/issues
+Author: Baldur Karlsson
+PackageName: RenderDoc
+PackageUrl: https://renderdoc.org/
+License: MIT
+LicenseUrl: https://github.com/baldurk/renderdoc/blob/HEAD/LICENSE.md
+Copyright: Copyright © Baldur Karlsson 2025
+ShortDescription: A stand-alone graphics debugging tool
+Description: RenderDoc is a free MIT licensed stand-alone graphics debugger that allows quick and easy single-frame capture and detailed introspection of any application using Vulkan, D3D11, OpenGL & OpenGL ES or D3D12 across Windows, Linux, Android, or Nintendo Switch™.
+Moniker: renderdoc
+Tags:
+- debug
+- debugger
+- debugging
+- debugging-tool
+- graphics
+- rendering
+ReleaseNotes: |-
+  This release includes limited support for shader debugging on OpenGL. More details are found below, and bear in mind that likely a minority of shaders and not all drivers will be supported as it requires a relatively modern shader code and modern drivers.
+  NOTE: currently AMD's official drivers contain a reported bug that may cause any shader debugging that depends on multiple threads to fail to debug correctly. You may also encounter problems with using VK_EXT_descriptor_buffer as noted in the v1.40 release notes.
+  Binary builds with installers, zips and tarballs are available on renderdoc.org.
+  NOTE: After this release, the code signing key used to sign windows nightly and stable builds will change. As Windows security is mostly fake this may trigger warnings about an unrecognised publisher or you may have to disable smartscreen or similar functionality to install or run new builds for an unknown period of time. The new code signing key is authentic from a real authority and can be checked manually in the file properties, so there is nothing that can be done about this unfortunately.
+  Main highlights
+  Limited OpenGL shader debugging
+  A limited form of shader debugging is now supported on OpenGL. Only shaders that aren't so outdated and legacy that they are incompatible with SPIR-V compilation can be debugged. There may be issues with shaders that are not fully compatible with SPIR-V compilation so the most reliable results will come from shaders that compile as-is to SPIR-V without modification. Otherwise undefined behaviour from differences in bindings may occur.
+  The feature has high minimum requirements - both GL_ARB_compute_shader and ARB_shader_storage_buffer_object (or equivalent core version functionality) - so it's expected that not all GL drivers will be supported. Shader debugging will be disabled entirely for any OpenGL capture if the minimum requirements are not met. It also requires SSBO support for the stage being debugged, meaning that commonly on Android vertex shaders will not be debuggable.
+  Python Breaking API changes
+  - None.
+  Features/Improvements
+  - UI: The resource usage display in the resource inspector now displays the marker where each usage entry sits, and allows splitting the list by parent marker.
+  - UI: Add the ability to customise the keyboard and mouse controls used for the flycam in the mesh viewer, as well as customising the near/far plane of the display (separate from any near/far plane used for unprojection of vertex data).
+  - UI: Added a feature to embed all external dependencies into a capture, such as separate shader debug info to make the capture more easily portable. This can be done via the Tools menu which also includes the option to remove any embedded files.
+  - D3D12: Add support for GPU_UPLOAD heaps.
+  - D3D12: Display compute shader referenced builtin inputs in the UI when debugging a compute shader (SV_DispatchThreadID, SV_GroupID, SV_GroupIndex, SV_GroupThreadID).
+  - D3D12: Add compute shader debugger support for quad and derivative operations (SM6.6+).
+  - D3D12: Add DXIL shader debugging support for shaders using UAV Counters.
+  - Vulkan: Add support for compute shader debugging shaders using VK_KHR_compute_shader_derivatives and quad operations.
+  Bugfixes
+  - UI: Fix the display of bounding box calculated data for mesh shaders.
+  - D3D11/D3D12: Fix incorrect DXBC shader debug of CalculateLevelOfDetailUnclamped.
+  - D3D11: Fix a crash if running on extremely low-end drivers such as WARP when reporting video functionality to the application that is unsupported.
+  - D3D11: Fix an issue with the NV counters where results may not be returned if gathering over a lot of events.
+  - D3D12: Fix some resource references while debugging a shader having the incorrect type.
+  - D3D12: Fix a potential crash when capturing a TIGHT_ALIGNMENT resource due to the D3D12 runtime returning invalid data.
+  - D3D12: Fix a rare race condition when capturing if the capture ends as a queue submission is happening with mapped memory on another thread.
+  - D3D12: Fix a crash when a UPLOAD heap is created mid-capture.
+  - D3D12: Fix a problem where pixel history could crash or return the wrong results if logic ops are used.
+  - D3D12: Fix handling of matrix inputs to a shader stage.
+  - D3D12: Fix a potential issue where shader interfaces using float3 arrays would not properly be fetched when shader debugging.
+  - D3D12: Fix wireframe overlay not displaying if conservative rasterization is enabled.
+  - D3D12: Fix a problem with pixel history being run on 3D textures.
+  - D3D12: Fix an error when replaying an execute indirect that does not need a root signature attached.
+  - D3D12: Fix a crash in WriteToSubresource reading the wrong amount of data.
+  - Vulkan: Fix a potential crash after a fatal error (e.g. device lost or android device disconnection) depending on the current selected event.
+  - Vulkan: Add DESCRIPTOR_BUFFER usage internally to some buffers which is required to map to certain memory types.
+  - Vulkan: Fix a crash binding a NULL index buffer.
+  - Vulkan: Fix an issue where vkCmdDrawIndexedIndirectCount would fail in some circumstances if an individual draw was selected.
+  - Vulkan: Fix a potential race condition if multiple threads are submitting work using the same mapped memory.
+  - Vulkan: Fix a case where matrix source variables were not properly displayed depending on how they mapped to SSA IDs.
+  - Vulkan: Fix a potential crash when running pixel history on a renderpass with multiple subpasses and secondary command buffers.
+  - Vulkan: Fix invalid API use by never replaying suspend/resume and always using load/store instead.
+  - Vulkan: Fix an issue using primitive ID input when debugging a pixel shader that is linked to a mesh shader.
+  - Vulkan: Fix incorrect shader debug of GLSL textureProj with a shadow sampler (SPIR-V OpImageSampleProjDrefExplicitLod, OpImageSampleProjDrefImplicitLod.
+ReleaseNotesUrl: https://github.com/baldurk/renderdoc/releases/tag/v1.42
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://renderdoc.org/docs/index.html
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/baldurk/renderdoc/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

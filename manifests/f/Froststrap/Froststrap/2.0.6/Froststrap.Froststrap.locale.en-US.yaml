@@ -1,0 +1,142 @@
+# Created with WinGet Releaser using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Froststrap.Froststrap
+PackageVersion: 2.0.6
+PackageLocale: en-US
+Publisher: Froststrap
+PublisherUrl: https://github.com/Froststrap
+PublisherSupportUrl: https://github.com/Froststrap/Froststrap/issues
+PackageName: Froststrap
+PackageUrl: https://github.com/Froststrap/Froststrap
+License: MPL-2.0
+LicenseUrl: https://github.com/Froststrap/Froststrap/blob/HEAD/LICENSE
+ShortDescription: Froststrap is a fork of Bloxstrap and Fishstrap, focused on performance and customization.
+Tags:
+- bloxstrap
+- bootstraper
+- fishstrap
+- froststrap
+- linux
+- macos
+- windows
+ReleaseNotes: |-
+  Froststrap v2.0.6 - What's new?
+  The 2.0.6 cycle was all about performance: Native AOT, our build system rewritten from scratch, and a UI refresh.
+  Added
+  Native AOT
+  - Froststrap no longer requires .NET 10
+  - Startup times drop dramatically — low-end machines that used to see 8s should now see 1-2s
+  Other optimizations
+  - macOS native libraries for Avalonia now half the size
+    - being able to control the libraries with AOT
+    - running lipo on the binaries to go from collective 18MB due to universal to 9MB on arm/aarch64 systems
+  - Removal of under-utilised libraries dropped the binary size by another 4MB
+  Interface
+  - New titlebar design
+    - Shows the current settings page title
+    - Search and sidebar toggle buttons
+    - Account manager moved to the top-right
+    - About button takes the old account manager spot
+  - macOS Backdrop support
+  image
+  - Inter is now the font on all platforms, fixing macOS text alignment
+  - Scroll bars removed from scrollable pages for a more consistent layout
+  - Onboarding window enlarged (700×550 → 725×600) and re-spaced
+  - New color picker powered by FluentAvalonia
+    - Removes ColorPicker dependency which dropped another 2MB
+  - Toggle to hide bootstrapper information on the splash screen (Appearance)
+  - Bootstrapper now trusts the window border, giving proper rounded corners on macOS and Windows
+  Features
+  - Move Storage — relocate the heavy Versions and Downloads directories
+    - NTFS junctions on Windows, symlinks elsewhere
+  - Virtual Display customization
+    - Custom name, width and height
+    - macOS refresh rate (Hz) configuration
+  - Custom cursors now support .ani, .ico and .cur (converted to PNG internally)
+  - Join games from pasted Roblox links, plus creating shortcuts from game links (#221, @utophii)
+  - Refresh button in the Roblox servers window
+  - New diagnostics window (groundwork for now)
+  New argument parser
+  Help generation and a version system have been added. Old args map to new ones:
+  - -settings -> --settings
+  - -backgroundupdater -> --background-updater
+  - -nolaunch -> --no-launch
+  - -testmode -> --test-mode
+  - -upgrade -> --upgrade
+  - -player -> --player
+  - -studio -> --studio
+  - -channel -> --channel
+  - -force -> --force
+  - -gameshortcut -> --game-shortcut
+  - -console -> --console
+  - -nogpu -> --no-gpu
+  - -version -> --roblox-version
+  New flags: --help, --version.
+  Removed: watcher, onboarding, menu/preferences, quiet.
+  Invalid arguments now fail hard like a normal program, so if your client crashes, make sure your launch arguments only use ones from this list.
+  Fixed
+  - Bare --player and --studio failing to parse, which broke Save & Launch, desktop shortcuts and Studio launch
+  - Linux activity watcher closing before it should
+  - Activity watcher picking up the wrong logs (crash handler/installer logs, Studio switching)
+  - Virtual display not mirroring or not being set as the main display
+  - Sober URI parsing being garbled, so website launching now works
+  - "Skybox" string resource looking for the wrong case and showing blank
+  - .rpm failing to install on Fedora due to the libicu-dev dependency
+  - macOS Save & Launch splitting into multiple app lifetimes
+  - Cleaner treating its age setting as hours instead of days, not skipping on Never, and a 2000-file per-run limit
+  - Windows MSI now installs per-user, fixing error 2503 (#251)
+  - Discord RPC not working after the AOT work
+  - Free disk space check failing on unusual drives and paths
+  - Roblox crash handler now waited on after the watcher closes it
+  - Settings account dropdown not opening
+  - CardExpander being slow to close
+  - Logging now shows real call sites and stack traces
+  - JSON context generation issues
+  - Icons now sourced from PNG to keep the binary small
+  - Theme race condition after switching from backdrop
+  - %20 showing in preset flags instead of spaces
+  - Crash when VirtualDisplay data was null (rc.2 hotfix)
+  - macOS cached packages now integrity-checked against recorded hashes
+  - Account manager, Studio RPC after account switch, and key read/write issues (#236, #233, #232)
+  - LucideAvalonia launch overhead
+  - macOS bundle version string now valid
+  - Linux no longer prints stray update-mime-database output
+  - Grammar and string typo fixes (#249, @Chipislol)
+  Changed
+  - Avalonia renderers are now chosen explicitly per platform
+    - Windows: AngleEgl, Wgl, Vulkan, Software
+    - macOS: Metal, Software (OpenGL disabled)
+    - Linux: Glx, Vulkan, Software
+  - Binary renamed from Froststrap to froststrap (froststrap.exe on Windows)
+  - Internal Bootstrapper page renamed from Behaviour, so it now matches the UI
+  - All pages rewritten to follow a common pattern
+  - macOS entitlements stripped down after AOT so JIT and sketchy sounding entitlements aren't needed anymore
+  - old bootstrapper leftovers relics from like 2023/2022
+  Packaging
+  - Arch Linux .tar.zst output is now supported
+  Nix
+  - now has mkFroststrap for shipping a new binary
+  - live builds
+  - ships the correct fontconfig version to avoid those fontconfig key warnings
+  Codebase
+  - The Fallout build system was replaced by an in-house Rust one
+    - ~10x faster cold start on Linux
+  - macOS .app bundling is now hand-rolled with stdlib + Xcode CLI tools, removing the Xcode IDE dependency (~18x faster at bundling stage)
+  - macOS plist serialization/pretty-printing moved to our pissing crate (~390 lines removed)
+  - Launch handlers consolidated into a single point of failure
+  - backend now logs through an FFI layer into the C# logger
+  - Remote config signatures now use ECDSA P-256, dropping BouncyCastle
+  - NLog configuration moved into code
+  - objc2 crates only enable the features they need
+  - Rust now builds on the Nightly toolchain for faster CI
+  - macOS dylibs are lipo -thin'd to the target architecture
+  - AOT-friendly DataGrid replacement removed 3.3 MB of embedded resources
+  - Licenses page is data-driven via LicensesViewModel
+  - Translations moved to Resources/Translations
+  - Large round of dead code cleanup (~500 lines)
+  - Added a typos config
+  Full Changelog: v2.0.5...v2.0.6
+ReleaseNotesUrl: https://github.com/Froststrap/Froststrap/releases/tag/v2.0.6
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

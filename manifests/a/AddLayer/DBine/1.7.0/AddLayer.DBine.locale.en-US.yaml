@@ -1,0 +1,90 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: AddLayer.DBine
+PackageVersion: 1.7.0
+PackageLocale: en-US
+Publisher: AddLayer
+PublisherUrl: https://dbine.com/
+PublisherSupportUrl: https://github.com/addlayer-io/dbine/issues
+Author: AddLayer
+PackageName: DBine
+PackageUrl: https://dbine.com/
+License: Apache-2.0
+LicenseUrl: https://github.com/addlayer-io/dbine/blob/HEAD/LICENSE
+ShortDescription: Manage SQL, NoSQL and analytical databases in one app
+Description: |-
+  DBine is a desktop database manager for relational, analytical, document, key-value, graph, time-series and search databases. One workbench connects to PostgreSQL, SQL Server, MySQL, MariaDB, SQLite, Oracle, MongoDB, Redis, Cassandra, ClickHouse, DuckDB, Snowflake, BigQuery, Elasticsearch, Neo4j, InfluxDB and many more engines.
+
+  Explore and query:
+  - A tree per connection and database, with saved queries kept inside each database
+  - A SQL editor with each engine's dialect, completion of tables and columns, and script execution
+  - A fast results grid with cell editing, filters, sorting, charts and a JSON tree view
+  - Graphical execution plans, a visual query builder and query optimization hints
+  - Search across object names, columns and stored code, and run code on several databases at once
+
+  Design and move data:
+  - Table designer, ER diagrams and script generation
+  - Compare schemas and data, then migrate, clone or sync databases between engines
+  - Import CSV, JSON, XLSX and XML; export results in many formats; generate test data and data subsets
+  - Rename objects with an impact analysis of everything that depends on them
+
+  Administer:
+  - Server monitor, live processes and a profiler of the queries clients run
+  - Users and permissions, backups, health checks and database properties
+  - SSH tunnels, including chains of bastions and the SSH agent
+  - Read-only connections and production safeguards
+
+  Assistant and integrations:
+  - An AI assistant that writes and explains queries with a local built-in model or Ollama; it never runs anything by itself
+  - A local MCP server so AI coding assistants can work with your connections, with every write approved in DBine
+  - End-to-end encrypted cloud sync of connections, queries and settings to your own account
+  - A script library and projects backed by git
+
+  Passwords are stored encrypted with a key kept in the system keychain, and never go into the state file or the logs.
+Moniker: dbine
+Tags:
+- clickhouse
+- database
+- database-manager
+- duckdb
+- mariadb
+- mongodb
+- mysql
+- nosql
+- oracle
+- postgresql
+- redis
+- sql
+- sql-client
+- sqlite
+- sqlserver
+ReleaseNotes: |-
+  DBine v1.7.0 installers.
+  New
+  - Vectors (embeddings): DBine reads, edits, indexes, compares, moves and searches vectors on the engines that store them, such as PostgreSQL with pgvector, MySQL, Oracle, SQL Server, Snowflake, Elasticsearch, OpenSearch, Redis and its relatives, MongoDB, Cassandra, DuckDB, libSQL and Neo4j. A vector cell shows its first numbers and a badge with its dimensions, and the cell viewer gives its element type, norm, minimum and maximum. Edits are checked against the column's dimensions and element range before they reach the server. Each engine keeps its own types, index algorithms and distances.
+  - Vector indexes in the designer and the explorer: the table designer creates and edits vector indexes (HNSW, IVFFlat, DiskANN and the others each engine offers) with their distance and settings, and the explorer lists them in the Indexes tab. Redis, Valkey and Dragonfly list their search indexes in a folder of their own in a key database, with their fields and templates in the menu, and can drop them.
+  - Vectors in compare, transfers and conversion: schema compare and sync, data compare, transfers, clones, migrations, subsets, test data, masking and schema conversion carry vectors and their indexes between engines. When the target can't hold something exactly, the conversion report says what changed or was left out, and why: for example a Hamming index on binary vectors kept as cosine in libSQL, or a flat index too wide for Cosmos DB becoming a quantized one.
+  - Vectors in notebooks, export, database docs and the assistant: DataFrame SQL, exports, the database documentation and the AI assistant and MCP tools know about vector columns and indexes. The editor completes the vector functions and operators of each engine.
+  - The explorer's filter finds what isn't open, also inside code: as you type, the filter looks for the text in the open databases, first in what the explorer remembers from last time (at once) and then on the server by name, and shows each match in its folder (Tables, Views…) without opening them by hand. With </> on, it also looks inside definitions: views, procedures, functions, triggers, and Power BI's measures and tables (their Power Query and DAX). Those matches are tagged code, with the line where the text is. Search in database on Power BI now also searches the tables' Power Query and calculated columns. BigQuery bills each metadata query, so there the filter asks the server only when you press Enter.
+  - Lineage, and what an object uses: View dependencies… now also lists what the object itself uses: the tables and views a view reads, the routines a procedure calls, the tables its foreign keys point at, and sources outside the database. View lineage… draws both directions as a diagram, with what it uses on the left and what uses it on the right, and each card opens one more level either way. Solid lines come from the engine's catalog, dashed ones from reading the code, and a click shows the lines that name the other object. Each engine reads its own dependency catalog where it has one: SQL Server, Oracle, PostgreSQL and its family, MySQL 8, Db2, SAP HANA, Firebird, ClickHouse, Snowflake, MongoDB views and Cassandra. Databricks uses Unity Catalog's lineage, and Power BI uses INFO.CALCDEPENDENCY and the sources of each table's Power Query. Linked servers, database links, foreign tables, other databases and Power BI's data sources show as sources outside the database. The server's jobs are part of it too: the SQL Server Agent jobs, pg_cron and pgAgent jobs, DBMS_SCHEDULER jobs, MySQL events and the other scheduled jobs whose steps run an object show to its right, so the lineage runs from a table through the views and procedures that use it to the job that runs them. A job's own lineage, from Scheduled › On the servers, shows what its steps use.
+  - Lineage of a whole database: right click on a database, a schema, a folder (Tables, Views…) or a Power BI model › View lineage… draws every object and every dependency of it, with the sources outside the database and the server's jobs, in one diagram. Above about 200 objects it opens as an overview with one card per schema, and a double click opens one; it can be filtered by kind and text, to the confirmed lines only, and to the objects that have dependencies. The relations (foreign keys, and a Power BI model's relationships) run in parallel to the lineage, so a switch shows them along with it or leaves the lineage alone; in the whole-database view they start hidden. SQL Server, PostgreSQL and the engines that share its catalog, Oracle, Db2, SAP HANA, MySQL and MariaDB, ClickHouse, Snowflake, Databricks, MongoDB views and Power BI's whole model read it from their own catalogs and load it when the tab opens; the other engines show what the scan does and an Analyze button, because it reads every definition.
+  - Search in results: ⌘F (Ctrl+F) in a result's grid, or the magnifier on the results bar, searches every loaded row and column, not just the ones on screen, and highlights the matches. It lists the columns with matches and how many each has (a click limits the search to one), goes from match to match with Enter, marks where the matching rows are beside the scroll bar, and can leave only the rows or the columns with matches. Large results are searched in the background, so the window keeps responding. With only the matching rows showing, copying and exporting offer just those rows.
+  Improvements
+  - Schema conversion uses what the target really has: migrations, schema compare, scripts for another engine, subsets and notebook tables now convert with the foreign keys, indexes, comments and vector indexes the target engine can hold. What it can't hold is left out and the report says so, instead of the script failing on it.
+  - Neo4j reads from MCP clients and the AI assistant are enforced by the server: they run in Neo4j's read access mode, so a read that calls Neo4j's own vector functions or searches a vector index runs at once, and a write is refused by the server itself.
+  - Snowflake integer vectors: VECTOR(INT, n) is read, edited, compared and converted as a vector of whole numbers, which keeps them exact on the way to other engines.
+  - Redis, Valkey and Dragonfly search indexes compare equal: an index is read without the settings each server reports at their defaults, so the same index no longer shows as different on each after a sync.
+  - DuckDB opens files with HNSW indexes without downloading anything: the vss extension is loaded only if it is already installed, and DBine downloads it only when a write needs it.
+  - Mark every column as key at once in Compare data: in Queries mode, the box in the Key header of the column table marks every paired column as part of the key, or clears them all, instead of one by one. It shows a dash while only some are marked.
+  - Databricks explorer without waiting for the SQL warehouse: connecting to Databricks and opening catalogs used to wait for a stopped SQL warehouse to start, which can take minutes, and a big catalog's tables were read through information_schema. The explorer now gets catalogs, schemas, tables, views and functions from Unity Catalog, which needs no warehouse and answers in a few calls. Connecting still checks your sign-in and your access to the warehouse, and starts it if it's stopped, but no longer waits for it: a query waits for it as before. The legacy hive_metastore and foreign catalogs are still read with SQL.
+  - The explorer opens at once and keeps up with changes made elsewhere: while a connection opens, the explorer shows its databases and objects as they were last time, and the server's answer replaces them. If the connection fails, its error shows instead. What's open is read again in the background after five minutes, when you come back to DBine, and right after a CREATE, ALTER, DROP or rename run in the editor, so objects created or changed outside DBine show up without Refresh.
+  - The explorer shows big databases folder by folder: a database shows its schemas, and each folder (Tables, Views…) shows its own objects when you open it, 1,000 at a time with Load more, instead of the whole database at once. Completion looks up names as you type them and the tables a query names, the explorer's filter finds objects in folders that aren't open, and the table pickers of Compare data and the query builder search as you type. On almost every engine each folder, search and jump asks the server only for its own objects, a page at a time: with 50,000 views in a SQL Server database, its tables open in about 10 ms. Power BI, Athena, Solr, Neptune, ksqlDB, Manticore, Databend and Flight SQL servers other than DuckDB read their list once and page it in DBine.
+  - Each column's data type in the results grid: the grid header shows the type of every column in small text under its name. A switch in Settings › General hides it.
+  - New notebook from the explorer: right-click a connection, a database or a schema and choose New notebook, next to New query. The notebook opens with its cells already set to run there.
+  Fixes
+  - A source's names could add commands to a migration script: when a table went to MongoDB, Solr or Couchbase, the notes DBine writes about a vector index or field it had to adapt carried the source's name unchanged. Some engines, such as PostgreSQL, allow a line break inside a quoted name. A name with one could end the note and add a command, such as dropping a database, that then ran on the target with your permissions. Names in those notes are now written so they can't.
+  - Oracle vectors that claimed millions of dimensions: copying or pasting a sparse vector whose text claimed more dimensions than Oracle allows (65,535) into a dense VECTOR column could make DBine run out of memory. Such text is no longer read as a vector.
+ReleaseNotesUrl: https://github.com/addlayer-io/dbine/releases/tag/v1.7.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

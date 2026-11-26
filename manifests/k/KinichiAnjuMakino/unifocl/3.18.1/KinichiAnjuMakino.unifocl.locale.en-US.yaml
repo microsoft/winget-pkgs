@@ -1,0 +1,26 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: KinichiAnjuMakino.unifocl
+PackageVersion: 3.18.1
+PackageLocale: en-US
+Publisher: Kinichi Anju Makino
+PublisherUrl: https://github.com/Kiankinakomochi
+PublisherSupportUrl: https://github.com/Kiankinakomochi/unifocl/issues
+PackageName: unifocl
+PackageUrl: https://github.com/Kiankinakomochi/unifocl
+License: Apache-2.0
+LicenseUrl: https://github.com/Kiankinakomochi/unifocl/blob/HEAD/LICENSE
+ShortDescription: A CLI/TUI operations layer for Unity, enabling deterministic project interaction for developers and AI agents without the Editor.
+ReleaseNotes: |-
+  ## 3.18.1 - 2026-10-17
+  ### Fixed
+  • Editor bridge now compiles on Unity 6.5+ (verified on 6000.5.2f1 and 6000.6.6f1), where `GetInstanceID`, `InstanceIDToObject`, `IsLoadingAssetPreview(int)` and the `SceneHandle`/`EntityId` int conversions are hard errors (CS0619). Object ids keep their int wire format via a new `DaemonObjectIds` helper：instance ids before 6.5, the low 32 bits of the `EntityId` from 6.5 on. Older Unity versions keep the original code paths.
+  • `unifocl init` now installs `DaemonDryRunFileIo.cs` and `Timeline/DaemonTimelineService.cs` into the embedded package. They were missing from the payload allowlist, so the profiler/recorder services failed to compile (CS0103 `DaemonDryRunFileIo`) and the Timeline commands never shipped.
+  • Existing installs that lack these files are now reported as needing re-initialization, so the CLI refreshes the embedded package on the next `/open` or `/init`.
+ReleaseNotesUrl: https://github.com/Kiankinakomochi/unifocl/releases/tag/v3.18.1
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/Kiankinakomochi/unifocl/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

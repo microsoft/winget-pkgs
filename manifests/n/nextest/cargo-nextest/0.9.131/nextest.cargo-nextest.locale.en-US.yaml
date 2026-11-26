@@ -1,0 +1,54 @@
+# Created with komac v2.15.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: nextest.cargo-nextest
+PackageVersion: 0.9.131
+PackageLocale: en-US
+Publisher: nextest
+PublisherUrl: https://github.com/nextest-rs
+PublisherSupportUrl: https://github.com/nextest-rs/nextest/issues
+PackageName: cargo-nextest
+PackageUrl: https://github.com/nextest-rs/nextest
+License: Apache-2.0
+ShortDescription: A next-generation test runner for Rust.
+Tags:
+- cargo-plugin
+- cargo-subcommand
+- flaky-tests
+- junit
+- nextest
+- rust
+- testing
+ReleaseNotes: |-
+  Added
+  - Setup scripts and wrapper scripts can now specify per-command environment variables via the env field in the command configuration. (#3001)
+    For example:
+    [scripts.setup.script1]
+    command = {
+        command-line = "cargo run -p setup-test-db",
+        env = {
+            DB_PATH = "sqlite:/path/to/source.db",
+        },
+    }
+    Keys cannot begin with NEXTEST, as that prefix is reserved for internal use. Values defined in env override values set by the environment and by Cargo's config.toml (including those with force = true).
+    Thanks metatoaster for your first contribution!
+  - A new flaky-result configuration field and --flaky-result CLI flag (environment variable NEXTEST_FLAKY_RESULT) controls whether flaky tests are treated as passing or failing. When set to "fail", tests that pass on retry are marked as failures. The default remains "pass". flaky-result can be set at the profile level or per-test via overrides. (#3148)
+    For more information, see Failing flaky tests.
+    [profile.ci]
+    retries = 2
+    flaky-result = "fail"
+  - A new cargo nextest store export-chrome-trace command that exports test run data in the Chrome Trace Event format. Traces can be loaded into Perfetto or Chrome's chrome://tracing for a timeline view of test parallelism and execution. (#3163)
+    cargo nextest store export-chrome-trace latest -o trace.json
+    Traces support grouping by binary (default) or by slot (--group-by slot), and can be exported from both on-disk runs and portable recordings. For more, see Perfetto traces.
+  - Added release binaries for riscv64gc-unknown-linux-gnu. These binaries are cross-compiled from x86_64 Linux and are not currently tested.
+  Fixed
+  - Nextest now works with the new build directory layout (-Zbuild-dir-new-layout), and with the build directory being separate from the target directory (build.build-dir). (#3168, #3169)
+  Changed
+  - When retries are enabled, nextest no longer shows TRY 1 SLOW messages for the first attempt. TRY N SLOW is still shown for subsequent attempts.
+  Miscellaneous
+  - Self-update (cargo nextest self update) now uses ureq instead of reqwest and replaces the ring dependency with aws-lc-rs. This may require you to install CMake if you're on a less-commonly-used platform. (#3141)
+  Internal improvements
+  - Breaking change to the recording format: recordings now include test group and slot information, enabling Chrome trace export from recordings. (#3158)
+ReleaseNotesUrl: https://github.com/nextest-rs/nextest/releases/tag/cargo-nextest-0.9.131
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

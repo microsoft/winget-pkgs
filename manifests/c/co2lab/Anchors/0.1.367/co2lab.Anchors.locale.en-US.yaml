@@ -1,0 +1,75 @@
+# Created with WinGet Releaser using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: co2lab.Anchors
+PackageVersion: 0.1.367
+PackageLocale: en-US
+Publisher: co2lab
+PublisherUrl: https://github.com/co2-lab
+PublisherSupportUrl: https://github.com/co2-lab/anchors/issues
+PackageName: Anchors
+PackageUrl: https://github.com/co2-lab/anchors
+License: Elastic License 2.0
+LicenseUrl: https://github.com/co2-lab/anchors/blob/HEAD/LICENSE
+ShortDescription: Spec-first continuity framework for AI-assisted development
+Description: Anchors ties spec, feature and test together through a shared identity code, then confronts each artifact against the rules declared in anchors.yaml. It maps the project as a graph, propagates change from the anchor outward, and gates every step — so work guided by AI stays anchored to what was decided.
+Moniker: anchors
+Tags:
+- ai
+- ai-agents
+- cli
+- developer-tools
+- golang
+- spec-first
+ReleaseNotes: |-
+  Gates in parallel, a faster map, and late reports stamped as their run found the files
+  The gates run side by side.
+  - The gates Anchors answers itself run on every core.
+  - The project's tools run beside them, a few at a time.
+  - A tool that writes something another tool reads declares exclusive: true on its gate,
+    and runs alone after the others.
+  - Results come back in the order of the gates, as before.
+  - anchors check --sequential runs one gate after another, to rule the parallel run out
+    when a result looks wrong.
+  A parallel run surfaced a race: a gate that loads the configuration rewrote shared values
+  while other gates read them. Those values are now written only when they change.
+  The map is faster.
+  - map build reads and parses the files on every core. On MIF it went from 28 s to 8.6 s,
+    and the map came out identical.
+  - check --all no longer walks the whole tree to compute a stale-map list it never prints.
+  A late report is stamped as its run found the files. A JUnit report ingested by hand
+  used to be stamped with the tree of the ingestion. A screen that changed after the run
+  then kept a fresh proof. Now:
+  - anchors ingest places the run in time:
+    - --ran-at, a time or the commit the run measured;
+    - otherwise the report's timestamp;
+    - otherwise the report file's modification time.
+  - Each file a proof stands on is compared with its content at the last commit before the
+    run, using the evidence the map already uses, where comments and the header do not count:
+    - the test;
+    - the files the test reaches;
+    - the specs whose scenarios the test proves.
+  - A file whose evidence changed since then is stamped changed-after-run, so the proof is
+    stale and names it.
+  - --alias OLD=NEW (repeatable) and --alias-file read a code renamed since the run. The
+    alias applies to the report's cases and paths, and to each file's content at the run's
+    commit:
+    - a unit's code renames all of that unit's scenarios;
+    - a scenario's code renames only that scenario.
+    A file whose only change is the rename keeps its proof fresh. The signal records ran_at
+    and remapped.
+  - A run that anchors test just made is ingested as before.
+  coverage-delta now tells an earlier 0% apart from no earlier measure. Before, both
+  were stored as an empty value, so a file whose previous coverage was 0% read as having no
+  baseline. Now:
+  - a file measured for the first time is skipped, because there is nothing to compare;
+  - an earlier measure of 0% is compared like any other, so a rise or a hold passes;
+  - a file never measured is still pending.
+  Coverage measured at 0% before this version starts being compared from its next
+  ingestion.
+  Everything in the v0.1.351 notes still applies: run anchors migrate once, crossing format 8.
+  Changelog
+  - a084a44 feat: parallel gates, a map scanned on every core, late reports stamped as their run found them
+ReleaseNotesUrl: https://github.com/co2-lab/anchors/releases/tag/v0.1.367
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,52 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: SteveTheKiller.KillerPDF
+PackageVersion: 1.7.1
+PackageLocale: en-US
+Publisher: Steve the Killer
+PublisherUrl: https://github.com/SteveTheKiller
+PublisherSupportUrl: https://github.com/SteveTheKiller/KillerPDF/issues
+Author: Steve the Killer
+PackageName: KillerPDF
+PackageUrl: https://github.com/SteveTheKiller/KillerPDF
+License: GPL-3.0
+LicenseUrl: https://github.com/SteveTheKiller/KillerPDF/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Steve the Killer
+ShortDescription: PDF editor for Windows. Install or run portable. GPLv3. No account, no subscription, no telemetry.
+Description: KillerPDF is a lightweight PDF viewer and toolkit for Windows. View, merge, split, and manage PDF files. Runs portable or installs to your user profile - no admin rights required. No account, no subscription, no telemetry. Open source under GPLv3.
+Moniker: killerpdf
+Tags:
+- dotnet
+- gplv3
+- opensource
+- pdf
+- pdf-editor
+- portable
+- windows
+- wpf
+ReleaseNotes: |-
+  1.7.1 fixes the latest reported crashes, rendering problems, installer registration, file navigation, and editing issues, while adding perspective correction and app-link support.
+  Added
+  - Transform can now correct trapezoidal perspective distortion in pages photographed at an angle. Turn on perspective correction, drag four corner handles onto the photographed page outline, and Apply converts that quadrilateral into a straight rectangular page at the full transform resolution. The correction composes with rotation, deskew, scaling, and flipping in the same operation (#175, thanks 1mk3r).
+  - KillerPDF now registers a killerpdf:// link handler for the current user, laying the app-side foundation for the planned Chrome extension. A killerpdf://open?url=... link can hand a public HTTPS PDF to KillerPDF whether the app is closed or already running; downloads are size-limited and rejected unless their contents begin as a PDF. The registration refreshes itself when the executable moves.
+  - Open and Save dialogs now return to the last folder successfully used for that kind of operation, unless the caller deliberately supplies another starting folder. The places rail also brings in the user's pinned Windows Explorer Quick Access folders alongside KillerPDF's own editable pins, while avoiding duplicate entries (#178, thanks sheafitzek).
+  Fixed
+  - Fit Width and Fit Page are now remembered as the preferred fit for subsequently opened PDFs, so users on smaller screens no longer have to switch from Fit Page every time, thanks Thomas.
+  - Owner-restricted encrypted PDFs with malformed linearization tables now pass through KillerPDF's tolerant PDFium cleanup instead of being retried through PdfSharp's fragile read-only parser. This fixes the array-index error that prevented the Fritzbox 4060 manual from opening, thanks Thomas.
+  - Reopening a PDF no longer reapplies a raw zoom saved for a different window or monitor size, which could make the document appear enormous or tiny. KillerPDF keeps the saved page and view mode but fits the document to the current window, with Grid returning to a predictable three-column layout. Perspective correction's corner handles now retain their drag capture across child controls and release reliably, and applying the correction immediately redraws the edited page even when the current zoom does not change.
+  - Multi-line highlights now follow the reading direction of Persian, Arabic, Hebrew, and other right-to-left text. The first selected line extends left from the starting point and the last line extends right to the ending point, while left-to-right documents keep their existing behavior. Direction is detected per line, so mixed-language pages work without a document-wide setting (#170, thanks playerbhr).
+  - Installing KillerPDF for everyone now registers its PDF handler for the whole computer instead of writing it into the elevated administrator's personal registry. Every account can now find KillerPDF in Open With and Default apps, with the shared registration pointing at the Program Files copy; each user still chooses their own PDF default (#176, thanks adeit).
+  - The keyboard-shortcut list now uses the available window width instead of squeezing both halves into a narrow fixed card. Longer translated descriptions have room to remain visible, wrap cleanly on smaller windows, and sit level with the shortcut text in both columns (#177, thanks Mr-Update).
+  - The mouse wheel now moves the file picker's multi-column list horizontally, so folders and files beyond the right edge can be reached without dragging the bottom scrollbar. The folder tree's wheel works too, scrolling vertically normally and horizontally while Shift is held. The shared picker fix applies to Open, Save, image import, signatures, certificates, and every other file-selection flow; icon and details views keep their normal vertical wheel scrolling.
+  - Text annotations, highlights, stamps, ink, and filled form fields already stored in a PDF now appear in KillerPDF and survive printing, flattening, image export, page transforms, thumbnails, and repair rasterization (#141, thanks zenfas). PDFium does not paint annotation appearance streams unless explicitly requested, so every pixel-producing path silently omitted them. Enabling Docnet's annotation flag was not safe because it creates and destroys a form-fill environment while its page remains in use, corrupting PDFium state and crashing on a later native call. KillerPDF now renders through its direct PDFium layer, owns the form callback memory for its full native lifetime, paints both ordinary annotations and interactive widget appearances, then immediately closes the form, page, and one-shot document together. The reporter's five-page D&D Beyond file from #179 now exports and flattens with its filled values and multiline fields intact, without the native teardown crash (#179, thanks hsnopi).
+  - Annotations and stamps now save in the right position on PDFs that already carry a native page rotation when they are first opened (#169, thanks terada-d). The 1.7.0 fix read only KillerPDF's temporary rotation map, but that map is not populated until a page operation performs a temporary save and reload, so annotating an already rotated file and saving it immediately still treated the page as unrotated. Burn-in now falls back to the page's own /Rotate value, every newly opened document clears the previous document's temporary rotation map, and saving removes a malformed CropBox that extends outside its MediaBox instead of preserving contradictory portrait and landscape dimensions. Tests cover the reported invalid page boxes and preservation of a valid inset crop.
+  - Filled form fields now generate complete appearance streams, including the required stream length, multiline layout, and WinAnsi text encoding (#180, thanks Ryokoxx). This keeps entered values visible and readable in PDF viewers that strictly validate field appearances, resolving the damaged-file warning, missing line breaks, and replaced punctuation reported in #179 (#179, thanks hsnopi).
+  - Double-clicking bold or italic PDF text to edit it no longer turns the replacement into regular text (#182, thanks fo-bo). PDF text usually carries its face styling inside the embedded font name, such as Helvetica-BoldOblique, rather than as separate bold and italic properties. The detector cleaned those suffixes off to find the font family, then explicitly reset both style flags before opening the editor, so the formatting was lost before the first keystroke. Font detection now separates the family from its bold and italic face, applies both to the live edit box, and carries them into the replacement annotation when it is committed. Focused tests cover subset font names and regular, bold, italic, and combined faces.
+  - Clicking a page no longer crashes with "'∞' is not a valid value for property 'Height'" (#181, thanks lachlan-00). The page click rebuilds every annotation and form overlay, and malformed geometry could reach a WPF Width or Height property without being checked. WPF refuses NaN and infinity, so one bad form rectangle or a legacy saved signature with zero canvas dimensions took down the whole viewer during the redraw. Form rectangles and every sized annotation are now checked before they reach WPF; invalid form widgets are skipped, old signature dimensions fall back to the standard canvas size, and the render layer has a final guard for malformed persisted annotations.
+  Changed
+  - Transform's Rotate, Scale, Flip, Skew, and Perspective sections now collapse like the Stamp dialog, keeping the sidebar compact while still allowing every control to remain in one window. Rotate opens initially and the less frequently used sections stay folded until needed.
+  - Refined six German labels and shortcut descriptions for more natural and consistent wording (#150, thanks Mr-Update).
+ReleaseNotesUrl: https://github.com/SteveTheKiller/KillerPDF/releases/tag/v1.7.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

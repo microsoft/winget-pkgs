@@ -1,0 +1,102 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: erikbra.grate
+PackageVersion: 2.2.0
+PackageLocale: en-US
+Publisher: erikbra
+PublisherUrl: https://github.com/grate-devs
+PublisherSupportUrl: https://github.com/grate-devs/grate/issues
+PackageName: grate
+PackageUrl: https://github.com/grate-devs/grate
+License: MIT
+LicenseUrl: https://github.com/grate-devs/grate/blob/HEAD/LICENSE
+ShortDescription: grate - sql for the 20s
+ReleaseNotes: |-
+  grate 2.2.0 brings migration correctness fixes, improved Oracle and SQL Server script parsing, .NET 11 RC3 support, and stronger verification of the packages you install.
+
+  ## Highlights
+
+  • Add .NET 11 RC3 support while retaining .NET 8, 9 and 10 assets in the NuGet libraries and .NET tool. Self-contained binaries and the Docker image bundle runtime `11.0.0-rc.3.26522.148`. See the [packaging guide](https://grate-devs.github.io/grate/packaging/) for runtime and distribution details. (#868)
+  • Bundle the `use-grate` coding-agent skill, including guidance and runnable SQLite examples. Install it explicitly with `grate skills install --local` or `grate skills install --global`. (#822)
+  • Forward additional Docker container arguments to grate, alongside the environment-based configuration. (#827)
+  • Update to System.CommandLine 2.0.14, parse arguments once, and handle help and validation errors before creating database services. (#845)
+
+  ## Fixes
+
+  • Improve Oracle statement splitting for SQL terminators, PL/SQL packages, anonymous blocks, local routines and CASE expressions. (#816, #858, #859, #866)
+  • Preserve bracketed and double-quoted SQL Server identifiers containing `GO`, including escaped delimiters, and split only on standalone batch-separator lines. (#864)
+  • Prevent dry runs from creating, dropping or restoring databases and from writing migration history. SQLite previews use read-only connections for existing files. (#852)
+  • Isolate connections, cached history, deferred writes and results between differently configured migrators, so `WithConfiguration()` targets the requested database. (#861)
+  • Stop migrations when version registration or final status updates fail, instead of silently attributing scripts to an older version. Retain compatibility with legacy tracking-table upgrades. (#862)
+  • Preserve the version record when changed one-time scripts are accepted with `--warnandignoreononetimescriptchanges`, keeping history references valid without executing the changed SQL. (#863)
+  • Derive administration connection strings without changing credentials or the meaning of quoted values, key ordering and provider aliases. (#865)
+  • Fix SQL Server permissions-script hangs during transactional migrations. Refresh history between attempts and update the cache only after a successful history write or enqueue, allowing retries after rollback. (#828, #876)
+  • Wait for a working target connection after custom database-creation scripts and propagate the final connection failure if readiness cannot be established. (#877)
+  • Recognize legacy RoundhousE script hashes across line-ending changes, preserving the existing normalized hash format for new history. Expand the [RoundhousE migration guidance](https://grate-devs.github.io/grate/migrating-from-roundhouse/). (#842)
+  • Fix MariaDB bootstrap on servers with case-insensitive database names (`lower_case_table_names=1`), including upgrades and recovery from interrupted internal bootstrap. (#893)
+  • Update runtime, native SQLite and database-driver dependencies, and improve package verification and Windows Arm64 MSI generation. (#817, #839, #868)
+
+  ## Distribution, testing and documentation
+
+  • Automate release packaging and publication, with checksums and a release manifest for the nine CLI ZIPs, two Windows MSIs and two Debian packages. The release workflow also builds the .NET tool, six libraries and a verified multi-architecture Docker image. (#804)
+  • Use `gratedevs/grate` as the canonical Docker image, with matching image digests published to `erikbra/grate` during the compatibility transition. (#804)
+  • Add native MSI installation, upgrade and uninstall checks on Windows x64/Arm64; Debian installation, package upgrade and purge checks on Linux amd64/Arm64; and default Docker entrypoint checks on Alpine amd64/Arm64. These exercise migrations and reruns as well as package lifecycle behavior. (#883)
+  • Expand Windows and cross-framework test coverage, packaged-library/tool checks, migration reporting and recovery regressions, and native MSI security analysis. (#820, #843, #868, #804)
+  • Document application versus internal migration tables, changed-script handling and hash history, and the maintainer release process. Prepare source-built Homebrew/core packaging while retaining the existing cask channel. (#840, #879, #804, #805)
+
+  ## Upgrade notes
+
+  ### Custom database providers：statement-splitting API
+
+  `ISyntax.StatementSeparatorRegex` has been replaced by `IStatementSplitter StatementSplitter`. Custom implementations of `ISyntax` must now supply an `IStatementSplitter`; consumers of the removed `StatementSeparatorRegex` property must migrate to the splitter API. The corresponding property on `AnsiSqlDatabase` has also been removed. Rebuild and update custom providers when upgrading the libraries.
+
+  Normal CLI use and applications using the bundled providers require no changes for this API update.
+
+  ### Transaction isolation
+
+  New migration transactions started by `--transaction` use `ReadCommitted` isolation to avoid SQL Server history-locking hangs. When joining a caller-owned transaction, grate retains that transaction's existing isolation level. A caller-selected `Serializable` transaction can still encounter the original locking behavior.
+
+  ### Docker entrypoint
+
+  The default entrypoint continues to read environment-based configuration and now forwards additional container arguments to grate. Supply `APP_CONNSTRING` when using it; SQL scripts and migration output use `/db` and `/output`. For a help-only invocation without database configuration, use:
+
+  ```sh
+  docker run --rm --entrypoint /app/grate gratedevs/grate:2.2.0 --help
+  ```
+
+  ### Windows installers and package managers
+
+  The x64 and Arm64 MSIs use corrected per-user installer identities. If you installed a `2.2.0` prerelease MSI, uninstall it before installing the final `2.2.0`：packages with the same numeric version and different prerelease identities require explicit uninstall/reinstall.
+
+  The release workflow prepares a WinGet candidate under `grate-devs.grate`; submission and public acceptance are separate steps. Follow the [WinGet migration guide](https://github.com/grate-devs/grate/blob/2.2.0/installers/winget/MIGRATION.md) for transitions from `erikbra.grate`.
+
+  The existing Homebrew cask remains `erikbra/cask/grate`. The proposed Homebrew/core formula is separate work; `brew install grate` is not yet an available installation route. See the [packaging guide](https://grate-devs.github.io/grate/packaging/) for channel details.
+
+  ## Contributors
+
+  Thanks to everyone who contributed changes, reports and reproductions for 2.2.0.
+
+  ### Commits included in this release
+
+  • @Dissimilis fixed the SQL Server permissions-script hang and added regression tests. [#828](https://github.com/grate-devs/grate/pull/828)
+  • @erikbra contributed migration fixes, the bundled skill, .NET 11 support, packaging, tests and documentation. [#822](https://github.com/grate-devs/grate/pull/822), [#868](https://github.com/grate-devs/grate/pull/868), [#804](https://github.com/grate-devs/grate/pull/804), [#883](https://github.com/grate-devs/grate/pull/883)
+  • @hoangthanh28 added Docker entrypoint argument forwarding. [#827](https://github.com/grate-devs/grate/pull/827)
+  • @icedtoast contributed the SQL Server and Oracle statement splitters, the SSH.NET dependency fix and Windows test coverage. [#816](https://github.com/grate-devs/grate/pull/816), [#818](https://github.com/grate-devs/grate/pull/818), [#866](https://github.com/grate-devs/grate/pull/866), [#817](https://github.com/grate-devs/grate/pull/817), [#820](https://github.com/grate-devs/grate/pull/820)
+  • Dependabot (`dependabot[bot]`) contributed dependency updates.
+
+  ### Earlier contributions, reports and reproductions
+
+  • @najeraz reported the MariaDB case-insensitivity issue and opened the original PR. Its regression-test idea was carried forward into the replacement fix. [#215](https://github.com/grate-devs/grate/issues/215), [#216](https://github.com/grate-devs/grate/pull/216), [#893](https://github.com/grate-devs/grate/pull/893)
+  • @twerthi and @Dabeto83 supplied Oracle SQL terminator reproductions, and @shortgrass reported and isolated the slash parsing problem in Oracle packages. [#283](https://github.com/grate-devs/grate/issues/283), [#642](https://github.com/grate-devs/grate/issues/642)
+  • @kimjamia reported and traced the SQL Server permissions-script hang to migration history writes. [#657](https://github.com/grate-devs/grate/issues/657)
+  • @Edgaras91, @franzvrolijk-if and @gmilke reported or reproduced connection failures after custom database creation. [#681](https://github.com/grate-devs/grate/issues/681), [#629](https://github.com/grate-devs/grate/issues/629)
+  • @mattgallagher92 reported that the Docker entrypoint dropped extra arguments. [#819](https://github.com/grate-devs/grate/issues/819)
+  • @wokket proposed the release workflow improvements and helped investigate and review statement splitting. [#796](https://github.com/grate-devs/grate/issues/796), [#283](https://github.com/grate-devs/grate/issues/283), [#642](https://github.com/grate-devs/grate/issues/642), [#816](https://github.com/grate-devs/grate/pull/816)
+  • @leblancmeneses and @jimmyville asked questions about the internal migration tables that the new documentation addresses. [#583](https://github.com/grate-devs/grate/issues/583), [#840](https://github.com/grate-devs/grate/pull/840)
+  • @bob-box reported the RoundhousE changed-script history behavior that prompted the grate documentation update. [RoundhousE #424](https://github.com/chucknorris/roundhouse/issues/424), [#113](https://github.com/grate-devs/grate/issues/113), [#879](https://github.com/grate-devs/grate/pull/879)
+
+  **Full changelog:** https://github.com/grate-devs/grate/compare/2.1.6...2.2.0
+ReleaseNotesUrl: https://github.com/grate-devs/grate/releases/tag/2.2.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

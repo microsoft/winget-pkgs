@@ -1,0 +1,61 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: axpnet.AeroFTP
+PackageVersion: 3.6.10
+PackageLocale: en-US
+Publisher: axpnet
+PublisherUrl: https://github.com/axpnet
+PublisherSupportUrl: https://github.com/axpnet/aeroftp/issues
+Author: axpnet
+PackageName: AeroFTP
+PackageUrl: https://github.com/axpnet/aeroftp
+License: GPL-3.0
+LicenseUrl: https://github.com/axpdev-lab/aeroftp/blob/HEAD/LICENSE
+ShortDescription: A modern, multi-protocol file manager and FTP client with integrated AI, cloud sync, and military-grade encryption.
+Description: |-
+  AeroFTP is an open-source, multi-protocol file manager built with Tauri 2 (Rust + React 18 + TypeScript).
+  It supports 16 protocols (FTP, FTPS, SFTP, WebDAV, S3, Google Drive, Dropbox, OneDrive, MEGA, Box, pCloud, Azure Blob, 4shared, Filen, Zoho WorkDrive, and Cryptomator vaults),
+  features an AI assistant with 45 tools and 15 LLM providers, military-grade encrypted vaults (AES-256-GCM-SIV + Argon2id),
+  bidirectional real-time sync, a built-in code editor, SSH terminal, and media player with visualizers.
+  Available in 47 languages with 4 themes.
+Moniker: aeroftp
+Tags:
+- cloud-storage
+- encryption
+- file-manager
+- file-transfer
+- ftp
+- ftp-client
+- multi-protocol
+- rust
+- s3
+- sftp
+- sync
+- tauri
+- webdav
+ReleaseNotes: |-
+  [3.6.10] - 2026-04-28
+  MEGA Native canonical crypto, 2FA modal hookup, TOTP QR, mouse Back button
+  Same-day rollup on top of v3.6.8. The originally-tagged v3.6.9 build was deleted before a Linux release was published because the GitHub Actions Snap step was dying silently during LXD setup on three consecutive reruns; the work that was already in v3.6.9 (2FA modal hookup, TOTP QR, mouse Back button) is rolled into this v3.6.10 cut together with a critical MEGA Native crypto interop fix that landed in parallel. The Snap workflow step is marked continue-on-error: true so the rest of the Linux release pipeline (deb / rpm / AppImage signing and upload) is no longer blocked when the Snap action-build crashes; Snap Store stays on v3.6.8 until we either pin a newer action ref or move the Snap build to its own job (tracked for v3.7.0).
+  Fixed
+  - MEGAcmd login on Linux/macOS (critical) — saved-profile connect against the MEGAcmd backend was failing every time on Unix with Extra args required in non-interactive mode. Usage: login [...] email password | exportedfolderurl#key | session. The Unix path was passing only the email as a CLI arg and piping the password to stdin, on the assumption (carried forward from AUTH-01 audit notes) that this kept it out of ps listings. In reality mega-login is a non-interactive one-shot wrapper that talks to the background mega-cmd-server and does not read stdin at all in that mode; the stdin trick only worked inside the interactive mega-cmd shell, which AeroFTP never invokes. Fixed by passing email + password as CLI args on every platform, matching what rclone, the official MEGA Sync, and every other MEGAcmd integration already does. The brief ps exposure window during login (~1s) is the same surface area that env var or password-file alternatives would have, so there is no real security regression. Reproduced by @aleimob on a fresh Ubuntu install with a saved MEGA-CMD profile against dev@aeroftp.app.
+  - MEGA Native upload interoperability with MEGA Web (critical) — file node keys uploaded by AeroFTP through the MEGA Native API were stored in a non-canonical layout (raw 16-byte file key followed by nonce + meta-MAC), so AeroFTP could decrypt its own uploads but MEGA Web, MEGA Mobile, and any other official MEGA client derived the AES key from the canonical obfuscated layout and decrypted the payload with the wrong key, producing what looked like ciphertext-on-display. The fix in mega_crypto.rs::pack_node_key() now stores the MEGA-compatible obfuscated 32-byte node key, unpack_node_key_with_mac() derives the AES key by XOR-ing the first 16 bytes against the nonce / meta-MAC half, compute_attr_key() uses the canonical key for file attributes, and meta_mac() condenses the chunk MAC with the required [mac[0..4] ^ mac[4..8], mac[8..12] ^ mac[12..16]] XOR pairs. A unpack_node_key_legacy() fallback is kept so AeroFTP can still read files uploaded by the buggy older builds; download paths verify the canonical MAC first, then fall back to the legacy layout if needed. Existing legacy uploads must be re-uploaded if they need to open in MEGA Web (MEGA Web cannot use the legacy fallback). Independently verified end-to-end with megajs decoding the file name and plaintext from a fresh share link, and visually verified by the user in MEGA Web.
+  - 2FA prompt modal did not open from saved-card click (issue #128 follow-up) — saved-card connect goes through onSavedServerConnect and tab reconnect goes through switchSession. Neither path called tryShowTwoFactorPrompt, so the modal advertised in v3.6.8 never appeared when users clicked a saved MEGA / Filen / Internxt card whose persisted session had expired. The dispatcher is now wired into all three catch handlers; pattern matching against the backend's E_MFAREQUIRED / ENOTOKEN messages is shared so the matching surface is identical across paths. Test reproduction confirmed by the original reporter (@EhudKirsh).
+  Added
+  - Mouse Back button (button code 3) closes the topmost modal — the side button on gaming and productivity mice (the one that fires event.button === 3 and event.buttons === 8 in the HTML mouse events spec) now triggers a synthetic Escape keydown event that bubbles to the topmost open modal, dialog, dropdown or popover. Every dialog in the app already wires Esc (TwoFactorPromptDialog, HostKeyDialog, OverwriteDialog, SettingsPanel, VaultPanel, AISettingsPanel, ConnectionScreen, the delete-profile confirmation, the Quick Connect form, etc.), so re-routing Back through the same channel gives correct stacked-modal behavior with zero per-component churn: the topmost handler closes and self-removes, the next Back closes the next layer, all the way back to the My Servers home. Implemented as a single useMouseBackButton() hook mounted at the App root: listens for mousedown, mouseup and auxclick in the capture phase, suppresses the WebKitGTK history-back default that was beginning to fire on recent builds, and synthesizes the Escape on mouseup so the gesture timing matches what the user expects on releasing the side button. (reported by @EhudKirsh)
+  - AeroFTP master password TOTP setup QR code — Settings > Security > Two-Factor Authentication > Setup now renders the actual QR code (qrcode.react QRCodeSVG, level M, 180px on a white tile so it scans cleanly under the Cyber / Tokyo Night themes) instead of just the otpauth URI as copyable text, so the user can point Authy / Google Authenticator / 1Password / Bitwarden directly at the dialog. Account name in the URI changed from "AeroFTP Vault" to "Desktop 2FA" because Authy was rendering the entry as the awkward "AeroFTP : AeroFTP Vault" duplication. The URI also now carries a Google-extension image=https://docs.aeroftp.app/web-app-manifest-512x512.png parameter so authenticators that honor it (FreeOTP+, Yubico Authenticator, Bitwarden, recent Google Authenticator) can show the AeroFTP logo. Authy ignores image= and pulls icons from a Twilio-internal database, so an AeroFTP logo there would require a separate submission to Twilio support; until then Authy will fall back to its generic icon, which is a vendor limitation, not a URI problem.
+  Changed
+  - Agent / MCP / CLI internal cleanup pass — coordinated set of refactors across agent_session.rs, ai_core/{agent_tools, gui_tools, tools}.rs, ai_tools.rs, bin/aeroftp_cli.rs (+326 lines, the largest single delta), cross_profile_transfer.rs, lib.rs, mcp/tools.rs, profile_auth_state.rs, providers/{azure, jottacloud, xml_text}.rs, and speedtest.rs. Same-batch cleanup that landed alongside the MEGA Native crypto fix; behavior-preserving changes that improve consistency across the agent, MCP and CLI surfaces. No public API change.
+  Notes on accessibility
+  The Back-button hook is the first slice of a broader keyboard-and-pointer accessibility pass that landed on the v3.6.x roadmap after @EhudKirsh's feedback on issue #133. The remaining slices (full Tab-order audit on the Settings panel, Arrow-key navigation between My Servers cards, Enter to connect / Shift to multi-select, and "Forward mouse button (button code 4) → repeat last action") are scheduled for v3.7.0 because each one needs its own focus-management review across the 42 modals in the app, and shipping them piecemeal would create gaps where some screens listen and others do not. Tab and Enter already work where the underlying HTML controls are focusable, so the gap is concentrated in custom-rendered grids and chip lists rather than in form inputs.
+  Notes on the v3.6.9 tag
+  A v3.6.9 tag was briefly created earlier in the day on commit 78c322f with the modal-hookup / QR / mouse-back work. The Linux leg of its release pipeline failed three consecutive times because of a deterministic silent crash in snapcore/action-build@3bdaa03e during LXD setup, with no log output past the AppImage repackaging step. No Linux artifacts were ever published on that tag (only Windows .msi / .exe and macOS .dmg made it to the GitHub release page); the tag and the partial release were both deleted before any Linux user could install from them. v3.6.10 supersedes that effort with the same code plus the MEGA Native crypto interop fix and the workflow change that allows the rest of the Linux pipeline to ship even when the Snap step crashes.
+  Downloads:
+  - Windows: .msi installer, .exe, or .zip portable (no installation required)
+  - macOS: .dmg disk image
+  - Linux: .deb, .rpm, .snap, or .AppImage
+  Download AeroFTP
+ReleaseNotesUrl: https://github.com/axpdev-lab/aeroftp/releases/tag/v3.6.10
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

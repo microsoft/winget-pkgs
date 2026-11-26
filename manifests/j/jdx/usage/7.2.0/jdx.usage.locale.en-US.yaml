@@ -1,0 +1,73 @@
+# Created by Anthelion using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: jdx.usage
+PackageVersion: 7.2.0
+PackageLocale: en-US
+Publisher: jdx
+PublisherUrl: https://jdx.dev/
+PublisherSupportUrl: https://github.com/jdx/usage/issues
+Author: Jeff Dickey
+PackageName: usage
+PackageUrl: https://usage.jdx.dev/
+License: MIT
+LicenseUrl: https://github.com/jdx/usage/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2025 Jeff Dickey
+CopyrightUrl: https://github.com/jdx/usage/blob/HEAD/LICENSE
+ShortDescription: A specification for CLIs
+Description: |-
+  Usage is a spec and CLI for defining CLI tools. Arguments, flags, environment variables, and config files can all be defined in a Usage spec. It can be thought of like OpenAPI (swagger) for CLIs. Here are some potential reasons for defining your CLI with a Usage spec:
+
+  - Generate autocompletion scripts
+  - Generate markdown documentation
+  - Generate man pages
+  - Generate type-safe SDK client libraries for TypeScript, Python, and Rust
+  - Use an advanced arg parser in any language
+  - Scaffold one spec into different CLI frameworks-even different languages
+  - [coming soon] Host your CLI documentation on usage.sh
+Moniker: usage
+Tags:
+- cli
+- spec
+ReleaseNotes: |-
+  Added
+  - (spec) New opt-in unknown_env node (#1609, @jdx). When it's set, a parse fails if the environment holds any variable under the prefix that nothing in the spec reads, and the error lists every such variable at once. Without the node, nothing changes.
+    unknown_env prefix="MOQ_" {
+      allow "MOQ_VAAPI_DEVICE" "MOQ_V4L2_ENCODER"
+    }
+    flag "--port <port>" env="MOQ_PORT"
+    cmd "serve" {
+      flag "--tls-cert <path>" env="MOQ_TLS_CERT" deprecated_env="MOQ_CERT"
+    }
+    Rust derive CLIs declare it on the root struct: #[usage(bin = "moq", unknown_env(prefix = "MOQ_", allow("MOQ_VAAPI_DEVICE")))]. With MOQ_PROT and MOQ_TSL set, a derived CLI exits 2:
+    error: unknown environment variables under 'MOQ_':
+      MOQ_PROT
+      MOQ_TSL
+    A variable counts as known if anything in the command tree declares it, not only the command that ran. That covers env, env_fallback and deprecated_env on any flag or argument, including those in subcommands, flattened groups and clauses. It also covers variables read by config properties and names in allow. Other details:
+    - The prefix only limits which variables are checked. It is never used to build a variable name, so this is not clap's env_prefix.
+    - Deprecated names still produce a deprecation warning rather than an error.
+    - --help and --version are answered before the check runs.
+    - On Windows, names are compared case-insensitively.
+    In usage-lib, Parser checks the map passed to Parser::with_env if there is one, and the process environment otherwise. It reports a UsageErr::UnknownEnv.
+  - (go) Parsers from usage generate go now enforce unknown_env too (#1612, @jdx). Before this, generated Go ignored the node. The check runs before required flags and arguments are checked, and it reports offenders in sorted order:
+    error: unknown environment variables under `MOQ_`: `MOQ_PROT`, `MOQ_TSL`
+    The Go generator can't see what variables a mounted command declares, so usage generate go fails on a spec that has both unknown_env and a mount. go/argv adds UnknownEnv, RefuseUnknownEnv, EnvNames and the error code CodeUnknownEnv.
+  - (derive) A field with setting = "key" now declares that setting on its own, so you no longer need a matching #[derive(Config)] field (#1610, @jdx). The registry entry takes its type from the field's type and its environment names from env/env_fallback/deprecated_env. List splitting comes from delimiter (, or :), help comes from the doc comment, and the flags are every flag bound to the key. The root Cli now exposes SETTINGS_PROPS and SETTINGS_REGISTRY, and its spec gets a config block even when there is no config = Type.
+    #[derive(usage_rs::Args)]
+    struct ListenTls {
+        /// Load the given certificate from disk.
+        #[usage(long = "listen-tls-cert", env = "EX_LISTEN_TLS_CERT", delimiter = ',',
+                setting = "listen.tls.cert")]
+        cert: Vec<std::path::PathBuf>,
+    }
+    If several subcommands bind the same key, they must agree on field type, environment names and delimiter. Otherwise it's a compile error. Existing CLIs don't need to change, because a key declared on the config struct takes precedence over the flag. Settings that need a default, merge, scope or choices still have to be Config fields. Settings declared only by a flag are always optional and have no default.
+
+  Fixed
+  - (complete) Tab completion now offers -h/--help, and -V/--version where the parser accepts them (#1605, @jdx). Before this fix, CLIs compiled from the derive and usage itself never offered these flags. This applies to both the derive and usage complete-word. A spelling that a declared flag already uses (hidden flags included) is not offered twice, and disable_help_flag/disable_version_flag are respected. Also, merging a mounted spec no longer clears disable_help_flag, disable_help_subcommand or disable_version_flag on the host command. For example, mise run no longer gets --help back from the mounted root.
+  - (derive) A flag with setting = "key" inside a #[usage(clause)] element now sets its setting, the same way a flag in a flattened group does (#1611, @jdx). When several clause items give the same setting, list settings collect every entry in order and other settings keep the last value. A root whose only bound flags are in clauses can now use #[usage(settings)]. Before this fix, that failed to compile.
+ReleaseNotesUrl: https://github.com/jdx/usage/releases/tag/v7.2.0
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://usage.jdx.dev/cli/
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

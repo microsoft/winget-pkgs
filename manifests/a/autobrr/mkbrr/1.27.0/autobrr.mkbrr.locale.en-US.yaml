@@ -1,0 +1,71 @@
+# Created with winget-pkgs-updater using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: autobrr.mkbrr
+PackageVersion: 1.27.0
+PackageLocale: en-US
+Publisher: autobrr
+PublisherUrl: https://github.com/autobrr
+PublisherSupportUrl: https://github.com/autobrr/mkbrr/issues
+PackageName: mkbrr
+PackageUrl: https://github.com/autobrr/mkbrr
+License: GPL-2.0
+LicenseUrl: https://github.com/autobrr/mkbrr/blob/HEAD/LICENSE
+ShortDescription: mkbrr is a tool to create, modify and inspect torrent files. Fast.
+Tags:
+- bittorrent
+- go
+- golang
+- metafile
+- torrent
+ReleaseNotes: |-
+  Changelog
+  Breaking changes
+  - Batch jobs are private by default, like the CLI. A job with no private key now makes a private torrent and gets the tracker's default source, so its info hash changes. To keep the old torrents, add private: false or source: "" to the job.
+  - create --batch rejects other create flags. mkbrr used to ignore them. Only -v, -q, and -i work with --batch, so move flags such as --tracker or --exclude into the batch file.
+  - A max piece length of 14 or 15 fails where it cannot apply. mkbrr used to make 64 KiB pieces anyway. Set --max-piece-length to 16 or higher, and the hash stays the same.
+  - Go API. BatchJob now embeds torrent.CreateSettings with pointer fields, and ModifyOptions now embeds torrent.ModifySettings.
+  Highlights
+  - Plan before you hash. mkbrr create --plan prints the piece length and the exact .torrent size as JSON without hashing, so you can check a tracker size limit first.
+  - Presets work the same everywhere. The CLI, the GUI, and batch mode now resolve settings in one order. In the GUI, the private checkbox works with a preset, and preset values such as target_piece_count apply. Batch jobs accept max_piece_length and no_creator.
+  - Modify changes only what you ask. New --no-entropy removes entropy. Settings you do not set keep the torrent's value, modify writes no file when nothing changes, and it reads skip_prefix from the preset.
+  - Batch failures you can see. A failed job makes create --batch exit non-zero with N of M batch jobs failed, also with --quiet.
+  - Fixes and polish. --fail-on-season-warning stops before hashing, modify with one tracker removes the old announce-list, and create stops with an error when it cannot make entropy.
+  Breaking Changes
+  - 21ba448: feat(create)!: add exact pre-hash plan mode (#202) (@maghuro)
+  - b599319: feat(torrent)!: add --no-entropy and keep/set/clear for modify (#225) (@s0up4200)
+  - 554fdc6: refactor(torrent)!: share one create settings type between CLI, GUI and batch (#228) (@s0up4200)
+  - 96e4955: fix(create): reject create flags with --batch (#244) (@s0up4200)
+  - 87af7ca: fix(torrent): respect effective minimum for max piece length (#204) (@maghuro)
+  - ac2a443: refactor(torrent): resolve create options in one place (#215) (@s0up4200)
+  Bug fixes
+  - 13e0890: fix(batch): exit with an error when a batch job fails (#233) (@cestercian)
+  - 39c3b1d: fix(modify): read skip_prefix from the preset (#248) (@s0up4200)
+  - a8fd061: fix(release): list breaking changes first in the changelog (#226) (@s0up4200)
+  - 45b6189: fix(torrent): use typed atomics for verifier counters (#210) (@s0up4200)
+  - e76a3b3: fix(torrent): write torrent metadata in one place for create and modify (#217) (@s0up4200)
+  Other work
+  - db65319: chore(agents): add the needs-grilling triage label (#249) (@s0up4200)
+  - 0befa4b: chore(agents): note the Mintlify plan and compare README install steps (#242) (@s0up4200)
+  - d2259d4: chore(coderabbit): review PRs to main (#245) (@s0up4200)
+  - 01696d4: chore(deps): bump the golang group across 2 directories with 4 updates (#206) (@dependabot[bot])
+  - b4e092f: chore(gui): update dependencies and remove stray lockfile (#207) (@s0up4200)
+  - 79235f0: chore: add release steps, AI review rules, and a CodeRabbit config (#239) (@s0up4200)
+  - b8d8113: chore: add the Mintlify agent skill (#238) (@s0up4200)
+  - dead155: chore: add the Mintlify agent skill to main (#246) (@s0up4200)
+  - 9fcfeab: ci(gui): build the frontend with pnpm 11 (#208) (@s0up4200)
+  - 7d97064: ci(release): trigger the mkbrr.com docs update on release (#205) (@s0up4200)
+  - d8b853b: ci: require ! in the title of a PR with the BREAKING CHANGE label (#227) (@s0up4200)
+  - d067f8f: docs(installation): drop the removed Homebrew tap (#240) (@s0up4200)
+  - b3d455a: docs: add agent skills config (#209) (@s0up4200)
+  - 8da79fa: docs: add glossary for create settings (#214) (@s0up4200)
+  - ed94056: docs: add pull request template (#216) (@s0up4200)
+  - 3b1d399: docs: fix errors from the old docs site (#243) (@s0up4200)
+  - aad96c6: docs: move the mkbrr.com docs site into this repository (#235) (@s0up4200)
+  - 405d9e6: docs: port the unreleased docs from the old mkbrr.com repository (#237) (@s0up4200)
+  - caefdab: refactor(torrent): put the piece-length decision in one pure function (#231) (@s0up4200)
+  - a018533: test(cmd): add settings parity test for the CLI, batch, presets, and GUI (#229) (@s0up4200)
+  Full Changelog: v1.26.0...v1.27.0
+ReleaseNotesUrl: https://github.com/autobrr/mkbrr/releases/tag/v1.27.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

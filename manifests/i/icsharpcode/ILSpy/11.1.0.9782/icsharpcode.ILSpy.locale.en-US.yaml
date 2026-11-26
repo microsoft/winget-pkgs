@@ -1,0 +1,175 @@
+# Created by Anthelion using komac v2.17.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: icsharpcode.ILSpy
+PackageVersion: 11.1.0.9782
+PackageLocale: en-US
+Publisher: ICSharpCode Team
+PublisherUrl: https://github.com/icsharpcode/ILSpy
+PublisherSupportUrl: https://github.com/icsharpcode/ILSpy/issues
+PackageName: ILSpy
+PackageUrl: https://github.com/icsharpcode/ILSpy
+License: MIT
+LicenseUrl: https://github.com/icsharpcode/ILSpy/blob/HEAD/LICENSE
+Copyright: Copyright 2011-2023 AlphaSierraPapa for the ILSpy team
+CopyrightUrl: https://github.com/icsharpcode/ILSpy/blob/master/doc/ILSpyAboutPage.txt
+ShortDescription: Cross-Platform .NET assembly browser and decompiler.
+Tags:
+- c-sharp
+- decompile
+- decompiler
+- decompiler-engine
+- dotnet
+- dotnetcore
+- ilspy
+- mono
+- pdb
+- unity
+ReleaseNotes: |-
+  Want to learn how we built the Avalonia port of ILSpy? Join us October 6th for Move over, WPF! Avalonia for X-Plat Desktop Apps (with a lot of AI help)
+  A major focus of this release was to find the small (and not so small) bugs of the decompiler via a revamp of our testing by adding two new tools that allow mass-testing (for more information see TestTools/README.md):
+  - nugetfuzz: downloads packages from nuget.org and runs them through a DEBUG build of ilspycmd (sanity checks/assertions enabled). It records: crash, assertion fail, warnings in the decompiler output (as comment "IL_<nnnn>: ...") as well as any residue of compiler-generated identifiers in C# code (hints at missing language feature/pattern support).
+  - decompdiff: runs an assembly through two different versions of the decompiler (driven via ilspycmd) and calculates a diff of the generated source code.
+  You should see better decompilation results as an effect of this push and the general push of fixing previously reported decompiler bugs by users.
+  New Language Features
+  - PR #4014: Emit C# 7.1 default literals where the context supplies the type
+  - PR #3930: Decompile C# 14 implicit span conversions (first-class span types)
+  - PR #3975: Fix #3624: decompile semi-auto properties with the C# 14 field keyword
+
+  User Interface
+  - PR #4039: Fix five Avalonia UI regressions: mouse navigation, derived types, Enter, Delete, Analyze in the Analyzer pane
+  - PR #4056: Fix #4054: Accept drops from sources that do not permit the Move effect
+  - PR #4150: Fix #4146: keep Options section names readable on hover
+  - PR #3998: Fix #3996: edit the display font size in points, not pixels
+  - PR #4154: Fix #3526: show WPF resource entry names unescaped
+  - PR #4139: Scroll a node's new children into view when it is expanded
+  - PR #4129: Reject the name of an existing list in the assembly list prompt
+  - PR #4116: Fix #2093: find a navigation target in a reference assembly too
+  - PR #4117: Empty the panes when the assembly list is cleared
+  - PR #4044: Fix #4040: Compose accessibility and static overlays onto search result icons
+  - PR #4025: Fix package search and navigation follow-ups from #4023
+  - PR #3997: Fix #3993, #3994: main-menu shortcuts and dark-mode hover tooltips
+  - PR #4002: Give dark-theme syntax colors a perceptual contrast floor
+  - PR #3989: Prevent double dark conversion of syntax colors
+  - PR #3988: Keep the editor zoom separate from the configured font size
+
+  Contributions
+  - PR #4133: Remove the delegate cache left by a discarded method-group conversion — @dualfroz, thank you!
+  - PR #4134: Recognize a VB exception filter's type test — @dualfroz, thank you!
+  - PR #4053: Handle unresolved value-type call targets — @sonyps5201314, thank you!
+  - PR #4022: Improve floating-point fraction and negative constant reconstruction — @SychicBoy, thank you!
+  - PR #3897: Fix #3894: keep lambda parameter typing consistent — @sailro, thank you!
+  - PR #3888: Fix #3853: infer scoped locals from ref safety — @sailro, thank you!
+  - PR #3887: Model scoped and UnscopedRef lifetimes in the type system — @sailro, thank you!
+  - PR #3980: Keep instance-dependent assignments in constructors — @sailro, thank you!
+
+  Performance
+  - PR #4156: Keep the UI responsive while searching and drawing reference nodes
+  - PR #4106: Read the file system once per reference closure, not per reference
+  - PR #4023: Search inside packages without stalling, and navigate to what it finds
+
+  Enhancements
+  - PR #4158: Invent a syntax for ldtoken.
+  - PR #4147: Share the lookup and overload-resolution stages
+  - PR #4144: Share one escalation loop across the member-reference builders
+  - PR #4091: Split StackType.O into StackType.Obj+StackType.VT
+  - PR #4113: Remove ITypeReference
+  - PR #4090: Extend InferType() to every ILInstruction
+  - PR #4089: Always pass the type system into InferType().
+  - PR #4085: Pass the compilation to ILInstruction.CheckInvariant
+  - PR #4077: Improvements for type inference
+  - PR #4075: Infer the C# type of ldlen
+  - PR #4064: Expand nested conditional operators back into if-else
+  - PR #4062: Detect local functions renamed by obfuscators
+  - PR #4070: Drop isReferenceType when erasing unknown types
+  - PR #4071: Improve types for variables generated from stack slots
+  - PR #4068: Type inference for switch-expressions
+  - PR #4065: Insert casts in switch expression to ensure a best common type exists
+  - PR #4047: Bound every .resources length against the remaining stream before allocating
+  - PR #4048: Never size bundle entry decompression from the manifest's declared size
+  - PR #4046: Cap LightJson parser nesting depth to prevent stack overflow
+  - PR #4006: Tidy up the resolve-result hierarchy and document the tuple-cast rule
+  - PR #4005: Merge tuple element names during type inference
+  - PR #4008: Make ThisResolveResult an ILVariableResolveResult of the this parameter
+  - PR #3974: Extend UseLambdaSyntax to emit statement lambdas
+
+  ILSpyCmd
+  - PR #4101: Fix #3154: accept single-file bundles as ilspycmd input
+  - PR #4063: Accept member IDs without a signature in --navigateto
+
+  Documentation
+  - PR #4112: Update Unix/Mac setup guidance
+  - PR #4067: Add code review guidance and require Assisted-by on every agent commit
+  - PR #4051: Require spec references and design sign-off for engine changes
+  - PR #3999: Fix #3664: Move ipynb to Verso and adapt to v11 API surface
+
+  Testing / Infrastructure
+  - PR #4161: Rule out non-Framework processes without reading their modules
+  - PR #4131: Make every nugetfuzz finding traceable to the assembly it came from
+  - PR #4128: Report compiler-generated names leaking into decompiled output
+  - PR #4125: September 2026 NuGet Updates
+  - PR #4115: decompdiff: build both sides by default, add --no-build
+  - PR #4104: Fix decompdiff bad diffs
+  - PR #4097: Wait for the resolved dependencies, not for the application to go idle
+  - PR #4088: Widen decompdiff reference probing and prune unfixable misses
+  - PR #4087: Report field naming violations as suggestions
+  - PR #4081: Fix #4079: make stable Roslyn restorable from the solution directory
+  - PR #4083: Synchronize headless UI tests on idle and hit-tested clicks
+  - PR #4078: Run decompdiff against git refs, and build a corpus from nuget's most-downloaded packages
+  - PR #4069: Update NuGet packages; adapt to Dock.Serializer.SystemTextJson 12.1.0.6
+  - PR #4074: Bind each corpus assembly against its own reference-assembly pack
+  - PR #4073: Wait for the click target instead of counting frames
+  - PR #4060: Pin the deconstruction shapes the transform has to keep matching
+  - PR #4050: #2764: Add regression test for duplicate assembly references
+  - PR #4032: Tie the .NET Framework fixture host to the test host's lifetime
+  - PR #4033: Use server GC for the decompiler test suite (workstation GC on the shared Windows CI runner)
+  - PR #4035: Render a frame while the headless UI tests wait
+  - PR #4029: Walk the whole decompiler pipeline in the Debug Steps pane
+  - PR #4013: Add ILAst output to ilspycmd debug builds
+  - PR #4012: Stop ILSpy.Tests from retaining every test's app graph (15 GB -> 0.7 GB)
+  - PR #4020: Add TestTools with the nugetfuzz and decompdiff corpus tools
+  - PR #4009: Aim the tree-gesture pointer tests at a hit-testable row
+  - PR #4007: Fix pre-commit hook failure when package source mapping is active
+  - PR #3991: Cover the field-keyword name collisions with fixtures
+  - PR #3982: Remove UI tests that only restate the code they cover
+
+  Bug Fixes
+  - PR #4162: Fix #3316: keep unresolved plain XAML properties plain
+  - PR #4119: Fix #2372: report a field's address loads on their own
+  - PR #4043: Fix #3282: leave out trailing optional arguments in indexer accesses
+  - PR #4132: Fix #3320: detect dynamic await in pre-Roslyn state machines
+  - PR #4130: Look past comment placeholders when matching statement sequences
+  - PR #4127: Ignore nullability when comparing backing field and property type of auto properties
+  - PR #4124: Fix #2823 and add a PDB verification mode to nugetfuzz
+  - PR #4111: Fix #3568: read a record's member order off its generated members
+  - PR #4110: Fix #2930: follow references past the ones a document's assembly names
+  - PR #4109: Fix #2919: keep a settings file that cannot be parsed
+  - PR #4108: Fix the parts of #2253 that still reproduce
+  - PR #4105: Fix #2080: resolve GAC references onto the installed version
+  - PR #4103: #3315, #2253: make exported WPF projects build without hand edits
+  - PR #4102: Fix #3315: make exported WPF projects reproduce their resources
+  - PR #4100: Fix #3008: local function forwarding a display class loses its scope
+  - PR #4098: Fix #2054: repair a chain of type forwarders that cycles
+  - PR #4096: Fix two BAML bugs that make the decompiled XAML unwritable
+  - PR #4057: Fix uncompilable lambda parameter lists
+  - PR #4086: Parenthesize a ref-conditional assignment target
+  - PR #4084: Fix the C# 14 field keyword being printed next to a surviving backing field
+  - PR #4080: Fix #3714: declare a local function in its innermost capture scope
+  - PR #4072: Fix #3704: keep the static type of a dynamic call target
+  - PR #4021: Add an async/await pattern test suite and fix the await operand conversions it found
+  - PR #4024: Avoid using query expressions if there's indications that lambda parameter types cannot be omitted.
+  - PR #3964: Delay exceptions when copy-propagating an address into a StObj target
+  - PR #3920: Fix #1142: recover enum members for out-of-range constant operands
+  - PR #3995: Report a call as unresolvable when nothing matched at all
+  - PR #4000: Fix #3729: recognize value-type ctor call on unresolved declaring type
+  - PR #4001: Print the init-only marker after the set keyword again
+  - PR #3973: Fix the remaining deconstruction issues
+  For a full list of changes click here.
+  This release is based on .NET 10.0. Please make sure that you have it installed on your machine beforehand.
+  Note for Mac users: see https://github.com/icsharpcode/ILSpy/wiki/Build-Artifacts#running-the-macos-artifact because the ILSpy.app is neither signed nor notarized.
+ReleaseNotesUrl: https://github.com/icsharpcode/ILSpy/releases/tag/v11.1
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/icsharpcode/ILSpy/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

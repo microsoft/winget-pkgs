@@ -1,0 +1,33 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.6.0.schema.json
+
+PackageIdentifier: GRCSAC.NetVane
+PackageVersion: 1.3.1
+# Matches the published requirement ("Windows 10 or 11, 64-bit"). Deliberately not stricter: this
+# field makes winget REFUSE to install below it, so it must not promise less than the website does.
+MinimumOSVersion: 10.0.10240.0
+InstallerType: inno
+Scope: user
+InstallModes:
+  - interactive
+  - silent
+  - silentWithProgress
+UpgradeBehavior: install
+ReleaseDate: 2026-08-31
+Installers:
+  - Architecture: x64
+    InstallerUrl: https://netvane.doorvane.com/downloads/NetVane-Setup-1.3.1.exe
+    InstallerSha256: 9348C39EB5C3C4B84BA40E0613F04BEB28C888B69BEB0AE266418843D1026AE0
+    # Inno's uninstall key is "{AppId}_is1"; AppId is pinned in installer/netvane.iss and must
+    # never change between versions, since it drives upgrade and uninstall detection.
+    ProductCode: '{7B2E9D4C-3A1F-4E58-9C2A-1D6B0F3E9A21}_is1'
+    AppsAndFeaturesEntries:
+      # UninstallDisplayName in the .iss is "NetVane {version}", so the ARP name is NOT the
+      # package name and changes every release. Without this, winget cannot correlate an
+      # existing install and would offer an upgrade that is already applied.
+      - DisplayName: NetVane 1.3.1
+        Publisher: GRCSAC
+        ProductCode: '{7B2E9D4C-3A1F-4E58-9C2A-1D6B0F3E9A21}_is1'
+        # No UpgradeCode: that is an MSI concept and this is an Inno installer. Putting the Inno
+        # AppId there would look right and mean nothing.
+ManifestType: installer
+ManifestVersion: 1.6.0

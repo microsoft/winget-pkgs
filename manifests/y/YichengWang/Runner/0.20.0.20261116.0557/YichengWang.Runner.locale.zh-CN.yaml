@@ -1,0 +1,33 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.28.0.schema.json
+
+PackageIdentifier: YichengWang.Runner
+PackageVersion: 0.20.0.20261116.0557
+PackageLocale: zh-CN
+ShortDescription: 让 Claude Code、Codex、Copilot CLI 等终端编码智能体在同一个 mission 上协同工作。
+Description: Runner 是一款原生桌面应用，让终端智能体协同工作。Claude Code、Codex、OpenCode、Cursor CLI、Grok Build、Antigravity CLI、Copilot CLI 与 pi 可以在同一个任务、同一个 mission 中配合，每个智能体都保留自己真实终端里的 TUI，由 lead 把决策带回给你。Runner 的一切能力都对应一个 `runner` 命令：mission、crew、role、project、chat、session 与 msg 都能在命令行操作，后台服务是 `runnerd`。智能体在 Windows 上原生运行，不需要 WSL，PowerShell 7 为可选。当前状态：alpha，持续发布。原生支持 macOS（Apple Silicon）与 Windows（x64，Windows 10 1809 或更高版本）；不支持 Intel Mac、Windows ARM64 与 Linux。安装程序、应用与 CLI 辅助程序均使用签发给 Open Source Developer Yicheng Wang 的 Certum 开源代码签名证书签名。
+Tags:
+- claude-code
+- codex
+- 人工智能
+- 命令行
+- 控制台
+- 终端
+ReleaseNotes: |-
+  Runner 0.20.0 是 macOS、Windows 和 Linux 上基于 0.19.9 的功能版本，新增首次启动设置、带并排对比的 git Changes 视图，以及统一的应用与终端主题选择。
+  新功能
+  - 首次启动设置。 全新安装后不再打开空白启动器，而是进入 Setup：列出 Runner 检测到的 agent；在 npm 可用时直接安装 Claude Code、Codex、GitHub Copilot CLI 和 pi；打开终端完成登录；并用你已安装的 agent 组成 Pair coding 入门 crew（有两个不同的 agent 时会分别使用）。Start your first chat 会创建该 crew（除非选择 Don't create），并打开带可编辑示例提示词的启动器；Skip setup 直接进入启动器。之后可随时在 Settings → Agents → Open setup 重新打开。全新安装不再在检测 agent 之前预置只用 Codex 的 crew；已经使用过的安装保留原有 crew，并跳过 Setup。 (#1171)
+  - 在设置中安装 agent。 当 npm 可用时，Settings → Agents 为未安装的 npm 包 agent（Claude Code、Codex、GitHub Copilot CLI、pi）显示 Install，安装作为后台任务运行，可查看输出、在需要输入时响应、重试或停止。 (#1171)
+  - 侧面板中的 git Changes。 从侧面板的 +（或按 C）打开 Changes，或在纯终端标签页中切换到 Files 旁的 Changes 标签页。它会显示当前分支的 All changes、Uncommitted changes 以及自基准分支以来最近最多 200 个提交，支持平铺或树形文件列表、+/− 行数统计和语法高亮的 diff。将文件标记为 Viewed 后会在已打开的窗口间同步变暗；查看后再次改动的文件会以琥珀色标为 changed。提交、文件列表、差异块（] / [）和 diff 均支持键盘导航。可在 Settings → Side panel 中关闭。 (#1141)
+  - 并排 diff 与侧面板最大化。 任意 diff 都可在 Unified 和 Split 之间切换，Changes 与 Files 共用这一选择。点击侧面板标题栏的最大化按钮，或在焦点位于侧面板时按 macOS 上的 ⇧⌘↩（Windows 和 Linux 上为 Ctrl+Shift+Enter），可让 Changes、Files、Sessions 或 Info 占满当前标签页，点击 Restore chat 即可恢复聊天或 mission。在较窄的侧面板中选择 Split 会自动最大化面板。 (#1141)
+  - 从打开的文件查看 diff。 Files 中打开的文件有未提交改动时，会在 Open in 旁显示 Diff 按钮，可在文件内容与其相对 HEAD 的工作区 diff 之间原地切换。 (#1141)
+  - 应用与终端共用一个主题。 Settings → Appearance 现在提供 Light theme 和 Dark theme 两组各六款成对的应用与终端主题：Runner Light / Runner、Catppuccin Latte / Mocha、Rosé Pine Dawn / Moon、Tokyo Night Day / Tokyo Night、Gruvbox Light / Dark 和 Solarized Light / Dark。点选主题会立即同时更新应用界面与已打开的终端。单独的 Settings → Terminal → Colors 设置已移除；原有的应用主题选择会保留，终端改为跟随所选主题配对的调色板。 (#1319)
+  - 每个 agent 的自定义启动参数。 Settings → Agents → agent → Launch 新增 Custom flags，会在角色参数之前传给该 agent 的所有聊天、角色、mission、恢复和分叉，并显示在命令预览中。Runner 会拒绝未闭合的引号和它自己管理的参数，参数不在 agent 的 --help 中时会给出提醒。 (#1285)
+  - 侧面板保持宽度。 Files 或 Changes 将侧面板加宽后，切换到 Sessions 或 Info、关闭最后一个打开的文件标签页、切换标签页或关闭该界面时，侧面板都保持加宽后的宽度。 (#1344)
+  问题修复
+  - OpenCode 需要 v2。 Runner 现在将该运行时标为 OpenCode v2，并要求 OpenCode 2.0.0 及以上版本。当 PATH 中为 OpenCode v1 时，Runner 会将 OpenCode v2 列在 Not installed 下，不再因不支持 --standalone 而在启动时失败；Settings → Agents 会显示其路径、版本和 v2 要求，拒绝低于 2.0.0 的自定义路径，并在启动或恢复被拒绝时提供 Open Settings。 (#1251)
+  - Starting 提示保持到 agent 出现。 Starting… 和 Resuming… 提示不再在一秒后消失并露出空白窗格或旧内容，而是保持到 agent 的第一屏或终端提示符绘制出来。 (#1201)
+  - 远程未读标记可正常清除。 在活动窗口中查看远程电脑上运行中或已完成的聊天，或在已选中的远程聊天中回复时，主机和远程侧边栏上的绿色未读圆点现在都会被清除，并在切换标签页后保持已读。 (#1315)
+  - Windows 上 Antigravity 用量检查不再闪终端窗口。 Windows 上的 Antigravity CLI 用量检查改为直接读取已保存的登录凭据并通过 HTTPS 查询配额接口，不再启动 agy，因此定时和手动刷新都不会再闪出控制台或 Windows Terminal 窗口。 (#1324)
+ManifestType: locale
+ManifestVersion: 1.28.0

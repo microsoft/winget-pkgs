@@ -1,0 +1,105 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.10.0.schema.json
+
+PackageIdentifier: PBH-BTN.PeerBanHelper
+PackageVersion: 8.0.2
+PackageLocale: zh-CN
+Publisher: PBH-BTN Community
+PublisherUrl: https://github.com/PBH-BTN
+PublisherSupportUrl: https://github.com/PBH-BTN/PeerBanHelper/issues
+PackageName: PeerBanHelper
+PackageUrl: https://github.com/PBH-BTN/PeerBanHelper
+License: GPL-3.0
+LicenseUrl: https://github.com/PBH-BTN/PeerBanHelper/blob/HEAD/LICENSE
+ShortDescription: 自动封禁不受欢迎、吸血和异常的 BT 客户端，并支持自定义规则。
+Tags:
+- bt
+- 种子
+ReleaseNotes: |-
+  8.0.2 是 8.0 系列主要更新的首日补丁。修复了发布当日用户反馈的多个问题。有关 8.0 系列的主要更新日志，请在后面的更新日志中展开对应的折叠块查看。
+  错误修复
+  1. 修复 install4j 安装程序的简体中文语言条目丢失的问题
+  改进
+  1. 异步加载 BtnNetwork 模块，提高程序启动速度
+  2. 调整下载器 HTTP 请求的 connectTime 到 10 秒
+  3. 更新 credit.txt
+  展开 8.0 的主要更新日志
+  v8.0.0/.1 - 主要版本更新
+  感谢所有用户的耐心等待！由于过去数个月中开发团队的所有人都处于非常繁忙的状态，因此 v8.0.0 的进度比预期慢了许多，一直延期到现在才正式发版。
+  在新的版本中，我们引入了许多用户期盼已久的流量限制功能，通过 PeerBanHelper 的流量统计数据，动态调整下载器的速度限制。希望对那些做种大量种子为控制上传量而不得不将速度进行严格限制的用户改进做种体验。
+  除此以外，我们还对过去的现有代码进行了大量的重构和优化，解决了许多性能和功能问题，并修复了许多错误。也欢迎您升级尝试。
+  [!WARNING]
+  这是一次大型更新，请在更新前备份您的配置文件和 PeerBanHelper 数据库。也就是备份整个 data 文件夹。以免数据升级的过程中出现错误导致配置和记录的数据损坏。
+  [!NOTE]
+  BiglyBT 用户： 本次升级需要您更新 BiglyBT 的 PeerBanHelper 适配器到 1.4.0 或者更高版本。
+  8.0.1 更新内容：忘记修改 8.0.0-beta4 的版本号了
+  新功能
+  1. 流量限制
+  使用此功能需要用户手动配置三个选项，分别为：
+  1. 每日（24 小时）最大允许上传的数据量
+  2. 最小速度限制（调整时不低于此值）
+  3. 最大速度限制（调整时不高于此值）
+  启动该功能后，PeerBanHelper 将尽最大努力在最小速度限制和最大速度限制之间根据近 24 小时滑动窗口已下载的数据量动态调整您的下载器限速，以尽可能将每日的传输量控制在设置的值附近。
+  简单来说： 过去一段时间传的少，则提高速度；反之过去一段时间传的多，则降低速度。最终将 24 小时传输量保持在用户设置的期望传输量附近。
+  注意：只有支持流量统计数据的下载器才能使用此功能，否则速度调整将不会生效。当前版本支持该功能的下载器有：qBittorrent, Transmission 和 BiglyBT。
+
+  @Ghost-chu @Gaojianli @azicen
+  2. 表格排序
+  许多用户反馈，PeerBanHelper 的表格没有排序功能，使得在自行手动排查数据的时候困难重重。
+  本次更新对主要的几个呼声较高的表格添加了数据排序功能：
+  - 数据透视->封禁日志：允许按照封禁时间、上传流量和种子大小排序
+  - 数据透视->种子->访问历史->流量
+  - 数据透视->种子->封禁历史->流量
+
+  @Ghost-chu @Gaojianli
+  3. 新的指标
+  新的 恶意：正常 连接比例 和 Peer 会话跟踪数量 指标可以统计自 PeerBanHelper 上次重启以来的连接的 Peers 与封禁的 Peers 的比例，并显示目前 PeerBanHelper 正在跟踪的 Peer 会话数量（即有多少 Peers 自上次 PBH 重启以来连接到过您的下载器并进行过数据传输）。
+  @Ghost-chu
+  4. 插件加载器和 API
+  v8.0 引入了新的 PF4J 插件加载器，现在您可以编写自己的 PeerBanHelper 插件以增强或修改 PeerBanHelper 的行为。
+
+  @Ghost-chu
+  改进
+  1. 重构 PeerBanHelper 代码结构以适配 PF4J 插件加载器，并合适的暴露各个模块的 API 接口。@Ghost-chu
+  2. 引入 Swarm Tracking 技术，以便在不同检查间关联跟踪有关 Peers。该功能类似仅用于 PBH 的、更详细的本地 Tracker，只有与下载器有数据传输的 Peer 才会被记录，所有记录的数据在 PeerBanHelper 退出时不会保留。@Ghost-chu
+  3. 重写 BTN 数据提交读取逻辑，避免出现大量相同时间戳数据导致分批读取死循环的潜在问题。@Ghost-chu
+  4. ⭐ 下载器现在使用唯一 UUID 标定，而不是依赖下载器名称。更改下载器名称不再影响与该下载器关联的数据统计。 与此有关的所有 WebAPI 都进行了重构。@Ghost-chu
+  5. 调整缓存功能，减少 RAM 使用量，以腾出更多宝贵的 RAM 用于其它用途。@Ghost-chu
+  6. 现在新增 MonitorFeatureModule，与普通的模块抽象不同，该类允许一次性处理单次 BanWave 中的所有 Peers，提高处理效率。@Ghost-chu
+  7. 新增 ORMLite 对 SQL 临时表的支持。@Ghost-chu
+  8. 更新使用的 SQLite Loongarch64 构建。@Ghost-chu
+  9. 预载下一代 BTN v2 协议代码。@Ghost-chu
+  10. 新增 WebAPI 的查询排序参数 &orderBy。@Ghost-chu
+  11. 现在语言文件按需加载到 RAM 中，以节约不必要的 RAM 使用。@Ghost-chu
+  12. HTTP 请求现在全面使用虚拟线程作为线程模型，以优化大量下载器 HTTP 请求并发过程中的性能和 RAM 使用。@Ghost-chu
+  13. [install4j] Windows 平台的安装程序现在会在安装 Microsoft Edge WebView2 之前检查是否必要再安装。@Ghost-chu
+  14. BanMetadata 现在额外记录结构化数据，以支撑程序化分析。@Ghost-chu
+  15. PeerBanHelper 的警报系统现在与桌面通知挂钩，当使用 GUI 模式运行时，新的警报会通过系统通知中心发送。@Ghost-chu
+  16. 新增 WebUI 登陆成功、登陆失败、暴力破解防护的控制台日志信息，同时登陆成功时会发送桌面通知提示用户有人已登录 WebUI 控制台。@Ghost-chu
+  17. 改进了 WebUI 的暴力破解防护机制，现在不再计算单个 IP，而是 IP 段以提高保护能力并节约 RAM。@Ghost-chu
+  18. ⭐ [Windows] 在 Windows 平台上运行的 PeerBanHelper 现在支持崩溃自动恢复。当 JVM 遇到致命错误而被迫退出崩溃时，错误处理脚本将被拉起收集错误，并在稍后重新启动 PeerBanHelper。@Ghost-chu
+  19. [install4j] 重新添加 “将 PeerBanHelper 作为服务安装” 的安装方式。@Ghost-chu
+  20. 改进 HTTP 请求的超时设置，现在不再单独限制 connectTimeout 和 headersTimeout，转为单个请求最多等待 30 秒。@Ghost-chu @gsxgmpkt9020
+  21. Java 运行环境升级到 Java 24。@Ghost-chu
+  22. [install4j] 通过安装器安装的 PBH 现在支持从数据目录下的 java.vmoptions 载入 JVM Flags。@Ghost-chu
+  23. 改进 WebUI 的暴力破解防护，扩展到 IPV4/24 和 IPV6/60 地址段。@Ghost-chu
+  24. 改进了 SWT UI 和 Swing UI 的高速日志更新时的渲染性能。 @Ghost-chu
+  25. 改进了 PeerBanHelper 及其安装程序在默认语言方面的行为。@Ghost-chu @RogerRabbit10
+  错误修复
+  1. 修复了 IPDB 下载失败时但服务器返回了状态码的情况下，可能不会使用其它源重试。@Ghost-chu @paulzzh
+  2. 修复了数个并发死锁问题。@Ghost-chu @Kainichy @Backyham NL_sdt (QQ Group)
+  3. 修复了 Install4j 意外的转义了启动参数的 JVM Flags 导致其实际上从未生效的问题。 @Ghost-chu
+  4. 修复 WebUI 日志消息丢失 throwable 内容的问题。 @Gaojianli @Ghost-chu
+  5. 修复 SWT GUI 模式下关闭窗口后，再次打开 WebUI 控制台标签卡内的 WebView2 显示为空白页的问题。@Ghost-chu ♞勿忘我～♞(QQ Group)
+  以及其它性能和资源占用方面的改进。
+  Docker
+  DockerHub: ghostchu/peerbanhelper:v8.0.2
+  阿里云国内镜像加速：registry.cn-hangzhou.aliyuncs.com/ghostchu/peerbanhelper:v8.0.2
+
+  部署教程 | 常见问题 | 如何设置下载器
+ReleaseNotesUrl: https://github.com/PBH-BTN/PeerBanHelper/releases/tag/v8.0.2
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/PBH-BTN/PeerBanHelper/wiki
+ManifestType: locale
+ManifestVersion: 1.10.0

@@ -1,0 +1,49 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Stack-Cairn.LiveAgent
+PackageVersion: 2.0.11
+PackageLocale: en-US
+Publisher: Stack-Cairn
+PublisherUrl: https://github.com/Stack-Cairn
+PublisherSupportUrl: https://github.com/Stack-Cairn/LiveAgent/issues
+PackageName: LiveAgent
+PackageUrl: https://github.com/Stack-Cairn/LiveAgent
+License: MIT
+LicenseUrl: https://github.com/Stack-Cairn/LiveAgent/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Stack-Cairn
+ShortDescription: A local-first AI agent desktop client that deeply integrates large language model reasoning with local system tools.
+Description: LiveAgent is a local-first AI agent desktop client. It deeply integrates large language model reasoning with local system tools, so the AI can genuinely operate your file system, run commands, and manage scheduled tasks — while the Gateway enables remote access and collaboration.
+Tags:
+- agent
+- agentic
+- ai
+- claude-code
+- codex
+- large-language-model
+- llm
+- mcp
+ReleaseNotes: |-
+  LiveAgent v2.0.11
+  内置 K-brain v0.107.21（#1233）。
+  新功能
+  - Windows 上可以直接用“沙箱”命令安全模式了（K-brain#145）：以前在 Windows 原生上选“沙箱”会提示“K-brain 无法在本机启用沙箱”，要求改用 WSL2。现在不需要 WSL2：
+    - 命令只能写当前工作区和沙箱专用的临时目录，工作区外的文件不能写、删或改名；
+    - 工作区里的 .git/hooks、.git/config、.k-brain/、.liveagent/ 只读；
+    - ~/.ssh、~/.aws、~/.config/gh 等凭据目录和 K-brain 的数据目录（API key、会话、记忆）在沙箱里读不到；
+    - “沙箱（断网）”在 Windows 上暂时仍不可用，菜单里会显示原因；后续版本会通过一次性的管理员设置提供。
+  修复
+  - 沙箱不能保护受保护路径时不再提供（#1235）：Linux 上没有可用的 bubblewrap 时（例如没安装，或 Ubuntu 24.04 默认限制了非特权用户命名空间），K-brain 会改用 Landlock，但这种方式不能让工作区里的 .liveagent/、.git/hooks 保持只读。此时“沙箱”和“沙箱（断网）”会显示为不可用并说明原因，运行时也不会以这种方式启动沙箱。安装 bubblewrap 或允许非特权用户命名空间即可恢复。
+  内置 K-brain 的变化
+  - 沙箱加固：
+    - Linux 上没装 bubblewrap 或它无法运行时，K-brain 改用 Landlock + seccomp（K-brain#146）；LiveAgent 暂不使用这种方式，原因见上；
+    - .git/hooks、.git/config 以及 core.hooksPath 指向的目录不能被沙箱里的命令改写，Linux 上连不上 docker、D-Bus 等系统套接字（K-brain#149）；
+    - 沙箱里的命令不再继承名字里带 KEY、SECRET、TOKEN、PASSWORD 的环境变量，需要时可用 sandbox.envKeep 放行（K-brain#157）；
+    - 命令被沙箱拦下时，结果末尾会说明原因，并在能确定时建议把哪个目录加为可写（K-brain#153）。
+  - 工具结果更完整（K-brain#135）：工具结果带上退出码、是否超时和耗时；编辑审批带上变更预览。
+  - 一次可以问多个问题（K-brain#162）：模型可以在一张提问卡片里一次问最多 4 个问题。
+  - kn 终端界面全面改版：对话记录虚拟化与流式 Markdown（长回复流式输出快几十倍）、思考块折叠、/find 搜索、按工具类型显示的工具行与高亮 diff、撤销与历史搜索的输入框、完整命令与可调“始终允许”范围的审批卡片、计划审阅、状态行阶段与 /usage、会话选择器与设置面板等。详见 K-brain v0.107.21 发布说明。
+  完整变更：https://github.com/Stack-Cairn/LiveAgent/compare/v2.0.10...v2.0.11
+ReleaseNotesUrl: https://github.com/Stack-Cairn/LiveAgent/releases/tag/v2.0.11
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

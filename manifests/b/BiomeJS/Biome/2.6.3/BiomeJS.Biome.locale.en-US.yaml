@@ -1,0 +1,158 @@
+# Created by Anthelion using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: BiomeJS.Biome
+PackageVersion: 2.6.3
+PackageLocale: en-US
+Publisher: BiomeJS
+PublisherUrl: https://biomejs.dev/
+PublisherSupportUrl: https://github.com/biomejs/biome/issues
+Author: Biome Developers and Contributors
+PackageName: Biome
+PackageUrl: https://biomejs.dev/
+License: Apache-2.0
+Copyright: Copyright (c) 2023-present Biome Developers and Contributors
+ShortDescription: Biome is a toolchain for web projects, aimed at providing functionalities to maintain them. It offers a formatter and linter, usable via CLI and LSP.
+Moniker: biome
+Tags:
+- css
+- formatter
+- javascript
+- json
+- jsx
+- linter
+- static-code-analysis
+- typescript
+- web
+ReleaseNotes: |-
+  2.6.3
+
+  Patch Changes
+  - #12275 807e616 Thanks @dyc3! - Added the new nursery rule noArraySortForMinMax, which reports sorting an array only to read its smallest or largest value. Use Math.min() or Math.max() instead.
+    const minimum = array.toSorted((a, b) => a - b)[0];
+  - #12432 cf61682 Thanks @dyc3! - Added the nursery rule noBooleanSortComparator, which reports sort comparators that return a boolean instead of a number. For example, array.sort((a, b) => a > b) never puts the first item before the second, so the array isn't sorted correctly.
+    for (const name of users.map((user) => user.name)) {
+      console.log(name);
+    }
+  - #12121 66c3791 Thanks @dyc3! - Added the nursery rule noNewRequire, which disallows calling require with new, such as new require("app-header").
+  - #12316 34b520d Thanks @dyc3! - Added the new nursery rule noObsoleteAttributes, which disallows obsolete attributes on HTML elements and suggests what to use instead.
+    <table bgcolor="#ffffff" cellpadding="5"></table>
+  - #12258 cce2385 Thanks @dyc3! - Added the nursery rule noPathConcat, which disallows building file paths and URLs by joining strings to __dirname, __filename, import.meta.dirname, import.meta.filename, or import.meta.url.
+    const fullPath = __dirname + "/foo.js"; // reported
+  - #12287 e12ad78 Thanks @dyc3! - Added the new nursery rule noPlaywrightNthMethods, which disallows selecting Playwright elements by position with first(), last(), and nth(). A test that relies on the position of an element can act on a different element when the page changes.
+    await page.locator("button").first().click();
+  - #12343 62ad123 Thanks @vibbix! - Added the nursery rule noSelfNestedLayer, which disallows nesting a cascade layer inside a layer with the same name. Layer names inside an @layer block are relative to it, so the inner layer below creates the sublayer components.components instead of adding to components.
+    @layer components {
+      @layer components {
+        .button {
+          color: red;
+        }
+      }
+    }
+  - #12289 bbbd95d Thanks @dyc3! - Added the nursery rule noShortTimeValues, which reports CSS animation and transition times that are shorter than the configured minimum number of milliseconds. The rule does nothing until minimum is set.
+    For example, the following code is invalid when minimum is 100:
+    a {
+      transition-duration: 80ms;
+    }
+  - #12431 f748ec0 Thanks @dyc3! - Added the nursery rule noSvelteInternal, which disallows importing from svelte/internal and its submodules. These modules are private to Svelte and can change or disappear in any release.
+    import { get_current_component } from "svelte/internal";
+  - #12270 8ae35c4 Thanks @dyc3! - Added the nursery rule noTanstackQueryRestDestructuring, which disallows rest destructuring and object spread on TanStack Query results. Both read every property of the result, so the component updates on every change to the query.
+    import { useQuery } from "@tanstack/react-query";
+    const { data, ...rest } = useQuery({ queryKey: ["todos"], queryFn: fetchTodos });
+    The rule belongs to the new tanstackQuery domain.
+    for (const item of getItems(createArgument(seed))) {} // reported
+  - #12422 0be8d10 Thanks @dyc3! - Added the new nursery rule noUnsafeReturn, which disallows returning a value typed as any from a function.
+    function parse(text: string) {
+      return JSON.parse(text); // reported
+    }
+  - #12311 8434c92 Thanks @dyc3! - Added the nursery rule noUselessSplice, which reports splice() calls that have a simpler alternative. For example, array.splice(0, 1) can be written as array.shift().
+  - #12293 eaa4a2b Thanks @dyc3! - Added the nursery rule noVueUnusedEmitDeclarations, which reports events that a Vue component declares but never emits.
+    For example, the following component never emits close:
+    <script setup>
+    const emit = defineEmits(["change", "close"]);
+    emit("change");
+    </script>
+  - #12386 f01ebb0 Thanks @dyc3! - Added the nursery rule noVueVTextVHtmlOnComponent, which disallows v-text and v-html on Vue components. These directives replace everything inside the component's root element instead of filling its slot.
+    <template>
+      <MyComponent v-html="html"></MyComponent>
+    </template>
+  - #12385 7bd38b7 Thanks @dyc3! - Added the new nursery rule noVueWatchAfterAwait, which disallows creating watchers after an await in a Vue component's setup() function. Vue doesn't stop these watchers when the component is removed. A watcher is allowed when the function it returns is stored, so that function can be called later to stop the watcher.
+    <script>
+    import { watch } from "vue";
+    export default {
+      async setup() {
+        await fetchUser();
+        watch(source, () => {});
+      },
+    };
+    </script>
+  - #12286 50d2a4e Thanks @dyc3! - Added the nursery rule noZeroLengthUnit, which disallows units on zero lengths in CSS. Biome can remove the unit.
+    a {
+      top: 0px;
+    }
+  - #12300 ab2eb9e Thanks @dyc3! - Added the nursery rule useBlockStatementOverIife, which reports functions that are called immediately when a block statement can replace them. Biome can replace these functions with a block statement.
+    Invalid:
+    (() => {
+        const value = getValue();
+        run(value);
+    })();
+  - #12421 1c2cac0 Thanks @dyc3! - Added the nursery rule useConsistentLightnessNotation, which enforces writing the lightness of lab(), lch(), oklab(), and oklch() colors as a percentage, or as a number with the notation option. For example, with the default options, oklch(0.85 0.17 88) is reported and can be fixed to oklch(85% 0.17 88).
+  - #12224 fef7ed4 Thanks @dyc3! - Added the nursery rule useExpectToContain, which reports tests that compare the result of includes() to a boolean, and suggests using toContain() instead.
+    expect(fruits.includes("apple")).toBe(true);
+  - #12299 0d5025d Thanks @dyc3! - Added the new nursery rule useIteratorZip, which reports for loops that use an index only to read the same position from several arrays. Such loops can use Iterator.zip() instead.
+    // reported
+    for (let index = 0; index < Math.min(names.length, scores.length); index++) {
+      save(names[index], scores[index]);
+    }
+  - #12298 a234d2f Thanks @dyc3! - Added the nursery rule useMathAbs, which reports manual absolute value calculations and range checks that can use Math.abs(). For example, value < 0 ? -value : value can be written as Math.abs(value), and value > limit || value < -limit can be written as Math.abs(value) > limit.
+  - #12499 bd024cc Thanks @dyc3! - Added the nursery rule useMathTrunc, which requires Math.trunc() instead of bitwise operations or parseInt(String(x), 10) for removing the decimal part of a number. For example, const result = value | 0; and const result = ~~value; are now reported.
+  - #12314 9e875a4 Thanks @dyc3! - Added the new nursery rule usePackageJsonValidCpu, which reports a cpu field in package.json that isn't an array of known processor types. The cpu field lists the processor types that the package supports.
+    For example, the rule reports the following package.json file because x86 isn't a processor type that package managers recognize:
+    {
+      "name": "my-package",
+      "cpu": ["x86"]
+    }
+  - #12315 cb30544 Thanks @dyc3! - Added the nursery rule usePackageJsonValidEngines, which reports an invalid engines field in package.json. The field must be an object, and each of its values must be a non-empty string.
+    For example, the following engines field is reported because the version of node is a number:
+    {
+        "engines": {
+            "node": 24
+        }
+    }
+  - #12400 407604d Thanks @dyc3! - Added the nursery rule useVueComponentIs, which requires Vue <component> elements to bind the is attribute with :is or v-bind:is. Without it, Vue has no component to render.
+    <template>
+      <component :is="currentView" />
+    </template>
+  - #12337 c371520 Thanks @dyc3! - Added the nursery rule useVueToggleInsideTransition, which requires the element inside a Vue <Transition> to be shown and hidden with v-if or v-show. Without one of them, the element is always shown and the transition never plays.
+    <template>
+      <Transition>
+        <div>Content</div>
+      </Transition>
+    </template>
+  - #12387 64472e9 Thanks @dyc3! - Added the nursery rule useVueTypedRef, which reports ref() and shallowRef() calls in TypeScript that have no type argument and no initial value other than null or undefined. Without a type, TypeScript can't tell which values these refs are meant to hold.
+    import { ref } from "vue";
+    const count = ref();
+  - #12423 bf1a55a Thanks @dyc3! - Added the nursery rule useVueVOnExact, which requires the .exact modifier on a v-on listener when another listener for the same event on the element needs more modifier keys, such as .ctrl. Without .exact, both listeners run when those keys are held down. The rule accepts the following code:
+    <template>
+      <button @click.exact="select" @click.ctrl="open"></button>
+    </template>
+  - #12418 208730e Thanks @latin-1! - Fixed #12417: useSortedProperties could produce invalid CSS when sorting properties without a final semicolon. Comments attached to reordered properties are preserved.
+  - #12216 f2a3c71 Thanks @dyc3! - Added the new nursery rule noDanglingUnderscore, which disallows variable names, function names, and property accesses that start or end with an underscore.
+    const _count = 0; // reported
+    user._id; // reported
+  - #12536 438997f Thanks @vidigoat! - Fixed the formatter removing the parentheses around an instantiation expression before +, -, <, >, >=, >> and >>>. TypeScript reads make<T> + y as make < T > +y, and make<T> >> y doesn't parse.
+    - x = make<T> + y;
+    + x = (make<T>) + y;
+    - x = make<T> >> y;
+    + x = (make<T>) >> y;
+  - #12540 7d3e8a1 Thanks @vidigoat! - Fixed the formatter removing the parentheses around an instantiation expression before a non-null assertion or type arguments of a class heritage, which produced code that doesn't parse.
+    - const a = make<T>!;
+    + const a = (make<T>)!;
+    - class D extends B<T><T> {}
+    + class D extends (B<T>)<T> {}
+ReleaseNotesUrl: https://github.com/biomejs/biome/releases/tag/@biomejs/biome@2.6.3
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://biomejs.dev/guides/getting-started/
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

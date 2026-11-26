@@ -1,0 +1,107 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: code-yeongyu.OmO
+PackageVersion: 5.1.79
+PackageLocale: en-US
+Publisher: code-yeongyu
+PublisherUrl: https://github.com/code-yeongyu
+PublisherSupportUrl: https://github.com/code-yeongyu/oh-my-openagent/issues
+Author: YeonGyu-Kim
+PackageName: OmO
+PackageUrl: https://github.com/code-yeongyu/oh-my-openagent
+License: Freeware
+LicenseUrl: https://github.com/code-yeongyu/oh-my-openagent/blob/HEAD/LICENSE.md
+ShortDescription: AI coding assistant with read, bash, edit and write tools.
+Description: |-
+  OmO is a standalone terminal AI coding agent with the OMO extension built in. It keeps a memory system, CodeMode and subscription providers, and lets one prompt drive several models at once.
+  It reads, edits and runs your code from the terminal, and works with Claude, Codex, Gemini, OpenAI and other compatible providers.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- harness
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  Fixed
+  - The /remote close in the TUI follows thread_close's close contract (#14234). A close refused because the thread has messages it has not read names /remote close <session> --force and lists those messages, or says the ids are unavailable on that device's engine. The picker then offers "Close anyway". A forced close lists the messages it dropped. The refusal's details.reason is the engine's own reason (turn_active or work_pending). (#14246, fixes #14245) (#14248)
+  - Thread tools: a command for a thread whose session parked on another device after it was listed no longer fails unsupported with advice to update omo on that device. The device service answers such a command route_unlisted (its host no longer lists that session, so nothing was sent to it). thread_close now answers closed: false, reason: "not_live", and the other thread tools answer not_resumable, as for a session that ended there. A create, or a reopen's session-file lookup, refused that way is host_unavailable, with a retry. (#14237, fixes #14233) (#14248)
+  - The cold-wake session host unit (and every other unit or plist the cold-wake install writes) is now written 0644 under any umask. Under umask 077 it was written 0600, because a file's creation mode is masked by the umask; the mode is now set explicitly before the file is moved into place. (#14249, fixes #14247) (#14248)
+  - A cold-wake unit or plist an earlier build already left 0600 is set back to 0644 the next time the install (or a refresh to a newer runtime) finds its content unchanged, with no reload or restart. A file this user cannot change the mode of (another owner's, or on a read-only filesystem) is left as it is and the install still succeeds. (#14249) (#14248)
+  Changed
+  - thread_close no longer drops messages a thread has not read unless you ask it to. Before, it always interrupted the session and silently dropped any messages queued behind its run. Now:
+    - A busy thread with unread messages is refused turn_active. The refusal names those messages (pending_deliveries) and gives the force option.
+    - thread_close({ thread, force: true }) closes it anyway.
+    - Every close result carries dropped_deliveries, the messages it handed back unread (an empty list when there were none).
+    - An idle thread still closes without force, even when an interrupted run left messages stranded (#14169); those are listed too.
+    - On a device whose engine cannot name its queued messages (older than code-yeongyu/senpi#7006), a default close never interrupts. It says the message ids are unavailable there, and force: true still closes it.
+    - omo remote close takes --force and reports the dropped messages as well. (#14242, fixes #14234) (#14248)
+  Added
+  - The desktop can ask OmO which model each category and agent runs. A new read-only extension request, omo.modelRouting.resolve, answers the model every category (under its canonical name) and every task agent would spawn on, using the same resolvers a task call uses against the session's project config, model registry and sign-ins, and says whether that model came from your omo.json or from OmO's defaults. (#14025)
+  - 822bd92303 Merge pull request #14290 from code-yeongyu/release/v5.1.79-source-state
+  - fd7c18a9de Merge pull request #14286 from code-yeongyu/ratchet-no-ignore
+  - 2d1b133359 fix(lint-ratchet): the lint ratchet refuses a file oxlint skipped, so a config's ignorePatterns cannot hide one either
+  - 0bed7304a4 fix(lint-ratchet): lint ratchet runs oxlint with --no-ignore, so an ignore file cannot hide a file from it
+  - abfb5be796 Merge pull request #14248 from code-yeongyu/release-train/omo-20261119-thread-train-3
+  - 7559752bf0 Merge pull request #14267 from code-yeongyu/fix/11845-progress-aware-spawn-budget
+  - 5e628bcd6f Merge pull request #14268 from code-yeongyu/feat/no-bun-mock-module
+  - c7367ed9aa test(omo-native): review fixes for the progress-aware budget
+  - 07b5060b91 test(script): cover createRequire and members read off a loaded bun:test
+  - 42ef9ed14e fix(script): no-module-mock also sees bun:test loaded through createRequire
+  - 94f3fcc203 feat(script): ratchet module mocks in tests (no-module-mock)
+  - e9940fb6bb test(omo-native): bound daemon spawn waits by child CPU progress, not wall clock
+  - 8356fb89da Merge pull request #14259 from code-yeongyu/fix/14257-published-smoke-tarball-wait
+  - 1de932cb39 fix(ci): fail fast on invalid smoke wait overrides; name sub-minute waits in seconds
+  - a20f5a8f3e fix(ci): wait for latest's tarball to commit before the published install smoke packs it
+  - 50641b1434 Merge dev 95e7eb528d (#14239, #14025) into thread train 3
+  - 95e7eb528d Merge pull request #14025 from code-yeongyu/feat/11344-model-routing-resolve-2
+  - 452b41dd6b Merge pull request #14239 from code-yeongyu/p0/relcwd-owned-folder
+  - 608ebb582e Merge dev 5b42751b12 (release v5.1.78) into thread train 3
+  - ff717ee44d Merge origin/dev (5b42751b12) into feat/11344-model-routing-resolve-2
+  - 5b42751b12 Merge pull request #14243 from code-yeongyu/release/v5.1.78-source-state
+  - a59c0a28a4 docs(changes): fold #14249's fragment into 14248.md
+  - 12bdc2c44b Merge #14249 (cold-wake unit mode 0644 under any umask, Fixes #14247) into thread train 3
+  - 24ed73e7fb Merge #14227 (drop the dead no-endpoint check in device-service-core) into thread train 3
+  - 053403d460 fix(cold-wake): make the unchanged-unit mode repair best effort (#14249)
+  - 4543cc7fbc fix(cold-wake): repair the mode of an unchanged unit left 0600 (#14247)
+  - a51b95ff70 Merge current dev (train-3 prep)
+  - bc80fcf31f docs(changes): fold the thread train 3 members' fragments into 14248.md
+  - 7bc8c2bb08 docs(changes): note the cold-wake unit mode fix (#14249)
+  - 9136ad1f53 fix(train): move the two-CLI-generations comment back above typedFailure (#14246 review LOW, comment only)
+  - 3dadbb1284 fix(cold-wake): write the session-host unit 0644 regardless of umask (#14247)
+  - e323a3683e Merge #14246 (L1/L2 follow-up of #14242, Fixes #14245) into thread train 3
+  - 645afac4ce test(thread): train 3 resolution - #14237's route_unlisted close expects #14242's dropped_deliveries
+  - 05a6e32a06 docs(changes): fragment for #14246
+  - c8221344c7 fix(remote): /remote close carries the close contract (force, dropped ids, surface-named hint); unread refusal keeps the engine's reason (#14245)
+  - f30e165403 Merge #14242 (thread close unread, Fixes #14234) into thread train 3
+  - 84ce4a7ff2 Merge #14237 (thread route unlisted, Fixes #14233) into thread train 3
+  - 81368b7d1b chore(thread): un-export two module-local constants (values unchanged) and format (#14242 static checks)
+  - 0b7bc8920f docs(changes): fragment for #14242
+  - 2244531554 fix(thread): thread_close never drops unread deliveries unless forced; dropped_deliveries on every close (#14234)
+  - a51ee84fb4 test(thread): correct the cleanup comment (review L1 of #14239): bun:test already awaits an async hook; the wrapper exists to remove the owned folder
+  - 99994cec02 fix(thread): an endpoint-level route_unlisted (reopen lookup) is host_unavailable, one mapping for open and find_session (#14237 review L1)
+  - e462f2a34d test(thread): the relative-cwd case owns its caller folder instead of assuming a repo-root cwd (#14238)
+  - 026c659f5a docs(changes): fragment for #14237
+  - 2c005dd906 fix(thread): answer route_unlisted as a session the device no longer runs, not 'update omo' (#14233)
+  - 916de04c94 refactor(device-service-core): drop the dead no-endpoint check after the endpoint lookup
+  - 199099f68d Merge origin/dev (630a673483) into the branch; regenerate bundles once
+  - 76a98618c8 chore(build): regenerate bundles after merging dev
+  - e0590e588a Merge dev into feat/11344-model-routing-resolve-2
+  - 847200fe34 Merge remote-tracking branch 'origin/dev' into feat/11344-model-routing-resolve-2
+  - 3556503cbc docs(changes): name the fragment for #14025
+  Thank you to 1 community contributor:
+  - @YeongYU:
+    - test(thread): the relative-cwd case owns its caller folder instead of assuming a repo-root cwd (#14238)
+    - test(thread): correct the cleanup comment (review L1 of #14239): bun:test already awaits an async hook; the wrapper exists to remove the owned folder
+  bun add -g omo-ai
+ReleaseNotesUrl: https://github.com/code-yeongyu/oh-my-openagent/releases/tag/v5.1.79
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://omo.dev/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

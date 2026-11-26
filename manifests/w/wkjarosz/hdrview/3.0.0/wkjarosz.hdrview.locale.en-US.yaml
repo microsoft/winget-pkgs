@@ -1,0 +1,120 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: wkjarosz.hdrview
+PackageVersion: 3.0.0
+PackageLocale: en-US
+Publisher: wkjarosz
+PublisherUrl: https://github.com/wkjarosz
+PublisherSupportUrl: https://github.com/wkjarosz/hdrview/issues
+PackageName: hdrview
+PackageUrl: https://github.com/wkjarosz/hdrview
+License: Custom
+LicenseUrl: https://github.com/wkjarosz/hdrview/blob/HEAD/LICENSE.txt
+Copyright: Copyright (c) Wojciech Jarosz
+ShortDescription: simple image viewer for examining and comparing HDR images
+Description: A simple research-oriented image viewer with an emphasis on examining and comparing high-dynamic range (HDR) images.
+Tags:
+- comparison-tool
+- exr
+- hdr
+- hdr-images
+- high-dynamic-range
+- image
+- image-processing
+- macos
+- openexr
+- pfm
+ReleaseNotes: |-
+  What's changed
+  ========
+
+  This is the first HDRView release in the 3.0 series! It includes a huge amount of work across 55 pull requests and over 350 commits.
+
+  The major version bump is for four things HDRView simply could not do before:
+
+  • **HDR output on all desktop platforms**, Windows and Wayland Linux now join macOS in supporting true HDR output on compatible displays!
+  • **it can edit images again**, with a real undo history — the destructive editing HDRView had before the 2.0 rewrite, rebuilt on top of the modern channel/layer image model;
+  • **you can draw on an image** — arrows, boxes, circles, scribbles and text — to mark up what you are looking at;
+  • **it can act as a display server for supported renderers** to display in-progress renderings, over the same protocol [tev](https://github.com/Tom94/tev) and [PBRT](https://github.com/mmp/pbrt-v4) speak.
+
+  On top of that：sessions, multi-selection, JPEG 2000, HDR gain maps in various formats, a much faster AVIF decoder, a rebuilt statistics/histogram panel — and a *lot* of correctness work. Seven systematic bug hunts, plus AddressSanitizer, UndefinedBehaviorSanitizer, ThreadSanitizer and libFuzzer jobs in CI, turned up several crashes, memory-safety bugs, and a long list of images that were being decoded, displayed or exported *silently wrong*. HDRView now has a steadily growing arsenal of over 340 automated tests, alongside ~100 GUI regression tests.
+
+  Highlights
+  ----------------------
+
+  • **Image editing with undo** — crop, resize, flips and rotations, blurs, unsharp mask, median, exposure/gamma and brightness/contrast curves you can drag, channel mixer, hue/saturation, color-space conversion, seamless (Poisson) paste, mip pyramid generation, environment-map remapping and irradiance convolution — all undoable, with a History panel (#208)
+  • **Annotations** — rectangles, ellipses, lines, arrows, freehand scribbles and text drawn over an image, in image coordinates, saved with the session and never baked into the pixels (#223, #226)
+  • **Live images from your renderer** — a display server speaking tev's IPC protocol, verified end to end against pbrt-v4 (#207)
+  • **True HDR display output on macOS, Windows and Linux/Wayland**, with the display's real headroom read from each platform and drawn in the histogram (#178, #192)
+  • **Sessions** (`.hsess`) — save and restore your whole working state, and export a session *bundle* that zips the images along with it (#176)
+  • **Multi-selection** over (image, channel group) pairs, with edits fanning out over the selection (#209)
+  • **HDR gain maps** from iPhone and Android photos — Apple, ISO 21496-1, Adobe XMP and JPEG XL flavors (#190)
+  • **JPEG 2000 and HTJ2K** read and write, including bare codestreams (#222)
+  • **AVIF decoding up to 6× faster** via dav1d (#206)
+  • **A unified Pixel statistics window** — pixel inspector, channel statistics and histogram in one panel, with a rebuilt histogram (#172, #181, #186)
+  • **Native Windows ARM64 builds** (#170)
+
+  Image editing, with an undo system
+  ----------------------
+
+  Editing is back. The `Edit` menu currently contains 34 commands grouped by type. You can run edit commands on the current image, or on multiple selected images at once. Each one lands as a single step in a History panel that shows the whole stack, where you are in it, and what each step costs in memory.
+
+  • **Clipboard** — cut, copy, paste, and gradient-domain/Poisson seamless paste
+  • **Size and orientation** — flips, quarter turns, crop, image size, canvas size, and generating a mip pyramid as one image per level.
+  • **Tone** — invert, clamp, zap gremlins (NaNs/infinities), exposure/gamma, brightness/contrast, fill.
+  • **Color** — convert color space (which retags the image's metadata to match), channel mixer, hue/saturation, flatten over a background. CIE L\*a\*b\* was added along the way, so brightness/contrast can work on lightness alone, or on the two opponent chromaticity axes alone.
+  • **Channels** — ungroup a group into single channels, regroup them, delete a group outright.
+  • **Neighborhood filters** — Gaussian, fast Gaussian and box blur, unsharp mask, median, shift with wrapping, bump-to-normal-map.
+  • **Environment maps** — remap between six parameterizations with EWA filtering over a mip pyramid, and convolve one to irradiance. Both the 3×4 cube cross and OpenEXR's 1×6 column are handled.
+
+  Long filters run off the main thread behind a progress bar you can cancel.
+
+  Annotations
+  ----------------------
+
+  There is now a floating tools palette with the existing Pan, selection, and pixel inspector tools. And now also with an annotation tool. Pressing <kbd>A</kbd> brings it up and pressing it again cycles the type of annotation. <kbd>F10</kbd> brings up the Annotations panel.
+
+  • Drag on empty space to draw, drag a shape to move it, drag a handle to resize it. <kbd>Esc</kbd> puts back whatever a drag changed; <kbd>Delete</kbd> removes the annotation in hand.
+  • **Text** is placed with a click and typed inline, with a choice of face, size and a 3×3 anchor grid; dragging a corner of its box scales the font.
+  • **Scribbles** can be drawn as straight segments or smoothed into a curve.
+  • The panel lists every annotation with visibility, lock, per-shape icon, rename and delete, and you can drag rows to reorder.
+  • Stroke width and font size can be in **image pixels** (so it zooms with the image) or **screen pixels** (so it stays put), picked from a menu inside the field. (#226).
+
+  Annotations are *view state*, not image data：they never enter the undo history, never mark an image modified, and are never rasterized into the pixels. That is what lets them work on an image a renderer is still writing into. They are per image, survive a reload, and are saved into sessions.
+
+  Live images from a renderer
+  ----------------------
+
+  HDRView now listens for images over the protocol tev uses, so the clients that already exist for it work unchanged — a renderer can create an image, stream tiles into it as it converges, and lay vector graphics over it. It is off until you turn it on, from the Watched Folders panel, the command palette, or `--listen` (#207).
+
+  • Verified end to end against **pbrt-v4** (`pbrt --display-server 127.0.0.1:14158`)：the render arrives tile by tile, and HDRView's channel statistics match the EXR pbrt writes.
+  • The panel shows an indeterminate activity bar with the live rate and running totals.
+  • Vector overlays (paths, shapes, text, in the image's own coordinates) are drawn through Dear ImGui's draw lists. The few commands with no equivalent are reported (but these seem to be uncommon in the wild).
+
+  HDR display output, everywhere
+  ----------------------
+
+  The EDR/HDR display support HDRView has long had on macOS now works on Windows and Linux/Wayland too (#178). Frames are composited in extended sRGB and converted once, at the end, into what the display actually wants — scRGB linear, a power curve, or PQ, over a wider gamut where available. The display's color space is re-queried every frame, so moving the window between monitors or toggling the OS HDR mode takes effect immediately.
+
+  This is thanks in large part to @wjakob and @Tom94, who worked out how to actually get HDR to the display in [NanoGUI](https://github.com/wjakob/nanogui) and [tev](https://github.com/Tom94/tev); HDRView now depends on Tom94's [patched GLFW fork](https://github.com/Tom94/glfw).
+
+  The histogram now shows what your display can do with the image (#192)：the span up to display value 1 is labeled SDR, the span from there to the display's current headroom is labeled HDR and grows and shrinks as the monitor's brightness changes. The About dialog reports the headroom too.
+
+  Sessions, selection and workflow
+  ----------------------
+
+  • **Sessions** (#176)：`File > Save session…` / `Load session…` store the loaded image list, current and reference selection, blend mode, view and display settings, annotations, and your channel selection (by channel name, so it survives a reload) to a `.hsess` file — with drag-and-drop, CLI, and Finder/Explorer "Open with" support. An exported session *bundle* zips the images with it, so it can be handed to someone else or opened in the web build. Use this to prepare image comparison sets before your next research meeting!
+  • **Multi-selection** (#209) is back, extended from images to **(image, channel group)** pairs：<kbd>Ctrl</kbd>/<kbd>Cmd</kbd>-click toggles, <kbd>Ctrl</kbd>/<kbd>Cmd</kbd>+<kbd>Shift</kbd>-click selects a range, and <kbd>Shift</kbd>-click still sets the reference. Edits run once per selected image, each as its own undo step. This also allows you to ungroup an RGBA group, deselect the alpha, and group the rest back up.
+  • **Status-bar log badge** (#171) surfaces the highest-severity message since you last looked at the Log window; click it to jump straight there.
+  • **Flipbook playback** is now paced at the rate you asked for (#210). The frame period was rounded to whole milliseconds, which collapsed every broadcast rate onto its neighbor — 23.976 and 24 fps were bit-identical, and both actually ran at 24.39. Playback also no longer caps at the render rate or accumulates timing error, and the rate field shows three decimals.
+  • **Mouse wheel zoom and trackpad pinch** (#203, #198). A wheel notch used to zoom by about 1.7%, which is why the wheel felt dead over the image and fine over the panels; a notch is now a quarter stop, with trackpad travel detected separately and scaled to match. Pinch-zoom on a touchscreen or trackpad continues to work.
+
+  Statistics, histogram and inspection
+  ----------------------
+
+  • The Pixel Inspector, Channel Statistics and Histogram are merged into one dockable **Pixel statistics** window (<kbd>F6</kbd>), with a resizable histogram, a legend, and per-side clip warnings (#172, #181).
+  • **The histogram was rebuilt** (#186). 8-bit images used to draw as a row of detached spikes; bins are now laid out in the space the x axis is drawn in, so they are equally wide on screen and their height is
+ReleaseNotesUrl: https://github.com/wkjarosz/hdrview/releases/tag/v3.0.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

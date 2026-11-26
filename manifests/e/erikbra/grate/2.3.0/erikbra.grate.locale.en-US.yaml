@@ -1,0 +1,78 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: erikbra.grate
+PackageVersion: 2.3.0
+PackageLocale: en-US
+Publisher: erikbra
+PublisherUrl: https://github.com/grate-devs
+PublisherSupportUrl: https://github.com/grate-devs/grate/issues
+PackageName: grate
+PackageUrl: https://github.com/grate-devs/grate
+License: MIT
+LicenseUrl: https://github.com/grate-devs/grate/blob/HEAD/LICENSE
+ShortDescription: grate - sql for the 20s
+ReleaseNotes: |-
+  grate 2.3.0 adds database-specific distributions alongside the all-in-one package, CI-aware migration logging with activity groups and progress, interactive terminal progress, SQL Server restore file relocation, and SQL Server script diagnostics, alongside migration correctness fixes and improvements to documentation and release tooling.
+
+  ## New features
+
+  • Improve migration logging with native CI groups, progress and warning/error annotations, plus live progress in capable interactive terminals. The format is detected automatically or selected with `--log-format`. [#904](https://github.com/grate-devs/grate/pull/904), [#934](https://github.com/grate-devs/grate/pull/934), closes [#903](https://github.com/grate-devs/grate/issues/903).
+  • Add database-specific packages for SQLite, SQL Server, MariaDB, PostgreSQL and Oracle alongside the all-in-one package, across CLI archives, .NET tools, Docker and native package formats. Each variant defaults to its selected database. [#910](https://github.com/grate-devs/grate/pull/910).
+  • Relocate SQL Server backup files during restore with repeatable `--restore-move 'logical-name=destination-path'` options. Library consumers can use `RestoreFileMove`, `GrateConfiguration.RestoreMoves` and `WithRestoreMoves(...)`. Validate mappings before migration, quote restore inputs correctly, and attempt to restore `MULTI_USER` access after a restore failure while retaining the original exception. Existing restore calls remain supported. [#908](https://github.com/grate-devs/grate/pull/908), closes [#593](https://github.com/grate-devs/grate/issues/593).
+  • Include SQL Server `PRINT` and other informational script messages at Debug/Trace verbosity, with the script name. Default Information output is unchanged; SQL errors still fail migrations. [#907](https://github.com/grate-devs/grate/pull/907), closes [#594](https://github.com/grate-devs/grate/issues/594).
+
+  ## Database-specific distributions
+
+  Choose a package containing the provider you need, or keep the existing all-in-one package. Every variant exposes the same `grate` command. A database-specific build defaults to its selected database and rejects unsupported provider selections before migration starts. The all-in-one package keeps SQL Server as its default. [#910](https://github.com/grate-devs/grate/pull/910), related to [#909](https://github.com/grate-devs/grate/issues/909).
+
+  | Distribution | .NET tool ID / release file prefix | Default database |
+  | --- | --- | --- |
+  | All | `grate` | SQL Server |
+  | SQLite | `grate-sqlite` | SQLite |
+  | SQL Server | `grate-sqlserver` | SQL Server |
+  | MariaDB | `grate-mariadb` | MariaDB |
+  | PostgreSQL | `grate-postgresql` | PostgreSQL |
+  | Oracle | `grate-oracle` | Oracle |
+
+  • Each distribution has self-contained ZIPs for the existing nine platform/architecture combinations, Windows x64/Arm64 MSI installers, and Debian amd64/arm64 packages. Packaging now produces 54 ZIPs, 12 MSIs and 12 Debian packages, plus checksums and a release manifest.
+  • Six framework-dependent .NET tools retain net8.0/net9.0/net10.0/net11.0 assets. The six existing dotted-name library packages, such as `grate.sqlite` and `grate.sqlserver`, remain separate from the hyphenated CLI tools.
+  • Docker adds `gratedevs/grate:sqlite-2.3.0`, `:sqlserver-2.3.0`, `:mariadb-2.3.0`, `:postgresql-2.3.0` and `:oracle-2.3.0`, each for linux/amd64 and linux/arm64. Stable profile aliases use `:sqlite`, `:sqlserver`, `:mariadb`, `:postgresql` and `:oracle`. Existing all-in-one version/`latest` tags and the digest-identical `erikbra/grate` compatibility copy retain their behavior; no profile tags are added to the compatibility repository.
+  • Stable release tooling updates six casks in the existing `erikbra/cask` tap and prepares six WinGet identity candidates, six Chocolatey x64 packages and six Homebrew source-formula candidates. WinGet/Chocolatey submission and acceptance, and source-formula channel placement, remain separate. New identities become installable only after their release/publication or acceptance steps complete.
+
+  See the [distribution guide](https://github.com/grate-devs/grate/blob/1a25dbb2d6195338c350be25831c2d25123c444d/docs/distributions.md) and [complete distribution catalog](https://github.com/grate-devs/grate/blob/1a25dbb2d6195338c350be25831c2d25123c444d/docs/distribution-catalog.md) for filenames, channels and platform coverage.
+
+  ## Fixes
+
+  • Report transaction commit failures as migration failures rather than success. Log the underlying cause and attempt to record version status `Error` after disposing the transaction. Includes a real PostgreSQL deferred-constraint regression. [#899](https://github.com/grate-devs/grate/pull/899), closes [#647](https://github.com/grate-devs/grate/issues/647).
+  • Use default database creation when a configured custom creation folder contains no SQL files, preserving creation-dependent follow-up scripts and dry-run behavior. [#897](https://github.com/grate-devs/grate/pull/897), closes [#532](https://github.com/grate-devs/grate/issues/532).
+  • Reject missing explicitly configured CLI migration directories before starting migration. Report the folder key/path and exit with code 1, including for configuration-file mappings. Standard folders without explicit path overrides remain optional. [#898](https://github.com/grate-devs/grate/pull/898), closes [#292](https://github.com/grate-devs/grate/issues/292).
+  • Create bootstrap temporary directories directly, avoiding temporary-file conversion and deletion of an existing directory. This addresses a failure observed while preparing bootstrap scripts on Windows. [#934](https://github.com/grate-devs/grate/pull/934).
+
+  ## Dependencies and contributor tooling
+
+  • Move source builds to stable .NET SDK `11.0.100`. Self-contained CLI archives, MSI/Debian installers and all six Alpine 3.24 Docker profiles bundle stable .NET runtime `11.0.0`. Framework-dependent tools and libraries retain `net8.0`/`net9.0`/`net10.0`/`net11.0` assets and use the matching installed runtime. [#943](https://github.com/grate-devs/grate/pull/943).
+
+  • Update `System.Security.Cryptography.Pkcs` to `10.0.14` across all four target frameworks. Refresh standalone .NET 10 examples and their dependencies, and retry transient pinned WiX downloads without weakening checksum checks. [#926](https://github.com/grate-devs/grate/pull/926).
+  • Replace `grate.sln` with `grate.slnx`, preserve solution/filter membership and build mappings, consolidate NuGet configuration, audit direct/transitive dependencies at all severities, and enable package pruning. [#928](https://github.com/grate-devs/grate/pull/928).
+  • Convert repository automation to PowerShell and retain the small runtime shell launchers. [#917](https://github.com/grate-devs/grate/pull/917).
+  • Validate complete PR CI evidence, stage expensive checks behind build/isolated tests, and run shared build-independent checks before compilation. Main protection remains a separate proposal. [#913](https://github.com/grate-devs/grate/pull/913), [#922](https://github.com/grate-devs/grate/pull/922), [#927](https://github.com/grate-devs/grate/pull/927).
+  • Normalize C# whitespace/encoding and add a shared changed-file formatting check; configure advisory CodeRabbit reviews; update CodeQL Action to `4.39.3`. [#923](https://github.com/grate-devs/grate/pull/923), [#912](https://github.com/grate-devs/grate/pull/912), [#902](https://github.com/grate-devs/grate/pull/902), [#936](https://github.com/grate-devs/grate/pull/936).
+  • Retry macOS Arm64 SDK installation once in fresh installation and temporary directories, validate the selected SDK and Arm64 host, and fail if recovery does not succeed. This prevents a partial installation from being accepted by the retry. [#933](https://github.com/grate-devs/grate/pull/933).
+  • Refresh CodeQL on main pushes and a weekly schedule. Add read-only PR dependency review and a resolved direct/transitive NuGet audit, rejecting high/critical findings and audit-feed failures. These workflow changes do not activate repository rulesets or required-check settings. [#911](https://github.com/grate-devs/grate/pull/911).
+  • Bound Windows MSI lifecycle verification waits and retain process/progress evidence on failure. Organize GitHub Actions display names by purpose, update `docker/login-action` to `4.8.0`, and update the xUnit MTP package to `4.0.3`. [#934](https://github.com/grate-devs/grate/pull/934), [#935](https://github.com/grate-devs/grate/pull/935), [#937](https://github.com/grate-devs/grate/pull/937).
+  • Split CI and release orchestration into reusable phase workflows. Expand matching CLI/tool, native installer and database-version checks across the all-in-one and database-specific builds, and maintain a generated distribution catalog checked during preflight. [#910](https://github.com/grate-devs/grate/pull/910).
+
+  ## Documentation and examples
+
+  • Clarify migration folder defaults/order, script policies, database setup and safe migration workflows in the bundled `use-grate` skill. [#896](https://github.com/grate-devs/grate/pull/896), [#895](https://github.com/grate-devs/grate/pull/895).
+  • Clarify that `--output` stores migration artifacts; capture console logs by redirecting stdout/stderr. [#906](https://github.com/grate-devs/grate/pull/906).
+  • Document provider connection strings and add a runnable PostgreSQL Compose example. Refresh the README, SQLite quick start and contributor guidance. [#905](https://github.com/grate-devs/grate/pull/905), [#929](https://github.com/grate-devs/grate/pull/929).
+  • Document Chocolatey packaging/moderation, WinGet community submission, and the expanded distribution catalog. Release tooling retains package candidates; public-feed submission and acceptance remain separate. [#900](https://github.com/grate-devs/grate/pull/900), [#901](https://github.com/grate-devs/grate/pull/901), [#910](https://github.com/grate-devs/grate/pull/910).
+
+  ## Upgrade notes
+
+  • All CLI variants install command `grate`. Uninstall the installe
+ReleaseNotesUrl: https://github.com/grate-devs/grate/releases/tag/2.3.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

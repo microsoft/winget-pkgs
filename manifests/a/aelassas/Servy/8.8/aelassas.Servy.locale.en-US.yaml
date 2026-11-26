@@ -1,0 +1,99 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: aelassas.Servy
+PackageVersion: '8.8'
+PackageLocale: en-US
+Publisher: Akram El Assas
+PublisherUrl: https://github.com/aelassas
+PublisherSupportUrl: https://github.com/aelassas/servy/issues
+Author: Akram El Assas
+PackageName: Servy
+PackageUrl: https://servy-win.github.io/
+License: MIT
+LicenseUrl: https://github.com/aelassas/servy/blob/HEAD/LICENSE.txt
+Copyright: Copyright (c) 2025 Akram El Assas
+ShortDescription: Servy lets you run any app as a native Windows service with full control over working directory, startup type, process priority, logging, health checks, pre-launch scripts and parameters.
+Description: |-
+  Servy lets you run any app as a native Windows service with full control over the working directory, startup type, process priority, logging, health checks, environment variables, dependencies, pre-launch and post-launch hooks, pre-stop and post-stop hooks, and parameters. It's designed to be a full-featured alternative to NSSM, WinSW, and FireDaemon Pro.
+
+  Servy is digitally signed using a trusted code-signing certificate provided by the SignPath Foundation. This ensures that all Servy executables and installers are verified and secure, giving you peace of mind when using the tool.
+
+  Servy offers a desktop app, a CLI, and a PowerShell module that let you create, configure, and manage Windows services interactively or through scripts and CI/CD pipelines. It also includes a Manager app for easily monitoring and managing all installed services in real time.
+
+  Features:
+  - Clean, simple UI
+  - Monitor and manage all installed services with Servy Manager
+  - Real-time CPU and RAM monitoring with live performance graphs for installed services
+  - Real-time service stdout and stderr output preview in Servy Console
+  - Service dependency tree visualization with status indicators
+  - CLI and PowerShell module for full scripting and automated deployments
+  - Run any executable as a Windows service
+  - Set service name, description, startup type, priority, working directory, environment variables, and dependencies
+  - Environment variable expansion supported in parameters, process paths and startup directories
+  - Run services as Local System, local or domain accounts, Active Directory accounts, or gMSAs
+  - Redirect stdout/stderr to log files with automatic size-based and date-based rotations
+  - Run pre-launch hook before starting the service, with retries, timeout, logging and failure handling
+  - Run post-launch hook after the application starts successfully
+  - Run pre-stop and post-stop hooks before the application stops and after the application stops
+  - Supports Ctrl+C for command-line apps, close-window for GUI apps, and force kill if unresponsive
+  - Prevent orphaned/zombie processes with improved lifecycle management and ensuring resource cleanup
+  - Health checks and automatic service recovery
+  - Browse and search logs by level, date, and keyword for faster troubleshooting from Servy Manager
+  - Export/Import service configurations for easy backups and automation
+  - Service Event Notification alerts on service failures via Windows notifications and email
+  - Compatible with Windows 7-11 x64 and Windows Server editions
+
+  Who is it for?
+  - Developers: Run development servers, scripts, or custom tools as services without extra setup.
+  - Sysadmins & IT professionals: Ensure critical background processes stay alive, monitored, and properly logged.
+  - Teams or organizations: Automate background services reliably across multiple machines.
+Moniker: servy
+Tags:
+- admin
+- automation
+- background-service
+- cli
+- devops
+- dotnet
+- nssm
+- powershell
+- scm
+- service-manager
+- service-supervisor
+- service-wrapper
+- watchdog
+- windows-service
+- windows-tools
+- winsw
+ReleaseNotes: |-
+  - feat: allow configuring CPU affinity in service definitions (#4436)
+  - feat: Add ARM64 architecture support to WinGet, Chocolatey and Scoop (#4199,#4206)
+  - fix(core): ResourceHelper.cs - CopyEmbeddedResource generic catch logs OperationCanceledException as 'Failed to copy' Error and swallows the cancellation (post-#3222) (#4331)
+  - fix(core): ServiceHelper.cs - StartServices/StopServices catch OperationCanceledException from the wait loops as a service failure (mislogged Error; last-service cancel throws AggregateException not OCE) (#4332)
+  - fix(core): ImportGuard.cs / ServiceDtoImportValidator.cs - the same MaxConfigFileSizeBytes rejection is logged as Error in one half of the import guard and Warn in the other (#4419)
+  - fix(service): ProcessLauncher.cs - CreateStartInfo documents a null-or-whitespace working-directory fallback but uses ??, so an empty string silently inherits the service's System32 directory (#4405)
+  - fix(service): ProcessWrapper.cs - SendCtrlC's finally clears the service's Ctrl+C ignore flag instead of restoring it, undoing what OnStart set and StartProcess carefully preserves (#4408)
+  - fix(service): EnvironmentVariableHelper.cs a custom variable referencing another whose value holds a system placeholder never resolves it; the class's own documents output the engine cannot produce (#4409)
+  - fix(restarter): ServiceRestarter.cs - stop-phase timeout message says 'No time remaining to stop' although Stop() was already issued; the service is left stopped and never started (residual of #949) (#4388)
+  - fix(desktop): ServiceConfigurationValidator.cs (Servy vs Manager) - a null DTO is silently swallowed in the desktop validator but reported to the user in the Manager one (#4361)
+  - fix(desktop): ServiceValidationRules.cs - an empty Confirm password field skips the mismatch check entirely, so an unconfirmed password installs in the desktop app (#4400)
+  - fix(manager): Manager monitoring ViewModels - shared _isDisposed guard tripped in every Dispose(bool) override makes base.Dispose() skip its cleanup (DispatcherTimer/CTS leak) (#4323)
+  - fix(manager): ServiceCommands.cs (Manager) - export path is the only GetByNameAsync call site that relies on the implicit decrypt:true default (#4337)
+  - fix(manager): ServiceCommands.cs (Manager) - ImportConfigAsync silently overwrites an existing service; InstallServiceAsync confirms first (#4341)
+  - fix(manager): ConsoleViewModel.cs - unchecked 'as' cast on Clone() makes a type mismatch silently clear the console every tick (#4348)
+  - fix(manager): LogTailer.cs - Dispose nulls OnNewLines but not OnLoopCompleted, though the doc says it detaches event handlers (#4357)
+  - fix(manager): MonitoringViewModelBase.cs - StartMonitoring has no _isDisposed gate; it rebuilds the timer and CTS on a disposed view model and re-hooks the Tick handler Dispose removed (#4370)
+  - fix(cli): Helper.cs (Servy.CLI) - TryParseFileType digit guard misses sign-prefixed numerics: '+1' is accepted as Json, '-0' as Xml (#4237)
+  - fix(cli): InstallServiceOptions.cs - 'Maximum time context in seconds' word salad leaks into user-facing --help; preLaunch/preStop timeout HelpTexts omit their unit (#4238)
+  - fix(psm1): Servy.psm1 - timeout-kill path leaks WaitForExit's Boolean return into the pipeline (missing [void]) (#4252)
+  - fix(psm1): Servy.psm1 - HeartbeatUrlTimeoutSeconds help promises 'Set to 0 for unlimited wait' but ValidateRange(2,30) rejects 0 (#4253)
+  - ci: changelog.yml - [datetime]::Parse converts the Z-suffixed published_at to runner-local time; release dates shift by a day on non-UTC runners (#4268)
+  - chore(deps): update dependencies
+  - other fixes: check GitHub Issues for details.
+ReleaseNotesUrl: https://github.com/aelassas/servy/releases/tag/v8.8
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/aelassas/servy/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

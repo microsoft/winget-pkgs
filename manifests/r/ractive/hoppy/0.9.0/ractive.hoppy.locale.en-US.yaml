@@ -1,0 +1,47 @@
+# Created with ractive/release-workflows using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: ractive.hoppy
+PackageVersion: 0.9.0
+PackageLocale: en-US
+Publisher: '@ractive'
+PublisherUrl: https://github.com/ractive
+PublisherSupportUrl: https://github.com/ractive/hoppy/issues
+Author: Jean-Pierre Bergamin
+PackageName: hoppy
+PackageUrl: https://github.com/ractive/hoppy
+License: MIT
+LicenseUrl: https://github.com/ractive/hoppy/blob/HEAD/LICENSE
+ShortDescription: CLI for bunny.net cloud and edge services
+Description: Hoppy is a command-line tool for managing bunny.net cloud and edge services, including CDN pull zones, storage zones, DNS, video streaming, security (WAF/DDoS), edge scripting, and magic containers.
+Moniker: hoppy
+Tags:
+- bunny
+- bunny-net
+- cdn
+- cli
+- dns
+- edge
+- rust
+- storage
+ReleaseNotes: |-
+  The Windows binaries no longer need the Visual C++ runtime: hoppy.exe links the C runtime statically, so the zip, Scoop and winget installs start on a clean Windows. A bare hoppy now prints the help and exits 0. This release also widens hoppy search to container apps and databases and fixes hoppy statistics and pull-zone list for Magic Containers.
+  Breaking
+  - bunny-net-api library: AccountStatistics.average_origin_response_time is now f64 and AccountStatistics.origin_response_time_chart is now Option<BTreeMap<String, f64>>, because the API sends fractional values. The count and byte charts stay i64. The CLI is not affected. (#113)
+  Added
+  - hoppy search also finds container apps and databases. It matches their names (case-insensitive substring) and adds the pull zones of matched apps. In JSON they are an ExtraResults array next to the unchanged /search envelope. --server-only sends only the plain /search request. (#113)
+  Fixed
+  - Windows: no Visual C++ runtime needed. hoppy.exe no longer imports VCRUNTIME140.dll or the api-ms-win-crt-* DLLs. Without the Visual C++ Redistributable, 0.8.0 could not start at all (exit code 0xC0000135, DLL not found). (#114)
+  - hoppy without arguments prints the short help and exits 0, the same as hoppy -h. It used to exit 2 with a usage error. Invalid arguments and unknown commands still exit 2. (#114)
+  - hoppy statistics no longer fails on a fractional average origin response time or fractional origin response time chart values. Cache Hit Rate is already a percentage and is no longer multiplied by 100. (#113)
+  - pull-zone list and count also find Magic Containers pull zones that no container endpoint names. The lookups run one at a time and retry on HTTP 429. If the rate limit persists, hoppy warns once that the list may be incomplete. (#113)
+  Internal
+  The release pipeline moves to ractive/release-workflows v0.3.2. Its winget job runs komac 2.16.0, so the winget manifest keeps PortableCommandAlias. A Windows release build now fails if the binary imports the dynamic C runtime. (#114, #115)
+  What's Changed
+  - Iter-91: statistics float crash, missing container zone, search coverage by @ractive in #113
+  - Windows: static C runtime; bare hoppy prints help and exits 0 by @ractive in #114
+  - release: v0.9.0 by @ractive in #115
+  Full Changelog: v0.8.0...v0.9.0
+ReleaseNotesUrl: https://github.com/ractive/hoppy/releases/tag/v0.9.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

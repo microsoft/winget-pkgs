@@ -1,0 +1,179 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: ChrisMcLennan.mnml
+PackageVersion: 0.2.11
+PackageLocale: en-US
+Publisher: Chris McLennan
+PublisherUrl: https://github.com/chris-mclennan
+PublisherSupportUrl: https://github.com/chris-mclennan/mnml/issues
+Author: Chris McLennan
+PackageName: mnml
+PackageUrl: https://mnml.sh/
+License: Apache-2.0
+LicenseUrl: https://github.com/chris-mclennan/mnml/blob/main/LICENSE-MIT
+ShortDescription: A NvChad-style terminal IDE in Rust.
+Description: 'mnml is a terminal IDE: vim or standard editing, LSP, git, embedded HTTP/CDP/DAP, AI panes, headless test harness.'
+Tags:
+- editor
+- ide
+- rust
+- terminal
+- tui
+- vim
+ReleaseNotes: |-
+  Release Notes
+  Two flagship features on 8/11 — the first-launch wizard and the
+  per-integration auth SDK — plus a big 8/12 add: L2 demo mode
+  (mnml --demo), ghost-text via Claude Code sub, and a wizard
+  - hover-help polish pass driven by user feedback.
+  Added
+  - First-launch wizard (first_launch.show) — modal that
+    auto-opens on first-ever mnml launch, walks new users through
+    6 setup questions: AI ghost-text backend (Claude API / Local /
+    Skip), input style (vim / standard), Nerd Font check, Claude
+    Code + Codex install, VSCode code shim, process monitors.
+    Install sections spawn a Pty pane running the actual command
+    (npm install -g …, sudo ln -sf …, brew install …).
+    Esc = "Ask me later"; Enter = "Finish" (persists + suppresses
+    future auto-open).
+  - Per-integration Settings pane + [[auth]] manifest schema.
+    Integration authors declare auth fields (kind = secret / text
+    / url / email / number, env_fallback, help_url, required)
+    via mnml-bridge 0.7.0's new AuthField. mnml core drives
+    three surfaces from those declarations:
+    - Configure pane: right-click chip → "Configure…"
+      renders a modal form (secrets masked). Ctrl+S writes to
+      [auth_values] in the same manifest TOML.
+    - First-hit auth guard: firing a command with a required
+      field unset (and no env fallback) opens the Configure pane
+      instead of silently spawning a broken Pty.
+    - Pty env-injection: at spawn time, [auth_values] flow
+      through as env vars using each field's env_fallback name
+      — cross-integration, so configuring bitbucket once gives
+      jira's Fix Versions view its $BITBUCKET_ACCESS_TOKEN for
+      free.
+  - Pilot siblings shipped with [[auth]]: mnml-msg-slack 0.1.3 (bot_token + team_id), mnml-forge-bitbucket 0.3.3
+    (app_password + username), mnml-tracker-jira 0.2.3 (site_url
+    - email + api_token).
+  - hover-help-writer agent (.claude/agents/) — audit/fill/
+    verify modes over src/ui/info_view_copy.rs; enumerates every
+    HoverChip variant + menu item + tree language, diffs
+    against the copy dictionary, reports gaps + drift.
+  - pr-reviewer agent — fetches a GitHub PR into an isolated
+    worktree, runs cargo build/clippy/test on the branch, stages a
+    severity-ranked review at .mnml/pr-reviews/<N>.md. Never
+    posts to GitHub — user posts after reading.
+  - crates/fim-engine/ — the local FIM completion engine is
+    now a workspace member (was a sibling repo at ../fim-engine/,
+    now vendored via git subtree with full history preserved).
+    Worktrees under the repo tree work again; no more cross-repo
+    coordination.
+  - Site manual: 2 new pages under site/src/content/docs/manual/
+    — first-launch wizard walkthrough + integration auth deep-dive.
+  - L2 demo mode (mnml --demo / ./run.sh demo). Boots against
+    a bundled Loop / Bloom Labs sample workspace (demo/workspace/)
+    copied to a per-user cache dir + git history seeded from the
+    shipped demo/workspace-git.tar.gz (fictional 10 commits, 4
+    authors, 2 feature branches). Auto-spawns a Python HTTP mock
+    server on localhost:7071 that serves 40 JSON fixtures under
+    demo/fixtures/{jira,bitbucket,github}/ — populated Jira
+    boards + sprints + tickets, Bitbucket repos + PRs + pipelines,
+    GitHub PRs + Actions runs. Env-injects the sibling env vars
+    (JIRA_BASE_URL etc) so integration panes route through the
+    mock. Clears [[workspaces]] from the in-memory config so the
+    tree rail doesn't leak the user's real workspace favorites.
+    Screenshot-ready without exposing real work.
+  - AI ghost-text via Claude Code subscription (SuggestBackend:: ClaudeCode) — reuses the OAuth access token Claude Code caches
+    (via crate::ai_usage::read_claude_token) so ghost-text calls
+    bill against Max/Pro plan quota instead of requiring a separate
+    $ANTHROPIC_API_KEY. Same /v1/messages endpoint; x-api-key
+    header carries the OAuth token (Anthropic 401s Bearer-carried
+    OAuth as of early-2026), + anthropic-beta: claude-code-20250219,oauth-2025-04-20 + Claude-Code identity
+    system-prompt fragment. Wizard's AI section gains a 4th radio
+    ("Claude Code sub — uses your Max/Pro plan") and auto-selects
+    it when claude CLI + ~/.claude/ are both present. Grey-area
+    vs. Anthropic TOS — flagged in the code + docs.
+  - ./run.sh demo subcommand + interactive-menu entry — mirrors
+    ./run.sh shape (rebuild-on-exit-75 loop). Sets
+    $MNML_DEMO_WORKSPACE so ./run.sh restart|stop|status from
+    another shell find the running instance's IPC dir at a stable
+    path.
+  Changed
+  - Wizard sections numbered (1. AI ghost-text / 2. Input style
+    / …) with horizontal rules between them — fixes the wall-of-text
+    feel; connects with the existing [1-6] jump section hint.
+  - Wizard input-style row pre-selects the persisted config value
+    but tags the persisted one with (current). Enter no longer
+    silently overwrites editor.input_style — the row must be
+    actively cycled (via ←/→/h/l) for the wizard's Finish path to
+    persist. Prevents a returning vim user who reopens the wizard
+    for the Nerd Font check from losing their vim mode.
+  - hover_tooltip opt-out — new [ui] hover_tooltip config,
+    view.toggle_hover_tooltip palette command, :set [no]hovertooltip ex-command, Settings-overlay row. Info-View
+    hover-help covers most surfaces already; the popup was
+    annoying users. Off = popup silent, on = original behavior.
+  - Wizard AI ghost-text section: install commands now use
+    Anthropic's + OpenAI's official curl | sh shell installers
+    (curl -fsSL https://claude.ai/install.sh | bash +
+    curl -fsSL https://chatgpt.com/codex/install.sh | sh)
+    instead of the outdated npm-global path.
+  - Wizard Nerd Font section: press Space to auto-install
+    Symbols Nerd Font Mono (brew / winget / curl per OS) + shows a
+    terminal-specific config hint for ghostty / iTerm / Terminal.app
+    / WezTerm (font restart warning included).
+  Fixed
+  - Hover-help panel 120ms debounce so dragging the mouse across
+    tree rows no longer flickers the info-box copy rapid-fire.
+    Rapid mouse motion resets a pending timer; content only swaps
+    after the fresh target has been stable for the debounce window.
+    First paint renders immediately (no lag opening the panel).
+  - Wizard headless SEV-1 — portable-choice prompt was covering
+    the wizard's first paint in --headless because interactive-only
+    callers can't dismiss it. Gated maybe_show_portable_choice_on_launch
+    behind !args.headless; headless callers can still choose portable
+    via mnml.choose_data_layout on the palette.
+  - Palette-from-prompt — Ctrl+Shift+P was consumed by the prompt
+    handler when a prompt was open; now dispatches to
+    open_command_palette first.
+  - 8 CI-red e2e tests — space-eating in vim insert / DAP REPL
+    / any typed-text surface, plus settings-overlay Esc requiring
+    two presses to close and arrow keys not adjusting rows. Root
+    cause: R9's <space>ff binding made bare space a leader
+    prefix. Fix: new InputHandler::is_op_pending() trait method
+    - broader pane_wants_bare_space bypass. 223/223 e2e green.
+  - Slack glyph codepoint — F03EF was NOT slack; the actual
+    nf-md-slack is U+F04B1. Fixed in icon_catalog.rs,
+    marketplace.rs, installed manifests, AND the msg-slack
+    sibling's install.rs so future installs write the correct
+    codepoint.
+  - Hover-help panel got a 1-row bottom cushion so the last
+    content line isn't flush against the statusbar.
+  Merged
+  - PR #27 from ICodeGorilla — Windows zig target detection
+    fix so x86_64-pc-windows-gnu builds don't silently ABI-
+    mismatch to msvc. Approved via the new pr-reviewer agent.
+  Install mnml-rs 0.2.11
+  Install prebuilt binaries via shell script
+  curl --proto '=https' --tlsv1.2 -LsSf https://github.com/chris-mclennan/mnml/releases/download/v0.2.11/mnml-rs-installer.sh | sh
+  Install prebuilt binaries via powershell script
+  powershell -ExecutionPolicy Bypass -c "irm https://github.com/chris-mclennan/mnml/releases/download/v0.2.11/mnml-rs-installer.ps1 | iex"
+  Download mnml-rs 0.2.11
+  ─────────────────────────────────────────────┬───────────────────┬─────────────
+  File                                         │Platform           │Checksum
+  ─────────────────────────────────────────────┼───────────────────┼─────────────
+  mnml-rs-aarch64-apple-darwin.tar.xz          │Apple Silicon macOS│checksum
+  ─────────────────────────────────────────────┼───────────────────┼─────────────
+  mnml-rs-x86_64-apple-darwin.tar.xz           │Intel macOS        │checksum
+  ─────────────────────────────────────────────┼───────────────────┼─────────────
+  mnml-rs-x86_64-pc-windows-gnu.zip            │x64 MinGW          │checksum
+  ─────────────────────────────────────────────┼───────────────────┼─────────────
+  mnml-rs-x86_64-pc-windows-gnu.msi            │x64 MinGW          │checksum
+  ─────────────────────────────────────────────┼───────────────────┼─────────────
+  mnml-rs-aarch64-unknown-linux-gnu.tar.xz     │ARM64 Linux        │checksum
+  ─────────────────────────────────────────────┼───────────────────┼─────────────
+  mnml-rs-x86_64-unknown-linux-gnu.tar.xz      │x64 Linux          │checksum
+  ─────────────────────────────────────────────┴───────────────────┴─────────────
+ReleaseNotesUrl: https://github.com/chris-mclennan/mnml/releases/tag/v0.2.11
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

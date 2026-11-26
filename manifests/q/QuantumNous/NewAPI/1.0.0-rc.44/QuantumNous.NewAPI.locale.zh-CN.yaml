@@ -1,0 +1,102 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: QuantumNous.NewAPI
+PackageVersion: 1.0.0-rc.44
+PackageLocale: zh-CN
+Publisher: Quantum Nous
+PublisherUrl: https://www.newapi.ai/
+PublisherSupportUrl: https://www.newapi.ai/support/
+Author: 锟腾科技（杭州）有限公司
+PackageName: New API
+PackageUrl: https://www.newapi.ai/
+License: AGPL-3.0
+LicenseUrl: https://github.com/QuantumNous/new-api/blob/HEAD/LICENSE
+Copyright: Copyright © 2026 Quantum Nous. All Rights Reserved.
+ShortDescription: 新一代大模型网关与 AI 资产管理系统
+Description: New API 是一个新一代大模型网关与 AI 资产管理系统，基于 One API 进行二次开发。该项目旨在提供一个统一的接口来管理和使用各种 AI 模型服务，包括但不限于 OpenAI、Anthropic、Gemini和 Midjourney 等。
+Tags:
+- anthropic-api
+- openai-api
+- openai-response
+- 人工智能
+- 大语言模型
+- 聊天机器人
+ReleaseNotes: |-
+  Important
+  v1 Coming Soon & Log Export / v1 即将发布与日志导出
+  v1 正式版即将发布，现在是最后几个 RC 版本。
+  使用日志支持导出 CSV。可以在日志维护里设置是否允许用户导出，以及日志最长时间范围，默认 365 天。普通用户的日志查询、导出和数据看板都按这个范围限制。
+  游乐场的数据按账号分开保存，升级后之前的聊天记录会清空一次。
+  Claude 请求按模型支持的档位发送思考强度。发给 Gemini 的工具和结构化输出保留完整的 JSON Schema。
+  v1 is coming soon. These are the last few release candidates.
+  Usage logs can be exported as CSV. In Log Maintenance you can choose whether users may export and set the longest log time range, 365 days by default. Regular users' log searches, exports, and dashboard charts all follow that range.
+  Playground data is stored per account. Earlier Playground history is cleared once after the upgrade.
+  Claude requests get the thinking effort each model accepts. Tools and structured output sent to Gemini keep their full JSON Schema.
+  New Features
+  - The usage log page has an Export button next to Search. It downloads the current view, with the page's filters and a chosen time range, as a CSV file in the viewer's language. Users export their own logs, and administrators in the all-users view export every user's logs. Each user runs one export at a time, across tabs and, with Redis, across nodes (#7774).
+  - Log Maintenance adds Allow users to export logs (on by default) and Longest log time range (days) (365 by default). Regular users' log searches had no limit before. Their searches, exports, and dashboard usage and traffic charts now share this range. The page is split into Log recording, Log search and export, history log cleanup, and server log management.
+  - Date and time pickers, including the date range filter on log pages, work down to the second.
+  Fixes and Improvements
+  - Known Claude models get the nearest thinking effort they accept, and none when they accept none. This fixes 400s on Opus 4.5 with max or xhigh, on Sonnet 4.5 and Haiku 4.5, and when a model suffix or modifier turns thinking off. Native Claude requests without a suffix or modifier pass through as sent.
+  - Claude Haiku 5.5 uses adaptive thinking with medium effort by default. Converted requests drop temperature, top_p, and top_k for it. Gemini 2.5 Pro gets a 32768 thinking budget for xhigh and max.
+  - Tools and structured output sent to Gemini keep const, oneOf, $ref, $defs, type arrays, and non-string enums. A schema that Gemini's typed Schema can hold is sent as before, and any other schema goes in parametersJsonSchema or responseJsonSchema. Models set to Gemini API v1 get a cleaned schema and a conversion warning (#7455, #7704).
+  - Responses images sent to Chat Completions upstreams use the object form of image_url, so vLLM and strict gateways accept Codex screenshots and tool images (#7578).
+  - Chat streams converted to Claude Messages keep answer text that arrives in the same chunk as the last reasoning token (#7664). Claude Messages converted to Chat Completions keep assistant text next to tool calls (#6871).
+  - Claude requests forward thinking.block_binding and every anthropic-beta header value. This fixes "The block is bound to a different conversation" in multi-turn conversations whose system prompt or tools change (#7732).
+  - Responses WebSocket sessions send a close frame when the server ends them, so Codex sees a normal close (#7642).
+  - Without Redis, model rate-limit 429s carry the same error message and log line as with Redis (#7721).
+  - The console reloads once when a page's code fails to load, and the error page shows a status code only when there is one (#7634).
+  - The wallet, security, and OAuth callback pages and the user binding dialog load much less JavaScript. Linux DO bindings show the Linux DO logo.
+  - Date pickers and relative times follow the interface language (#7654).
+  - The model square shows the latest 24 hourly status samples within 7 days, with no gaps. Expression model cards show the cache read price (#7757).
+  - Usage log previews keep the recorded billing tiers (#7763), and task settlement logs show tiered billing (#7446).
+  - Pricing conversion accepts model metadata that declares endpoints as an array (#7724). Root can manage pricing while the model square is disabled (#7761).
+  - Performance metrics count streams that finished before the client disconnected (#7638).
+  - The Sign in button on password login stays clickable and shows the legal consent warning (#7771).
+  - The Auto font uses the browser's sans-serif again. Meta Muse Spark models show the Meta icon (#7734), and billing source icons line up on mobile (#7760).
+  - Dependency updates, including Electron 41.
+
+  What's Changed
+  - fix(gemini): OpenAI 工具参数转换丢弃非字符串 enum，修复布尔枚举致上游 400 by @zhaoruizhe81 in https://github.com/QuantumNous/new-api/pull/7729
+  - fix(web): map Meta Muse Spark models to Meta icon by @i-richardwang in https://github.com/QuantumNous/new-api/pull/7734
+  - fix(web): show cache read price on expression model cards by @i-richardwang in https://github.com/QuantumNous/new-api/pull/7757
+  - fix(metrics): count completed streams after context cancellation by @jimmyleocn in https://github.com/QuantumNous/new-api/pull/7638
+  - fix(logs): vertically align billing source icons on mobile by @seefs001 in https://github.com/QuantumNous/new-api/pull/7760
+  - fix: mark task settlement logs with is_task for tiered billing display by @feitianbubu in https://github.com/QuantumNous/new-api/pull/7446
+  - fix(pricing): allow root access when the square is disabled by @seefs001 in https://github.com/QuantumNous/new-api/pull/7761
+  - fix(relaykit): preserve assistant text with tool calls by @enwaiax in https://github.com/QuantumNous/new-api/pull/6871
+  - fix(web): preserve recorded billing tiers in usage log previews by @seefs001 in https://github.com/QuantumNous/new-api/pull/7763
+  - chore(web): bump @lobehub/icons to 5.22.0 by @i-richardwang in https://github.com/QuantumNous/new-api/pull/7764
+  - fix(pricing): accept declared endpoint arrays in pricing conversion by @JohnUncle in https://github.com/QuantumNous/new-api/pull/7724
+  - fix(ci): stabilize checks and configure Bun dependency updates by @seefs001 in https://github.com/QuantumNous/new-api/pull/7765
+  - fix(auth): show legal consent warning on password login by @seefs001 in https://github.com/QuantumNous/new-api/pull/7771
+  - fix(claude): forward thinking.block_binding and every anthropic-beta value by @RedwindA in https://github.com/QuantumNous/new-api/pull/7732
+  - chore(deps-dev): bump @xmldom/xmldom from 0.8.13 to 0.8.15 in /electron by @dependabot[bot] in https://github.com/QuantumNous/new-api/pull/7187
+  - build(deps): bump yace from 1.1.0 to 1.1.1 in /web by @dependabot[bot] in https://github.com/QuantumNous/new-api/pull/7770
+  - build(deps): bump stream-markdown-parser from 1.1.3 to 1.2.18 in /web by @dependabot[bot] in https://github.com/QuantumNous/new-api/pull/7769
+  - build(deps-dev): bump @tanstack/router-plugin from 1.168.23 to 1.168.42 in /web by @dependabot[bot] in https://github.com/QuantumNous/new-api/pull/7768
+  - build(deps-dev): bump oxfmt from 0.57.0 to 0.72.0 in /web by @dependabot[bot] in https://github.com/QuantumNous/new-api/pull/7766
+  - chore(deps-dev): bump electron from 39.8.10 to 41.10.6 in /electron by @dependabot[bot] in https://github.com/QuantumNous/new-api/pull/7625
+  - chore(deps-dev): bump fast-uri from 3.1.5 to 3.1.7 in /electron by @dependabot[bot] in https://github.com/QuantumNous/new-api/pull/7169
+  - chore(deps): bump github.com/gorilla/websocket from 1.5.0 to 1.5.3 by @dependabot[bot] in https://github.com/QuantumNous/new-api/pull/7001
+  - chore(deps): bump ai from 7.0.31 to 7.0.136 in /web by @dependabot[bot] in https://github.com/QuantumNous/new-api/pull/7767
+  - chore(deps-dev): bump brace-expansion from 1.1.16 to 1.1.21 in /electron by @dependabot[bot] in https://github.com/QuantumNous/new-api/pull/7623
+  - chore(deps-dev): bump js-yaml from 4.3.1 to 4.3.2 in /electron by @dependabot[bot] in https://github.com/QuantumNous/new-api/pull/7327
+  - chore(deps-dev): bump undici from 6.28.0 to 6.29.0 in /electron by @dependabot[bot] in https://github.com/QuantumNous/new-api/pull/7624
+  - feat(logs): export usage logs from the common log page by @Calcium-Ion in https://github.com/QuantumNous/new-api/pull/7774
+  New Contributors
+  - @zhaoruizhe81 made their first contribution in https://github.com/QuantumNous/new-api/pull/7729
+  - @i-richardwang made their first contribution in https://github.com/QuantumNous/new-api/pull/7734
+  - @JohnUncle made their first contribution in https://github.com/QuantumNous/new-api/pull/7724
+  Full Changelog: https://github.com/QuantumNous/new-api/compare/v1.0.0-rc.43...v1.0.0-rc.44
+ReleaseNotesUrl: https://github.com/QuantumNous/new-api/releases/tag/v1.0.0-rc.44
+Documentations:
+- DocumentLabel: 使用指南
+  DocumentUrl: https://www.newapi.ai/guide/
+- DocumentLabel: 维基百科
+  DocumentUrl: https://www.newapi.ai/wiki/
+- DocumentLabel: 接口文档
+  DocumentUrl: https://www.newapi.ai/api/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

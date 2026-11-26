@@ -1,0 +1,78 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: PBH-BTN.PeerBanHelper
+PackageVersion: 9.6.0
+PackageLocale: zh-CN
+Publisher: PBH-BTN Community
+PublisherUrl: https://github.com/PBH-BTN
+PublisherSupportUrl: https://github.com/PBH-BTN/PeerBanHelper/issues
+PackageName: PeerBanHelper
+PackageUrl: https://github.com/PBH-BTN/PeerBanHelper
+License: GPL-3.0
+LicenseUrl: https://github.com/PBH-BTN/PeerBanHelper/blob/HEAD/LICENSE
+ShortDescription: 自动封禁不受欢迎、吸血和异常的 BT 客户端，并支持自定义规则。
+Tags:
+- bt
+- 种子
+ReleaseNotes: |-
+  This version includes fix patches for important security issues.
+  安全性改进
+  -【重要-Upstream Exploit】 此版本已更新 JVM 启动参数以缓解 OpenJDK 的 CVE-2026-114938(Java4Shell) 远程代码执行漏洞。攻击者可通过 (1) 向 WebUI 发送恶意请求、(2) 欺骗用户输入恶意构造的 PBH 许可证代码 (3) 连接恶意架设的第三方 BTN 实例 (4) 连接恶意架设的 Transmission 下载器或 BiglyBT 下载器，路径触发漏洞获取设备访问权限。
+    - 我们通过启动参数应用了临时缓解错误，并继续等待上游 Java OpenJDK 运行环境的安全补丁。通过 JRE、批处理等方式手动部署和启动的 PeerBanHelper 用户，由于使用自定义启动脚本，请自行更新您的启动参数。
+  -【重要-Upstream Exploit】 此版本已更新 OpenJDK 运行环境，以缓解 OpenJDK 的 CVE-2026-91403(eMudhra) HTTPS 安全信任漏洞。eMudhra 是一家印度 SSL 证书印度公钥基础设施公司。由于其中间 CA 证书已泄露且其签发的 SSL 证书广受设备和厂商信任，恶意攻击者可通过 DNS 劫持和伪造签发的 HTTPS 证书，劫持您访问恶意架设的更新服务器、BTN 服务器、规则订阅更新服务器，并通过软件更新、BTN 脚本下发、规则下发方式进行远程代码执行，或将 PeerBanHelper 更新至精心构造的恶意构建。
+    - 此问题还影响所有 Windows 和 Linux 发行版的系统证书库、嵌入式设备和其它语言的应用程序。建议您及时排查并撤销 eMudhra 的证书信任。
+  此外，本月 Linux 内核、PHP、Nginx 都另有多个高危权限提升漏洞，建议您及时排查更新操作系统内核与软件包，关注安全资讯。
+  请您帮助转告他人有关本次安全更新的重要通知，并及时升级 PeerBanHelper 程序和 Docker 镜像。本版发布后，BTN 服务器将会启动对使用受影响版本且未更新用户的安全通知推送，安全告警将通过 BTN 账户绑定的 GitHub 邮箱发送。
+  新功能
+  - IP 查询现在支持网段评论，您可以将您对某个网段的发现发送为评论，以供其它用户或研究人员参考 @Ghost-chu @Gaojianli
+  错误修复
+  - 修复特定情况下的 SWT 初始化可能阻塞 Swing 初始化导致 UI 窗口黑屏/白屏无响应的问题 @Ghost-chu
+  - 修复 AutoSTUN 使用 io_uring 初始化套接字时，系统 I/O Wait 指标激增的问题 @Ghost-chu @paulzzh
+    - 目前，AutoSTUN 默认继续使用 epoll (Linux), kqueue (macOS) 和 select (Windows) 模型
+  - 修复某些情况下，BTN 网络返回错误响应时，PeerBanHelper 重复读取响应体出现 IllegalStateException 的问题 @Ghost-chu
+  - 修复更新 IPDB 时，由于网络错误、网络中断或服务器异常响应时，可能导致更新的 IPDB 文件损坏的问题 @Ghost-chu
+  - [WebUI] 统一 URL 前缀 @Gaojianli
+  有关爱发电、面包多渠道捐赠事宜更新通知
+  即日起，我们已停止受理通过人工邮件方式找回 PBH Plus 许可证的请求。许可证的签发和管理将通过 BTN v3.1 进行。您可以登录 BTN v3.1，前往 "个人资料->设置->捐赠支持与许可证" 页面绑定爱发电/面包多订单号来自助管理许可证。
+  如您在爱发电捐赠时填写的邮箱与登录 GitHub 的邮箱一致，您的爱发电账号信息将自动与您的 BTN 账号绑定。如果没有成功自动绑定，请您手动输入爱发电订单号进行账号绑定。
+  由于此前部分签发的许可证备注信息带有购买订单号，因此如您将许可证泄露或发送给他人，可能会被第三方绑定爱发电账号，请您及时绑定。
+  如出现被他人绑定或无法绑定的情况，请与我们联系。
+  Docker
+  DockerHub: ghostchu/peerbanhelper:v9.6.0
+  阿里云国内镜像加速：registry.cn-hangzhou.aliyuncs.com/ghostchu/peerbanhelper:v9.6.0
+
+  以下是近期 BTN 服务的更新日志。
+  BTN v3.1 更新日志
+  欢迎来到 BTN 网络 v3.1 版本。v3.1 是 PBH-BTN 官方 Sparkle BTN 实例的重大升级，在视觉、稳定性和数据分析能力上得到了大幅提升和改进。以下是主要更新内容。
+  新的图表
+  新增多个 BTN 网络趋势图表，以便帮助您快速了解网络和威胁整体趋势与状态。
+  全面增强的 IP 查询能力
+  BTN 新增 IP 查询功能，可一键汇总查询指定 IP / CIDR 的历史数据。
+  新的 IP 查询还增设了评论区能力，您可以将您对某段 IP 的发现与其它人分享。切换网段大小可以查看更大网段下的所有评论。
+  新设计的个人资料页面与统计数据
+  现在个人资料页面将能够统计和显示您在 BTN 网络上的历史统计数据。
+  个人流量统计
+  我的流量统计页面现在能够汇总显示关联 BTN 客户端的流量活动。
+  提交记录历史数据
+  如果您好奇您的 BTN 客户端提交了哪些数据，现在您可以在我的提交记录页面中查看您账号下各 BTN 客户端近 7 天提交的历史数据记录。
+  积分与排行榜
+  之前由于算法性能问题遭到移除的积分与排行榜现已回归，您可以查看您的积分变动详情和排行榜数据。
+  新的隐私设置
+  新的隐私设置页面允许您对自己账号的哪些数据显示和公开进行设置。
+  通知和提醒偏好
+  新的通知和提醒系统允许您自定义设置哪些信息通过站内信发送，哪些信息通过邮件发送，或者完全拒绝接受某一类的通知信息。
+  社区群组
+  现在我们在 GitHub 上也建立了社区群组，您可以通过社区群组页面快速加入 GitHub 群组、Telegram 频道和 QQ 群。
+  账户注销
+  BTN 现在支持账户注销功能，注销的账户将解除与您的 Github 账户和邮箱的关联，并匿名化您的个人信息。
+  视觉更新
+  全新的基于 Arco Design 设计的前端样式，支持亮色和暗色模式及跟随系统，本次还额外增加了英语 （English） 语言支持。
+  捐赠支持与许可证
+  现在爱发电和面包多的数据由 BTN 管理，您可以在系统上申请新的许可证，或者查询之前发送给您的爱发电许可证信息。
+ReleaseNotesUrl: https://github.com/PBH-BTN/PeerBanHelper/releases/tag/v9.6.0
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/PBH-BTN/PeerBanHelper/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

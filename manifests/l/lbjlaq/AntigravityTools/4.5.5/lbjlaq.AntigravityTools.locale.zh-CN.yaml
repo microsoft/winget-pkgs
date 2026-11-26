@@ -1,0 +1,32 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: lbjlaq.AntigravityTools
+PackageVersion: 4.5.5
+PackageLocale: zh-CN
+Publisher: lbjlaq
+PublisherUrl: https://github.com/lbjlaq
+PublisherSupportUrl: https://github.com/lbjlaq/Antigravity-Manager/issues
+PackageName: Antigravity Tools
+PackageUrl: https://github.com/lbjlaq/Antigravity-Manager
+License: CC-BY-NC-SA-4.0
+LicenseUrl: https://github.com/lbjlaq/Antigravity-Manager/blob/HEAD/LICENSE
+ShortDescription: 专业的 Antigravity 账号管理与切换工具。为 Antigravity 提供一键无缝账号切换功能。
+Description: |-
+  Antigravity Tools 是一个专为开发者和 AI 爱好者设计的全功能桌面应用。它将多账号管理、协议转换和智能请求调度完美结合，为您提供一个稳定、极速且成本低廉的 本地 AI 中转站。
+  通过本应用，您可以将常见的 Web 端 Session (Google/Anthropic) 转化为标准化的 API 接口，彻底消除不同厂商间的协议鸿沟。
+Tags:
+- account-manager
+- antigravity
+ReleaseNotes: |-
+  - [核心功能] 支持 Gemini countTokens 端点透明代理到真实上游 (Gemini countTokens Upstream Proxy):
+    - 全面代理真实 Token 计数：将原本硬编码返回 {"totalTokens": 0} 的 /countTokens（斜杠语法）以及直接拒绝返回 400 的 :countTokens（冒号语法）统一代理到上游 v1internal:countTokens 端点，返回真实的 Token 统计数据。
+    - 协议格式适配与字段剥离：依据上游协议约束规范，顶层只保留 request 包装并剔除 safetySettings，防止上游返回 400 错误，并兼容顶层及嵌套 response 格式的计数解析。
+    - 相关 PR: 详见 PR #3295。
+  - [构建修复] 修复后端容器镜像本地构建失败缺陷 (Dockerfile.backend Build Fix):
+    - 补全 Rust/C 原生依赖工具链：为 Dockerfile.backend 的 builder 阶段补充 perl, cmake, golang-go, clang, libclang-dev, git 编译工具链，修复 rquest / boring-sys2 在本地构建时的编译 panic。
+    - 解决编译期前端产物依赖及 BuildKit 兼容性：增加占位 /app/dist/index.html 满足 Tauri 编译期路径检查，并将 ARG FRONTEND_IMAGE 置于首个 FROM 之前以兼容新版 Docker BuildKit (29.x)。
+    - 相关 PR: 详见 PR #3296。
+ReleaseNotesUrl: https://github.com/lbjlaq/Antigravity-Manager/releases/tag/v4.5.5
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

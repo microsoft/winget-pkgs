@@ -1,0 +1,46 @@
+# Created by Anthelion using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: mostlygeek.llama-swap
+PackageVersion: '271'
+PackageLocale: en-US
+Publisher: mostlygeek
+PublisherUrl: https://mostlygeek.com/
+PublisherSupportUrl: https://github.com/mostlygeek/llama-swap/issues
+PackageName: llama-swap
+PackageUrl: https://github.com/mostlygeek/llama-swap
+License: MIT
+LicenseUrl: https://github.com/mostlygeek/llama-swap/blob/HEAD/LICENSE.md
+Copyright: Copyright (c) 2024 Benson Wong
+ShortDescription: Model swapping for llama.cpp
+Description: llama-swap is a light weight, transparent proxy server that provides automatic model swapping to llama.cpp's server.
+Moniker: llama-swap
+Tags:
+- golang
+- llama
+- llamacpp
+- localllama
+- localllm
+- openai
+- openai-api
+- vllm
+ReleaseNotes: |-
+  This release includes a some nice contributions form the community:
+  - @cphlipot improved the sidebar on mobile
+  - @candrews added model parsing from the websocket stream in v1/realtime
+  - @heshiming added support for TensorFold metrics parsing
+  On the backend there was lots of work to finetune LFM3-1.7B for
+  the new help agent on llama-swap.ai. This includes the training scripts
+  and data and the new docbot package that has the Help's mcp endpoints.
+  - PR #1283 ui: dismiss mobile sidebar when user selects an item: closes the mobile sidebar overlay as soon as a nav item is tapped so the selected page comes into focus immediately, because the overlay previously stayed open and made switching pages (eg. activity -> playground) take two taps; no effect on desktop where the sidebar is always visible by @cphlipot
+  - PR #1304 evals/docs-agent: update cases for current KB and tune the Docs Agent: adds 66 training and 29 holdout eval cases, fixes four wrong assertions, raises get_doc default output from 250 to 400 lines (it was cutting off the kubeswap gpu-budget example), corrects the cmdStop, ${PORT} macro and kubeswap docs, and points KB pages at the guides holding the answers, lifting gemma-4-12B-r9700's training score from 96.0% to 97.3% by @mostlygeek
+  - PR #1308 evals/docs-agent: add fine-tuning pipeline for a small Docs Agent model: adds the scripts, recorded conversations and run notes used to fine-tune LFM3-1.7B on Docs Agent conversations (lfm3-v2 Q4_K_M scores 95.5% on training cases and 96.1% on the holdout at a 60 s per-question limit), with no weights included, as a reference for tuning future help-agent models by @mostlygeek
+  - PR #1310 internal/server: route /v1/realtime by model in session.update: fixes 404s before the websocket upgrade for clients that follow OpenAI's documented /v1/realtime API and connect with ?intent=transcription but no ?model=, by having llama-swap complete the handshake itself, buffer events until a session.update names a model (session.model, then the transcription model keys), and replay them upstream through the normal model chain, reporting failures as OpenAI style error events by @candrews
+  - PR #1312 docbot: new importable package: extracts MCP protocol handling into a stateless internal/mcpserver.Handler and adds a docbot package that serves llama-swap's docs (and optionally source) as MCP tools over any HTTP route with SystemPrompt() and Tools() helpers, a prerequisite for the help agent on llama-swap.ai by @mostlygeek
+  - PR #1313 TensorFold support for pluggable usage handlers: adds a TensorFold usage and metrics extractor with simplified captured-metrics fixtures, rebuilt on the pluggable per-upstream usage handler standard from #1292 after that refactor left the original TensorFold support stale by @heshiming
+  - dea1363 README.md: add tip for llama-swap.ai: adds a README tip pointing to the browser-based Chat agent powered by an LFM3-1.7B fine tuned on the docs by @mostlygeek
+  - cef61b3 Revise Chat agent info in README: revises the Chat agent description and links to the fine-tuned model on Hugging Face by @mostlygeek
+  - c805e62 Update link format for Chat agent in README: links the whole "Chat agent on llama-swap.ai" phrase to the chat docs page by @mostlygeek
+ReleaseNotesUrl: https://github.com/mostlygeek/llama-swap/releases/tag/v271
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

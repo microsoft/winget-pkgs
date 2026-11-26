@@ -1,0 +1,65 @@
+# Created with WinGet Releaser using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: anyvm-org.anyvm
+PackageVersion: 0.7.7
+PackageLocale: en-US
+Publisher: anyvm.org
+PublisherUrl: https://anyvm.org/
+PublisherSupportUrl: https://github.com/anyvm-org/anyvm/issues
+PackageName: anyvm
+PackageUrl: https://github.com/anyvm-org/anyvm
+License: MIT
+LicenseUrl: https://github.com/anyvm-org/anyvm/blob/HEAD/LICENSE
+ShortDescription: Run any VM anywhere -- bootstrap BSD, Illumos, and Linux guests with QEMU.
+Description: |-
+  anyvm boots a prebuilt BSD, Illumos, Linux, Hurd or Plan 9 guest under QEMU
+  with one command. It downloads the image, configures firmware, ssh, folder
+  sync and port forwarding for that guest on that architecture, then drops you
+  into a shell or runs your command and exits.
+
+  anyvm drives QEMU but does not bundle it, so QEMU is declared as a package
+  dependency and winget installs it first. Pass --skip-dependencies to install
+  anyvm on its own and supply QEMU yourself.
+Moniker: anyvm
+Tags:
+- ci
+- dragonflybsd
+- emulator
+- freebsd
+- haiku
+- illumos
+- netbsd
+- openbsd
+- qemu
+- solaris
+- virtual-machine
+- vm
+ReleaseNotes: |-
+  new guest hyprbsd, a 3D desktop on Linux hosts, new freebsd default
+  images
+  New guest: --os hyprbsd (HyprBSD, FreeBSD 15.1 with a Hyprland
+  desktop; x86_64 only, boots through UEFI). Release 15.1 is built from
+  upstream's 15.1-rc3 ISO and keeps its name when the final ISO lands.
+  On a Linux host whose QEMU has OpenGL (virtio-vga-gl and the
+  egl-headless display; qemu-system-modules-opengl on Ubuntu/Debian) and
+  a /dev/dri/renderD* the user can open (usually the render group),
+  anyvm gives the guest virtio-vga-gl + egl-headless, and the VNC / web
+  console shows the Hyprland login (user anyvm, password anyvm.org).
+  WSL2 works with Mesa's software renderer. Everywhere else, and with an
+  explicit --vga, the guest boots to a text login.
+  New default builder versions:
+  freebsd 2.2.8 -> 2.2.9 15.0 and 15.1 (x86_64, aarch64, riscv64)
+  have a UFS root instead of ZFS; the ZFS
+  images are 15.0-zfs and 15.1-zfs. The 15.x
+  desktop images stay on ZFS.
+  hyprbsd (new) -> 2.0.2
+  Pass --builder 2.2.8 to keep the old freebsd images.
+  Other: a download of an image split into parts now fails with an error
+  when a part cannot be fetched (a GitHub 504, say), instead of
+  extracting the truncated image. The partial download is removed, so a
+  re-run starts clean.
+  Full Changelog: v0.7.6...v0.7.7
+ReleaseNotesUrl: https://github.com/anyvm-org/anyvm/releases/tag/v0.7.7
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

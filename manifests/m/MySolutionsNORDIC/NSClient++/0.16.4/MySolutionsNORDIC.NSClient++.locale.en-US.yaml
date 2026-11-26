@@ -1,0 +1,56 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: MySolutionsNORDIC.NSClient++
+PackageVersion: 0.16.4
+PackageLocale: en-US
+Publisher: MySolutions NORDIC
+PublisherUrl: https://medin.name/
+PublisherSupportUrl: https://github.com/mickem/nscp/issues
+Author: My Computer Solutions NORDIC KB
+PackageName: NSClient++
+PackageUrl: https://nsclient.org/
+License: GPL-2.0
+LicenseUrl: https://github.com/mickem/nscp/blob/HEAD/COPYING
+Copyright: Copyright (C) 2026 - Michael Medin
+ShortDescription: A fully fledged monitoring agent which can be used with many monitoring tools.
+Description: |-
+  NSClient++ (nscp) aims to be a simple yet powerful and secure monitoring daemon. It was built for Nagios/Icinga, but nothing in the daemon is Nagios/Icinga specific and it can be used in many other scenarios where you want to receive/distribute check metrics.
+  The daemon has 3 main functions:
+  - Allow a remote machine (monitoring server) to request commands to be run on this machine (the monitored machine) which return the status of the machine.
+  - Submit the same results to a remote (monitoring server).
+  - Take action and perform tasks.
+Moniker: nscp
+Tags:
+- icinga
+- naemon
+- nagios
+ReleaseNotes: |-
+  Security release: request-smuggling fixes in the bundled web server
+  This release upgrades the Cesanta Mongoose web server bundled in the Windows builds to 7.23, closing two critical HTTP request-smuggling vulnerabilities in its HTTP parser. If NSClient++'s web server is reachable through a reverse proxy or WAF, upgrade promptly.
+  Highlights
+  - Bundled Mongoose upgraded from 7.20 to 7.23. Fixes two critical (CVSS 9.1) HTTP request-smuggling vulnerabilities, CVE-2026-73256 and CVE-2026-73257, fixed upstream in Mongoose 7.22.
+  - Windows builds only. The Windows WEBServer module (REST API and web UI) uses the Mongoose backend; the Linux DEB/RPM packages build on Boost.Beast and never contained the vulnerable code.
+  - Exploitable behind an intermediary. Both flaws let an unauthenticated attacker smuggle requests past a reverse proxy, WAF or load balancer in front of NSClient++ — bypassing proxy-level ACLs or injecting into other clients' reused connections. Direct client → NSClient++ deployments have no front end to desynchronize, and NSClient++'s own authentication is still enforced per request either way.
+  Detailed changes
+  WEBServer — bundled Mongoose upgraded to 7.23 (security)
+  Mongoose versions before 7.22 mis-parse HTTP message framing in two ways:
+  ───────────────────┬────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  CVE                │Flaw
+  ───────────────────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  CVE-2026-73256     │Broken HTTP/1.0 detection in http_cb() — a request combining Transfer-Encoding: chunked with conflicting HTTP/1.0 framing is parsed with different message boundaries than an HTTP/1.0 reverse proxy
+                     │sees.
+  ───────────────────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  CVE-2026-73257     │Requests carrying both Content-Length and Transfer-Encoding: chunked are accepted instead of rejected, enabling CL.TE desynchronization against a Content-Length-preferring front end.
+  ───────────────────┴────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  All build pipelines now pin Mongoose 7.23 (the latest release, which also carries further upstream TLS and TCP/IP hardening): the Windows CI workflows, the Linux docker scenario images that fall back to the Mongoose backend (minimal, no-openssl), and the developer build instructions. The full advisory record is on the security notices page.
+  Upgrade notes
+  - Upgrade Windows installs, promptly if behind a reverse proxy/WAF: the request-smuggling CVEs only matter when an intermediary in front of NSClient++ frames the HTTP stream differently than the built-in web server. No configuration change is needed — this is a drop-in upgrade.
+  - Linux packages are unaffected (Boost.Beast web backend, no Mongoose), as are installs with the WEBServer module disabled.
+  Full Changelog: 0.16.3...0.16.4
+ReleaseNotesUrl: https://github.com/mickem/nscp/releases/tag/0.16.4
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://nsclient.org/docs/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,70 @@
+# Created with WinGet Releaser using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: UmageAI.CodeShellManager
+PackageVersion: 0.10.0
+PackageLocale: en-US
+Publisher: umage.ai
+PublisherUrl: https://umage.ai/
+PublisherSupportUrl: https://github.com/umage-ai/CodeShellManager/issues
+PackageName: CodeShellManager
+PackageUrl: https://github.com/umage-ai/CodeShellManager
+License: MIT
+LicenseUrl: https://github.com/umage-ai/CodeShellManager/blob/HEAD/LICENSE
+ShortDescription: A Windows desktop app for running multiple AI coding agents side-by-side in a tabbed and grid-layout terminal host.
+Description: CodeShellManager is a WPF desktop application that hosts multiple pseudo-terminal sessions in a configurable grid layout. It is built for managing many parallel CLI tool sessions — Claude Code, Codex, GitHub Copilot, ssh remotes, or any shell — with full-text search across every session's output, alert detection when an agent is waiting for input, per-session git status, sleep/wake to park sessions without losing them, and full session persistence across restarts.
+Tags:
+- claude
+- cli
+- conpty
+- copilot
+- developer-tools
+- pseudo-terminal
+- terminal
+- xterm
+ReleaseNotes: |-
+  This release brings git into the terminal toolbar: a status chip and menu for fetch, pull, status and switching branch, and a worktrees menu for repos with many worktrees. It also adds drag-and-drop ordering in the sidebar and sharp scaling on every monitor, and fixes a bug where a session that failed to start could be lost.
+  ✨ New
+  - Git on the terminal toolbar. Every session in a git repository shows a chip like ⎇ main ● ↑2 ↓5: the branch, a dot for uncommitted changes, and how far you are ahead of or behind the remote. Click it to:
+    - Fetch
+    - Pull (fast-forward only)
+    - Status
+    - Switch branch
+    It is deliberately read-only apart from pull and switch. There is no commit, push or merge from here, and nothing is ever typed into your terminal, so a running Claude session is never interrupted.
+  - Worktrees menu. If you keep a worktree per task, Worktrees ▸ in the same menu does the following:
+    - Lists every worktree of the repo, with its branch and state.
+    - Takes you to a worktree's session in one click, waking or opening one if needed.
+    - Creates a new worktree from the current branch.
+    - Cleans up worktrees whose folder has been deleted.
+    - Remove this worktree: closes the sessions in it, refuses if anything is uncommitted or another repository lives inside it, and only offers to delete the branch if it is fully merged.
+    Switch branch also knows when a branch is checked out in another worktree and takes you there instead.
+  - Drag-and-drop ordering. Drag sessions in the sidebar to reorder them, within or between groups. A blue line shows exactly where a session will land, and the terminal grid follows the sidebar order.
+  - Open in VS Code. A new { } button next to 📁 and >_ opens the session's folder in VS Code. It is also in the sidebar's right-click menu, and appears when VS Code is installed with code on your PATH.
+  🔧 Changed
+  - "RC All" has moved from the main toolbar to the sidebar menu → Bulk actions → Remote control all, so it can't be clicked by accident.
+  - Sharp on every monitor. CodeShellManager now follows each monitor's own scaling. Moving the window between screens, docking or undocking, or changing the display scale re-scales the app cleanly instead of blurring it. Previously the terminal text could end up a different size from the rest of the window.
+  🐛 Fixed
+  - Sessions that failed to start were deleted. If a sleeping or restored session could not start, it was permanently removed. Examples: a WSL distro that no longer exists, or claude temporarily missing from PATH. It now stays in the sidebar, asleep, so you can fix and wake it.
+  - "Open in Explorer" opened Documents instead of the folder for some paths, including folders opened from a git worktree and names containing a comma.
+  - Smoother typing under load. Three slow operations were moved off the UI thread.
+  ⬆️ Upgrading
+  Close any running copy of CodeShellManager before starting 0.10.0, including a portable copy. While an older copy is still open, the new version's terminals cannot start, and it shows a message saying so. Your sessions, groups and settings carry over unchanged.
+  All pull requests in this release
+  - docs(release): winget fails differently now — record the v0.9.0 evidence by @AThraen in #146
+  - docs: README comparison matrix and stand-out features by @AThraen in #150
+  - docs(comparison): correct Herdr licence and features, add working-state row by @AThraen in #158
+  - fix(perf): take three blocking paths off the UI thread and the thread pool by @AThraen in #160
+  - fix(sidebar): drag-and-drop lands where you drop, and shows where first by @mortenaslo in #173
+  - feat(toolbar): move "RC All" into the sidebar's Bulk actions by @mortenaslo in #174
+  - fix(dpi): per-monitor DPI awareness, and isolate --clean's WebView2 folder by @mortenaslo in #175
+  - Bump the nuget group with 4 updates by @dependabot[bot] in #155
+  - test(run-commands): ThrottledSignalTests wait for the event, not a fixed 500ms by @mortenaslo in #176
+  - feat(git): git tools on the terminal toolbar — fetch, fast-forward pull, status, switch by @mortenaslo in #177
+  - refactor(ui): move "Open in VS Code" out of the git menu, next to Explorer / PowerShell by @mortenaslo in #179
+  - feat(git): worktrees in the git menu — where am I, switch-aware, go to, prune, remove by @mortenaslo in #180
+  - fix: pre-release — Explorer paths, never delete a session on a failed relaunch, worktree remove safety by @mortenaslo in #182
+  - chore: v0.10.0 release prep — second review round, README, CI manifest check by @mortenaslo in #183
+  Full Changelog: v0.9.0...v0.10.0
+ReleaseNotesUrl: https://github.com/umage-ai/CodeShellManager/releases/tag/v0.10.0
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

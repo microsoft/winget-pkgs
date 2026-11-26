@@ -1,0 +1,114 @@
+# Created with WinGet Releaser using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: agentty.agentty
+PackageVersion: 0.9.59
+PackageLocale: en-US
+Publisher: agentty
+PublisherUrl: https://agentty.org/
+PublisherSupportUrl: https://github.com/1ay1/agentty/issues
+PackageName: agentty
+PackageUrl: https://agentty.org/
+License: MIT
+LicenseUrl: https://github.com/1ay1/agentty/blob/HEAD/LICENSE
+Copyright: Copyright (c) agentty contributors
+ShortDescription: Blazing-fast Claude in your terminal — a C++26 alternative to claude-code.
+Description: agentty is a native C++26 terminal coding agent and a drop-in alternative to claude-code. A single static binary with sub-millisecond cold start, sandboxed by default, and one-command SSH air-gap. No Node, Python, or Electron. Signs in with your Claude Pro/Max subscription or an ANTHROPIC_API_KEY.
+Moniker: agentty
+Tags:
+- ai
+- claude
+- cli
+- coding-agent
+- developer-tools
+- terminal
+ReleaseNotes: |-
+  Added
+  - OpenCode Go provider (OPENCODE_API_KEY). It sends the
+    x-opencode-session header OpenCode Go now requires, from the first request.
+  - Every gateway gets its session id the way it wants it. agentty sends a
+    stable per-conversation id so routing gateways keep a conversation on one
+    backend. The header name now fits the host: your pin, else one learned from
+    the host, else the provider's, else x-session-id. A host that refuses a
+    request for a "missing x-...-session" header has that name learned and the
+    same request resent, so the turn just works, and agentty remembers it. Hosted
+    vendors get an opaque id that differs per vendor; your own hosts get the
+    thread id. Pin one under "session_headers" in settings.json.
+  - A subagent's own tool calls show inside its Agent card, one row each
+    (icon, tool, detail), newest five with older ones folded into "N earlier".
+  - ^O on a subagent lists every call it made, then its report as formatted
+    prose (headings, bold, code, bullets) instead of numbered raw markdown.
+  Fixed
+  - Settings search finds the General toggles such as "Keep retrying on
+    errors", and picking one lands on that row (#133).
+  - The composer no longer bounces while a subagent runs. The Agent card now
+    only grows a row at a time.
+  - Session-header errors no longer say "check the API key".
+  - Subagents read in parallel. Independent read-only calls in one turn
+    (several greps or reads) run side by side instead of one after another.
+  - The tool panel footer shows the real elapsed time while tools run (it
+    read 0ms for a whole agent run), plus the agent's turn when one is
+    running: 0/1 action · turn 7/80 1m12s.
+  - Windows and macOS build again after today's speed work (an MSVC-only
+    builtin and a Linux-only sync call).
+  - Subagents no longer die after doing the work. A reply too long to
+    stream (a big write) used to end the whole run at the 8k output limit;
+    write-capable agents now get the model's output ceiling (up to 32k), and a
+    cut-off turn is retried smaller instead of failing the run.
+  - A subagent always ends with a report. When it runs out of turns or time
+    mid-work, it gets one last turn with no tools to write up what it changed
+    or found, instead of returning an activity log.
+  - Coder subagents start editing. They were spending 40-77 turns reading
+    and returning "no edits made"; the coder role now reads narrowly and edits
+    early, and every subagent is told its turn and time budget.
+  - The Agent card got a redesign. While it runs: a budget bar and
+    turn 7/80 · 9 tools · 1m 12s pinned above the feed, one line per tool
+    call that turns from ○ to ✓ 14.2s or ✗ — why in place, and the
+    agent's current sentence last. When it settles: the report with markdown
+    cleaned up (no stray **, ## or table pipes), a partial result (out of
+    turns or time) in amber with its findings instead of a red "failed", and
+    a provider failure explained in a sentence with what to do. A failed run's
+    report carries the last dozen steps, not the whole log.
+  - Live shell output streams again (to the card and to ACP clients); it
+    showed only the newest chunk since the background-on-timeout change.
+  - edit never silently overwrites someone else's change. If the file
+    is written by another process between edit's read and its write (a
+    formatter on save, your editor), the edit is refused and nothing is lost.
+  - edit and write keep read-only files read-only and hard links
+    linked. The atomic rename replaced a 0444 file straight through its
+    permission bit, and split a hard-linked file from its other names.
+  - A long shell or test call is no longer killed at 330 s. The
+    no-progress watchdog now waits for the timeout the call asked for (plus
+    slack), so timeout: 600 or timeout_seconds: 1800 runs to its own
+    deadline instead of losing its output.
+  - cd carries over between shell calls inside the sandbox. It was
+    saved to a file the sandbox's private /tmp couldn't reach, so every call
+    printed "No such file or directory" and the directory never stuck.
+  - A glob can reach into third_party/, vendor/, build-*/ and the
+    like. replace, grep, glob, extract, aggregate and the
+    structural tools skipped those directories even when the glob named them,
+    and replace just said "No files to scan". An empty scan now says why.
+  - Globs mean the same thing in every tool: *.{ts,tsx} alternation and
+    src/**/*.go paths work in search_structural and rewrite_structural
+    too, which only matched file names.
+  Performance
+  - edit on large files is ~9x faster (38 ms to 4 ms for a one-line
+    edit in a 1 MB, 30,000-line file; 0.4 ms on a typical 2,000-line file).
+    Edits splice in place, only the changed region is diffed, and the file is
+    diffed once instead of three times.
+  - edit is ~13x faster (8 ms to 0.6 ms for a one-line edit in a
+    2,000-line file): Myers diff instead of a full LCS table, no zero-filled
+    multi-megabyte read buffer, and no redundant fdatasync/directory fsync
+    when replacing an existing file on btrfs or ext4, which already order the
+    data before the rename.
+  - Sandboxed shell is ~45% faster (22 ms to 12 ms for true). It no
+    longer forks a fresh host probe per command, re-walks the workspace for
+    the secret mask (an inotify watch answers "nothing changed"), binds
+    missing optional paths, watches git's .sample hooks, or re-sorts the
+    seccomp table on every insert.
+  - grep is ~40% faster (32 ms to 19 ms on this repo), from the same
+    spawn savings.
+  Full history: CHANGELOG.md
+ReleaseNotesUrl: https://github.com/agentty-org/agentty/releases/tag/v0.9.59
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

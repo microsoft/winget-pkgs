@@ -1,0 +1,63 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Nub.Nub
+PackageVersion: 0.7.5
+PackageLocale: en-US
+Publisher: nub contributors
+PublisherUrl: https://nubjs.com/
+PublisherSupportUrl: https://github.com/nubjs/nub/issues
+Author: nub contributors
+PackageName: Nub
+PackageUrl: https://nubjs.com/
+License: MIT
+LicenseUrl: https://github.com/nubjs/nub/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 nub contributors
+CopyrightUrl: https://github.com/nubjs/nub/blob/HEAD/LICENSE
+ShortDescription: The all-in-one JavaScript toolkit that augments Node.js instead of trying to replace it.
+Description: "An all-in-one toolkit for Node.js. One Rust binary to run your files and scripts, install dependencies, and manage Node itself — a Bun-like modern DX on top of the node you already have. There's no new runtime to adopt and no lock-in: every augmentation rides on Node's own public extension surfaces."
+Moniker: nub
+Tags:
+- javascript-runtime
+- node-version-manager
+- nodejs
+- package-manager
+- script-runner
+ReleaseNotes: |-
+  A memory-retention release, plus two fixes to nub upgrade.
+  Memory retention
+  Seven unbounded-retention defects, each reproduced with a fixture against a plain Node control before and after the fix. (#702)
+  ─────────────────────┬─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┬──────────────────────────────────────────────────────────
+  Area                 │What changed                                                                                                                                                                         │Measured
+  ─────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────
+  nub run -r supervisor│Streaming mode no longer retains every prefixed output line for the child's whole life. A script that never exits — nub run -r dev — grew the supervisor 1:1 with child output.      │45 → 325 MB over 50 s, now flat at 15 MB
+  ─────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────
+  Aggregate output     │Flushes past 8 MiB instead of buffering the entire run. A non-TTY stdout selects this path, so CI and piped runs were affected too.                                                  │250 MB climbing → flat 29 MB, output still in order
+  ─────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────
+  URL.createObjectURL  │Captures one compact Buffer when the Blob is built, capped at 4 MiB, and decodes only when a Worker asks for the source.                                                             │20k object URLs: +43.1 → +5.6 MB (plain Node: +1.1)
+  ─────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────
+  Blob                 │A Blob no longer pins whatever its construction parts referenced.                                                                                                                    │2000 Blobs holding 64 KB between them: 504 → 4 MB external
+  ─────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────
+  Transpile-cache sweep│Was armed on an unref'd setImmediate the process exited before running, so a user whose runs are all synchronous never swept. It is now scheduled only when a sweep is due, and      │—
+                       │ref'd.                                                                                                                                                                               │
+  ─────────────────────┴─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┴──────────────────────────────────────────────────────────
+
+  Upgrade
+  Fixes in #705.
+  - On Windows the command reported its install path in the extended-length form — installed v0.7.4 to \\?\C:\Users\you\.nub. The install itself was always correct. Paths are now spelled for display at the print sites, while the path used for the file swap keeps the MAX_PATH exemption a deep install directory depends on. (#704)
+  - A nub upgrade with nothing newer to install downloaded and swapped in the release it was already running. It now reports already on the latest release and stops. An explicit --version still reinstalls, which is what repairs a damaged install, and --stable from a canary build still downloads, because that is a channel switch. (#664)
+  - The upgrade line now names the version being left as well as the one arriving.
+  - The --yes flag advertised a confirmation prompt that has never existed. Its help text now says what it does.
+
+  Docs
+  The reference pages were rewritten for density — the config reference, the FAQ, and the install, runtime, runner and deployment sections — and two rotted links were fixed.
+
+  What's Changed
+  - fix: bound unbounded retention in the run supervisor, blob URLs, and the caches by @colinhacks in #702
+  - fix(upgrade): strip the Windows verbatim path prefix, and skip a no-op upgrade by @colinhacks in #705
+ReleaseNotesUrl: https://github.com/nubjs/nub/releases/tag/v0.7.5
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://nubjs.com/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

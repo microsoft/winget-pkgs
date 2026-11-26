@@ -1,0 +1,29 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
+
+PackageIdentifier: LBEILC.Multiplane
+PackageVersion: 0.3.13
+PackageLocale: zh-CN
+Author: 路北路陈
+ShortDescription: 面向 AI 智能体的本地无头 HTML 转视频渲染器。镜头即由 render(t) 驱动的普通网页；包含确定性检查、镜头切换感知的运动模糊，以及带有累积景深的 3D 图层。
+Description: |-
+  给 AI agent 用的本地无头 HTML 视频渲染器。镜头就是普通网页：页面实现 render(t)，画面只由时间 t 决定；Multiplane 用无头 Chromium 逐帧截图，做超采样、运动模糊、胶片颗粒等后期，用 FFmpeg 合成视频，并能检查镜头是否确定。
+  名字来自迪士尼的多层摄影台（multiplane camera）：一层层平面画稿放在不同深度、逐帧拍摄、带真实景深。对应这里的多层网页画面、三维卡片层和累积景深。
+
+  特点
+  - 不用学新框架。镜头是 HTML、CSS 和一段 JavaScript，agent 最擅长写的东西。
+  - 渲染前检查。lint 不开浏览器、不到一秒，指出墙钟时间、随机数、CSS 动画、网络资源等会破坏确定性的写法，定位到文件、行、列；渲染命令启动前会自动先跑。
+  - 可验证。verify 会乱序、重载页面、单进程和多进程分别渲染同一批帧，逐像素比较；不一致时给出出问题的时刻、区域和差异图。
+  - 运动模糊不跨硬切。每帧在快门时间内多次采样、按线性光混合；镜头声明的硬切时刻 cuts 两侧的画面不会糊在一起。
+  - 三维层与累积景深（可选，multiplane/three）：图片卡片进三维空间，多次采样累积出真实的焦外虚化，与运动模糊配合。
+  - 机器可读。所有命令支持 --json，输出带稳定错误码的事件流；每次运行有独立的作业目录，可查询进度、可取消。
+  - 也能出静帧。stills 按指定时刻输出 PNG，和视频走同一套超采样、运动模糊、景深和透明通道。可以用来抽帧检查，也可以直接出封面、海报、配图这类高质量静帧。
+  - 确定性。渲染器自身不引入墙钟时间和未设种子的随机数；同一输入在同一环境下逐像素一致，并由测试保证。
+Tags:
+- html
+- html转视频
+- 人工智能
+- 视频
+- 视频渲染器
+ManifestType: locale
+ManifestVersion: 1.12.0

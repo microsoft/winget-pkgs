@@ -1,0 +1,50 @@
+# Created with WinGet Tracker using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: t8y2.DBX
+PackageVersion: 0.6.4
+PackageLocale: en-US
+Publisher: t8y2
+PublisherUrl: https://github.com/t8y2
+PublisherSupportUrl: https://github.com/t8y2/dbx/issues
+Author: t8y2
+PackageName: DBX
+PackageUrl: https://github.com/t8y2/dbx
+License: Apache-2.0
+LicenseUrl: https://github.com/t8y2/dbx/blob/HEAD/LICENSE
+ShortDescription: 15MB，lightweight, cross-platform database client. Supports MySQL, PostgreSQL, SQLite, Redis, MongoDB, DuckDB, ClickHouse, SQL Server and more.
+Tags:
+- clickhouse
+- database
+- database-client
+- database-management
+- duckdb
+- gui
+- mongodb
+- mysql
+- postgresql
+- redis
+- rust
+- sql-server
+- sqlite
+- tauri
+- vue
+ReleaseNotes: |-
+  新功能
+  - Elasticsearch 查询剖析 — ES 连接的查询结果新增「查询剖析」视图：对请求体带 "profile": true 的 _search 响应按分片渲染可折叠的耗时树，展示自身耗时、总耗时、阶段耗时与关键路径，节点按占比显示热度进度条，支持全部展开/折叠，数据量过大时深层节点默认折叠。 (contributed by @Abeautifulsnow) (PR #8191)
+  - etcd 认证权限控制 — 开启认证的 etcd 连接按当前用户角色授予的可读范围浏览 Key，受限账户不再因无权枚举全量 Key 空间而失败；无写权限的 Key 操作被拒绝并给出明确提示（单 Key 与批量写入分别提示，批量未执行任何写入），etcd 管理页仅 root 角色可访问。 (contributed by @eryajf) (PR #7997)
+  - 后台任务失败详情复制 — 导入/导出与 SQL 文件执行进度弹窗中，每条失败明细新增一键复制按钮，可直接复制表名、语句摘要与错误信息，复制后按钮短暂变为对勾反馈。 (contributed by @CN-Scars) (PR #8174)
+  改进
+  - 分割条拖动性能 — 拖动编辑器/结果区等分割条时，未开启自动换行的编辑器跳过无关的行号对齐测量，并移除 splitpanes 常驻的 will-change 提示，每帧样式/布局开销显著降低，大数据量网格下拖动更流畅。 (commit 5d1061d49)
+  - Redis Key 详情加载性能 — 查看 Key 详情、TTL 刷新、重命名与删除等操作不再整树重建，Key 树的展开与滚动状态保持不变，大规模 Key 浏览不再闪烁卡顿。 (contributed by @CN-Scars) (PR #8192)
+  修复
+  - 大批量数据生成卡死 — 生成数十万行以上数据不再一次性生成全部行导致界面卡死或内存耗尽：改为流式分批生成并写入，实时显示进度、已用时与失败计数，可随时取消且已写入行保留；新增超时时间（0 表示不限）与每批行数设置，超过服务端报文上限自动再拆分；预览仅抽样 50 行并注明插入时流式生成的总行数。 (contributed by @gggaiitx) (PR #8147)
+  - 数据页表属性展示与列宽 — 数据页头部的表名、Schema、列数徽章与「表信息」「数据工具」入口按当前数据页的实际表元数据展示；表信息抽屉宽度受可用空间约束，与单元格详情面板并排时不再溢出或挤压数据表格。 (contributed by @zipg) (PR #8190)
+  - 摘要面板语句定位高亮 — 点击执行摘要面板中的长 SQL 行时，编辑器在行号标记之外同步高亮整条语句文本，已在可视区内的语句定位不再难以察觉。 (contributed by @q396921921) (PR #8177)
+  - 编辑器独占模式空白区域 — 仅含编辑器的页签不再因结果面板尺寸残留被压缩，编辑器始终保持整页高度，不再留下空白死区。 (commit d9723afce)
+  - 非 MySQL 方言反斜杠字符串 — 仅 MySQL 系方言在字符串内把反斜杠当转义符：PostgreSQL 等标准 SQL 方言中 ESCAPE '\' 的收尾引号不再被吞掉，后续语句边界与运行按钮恢复正常；MySQL 系解析行为不变。 (commit e56823334)
+  - Databend 下划线库名表列表 — Databend 不再对 schema 模式中的下划线做通配符转义，库名含下划线（如 my_db）的数据库可正常列出表与函数，不再返回空列表。 (commit b853d49ac)
+  > 国内下载：如果 GitHub 下载较慢，可从 CNB 镜像 下载桌面端安装包，Docker 镜像从 docker.cnb.cool/dbxio.com/dbx:v0.6.4 拉取。
+ReleaseNotesUrl: https://github.com/t8y2/dbx/releases/tag/v0.6.4
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

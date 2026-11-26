@@ -1,0 +1,45 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
+
+PackageIdentifier: JustGenius-s.DSHDesktop
+PackageVersion: 0.2.0
+PackageLocale: zh-CN
+ShortDescription: DeepSeek Harness（DSH）的 Electron 桌面外壳。
+Description: DSH-Desktop 是 DeepSeek Harness（DSH）的 Electron 桌面外壳。它内置 node 与 pnpm，首次启动时将官方 @deepseek-ai/dsh 包安装到 ~/.dsh/runtime，并在浏览器窗口中提供 dsh web 界面，支持插件与 DSH 更新。
+Tags:
+- deepseek
+- deepseek-harness
+- dsh
+- 大模型
+- 大语言模型
+- 智能体
+- 自主智能
+ReleaseNotes: |-
+  changelog
+  Breaking：window.dshDesktop 重写成四族 API
+  0.1.x 的扁平方法（getUpdateState / onUpdateState / checkNow / downloadAppUpdate / updateDsh / skipVersion / setGate / relaunch）已移除。依赖旧形状的桌面插件会直接失效，需要改成：
+  const desktop = window.dshDesktop
+  await desktop.updates.getState()
+  desktop.updates.onState((state) => { /* ... */ })
+  await desktop.updates.checkNow()
+  await desktop.updates.downloadApp()
+  await desktop.updates.updateDsh()
+  await desktop.updates.skipVersion('app') // 或 'dsh'
+  await desktop.updates.setGate('dsh', false)
+  desktop.updates.relaunch()
+  另外三族是新增能力，不是替换关系：
+  - seats：应用菜单 / 托盘
+  - notify：系统通知
+  - overlays：同源透明置顶小窗（桌宠等），无需单独打包伴侣进程
+  契约见仓库 docs/desktop-api.md。配套更新插件：@just-genius/dsh-desktop-update ≥ 0.1.3。
+  桌宠
+  桌面 overlay 的示例插件：@just-genius/dsh-whale-girl
+  浏览器里是页面内宠物；在 DSH-Desktop 里走 overlays 常驻操作系统桌面。设置在 Settings → Plugins → 桌面宠物。
+  其他
+  - overlay 独立 session，避免和主窗口抢 Service Worker 存储
+  - 启动失败时自动隔离故障插件并重启
+  - 版本比较支持 prerelease（rc）
+  - 强化 IPC 类型绑定
+ReleaseNotesUrl: https://github.com/JustGenius-s/DSH-Desktop/releases/tag/v0.2.0
+ManifestType: locale
+ManifestVersion: 1.12.0

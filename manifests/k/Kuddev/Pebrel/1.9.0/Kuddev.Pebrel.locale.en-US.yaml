@@ -1,0 +1,69 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Kuddev.Pebrel
+PackageVersion: 1.9.0
+PackageLocale: en-US
+Publisher: Kuddev
+PublisherUrl: https://github.com/Kuddev
+PublisherSupportUrl: https://github.com/Kuddev/pebrel/issues
+PackageName: Nebula Terminal
+PackageUrl: https://github.com/Kuddev/pebrel
+License: GPL-3.0
+LicenseUrl: https://github.com/Kuddev/pebrel/blob/HEAD/LICENSE
+ShortDescription: A GPU-accelerated terminal for Windows that keeps your sessions alive.
+Description: 'Nebula is a terminal emulator for Windows, built in Rust on a GPU-accelerated rendering core and designed around one idea: your terminal sessions are too valuable to die with a window. It pairs a tmux-style resident session model with a glass UI, an AI-CLI-aware sidebar, and a shell experience that works without extra setup.'
+Tags:
+- claude
+- codex
+- ssh
+- terminal
+ReleaseNotes: |-
+  Added
+  - Added a native Windows ARM64 portable ZIP, alongside the Windows x64 installer and portable ZIP. ARM64 builds use a native runner and include matching ARM64 Hook and console runtime binaries.
+  - Added Kimi Code recognition, native session commands and managed lifecycle hooks, including its icon and terminal activity states.
+  - Added a dedicated Agents settings page for Claude Code, Codex, OpenCode, Cursor Agent, Kimi Code, Pi, Oh My Pi, GitHub Copilot and Grok. It shows detected CLI paths and actual Hook installation status beside each integration switch. Automatic Hook management is available on Windows.
+  - Added configurable notification duration: keep the existing defaults, choose 5, 10, 30 or 90 seconds, or keep notifications visible until dismissed. The selected duration takes precedence over an Agent's default banner lifetime.
+  - Added a persistent terminal font-ligature setting, enabled by default and applied to open sessions without restarting them. Addresses #220.
+  - Added a Sponsors page under Settings → Home → Project and support, introducing Fluxion AI with its sign-up link.
+  Fixed
+  - Fixed Codex cold restoration using a Hook group identifier instead of the native conversation identity. Saved sessions with an older or unrecognized transcript filename retain their existing valid conversation ID.
+  - Fixed missing Windows local Codex identities by recovering the native conversation ID and file path from the running process. Later lifecycle-only events retain the verified identity.
+  - Fixed dead-end Codex restoration when a saved conversation no longer exists: recovery opens the native conversation chooser, including from CMD, and the tab menu offers an explicit conversation choice.
+  - Fixed the session crash-loop breaker counting a launch as failed while a restored AI conversation was still unconfirmed. Normal exits with a Codex conversation waiting at its startup prompts no longer quarantine the whole workspace after three launches, and the saved conversation target is retained for the next launch.
+  - Fixed shutdown getting stuck when some AI identities cannot be collected. Users can save the known state and exit; save errors and subsequently changed editor drafts still keep the application open.
+  - Fixed AI failures and cancellations appearing as successful completion. Claude failure events and Pi retry-aware outcomes now use the shared result handling.
+  - Fixed notification replacements retaining an old result or expiry deadline. A refreshed pane result uses the selected duration, and an older timer cannot dismiss its replacement.
+  - Fixed supported AI confirmation actions by checking that the request is still current and completing the required key-down/key-up sequence. Windows notification activation restores the corresponding application window.
+  - Fixed WSL Hook installation and event delivery to use the distribution's own user configuration. Command completions include the distribution and user options.
+  - Fixed inherited Ctrl+C suppression preventing interruption of CMD child commands, while preserving selection copying.
+  - Fixed native CMD command activity detection, multiline input and echoed text at pending-wrap boundaries.
+  - Fixed application 256-color blocks being overwritten by terminal prompt colors, while retaining explicit custom color overrides.
+  - Fixed saved SSH hosts ignoring the available system SSH agent in automatic authentication mode.
+  - Fixed terminal working-directory copying to use the path reported by the shell, including guest paths, while normal selection copying retains the original text.
+  - Fixed terminal and answer-reader opening of supported local Markdown links, file URIs and relative paths. Paths containing spaces, Chinese text or parentheses resolve against the originating pane's directory; missing paths produce visible feedback. Addresses #203.
+  - Fixed file-editor selections and search matches blending into light and dark backgrounds. Plain-text and code editors reveal the configured workspace background, and the active line follows the theme.
+  - Fixed long Markdown outline headings overlapping adjacent rows. Full titles remain available through tooltips and copying. Addresses #184.
+  - Fixed interrupted Markdown drags leaving a selection that continues to grow when the pointer moves without a pressed button.
+  - Fixed code-language menus extending beyond narrow windows and kept their search field and keyboard activation usable.
+  - Fixed SSH host icons appearing off-center because a font glyph's visible outline differs from its text advance.
+  - Removed the duplicate title preview shown while dragging a tab.
+  Improved
+  - Markdown opens in read-only rendered mode. Text selection, copying, code copying and formula actions remain available; editing requires an explicit switch to source mode.
+  - Code-block language selection remains available in the reader. It changes syntax highlighting without rewriting the Markdown, survives scrolling away and back, and leaves copied code unchanged.
+  - Kept source-mode drafts when returning to the reader, while preventing undo/redo shortcuts from editing the document in read-only mode.
+  - Bounded Markdown presentation work with virtual rows, visible-block image ownership and release of inactive document layouts. These changes reduce repeated work without imposing a machine-specific memory or speed promise.
+  - Reused repository snapshots and rendered visible Git/SVN drawer rows to reduce repeated work in large repositories.
+  - Centered the Agents page, enlarged all nine Agent marks using SVG assets, and separated CLI discovery from Hook installation status. Long paths remain accessible through tooltips.
+  - Improved settings search, SSH connection cards and filters, file-panel control alignment, and command-group navigation, ordering and add actions.
+  - Preserved other integrations and user-owned configuration when installing or removing a managed Agent Hook.
+  - Temporarily hid the backup entry from the settings sidebar and search; cloud-backup controls are not exposed in this release.
+  Windows x64 includes an installer and portable ZIP; Windows ARM64 includes a native portable ZIP. The installer and in-app automatic installation remain x64-only. Linux x64 packages and macOS Apple Silicon/Intel DMGs retain their Preview designation. macOS requires version 14 or later. Molecular structure rendering remains disabled.
+ReleaseNotesUrl: https://github.com/Kuddev/pebrel/releases/tag/v1.9.0
+Documentations:
+- DocumentLabel: Installation Guide
+  DocumentUrl: https://github.com/Kuddev/pebrel/blob/main/INSTALL.md
+- DocumentLabel: Lua Configuration
+  DocumentUrl: https://github.com/Kuddev/pebrel/blob/main/docs/lua-configuration.md
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

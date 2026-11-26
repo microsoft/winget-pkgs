@@ -1,0 +1,50 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: JonathanMarler.msvcup
+PackageVersion: 2026_11_12
+PackageLocale: en-US
+Publisher: Jonathan Marler
+PublisherUrl: https://github.com/marler8997
+PublisherSupportUrl: https://github.com/marler8997/msvcup/issues
+Author: Jonathan Marler
+PackageName: msvcup
+PackageUrl: https://github.com/marler8997/msvcup
+License: MIT
+LicenseUrl: https://github.com/marler8997/msvcup/blob/HEAD/LICENSE
+Copyright: Copyright 2026 Jonathan Marler
+ShortDescription: A standalone tool for installing the MSVC toolchain and Windows SDK without Visual Studio.
+Description: |-
+  msvcup is a standalone tool for installing the MSVC toolchain and Windows SDK without Visual Studio.
+  The Visual Studio Installer manages thousands of components, modifies the registry, and can take hours to configure. msvcup treats the toolchain as a versioned asset rather than global system state. The build environment is defined by code, not a GUI.
+  - Fast: Runs in milliseconds when already installed. Put it at the start of every build script.
+  - Reproducible: Lock file ensures everyone gets the same toolchain.
+  - Isolated: Every package is installed to its own versioned directory. No registry modifications. No conflicts.
+  - Cross-compilation: Target x64, arm64, or x86 out of the box.
+  - Minimal: Download only what's needed to get a working native toolchain/SDK.
+Tags:
+- msvc
+- vc
+- vc++
+- visual-c++
+ReleaseNotes: |-
+  Main user-facing changes
+  - Install from other Visual Studio channels: packages could only come from the VS 17 release channel. list, list-payloads and install now take --channel with a name from the new list-channels command (vs17-release, vs17-preview, vs18-stable, vs18-insiders) or an https URL. VS 18's manifest is reachable this way, though the recipes don't cover all of it yet. Every URL on the way to a manifest has to be https, and a downloaded manifest is checked before it's cached. By @marler8997 in https://github.com/marler8997/msvcup/pull/56 and https://github.com/marler8997/msvcup/pull/59
+  - Much less memory, and faster: installing msvc and an sdk now peaks at about 260 MB where it used to take 1.6 GB, and uses about a quarter less CPU time. msvcup list takes about half as long and a quarter of the memory, because the 17 MB manifest is no longer parsed into a generic json tree. By @marler8997 in https://github.com/marler8997/msvcup/pull/61 and https://github.com/marler8997/msvcup/pull/69
+  - Smaller autoenv wrappers: autoenv.exe is copied next to every tool it wraps (cl.exe, link.exe, ...). It's now 82 KB on x86_64, down from 249 KB, and does about a third of the work on every compiler invocation. It talks to ntdll directly and keeps paths in WTF-16. A test now fails if its size changes. By @marler8997 in https://github.com/marler8997/msvcup/pull/62 and https://github.com/marler8997/msvcup/pull/64
+  - Downloads are safer when processes overlap: a lock file was deleted on unlock, which let two processes both believe they held it. Lock files are no longer deleted, and downloads no longer use them: each download goes to a .fetching file that is its own lock and is renamed into place when it's complete, so a crash can't leave a partial file under the final name and installs that want the same payload download it once. By @marler8997 in https://github.com/marler8997/msvcup/pull/57
+  - Downloads retry when a read fails: a connection reset or a response cut off in the middle of a chunk was a panic. It's now retried like a response that ends early, up to 3 attempts, and then reported as an error. By @marler8997 in https://github.com/marler8997/msvcup/pull/67
+  - Windows crash reports without the PDB: when msvcup or an autoenv wrapper crashes on Windows without its PDB, it now prints a small stack trace (module + offset) using wintrace, instead of a trace with no information. wintrace-symbolize resolves it later with the msvcup.pdb from the release zip. With the PDB present you get the same symbolized trace as before. By @marler8997 in https://github.com/marler8997/msvcup/pull/62 and https://github.com/marler8997/msvcup/pull/63
+  - Piping output in Git Bash: msvcup list-payloads | head -1 no longer prints error: BrokenPipe when the reader exits. By @marler8997 in https://github.com/marler8997/msvcup/pull/68
+  - A damaged manifest says how to recover: a manifest in the cache that was cut short is reported with its path and position, and the message says to delete it to have it downloaded again. By @marler8997 in https://github.com/marler8997/msvcup/pull/71
+  - msvcup is now built with zig 0.17.1 by @marler8997 in https://github.com/marler8997/msvcup/pull/61
+  Things that behave differently
+  - A proxy variable holding an IP and port with no scheme, like http_proxy=127.0.0.1:3128, is now an error (init proxy failed with UriMissingHost). It used to be ignored. Write it as http://127.0.0.1:3128.
+  - When an autoenv wrapper can't open its env or vcvars file, it prints the NTSTATUS, like status=0xc0000043, where it used to print a name like AccessDenied.
+  - Older msvcup versions and this one must not download the same payload into the same cache at the same moment: they lock differently and can corrupt the file.
+  Other changes
+  - name the list command's progress node "msvcup list" by @marler8997 in https://github.com/marler8997/msvcup/pull/70
+  Full Changelog: https://github.com/marler8997/msvcup/compare/v2026_11_02...v2026_11_12
+ReleaseNotesUrl: https://github.com/marler8997/msvcup/releases/tag/v2026_11_12
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

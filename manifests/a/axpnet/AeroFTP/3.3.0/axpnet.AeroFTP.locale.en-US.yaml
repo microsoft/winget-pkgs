@@ -1,0 +1,93 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: axpnet.AeroFTP
+PackageVersion: 3.3.0
+PackageLocale: en-US
+Publisher: axpnet
+PublisherUrl: https://github.com/axpnet
+PublisherSupportUrl: https://github.com/axpnet/aeroftp/issues
+Author: axpnet
+PackageName: AeroFTP
+PackageUrl: https://github.com/axpnet/aeroftp
+License: GPL-3.0
+LicenseUrl: https://github.com/axpdev-lab/aeroftp/blob/HEAD/LICENSE
+ShortDescription: A modern, multi-protocol file manager and FTP client with integrated AI, cloud sync, and military-grade encryption.
+Description: |-
+  AeroFTP is an open-source, multi-protocol file manager built with Tauri 2 (Rust + React 18 + TypeScript).
+  It supports 16 protocols (FTP, FTPS, SFTP, WebDAV, S3, Google Drive, Dropbox, OneDrive, MEGA, Box, pCloud, Azure Blob, 4shared, Filen, Zoho WorkDrive, and Cryptomator vaults),
+  features an AI assistant with 45 tools and 15 LLM providers, military-grade encrypted vaults (AES-256-GCM-SIV + Argon2id),
+  bidirectional real-time sync, a built-in code editor, SSH terminal, and media player with visualizers.
+  Available in 47 languages with 4 themes.
+Moniker: aeroftp
+Tags:
+- cloud-storage
+- encryption
+- file-manager
+- file-transfer
+- ftp
+- ftp-client
+- multi-protocol
+- rust
+- s3
+- sftp
+- sync
+- tauri
+- webdav
+ReleaseNotes: |-
+  [3.3.0] - 2026-04-01
+  IntroHub - Complete intro page redesign
+  Added
+  - IntroHub tab system: New tabbed interface replaces the old 50/50 split layout. Two main tabs (My Servers, Discover) plus dynamic form tabs for editing/creating connections
+  - My Servers grid view: Saved servers displayed in a responsive 4-column card grid with provider icons, protocol badges, last-connected timestamps, and masked credentials
+  - My Servers list view: Alternative table-like view with columns (name, user/host, protocol, time) and zebra striping for readability
+  - Filter chips with counters: Quick filter by protocol type (All, FTP/SFTP, S3/Object, WebDAV, Cloud, Favorites) with real-time counts on each chip
+  - Favorites system: Star/unstar saved servers, filter by favorites, persisted in localStorage. Star visible on hover (unfavorited) or always (favorited) in top-right of card
+  - Discover Services catalog: 5 categorized sections (Protocols, S3/Object Storage, WebDAV & Self-hosted, Cloud Storage, Developer) with sidebar navigation and provider search
+  - Info banners: S3 and WebDAV categories show translated description banners (47 languages) explaining requirements
+  - Command Palette (Ctrl+K): Spotlight-style overlay with fuzzy search across saved servers, providers, and actions. Full keyboard navigation (arrows, Enter, Tab, Esc)
+  - Dynamic form tabs: Click a provider or Edit a server to open a dedicated form tab. Multiple tabs can be open simultaneously for side-by-side editing
+  - Form 2-column layout: FTP/SFTP/S3/WebDAV/Azure forms display connection fields (left) and paths/save/button (right) in a professional 2-column grid
+  - Health Check button: Restored in toolbar with original emerald color, opens ServerHealthCheck modal
+  - Export/Import button: Restored in toolbar with original amber color
+  - Server counters in tabs: My Servers tab shows total server count, Discover tab shows total service count
+  - Keyboard shortcuts: Ctrl+1 (My Servers), Ctrl+2 (Discover), Ctrl+N (New connection), Ctrl+K (Command Palette)
+  - renderRightColumn() helper: Shared function in ConnectionScreen for paths/save/button, reducing code duplication across protocol forms
+  - SourceForge integration: Native SourceForge SFTP provider enabled in production. Pre-configured connection to frs.sourceforge.net with Project (Unixname) field and auto-composed remote path. SSH key authentication with collapsible SSH Auth section
+  - Custom Checkbox component: Replaced all ~75 native HTML checkboxes across 23 files with animated SVG checkmark component (src/components/ui/Checkbox.tsx). Includes focus-visible ring, aria-label support, keyboard navigation
+  - Cloud provider descriptions: All 17 cloud services in Discover now show storage info and signup links
+  - Info banners for all categories: Protocols, Cloud Storage, and Developer categories now show informational banners (previously only S3 and WebDAV had them). Translated in 47 languages
+  - Collapsible SSH Authentication: SFTP SSH auth fields collapse by default, expand on click. Saves form space when using password auth
+  Changed
+  - Connection screen architecture: ConnectionScreen now supports formOnly mode (hides SavedServers panel, ProtocolSelector, and redundant buttons). Used by IntroHub form tabs
+  - Server badges: Protocol badges in saved servers now match original style (gray, rounded, uppercase, no icons). GitHub shows secondary badge (PAT/APP/OAuth), MEGA shows (API/CMD)
+  - Service badges in Discover: Use original ProtocolSelector colors (green for TLS/SSH/E2E with ShieldCheck, purple for OAuth with Lock, blue for API, orange for HMAC)
+  - Provider icons in Discover: No container box around icons (matching original ProtocolSelector style)
+  - Connect button: Click the server icon to connect (with spinner feedback), no separate Connect button. Matches original SavedServers UX
+  - Icon border: Server icons have a subtle border (border-gray-200 dark:border-gray-500) at rest, blue ring on hover
+  - Form buttons: All gradient buttons replaced with solid colors per provider
+  - UI consistency: rounded-lg standardized across all 122 components (was mix of rounded-xl, rounded-md, rounded-lg)
+  - Enterprise category removed: Zoho WorkDrive moved to Cloud Storage (it's a cloud suite like Google). FileLu FTP/FTPS presets removed (redundant with S3+WebDAV+API)
+  - Replaced em-dash with regular hyphen in saved server subtitles per UI style rules
+  - Badge accuracy: Fixed kDrive (OAuth->API), Yandex Disk (API->OAuth), Koofr (OAuth->API). Added OCS badge for Felicloud and Nextcloud, Swift badge for Blomp
+  - Provider defaults in IntroHub: Discover panel now applies provider defaults (server, port, basePath) when opening a form tab
+  Fixed
+  - SFTP upload "host key changed" (#73): Removed SSH2/SCP fallback that opened a second TCP connection for uploads, causing known_hosts format mismatch between russh and ssh2 crates. Uploads now use native russh_sftp through the same SSH session as browse/list/delete
+  - SFTP keyboard-interactive auth: Added keyboard-interactive authentication fallback when password auth is rejected (required by servers like SourceForge)
+  Security
+  - Credential masking in activity log: Usernames, emails, and S3 access keys are now masked at the source before being written to the activity log (e.g. ale***@proton.me, AKIAD...ICIYF). Prevents accidental credential exposure when users copy logs for bug reports
+  - Credential masking in saved servers: Server list subtitles in both the connection sidebar and Settings panel now mask credentials by default, with an eye toggle to reveal them. Prevents credential exposure in screenshots
+  - Backend log masking: Rust provider debug logs (Jottacloud, Koofr) now mask usernames and emails in authentication messages
+  - Auto-update state model (Appendix-O Phase 2): Install overlay now shows real-time phase indicators (auth, running, restart). Post-restart toast confirms successful Sigstore-verified update
+  - Sigstore Trust UI (Appendix-O Phase 3): Download verification results shown as green/amber/red badge. Failed verification deletes artifact and blocks installation
+  - Linux restart fix (Appendix-O Phase 1A): External helper script with path allowlist, PID validation, and 30s bounded wait replaces the unreliable sleep-based restart
+  - Snap isolation (Appendix-O Phase 1B): Snap users redirected to snap refresh instead of showing broken download button
+  - Update marker verification mode: Post-restart confirmation now shows actual Sigstore verification status instead of hardcoded "verified"
+  Downloads:
+  - Windows: .msi installer, .exe, or .zip portable (no installation required)
+  - macOS: .dmg disk image
+  - Linux: .deb, .rpm, .snap, or .AppImage
+  Download aeroftp
+ReleaseNotesUrl: https://github.com/axpdev-lab/aeroftp/releases/tag/v3.3.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

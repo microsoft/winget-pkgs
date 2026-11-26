@@ -1,0 +1,102 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: lycohana.BiliSum
+PackageVersion: 1.20.0
+PackageLocale: zh-CN
+Publisher: lycohana
+PublisherUrl: https://github.com/lycohana
+PublisherSupportUrl: https://github.com/lycohana/BiliSum/issues
+PackageName: BiliSum
+PackageUrl: https://github.com/lycohana/BiliSum
+License: 免费软件
+ShortDescription: 为 Bilibili、YouTube 及本地视频提供 AI 视频摘要和知识库
+Tags:
+- bilibili
+- b站
+- youtube
+- 知识库
+ReleaseNotes: |-
+  v1.20.0
+  主要版本信息
+  BiliSum 1.20.0 带来全新的 Agent 友好型 CLI：既可以连接桌面端已有服务，共用任务与知识库，也可以在未安装桌面版的情况下使用独立 CLI 环境完成视频转写、摘要和任务管理。
+  - cli: 添加 Agent 友好的 CLI 界面 (#104) (58e3820)
+  - cli: brief 快速摘要模式、进度显示和后台服务空闲关闭 (#107) (fb0ac75)
+  - cli: 纯 CLI 场景优化——环境系统、网页设置和独立运行时 (#108) (a8de685)
+  - cli: 优化环境切换、配置解析和服务启动行为 (#114) (7ae31b8)
+  - cli: 新增可安装的视频理解 Skill (#116) (4a6d553)
+  知识库 AI 与任务流
+  v1.20.0 在 beta.1 基础上合入知识库 Agent、会话和任务流升级（#119）：
+  Features
+  - 新增持久化知识库会话，支持新建、切换、重命名、删除和刷新恢复。
+  - 会话消息保存 Markdown 原文、消息状态、来源、工具轨迹、结构化引用和任务关联。
+  - Agent 改为“先理解意图，再选择工具”，支持内容问答、系统问答、视频任务和会话追问，不再对所有问题无条件进行向量检索。
+  - 新增知识库系统数据工具，可查询视频数量、最近总结、收藏视频、收藏夹、任务历史和脱敏后的安全设置。
+  - 支持 @视频 和 @收藏夹 结构化引用，引用后会限制知识检索或视频任务范围。
+  - 新增动态推荐问题，根据最近总结视频、收藏、收藏夹、任务时间和标签生成推荐内容。
+  - 支持多个视频链接并行创建总结任务，展示总进度、单视频状态和失败原因；所有子任务完成后自动生成 Markdown 聚合文档。
+  - 聚合任务采用持久化的多轮 Agent 流程：先审阅视频摘要，再生成大纲和最终文档；切换会话或关闭页面不会中断后台任务。
+  - 视频元数据新增任务创建时间、完成时间、耗时和最近总结时间，支持回答“我最近在学什么主题”。
+  Fixes
+  - 统一兼容多种 LLM 响应格式，区分最终正文、推理内容、完成原因和 Token 用量。
+  - 修复模型推理过长、流式正文为空或 finish_reason=length 时返回 502 的问题；必要时自动进行非流式重试并返回明确错误。
+  - SiliconFlow Embedding 自动限制输入长度并分批请求，失败时保留服务端错误详情，避免只显示笼统的 HTTP 400。
+  - 知识库聊天界面新增任务状态卡片、动态推荐刷新、Markdown 复制/重试/保存操作和来源跳转；会话重命名与删除移动到会话项右键菜单。
+  - 相关实现与测试见 PR #119（合并提交 0ff5c1f）。
+  更新内容
+  Features
+  - 新增 bilisum summarize <url|file>，支持生成完整知识笔记。
+  - 新增 bilisum brief <url|file>，快速生成摘要卡片并跳过知识笔记阶段。
+  - 新增 bilisum transcribe <url|file>，直接输出视频转写全文。
+  - 新增 status、tasks、doctor、start、stop 等任务与服务管理命令。
+  - 支持 B 站、YouTube、本地视频、多 P 视频及全集处理。
+  - 支持 Markdown、JSON 和纯转写输出，以及 --output、--with-transcript、--no-wait 等自动化选项。
+  - 任务等待期间显示实时进度、处理阶段和状态信息；JSON 模式保持 stdout 纯净，进度统一输出到 stderr，方便 Agent 和脚本解析。
+  - 新增 desktop、cli、custom、auto 四种运行环境：
+    - desktop 连接桌面端服务，共用数据库、任务和知识库。
+    - cli 拥有独立的数据、配置、Python venv 和设置页。
+    - custom 可连接 Docker、远程服务或自定义地址。
+    - auto 优先连接桌面端，不可用时自动选择 CLI 独立环境。
+  - 支持 bilisum desktop|cli|custom|auto 快捷切换环境，以及通过 --environment 覆盖单次命令的环境选择。
+  - 新增 bilisum env setup，未安装桌面版时也可以初始化独立 CLI 环境。
+  - 新增 bilisum --setting，自动启动当前环境并打开网页设置。
+  - CLI 管理的后台服务默认空闲 10 分钟后自动退出；存在排队或运行中的任务时不会退出。
+  - bilisum stop 只停止 CLI 启动的服务，不影响桌面端服务。
+  - 新增可安装的视频理解 Skill，方便 Agent 直接调用 BiliSum 处理视频任务 (#116) (4a6d553)。
+  - 发布成功后自动触发 npx 与 Docker 发布，并将 release 状态挂到提交/PR 上 (979ca81, fa83ce5)。
+  - 发版说明支持直接编辑，合并时优先使用用户修改后的内容 (2102140)。
+  Fixes
+  - 修复知识库依赖安装/就绪检测与索引导入目录不一致导致知识库不可用的问题 (#97, #98) (bab5de1)。
+  - 修复桌面端和 CLI 环境自动启动服务后网页出现 500 的问题 (#112) (b638975)。
+  - 修复 --setting 和 start 打开网页后仍要求手动输入访问密钥的问题，并在认证完成后清除地址栏中的临时 token (#113) (9c70a90)。
+  - 修复 CLI 独立环境错误显示桌面端数据目录、auto 环境选择不生效、未知环境子命令被静默忽略等问题。
+  - 修复 custom 服务不可达时错误拉起本地替代服务的问题；custom 环境现在只连接指定服务。
+  - 优化环境参数大小写兼容、切换提示和错误信息。
+  - 修复 Windows 构建的版本校验步骤未使用 bash 的问题 (7885395)。
+  - 优化 Skill 失败处理和认证提示 (ea742b5)。
+  - 修复摘要设置下拉框问题 (#117) (eb1473b)。
+  快速开始
+  # 临时运行
+  npx bilisum@1.20.0 --help
+
+  # 或全局安装
+  npm install -g bilisum@1.20.0
+
+  # 初始化独立 CLI 环境
+  bilisum env setup
+  bilisum cli
+  bilisum --setting
+
+  # 生成完整知识笔记
+  bilisum summarize "https://www.bilibili.com/video/BV1xxxx"
+
+  # 快速摘要
+  bilisum brief "https://www.bilibili.com/video/BV1xxxx"
+
+  # 恢复自动环境选择
+  bilisum auto
+  独立 CLI 环境首次初始化需要系统安装 Python 3.12。初始化完成后将使用 CLI 自己的虚拟环境运行。
+  Full Changelog: https://github.com/lycohana/BiliSum/compare/v1.20.0-beta.1...v1.20.0
+ReleaseNotesUrl: https://github.com/lycohana/BiliSum/releases/tag/v1.20.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

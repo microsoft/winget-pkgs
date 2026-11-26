@@ -1,0 +1,71 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Podman.CLI
+PackageVersion: 6.1.0
+PackageLocale: en-US
+Publisher: Podman
+PublisherUrl: https://podman.io/
+PublisherSupportUrl: https://podman.io/community
+PackageName: Podman CLI
+PackageUrl: https://podman.io/
+License: Apache-2.0
+LicenseUrl: https://github.com/podman-container-tools/podman/blob/HEAD/LICENSE
+ShortDescription: A daemonless container engine for developing, managing, and running OCI Containers
+Description: |-
+  Podman is a daemonless, open source, Linux native tool designed to make it easy to find, run, build, share and deploy applications using Open Containers Initiative (OCI) Containers and Container Images.
+  Podman provides a command line interface (CLI) familiar to anyone who has used the Docker Container Engine.
+  Most users can simply alias Docker to Podman (alias docker=podman) without any problems.
+  Similar to other common Container Engines (Docker, CRI-O, containerd), Podman relies on an OCI compliant Container Runtime (runc, crun, runv, etc) to interface with the operating system and create the running containers.
+  This makes the running containers created by Podman nearly indistinguishable from those created by any other common container engine.
+Tags:
+- container
+- docker
+- image
+- pod
+ReleaseNotes: |-
+  Features
+  - A new command has been added, podman volume rename, to allow renaming volumes. Volumes created using volume drivers and volumes that are currently used by a container cannot be renamed (#28189).
+  - A new command has been added, podman machine restart, to allow easy restart of VMs managed by podman machine (#28366).
+  - The podman network rm command now includes a new option, --ignore, which suppresses errors when attempting to remove networks that do not exist (#28363).
+  - The podman manifest push command now includes two new options, --retry and --retry-delay, which allow pushes to be automatically retried on failure (#28590).
+  - Quadlet .container units now support a new key, ImageVolume=, to configure how volumes from images are handled (#28875).
+  - The podman generate kube command now includes support for generating container healthchecks as a livenessProbe (#22095).
+  - A new option, force_port_listen, has been added to containers.conf. This is required to be set when running Podman on WSL to support port forwarding from the Windows host. It is automatically set on newly-created podman machine VMs on Windows using the WSL provider.
+  Changes
+  - The podman info command now includes free memory available on the host (in addition to used memory and total memory) (#29116).
+  - The Pesto rootless port forwarding tool now supports IPv6 port forwarding with source IP preservation.
+  Bugfixes
+  - Fixed a bug where the remote Podman client could hang on some operations when connecting to a remote Podman service over SSH (#28453).
+  - Fixed a bug where the podman image scp command could not be used with usernames containing an @ character (#27655).
+  - Fixed a bug where the podman kube play command did not properly validate requested hostPort bindings, allowing the creation of containers with duplicated host ports which would never be able to start at the same time (#26622).
+  - Fixed a bug where podman machine VMs on Windows created using the hyperv provider would sometimes not properly start due to a race conditioning setting up volume mounts.
+  - Fixed a bug where podman machine VMs on Mac where machines could be left in an inconsistent state if the podman machine start command was interrupted by a signal.
+  - Fixed a bug where creating a container on a podman machine VM on Mac that attempted to bind to a port number number 1024 would return a nonsensical error message; a clear error explaining that privileged ports cannot be bound is now returned.
+  - Fixed a bug where the podman quadlet list and podman quadlet rm commands did not function properly with uninstantiated template Quadlets.
+  - Fixed a bug where the podman quadlet install command would occasionally fail to install a Quadlet if non-quadlet files were specified.
+  - Fixed a bug where the podman quadlet install command would not refuse to install Quadlets including non-quadlet files if the --application option was not specified.
+  - Fixed a bug where healthcheck logs could be corrupted, preventing proper healthcheck operation, if a healthcheck was killed midway through writing the file.
+  - Fixed a bug where the podman volume prune --all command incorrectly discarded label filters, causing podman volume prune --all --filter label=foo to prune all volumes, not just those with the foo label.
+  - Fixed a bug where the podman events --format=json command would print null instead of an error when the server sent an event that could not be decoded.
+  - Fixed a bug where a race condition could cause Quadlet to generate corrupt systemd units (#29004).
+  - Fixed a bug where the podman inspect command on a container with a single-element command (e.g. podman run fedora bash) would include the command in both Path and Args, when it should only have been included in Path (#29155).
+  - Fixed a bug where the --format option to podman inspect on containers did not properly support some format specifiers supported by Docker (e.g. {{.HostIp}} did not work, but {{.HostIP}} did) (#29164).
+  - Fixed a bug where the Quadlet generator would not write error messages to STDERR but only to /dev/kmsg, meaning that errors were not visible from systemd-analyze --generators verify and other tooling invoking the systemd generator directly.
+  - Fixed a bug where containers which failed to start would, in some circumstances, not properly clean up, resulting in improper behavior (#26143).
+  - Fixed a bug where the podman kube generate command would improperly generate warning messages only applicable when running as a rootless user on an SELinux enabled system when not running in that configuration (#17743).
+  API
+  - Fixed a bug where the Compat and Libpod Create endpoint for Exec Sessions (/containers/$CID/exec) did not honor the ConsoleSize parameter in the exec config.
+  - The Compat API has seen further changes to improve support for the Docker v1.44 API, including the deprecation of several fields removed in that release.
+  - Preparations have begun to implement support for the v1.45 API.
+  Misc
+  - Updated Buildah to v1.45.0
+  - Updated the image library to v5.41.1
+  - Updated the storage library to v1.64.0
+  - Updated the common library to v0.69.1
+ReleaseNotesUrl: https://github.com/podman-container-tools/podman/releases/tag/v6.1.0
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://podman.io/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

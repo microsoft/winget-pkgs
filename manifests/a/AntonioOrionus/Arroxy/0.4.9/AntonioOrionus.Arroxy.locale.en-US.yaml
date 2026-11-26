@@ -1,0 +1,86 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: AntonioOrionus.Arroxy
+PackageVersion: 0.4.9
+PackageLocale: en-US
+Publisher: Antonio Orionus
+PublisherUrl: https://github.com/antonio-orionus
+PublisherSupportUrl: https://github.com/antonio-orionus/Arroxy/issues
+Author: Antonio Orionus
+PackageName: Arroxy
+PackageUrl: https://github.com/antonio-orionus/Arroxy
+License: MIT
+LicenseUrl: https://github.com/antonio-orionus/Arroxy/blob/HEAD/LICENSE
+Copyright: Copyright © 2026 Antonio Orionus
+ShortDescription: Free open-source YouTube downloader GUI based on yt-dlp for Windows, macOS, and Linux. Download videos, Shorts, 4K, 1080p60, HDR, and subtitles with no ads, tracking, cookies, or login. Supports 9 languages.
+Description: Arroxy is a free, open-source desktop app for downloading YouTube videos and Shorts in up to 4K, 1080p60, HDR, and audio-only formats with no ads, tracking, or login required.
+Moniker: arroxy
+Tags:
+- audio-downloader
+- cross-platform
+- desktop-app
+- downloader-for-youtube
+- media-downloader
+- mp4-downloader
+- video-download
+- video-download-tool
+- video-downloader
+- youtube-4k-downloader
+- youtube-download
+- youtube-downloader
+- youtube-shorts-download
+- yt-dlp
+- yt-dlp-gui
+ReleaseNotes: |-
+  Install
+  Windows Setup Windows Portable
+  macOS Apple Silicon macOS Intel
+  Linux AppImage Linux Flatpak Linux tar.gz
+  SHA256
+  Arroxy gains a global shortcut that downloads whatever link you have copied without opening the app, the Linux builds start on a clean modern system without installing anything first, Vimeo OTT videos arrive with real titles, and settings no longer go missing when two changes land at once.
+  Highlights
+  Quick Download From Anywhere
+  - Copy a video link in your browser, press one shortcut, and Arroxy queues it with your active download profile. No window switching, no pasting. It is on from the first launch — the chord is Ctrl/Cmd + Shift + D, and you can record any other combination, switch it off, or reset to the default under Settings → Global hotkey.
+  - Upgrading from an earlier build keeps whatever your settings already say. The new default only applies to a profile that has never stored the setting, so if you ran a beta with the shortcut off, it stays off until you turn it on.
+  - If the shortcut is already claimed by another app, Arroxy says so while you are picking it rather than failing silently later.
+  - Every press answers you where you are looking — a native notification when Arroxy is in the background, an in-app message when it is in front. It tells you what actually happened: queued, already in the queue, nothing on the clipboard, or a link that needs a quick look first.
+  - The queue shows the item the moment you press the shortcut, so you get an immediate acknowledgment rather than waiting for the site to answer.
+  - Copy several links at once and the shortcut points you at Bulk URLs instead of guessing which one you meant.
+  - The main screen shows a small hint for the shortcut, so it stays discoverable instead of being a setting you turn on and forget.
+  The Shortcut Stops Sending You Back To The App
+  - Pressing the shortcut on a YouTube link that carries both a video and a playlist used to do nothing but show a notification asking you to open Arroxy and choose. It now downloads the video the link names, which is what reaching for a shortcut almost always means. If it guesses wrong, the download is in the queue straight away and can be cancelled.
+  - The choice is still offered where there is somewhere to offer it: paste the same link into the app and Arroxy asks whether you want the one video or the whole list.
+  - A YouTube radio or mix link — the kind autoplay hands you, ending in &start_radio=1 — now counts as the single video it names, everywhere in the app rather than only via the shortcut. Nothing distinguishes one from a plain video link: not the address bar, not the text you copy, not the video Arroxy shows you. There was no real playlist behind the question either, since YouTube builds a radio around the video as you watch and it comes out different every time.
+  - Those links now also fill in {id} in filename templates, which they previously left empty.
+  Copying Several Links At Once
+  - Copying a list of links no longer pops the bulk sheet open on its own. Arroxy hints that a multi-link clipboard is waiting and lets you decide when to open Bulk URLs — the same clipboard watch, without a window taking over the screen while you are working elsewhere.
+  The Linux App Starts On A Clean System
+  - The AppImage no longer needs FUSE. It previously refused to start on Ubuntu 24.04 and newer with dlopen(): error loading libfuse.so.2, and the fix everyone was told to run — apt install libfuse2 — no longer exists on those releases, so there was no obvious way out. The AppImage now carries everything it needs and runs as downloaded.
+  - Added instructions for the .tar.gz build, which had none at all despite being offered on the release page. It needs no installer and no FUSE — extract it anywhere and run it, which makes it the reliable option on an unusual setup.
+  - The Flatpak steps now install Flatpak and add Flathub first. Ubuntu ships Snap instead, so the old instructions assumed a command that was not there. Package-manager commands are listed for Ubuntu/Debian, Fedora and Arch rather than assuming apt.
+  - Noted that the Linux downloads are x86_64 only. On ARM64 machines the Flatpak installs without complaint and only fails when you try to launch it, after a long download — worth knowing before you spend the bandwidth.
+  - The window now follows your desktop's light/dark setting when you change it while Arroxy is open, instead of keeping the shade it started with.
+  Vimeo OTT Titles
+  - Videos hosted on Vimeo OTT (VHX) storefronts used to arrive in the queue as "Untitled". Arroxy now recovers the real title from the page, so those downloads are named like everything else.
+  Settings That Stay Put
+  - Two settings changes arriving at the same moment could interleave and leave part of your preferences behind. Every write is now serialized and, if one fails, rolled back to the last known-good state — so a failed save can no longer strand settings halfway.
+  - Older profiles that predate the current filename defaults are migrated properly instead of quietly reverting to the built-in template, and a single unreadable profile no longer takes the rest of your profiles down with it.
+  Under The Hood
+  - Six additional lint rules now run over the source and the findings they surfaced in production code are cleared. The codebase's rules on validating data at trust boundaries are written down as policy rather than convention, and the remaining type assertions in production paths are gone.
+  - Startup now records how the theme was resolved, so a report of the wrong theme on first launch can be diagnosed from the log rather than guessed at.
+  - Toolchain bumped to Bun 1.4.0 across the repo, CI, and the version pins. Packaging toolchain updated and its components realigned to matching versions, and a dependency carrying four security advisories was patched.
+  - All user-facing text above is translated across every supported language.
+  What's Changed
+  - fix(probe): recover real titles for VHX (Vimeo OTT) embeds reported as 'Untitled' by @antonio-orionus in #197
+  - feat: global hotkey — immediate ack, OS feedback routing, settings UI by @antonio-orionus in #199
+  - fix(settings): migrate legacy profile filename defaults by @antonio-orionus in #200
+  - feat: add Quick Download hotkey hint and release hardening by @antonio-orionus in #201
+  - Adopt six anti-slop lint rules and clear their production findings by @antonio-orionus in #202
+  - fix(settings): serialize every settings write and roll back to canonical state by @antonio-orionus in #203
+  - fix(linux): AppImage static runtime, README install guidance, theme diagnostics by @antonio-orionus in #205
+  - fix(hotkey): stop bouncing ambiguous YouTube URLs back to the app by @antonio-orionus in #206
+  Full Changelog: v0.4.8...v0.4.9
+ReleaseNotesUrl: https://github.com/antonio-orionus/Arroxy/releases/tag/v0.4.9
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

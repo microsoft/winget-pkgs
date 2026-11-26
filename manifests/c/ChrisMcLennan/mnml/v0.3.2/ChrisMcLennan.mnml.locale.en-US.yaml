@@ -1,0 +1,184 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: ChrisMcLennan.mnml
+PackageVersion: v0.3.2
+PackageLocale: en-US
+Publisher: Chris McLennan
+PublisherUrl: https://github.com/chris-mclennan
+PublisherSupportUrl: https://github.com/chris-mclennan/mnml/issues
+Author: Chris McLennan
+PackageName: mnml
+PackageUrl: https://mnml.sh/
+License: Apache-2.0
+LicenseUrl: https://github.com/chris-mclennan/mnml/blob/main/LICENSE-MIT
+ShortDescription: A NvChad-style terminal IDE in Rust.
+Description: 'mnml is a terminal IDE: vim or standard editing, LSP, git, embedded HTTP/CDP/DAP, AI panes, headless test harness.'
+Tags:
+- editor
+- ide
+- rust
+- terminal
+- tui
+- vim
+ReleaseNotes: |-
+  mnml 0.3.2 is the week after the cutover. Sessions get a mode of their own
+  — every Claude Code and Codex session side by side, with a ring that walks
+  the ones waiting on you — and mnml grows an API: a local socket with
+  mnml remote, a gate on what a program in a pane may ask for, and a face
+  for Claude Code's IDE protocol, so a session can open files, read the
+  selection and show its diffs in a review pane with no setup. Ticket keys
+  and PR references are links wherever they appear. The dashboards prefetch
+  and refresh on their own cadence. Jira and Bitbucket 0.2.2 ship alongside:
+  their chips wear Atlassian's own icons, and their cards and terminals link
+  to the issue or pull request they name.
+  Safety
+  - A program in a pane can no longer run commands through the file channel
+    without asking. A run-command of anything that changes more than the
+    view, and every open-pty, now waits on a toast with a Review
+    button; Review opens a box with Allow once, Allow for the session,
+    Deny and Cancel, and nothing answered in two minutes is denied. The
+    toast never takes the key you are typing.
+  - Every command now has a class — view, edit, write or exec — listed in
+    docs/commands.md; a grant for the session covers one class until mnml
+    quits.
+  - Each answer is a line in .mnml/ipc/audit.jsonl and in events.jsonl.
+  - .api.allow_commands and .api.clients in config.zon let a command
+    or the file channel through unasked; a workspace you have not trusted
+    cannot set them.
+  The API
+  - Each mnml now serves a local socket that mnml remote (or mnml r)
+    talks to: open PATH[:LINE[:COL]], run COMMAND-ID, status, panes,
+    ping, instances, and call METHOD [JSON] for anything raw, with
+    --json. Run in a pane it reaches that mnml as that pane; run from any
+    other terminal it finds the mnml whose workspace holds the current
+    directory. docs/API.md has the methods and the exit codes.
+  - Every pane is told the socket and gets its own token, made when the pane
+    starts and gone when it closes. A command run through the API that
+    changes more than the view asks you first, naming the pane; Allow for
+    the session lasts while that pane is open. Anything without a token may
+    only read the status and the command list.
+  - Settings → Integrations → API turns the socket off.
+  - A Claude Code session started in an mnml pane links to mnml as its IDE
+    with no setup. It sees your selection, opens files, reads diagnostics,
+    and shows its edits as a diff in mnml's review pane for you to accept
+    hunk by hunk or reject. An accepted diff is saved, as the session is
+    told it was; a session asking to save a file itself asks you first.
+  - A linked session wears a link mark (⇄) on its tab, and on its SESSIONS
+    card when nothing else has that spot; a toast says so when it first
+    connects.
+  - ai.send_selection points the session you looked at last at the
+    selected lines.
+  - The API switch covers the link too: off, no session is linked.
+  Sessions
+  - The + New session menu opens a batch of 3 or 6 Claude Code sessions
+    as well as 2, 4 or 8 (ai.claude_code_new_x3, _x6).
+  - The Sessions row of the activity bar enters the sessions mode: the editor
+    layout is put aside and every Claude Code and Codex session stands in
+    columns side by side (ai.session_columns, 1 to 4, default 2; the AI
+    chips' right-click Show side by side sets it), the rest stacked behind
+    them. Click the row again and the layout comes back exactly as it was.
+  - In the sessions mode Ctrl+Tab / Ctrl+Shift+Tab step the focused column's
+    stack, Ctrl+1 to Ctrl+9 show the rail's Nth session there, and Ctrl+N
+    starts a new session in it; outside the mode those chords mean what they
+    always did. Ctrl+Shift+N starts a Claude Code session anywhere.
+  - Closing a session keeps the shape: a zoomed session hands the zoom to the
+    next one, and a column whose last session closes is refilled from the
+    sessions stacked behind the others.
+  - One click on a SESSIONS card shows that session when the page is zoomed or
+    in the sessions mode; a • beside a card marks a session on screen.
+  - sessions.next_waiting / prev_waiting (Ctrl+Alt+N / Ctrl+Alt+Shift+N,
+    space a j / space a k) now walk every session that is ready for you,
+    and skip the rest: the ones waiting on you first, oldest wait first, then
+    the ones that finished a turn or ended since you last looked at them,
+    oldest first. A session still working, or one you have already looked at,
+    is passed over; it joins again when it finishes its next turn. The toast
+    says which it is — needs you: NAME (3 ready), finished: NAME (3 ready).
+    In the sessions mode the step swaps the session into the focused column;
+    on a zoomed page it takes the zoom.
+  - A ◆ beside a SESSIONS card marks a session that finished or ended since
+    you last looked at it, and the bell's right-click lists those sessions
+    under Finished: / Ended: after the ones that need input.
+  - The session count on a strip no longer reads ‹ 1/1 › with several
+    sessions open: a session left in the background, or started through a
+    shell (:term ./bin/claude) or a wrapper script, now counts everywhere
+    the tab mark does.
+  - A URL or a ticket key on a SESSIONS card — in its name, its output, its
+    ticket chip — or in the sessions table's summary is a link: a dotted
+    underline marks it, the pointer lights it, a click opens it in the
+    browser, and a right-click offers Copy link / Open link. The card's
+    menu lists each one as an Open … row, and Shift+F10 on the focused
+    card now opens that menu.
+  - Hovering a SESSIONS card no longer re-clips its summary lines: only the
+    name row makes room for the ⋯, and a URL below it keeps its length.
+  - A ticket key links only because an installed integration says what one
+    looks like: a manifest's new links[] pairs a pattern with the address
+    it opens (docs/SDK.md, Links). The Jira integration declares the
+    issue key and writes your site in at --install (reinstall it to pick
+    this up); with no integration declaring one, only URLs link.
+  - The help panel at the foot of the left column steps aside while
+    SESSIONS has more cards than fit above it, so the list gets those rows
+    instead of a scrollbar; it comes back when they fit, and its pin keeps
+    it in place.
+  - SESSIONS has its list ready the first time you open it: the first read
+    starts with mnml, in the background. A new or changed transcript shows
+    within half a second while the section or the sessions table is on
+    screen (two seconds while neither is): mnml looks at the files' sizes
+    that often and reads only one that changed, so a quiet machine reads
+    nothing. The process list, git status and the cloud runs follow a
+    pace of their own — quick while a session is working and a view shows
+    it, slower when nothing is, rare while nothing is showing. Settings →
+    Integrations → Dashboard refresh chooses auto, fast, slow or manual
+    (only the ⟳ chip reads); the intervals are sessions.refresh and
+    cloud_agents.refresh in the config file.
+  Links
+  - Ticket keys and pull-request refs link everywhere text is shown, not
+    only on SESSIONS cards: a terminal pane's output, an editor's text, the
+    Markdown preview, a commit's message in the git graph's detail column,
+    a toast, and an HTTP response body. Each goes through the one rule set
+    the installed integrations declare.
+  - In a terminal pane a link wears the same dotted underline and lights
+    under the pointer; Ctrl/Cmd+click opens it and a right-click offers
+    Copy link / Open link (a plain press still starts a selection).
+    The pane matches a line only once it has held still for a frame, so a
+    flood of output costs nothing extra.
+  - In an editor a key or a ref lights under the pointer and opens with
+    gx or Ctrl/Cmd+click, as a URL already did.
+  - The Bitbucket integration links <repo>#<number> (widget#42) to that
+    pull request in your workspace. --install writes config.zon's
+    workspace in, links only the repos its repos lists when it lists
+    any, and adds <workspace>/<repo>#<number>; without a config, mnml
+    takes the workspace from $BITBUCKET_WORKSPACE. A bare #42 names no
+    repo and does not link. Reinstall the integration to pick this up.
+  - The wheel over a link scrolls what is under it.
+  Tabs
+  - A tab strip whose tabs overflow shows ‹ 2/5 ›: the page of tabs on
+    show, its arrows turning a page. Nothing is painted when every tab fits,
+    and a session strip with one session shows no ‹ 1/1 ›.
+  - Beside the pager, ⋯ opens the buffer picker: every tab by name, on
+    the page or not, one click away. It shows only while the strip pages, is
+    the first thing to go on a strip short of room, and a session's strip
+    leaves it to the sessions rail. The +N hidden count is gone — with
+    every page a click away, nothing is hidden.
+  - Opening the tab just past the strip's last whole tab brings it into view
+    whole; it used to stay cut at the edge, its name and close button lost.
+  - A page of tabs holds whole tabs only: the tab that would be cut at the
+    strip's edge, before the new-tab +, is not painted there and starts
+    the next page, as the page count already said.
+  - Double-click a tab to zoom its pane; double-click again to put the splits
+    back.
+  The frame
+  - The sidebar is a fifth of the window by default — 30 cells up to 150
+    columns, 40 at 200, never more than 48 — and follows a resize; a number in
+    ui.tree_width still pins it. Right-click its divider to reset or set the
+    width (cells or 25%), hide or auto-hide it, or move it to the other side.
+  - Every menu — right-click menus, the menu bar's drop-downs, chip and dock
+    menus — prints each row's keyboard chord at its right edge, in muted grey,
+    for the profile you are in (Ctrl+N under standard, the vim chord under
+    vim). A row with no binding shows none, and a row too narrow for both drops
+    the chord rather than clip its label.
+  - Under the standard profile those chords include the editor's own keys:
+    the right-click menu's Cut, Copy, Paste, Undo and Select all read Ctrl+X,
+ReleaseNotesUrl: https://github.com/chris-mclennan/mnml/releases/tag/v0.3.2
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

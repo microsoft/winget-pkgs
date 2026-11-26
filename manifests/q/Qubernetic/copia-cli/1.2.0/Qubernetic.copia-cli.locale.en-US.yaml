@@ -1,0 +1,160 @@
+# Created with WinGet Releaser using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Qubernetic.copia-cli
+PackageVersion: 1.2.0
+PackageLocale: en-US
+Publisher: Qubernetic
+PublisherUrl: https://github.com/qubernetic
+PublisherSupportUrl: https://github.com/qubernetic/copia-cli/issues
+PackageName: copia-cli
+PackageUrl: https://github.com/qubernetic/copia-cli
+License: AGPL-3.0
+LicenseUrl: https://github.com/qubernetic/copia-cli/blob/HEAD/LICENSE
+ShortDescription: CLI for Copia — source control for industrial automation
+Description: |-
+  copia-cli is a command-line interface for Copia, the source control platform
+  for industrial automation. Modeled after GitHub CLI (gh), it provides a familiar
+  interface for managing repositories, issues, pull requests, releases, and more.
+Tags:
+- cli
+- copia
+- devops
+- git
+- industrial-automation
+- plc
+- source-control
+ReleaseNotes: |-
+  Breaking changes
+  Three changes can break existing scripts:
+  - COPIA_TOKEN goes only to the host that --host or COPIA_HOST names. When the host comes from the config file, the commands ignore COPIA_TOKEN, use the stored token and print a warning. If you set only COPIA_TOKEN next to a config file, set COPIA_HOST as well (#429)
+  - In api, -F is now --field and -f is --raw-field, as in gh. --field sends true, false, null and integers as JSON values and reads @file, so --field n=1 now sends a number; use --raw-field for a string. Each flag takes one key=value, and a comma no longer splits the value (#167)
+  - The --json field names match the keys the commands print: user instead of author on issue view, pr list and pr view, and stars_count and forks_count instead of stars and forks on repo view (#177)
+  Other changes
+  - --json, --jq and --template on 13 commands, repo sync, api input and pagination options, and list commands that return more than 50 items
+  - Several accounts per host, with tokens stored in the OS keyring
+  - Stricter handling of tokens and redirects, and a hardened CI and release pipeline
+  - The manual now uses MkDocs Material with the Qubernetic theme: https://qubernetic.github.io/copia-cli/
+  Every change is listed in CHANGELOG.md.
+  What's Changed
+  - chore: back-merge main after v1.1.2 release by @q-soriarty in #209
+  - fix(deps): bump go to 1.26.9 to unblock govulncheck by @q-horde in #230
+  - docs: bring project-layout.md up to date with develop by @q-horde in #226
+  - chore(deps): bump code.gitea.io/sdk/gitea from 0.24.1 to 0.25.1 by @dependabot[bot] in #210
+  - ci: bump codecov/codecov-action from 6 to 7 by @dependabot[bot] in #212
+  - ci: bump actions/checkout from 6 to 7 by @dependabot[bot] in #214
+  - ci: bump actions/setup-go from 6 to 7 by @dependabot[bot] in #218
+  - docs: add phase 3 command groups to project layout by @q-horde in #231
+  - docs: fix copr project name in linux install guide by @q-horde in #234
+  - test(httpmock): guard against query-parameter tokens by @q-horde in #237
+  - ci(bump-go): open PRs with a GitHub App token by @q-horde in #241
+  - docs(ci): use real bump-go app name qubernetic-bump-go by @q-horde in #243
+  - fix(issue): paginate issue list past the 50-item page cap by @q-horde in #247
+  - feat(cmd): add --limit to label, org and notification list by @q-horde in #248
+  - fix(cmd): paginate pr, repo, release and search list commands by @q-horde in #249
+  - fix(issue): resolve labels beyond the first page in issue edit by @q-horde in #250
+  - fix(issue): resolve org-level labels in issue create and edit by @q-horde in #251
+  - test(coverage): raise codecov project coverage to 60% by @q-horde in #252
+  - ci(codecov): add codecov.yml status gate by @q-horde in #256
+  - build(devcontainer): add a sandbox compose service for horde-dev by @q-horde in #258
+  - chore: ignore the .claude directory by @q-horde in #261
+  - ci(codecov): upload coverage and test results to Codecov by @q-horde in #263
+  - ci: close issues on merge into develop with the canonical workflow by @q-horde in #265
+  - ci: narrow workflow token permissions and pin actions by sha by @q-horde in #267
+  - ci: pass expression values to run steps through env by @q-horde in #269
+  - docs: state that only repository admins create release tags by @q-horde in #277
+  - fix(ci): escape the rejected value in check-go-version output by @q-horde in #275
+  - fix(ci): validate the release version and checksums in aur and copr by @q-horde in #276
+  - test(ci): scan script inputs and composite actions for expressions by @q-horde in #274
+  - fix(ci): accept only X.Y.Z in check-release-version.sh by @q-horde in #287
+  - fix(ci): pin the aur host key instead of keyscan by @q-horde in #286
+  - fix(ci): escape the rejected value in check-sha256 and check-release-version output by @q-horde in #285
+  - fix(ci): select aur checksums by exact asset name by @q-horde in #288
+  - test(ci): scan every local action a workflow uses by @q-horde in #291
+  - ci(copr): pin copr-cli by hash and run the version gate before install by @q-horde in #294
+  - ci(copr): exercise the hashed copr-cli install on pull requests by @q-horde in #296
+  - ci(release): disable the go cache in jobs that hold a write token or a secret by @q-horde in #298
+  - ci(docs): disable the go cache in the docs build and pin the lint and vuln tools by @q-horde in #300
+  - ci(release): pin goreleaser instead of version: latest by @q-horde in #302
+  - ci: update close-issues-on-merge to revision 2 by @q-horde in #304
+  - chore(deps): bump Go from 1.26.9 to 1.27.3 by @github-actions[bot] in #306
+  - ci: run the checks on pull requests into epic branches by @q-soriarty in #307
+  - ci: move every codeql-action step to 4.39.1 and group its bumps by @q-horde in #313
+  - feat(repo): add --visibility to repo list by @q-horde in #314
+  - feat(auth): add --show-token flag to auth status by @q-horde in #315
+  - feat(search): add --label, --sort and --order to search by @q-horde in #316
+  - feat(pr): add --body flag to pr merge by @q-horde in #317
+  - feat(view): add --comments flag to issue view and pr view by @q-horde in #318
+  - docs(issue): document that issue close has no --reason by @q-horde in #319
+  - feat(issue): add --assignee and --milestone to issue create by @q-horde in #323
+  - feat(issue): add --remove-assignee and --remove-label to issue edit by @q-horde in #324
+  - feat(issue): add --assignee, --author and more filters to issue list by @q-horde in #325
+  - feat(pr): add --assignee, --label, --milestone, --reviewer to pr create by @q-horde in #326
+  - feat(pr): add --draft, --body-file and --fill to pr create by @q-horde in #327
+  - feat(output): honour --json fields and add --jq by @q-horde in #328
+  - feat(output): add --template to commands with --json by @q-horde in #329
+  - feat(api): add --raw-field, --input and --include to api by @q-horde in #330
+  - feat(api): add --paginate and --jq to api by @q-horde in #331
+  - feat(cli): close gh flag parity gaps in issue, pr, output and api by @q-horde in #332
+  - fix(api): refuse redirects that change scheme, host or port by @q-horde in #334
+  - fix(repo): send the clone token only to the configured host by @q-horde in #336
+  - fix(release): fail upload when the release lookup errors by @q-horde in #348
+  - fix(cmdutil): stop paging on a repeated next link by @q-horde in #349
+  - fix(repo): reject a clone token with control characters by @q-horde in #350
+  - feat(auth): warn when auth status prints the token to a non-terminal by @q-horde in #351
+  - chore(deps): bump golang.org/x/crypto to v0.56.0 by @q-horde in #352
+  - test(cmdutil): assert jq context and module errors by @q-horde in #353
+  - test(cmdutil): check the http client guard on the syntax tree by @q-horde in #354
+  - test(ci): require a full commit sha on every remote action by @q-horde in #355
+  - ci: bump github/codeql-action/upload-sarif from 4.39.0 to 4.39.1 by @dependabot[bot] in #311
+  - test(ci): check codeql-action versions across every workflow file by @q-horde in #357
+  - ci: pin the codecov cli version by @q-horde in #358
+  - ci(bump-go): check the current go version before writing it by @q-horde in #359
+  - docs(contributing): check the target goreleaser release before a bump by @q-horde in #360
+  - feat(browse): open a repository, issue or pull request in the browser by @q-horde in #361
+  - feat(cli): land the low-risk backlog wave by @q-horde in #362
+  - fix(devcontainer): build the sandbox image with go 1.27.3 by @q-horde in #363
+  - chore(deps): bump github.com/stretchr/testify from 1.11.1 to 1.12.1 by @dependabot[bot] in #305
+  - fix(snap): set the snap version from the release tag by @q-horde in #365
+  - docs(parity): align the tracker with the gitea 1.26 api by @q-horde in #377
+  - feat(issue): add issue reopen by @q-horde in #379
+  - ci(snap): publish the snap without the snapcore actions by @q-horde in #378
+  - ci(snap): publish the snap at the release tag version by @q-horde in #381
+  - test(integration): stop logging the test account data on failure by @q-horde in #382
+  - feat(issue): add issue delete by @q-horde in #383
+  - feat(issue): add issue pin and unpin by @q-horde in #384
+  - feat(issue): add issue lock and unlock by @q-horde in #385
+  - feat(pr): add pr reopen by @q-horde in #386
+  - feat(pr): add pr comment by @q-horde in #387
+  - feat(pr): add pr edit by @q-horde in #388
+  - feat(pr): add pr ready by @q-horde in #389
+  - feat(pr): add pr update-branch by @q-horde in #390
+  - feat(search): add search prs by @q-horde in #391
+  - chore(git): merge develop into epic/366-issue-pr-lifecycle by @q-horde in #394
+  - feat(cli): add the issue and pr lifecycle commands by @q-horde in #392
+  - feat(config): add config get, set and list by @q-horde in #405
+  - feat(cmdutil): honour the configured default output format by @q-horde in #406
+  - feat(iostreams): page terminal output through the configured pager by @q-horde in #407
+  - feat(issue): add --editor to create and comment commands by @q-horde in #408
+  - feat(alias): add alias set, list, delete and import by @q-horde in #409
+  - feat(issue): add --web to issue view, list, create and comment by @q-horde in #410
+  - feat(pr): add --web to pr view, list, create, comment and diff by @q-horde in #411
+  - feat(repo): add --web to repo view, label list and search by @q-horde in #412
+  - feat(browse): open files, branches, commits and repository pages by @q-horde in #413
+  - feat(repo): add repo set-default by @q-horde in #414
+  - feat(issue): add issue status by @q-horde in #415
+  - feat(pr): add pr status by @q-horde in #416
+  - feat(status): add status dashboard by @q-horde in #417
+  - feat(config): add configuration and convenience commands by @q-horde in #418
+  - fix(config): store the default host instead of picking a random one by @q-horde in #424
+  - feat(auth): store tokens in the OS keyring by @q-horde in #425
+  - feat(auth): keep several accounts per host by @q-horde in #426
+  - ci(integration): raise the go test timeout of the integration step by @q-horde in #430
+  - feat(auth): add auth switch by @q-horde in #427
+  - fix(auth): use COPIA_TOKEN only for the host COPIA_HOST names by @q-horde in #431
+ReleaseNotesUrl: https://github.com/qubernetic/copia-cli/releases/tag/v1.2.0
+Documentations:
+- DocumentLabel: Manual
+  DocumentUrl: https://qubernetic.github.io/copia-cli/manual/
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

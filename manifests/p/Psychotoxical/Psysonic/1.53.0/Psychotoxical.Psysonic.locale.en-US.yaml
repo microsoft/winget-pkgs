@@ -1,0 +1,109 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Psychotoxical.Psysonic
+PackageVersion: 1.53.0
+PackageLocale: en-US
+Publisher: Psysonic
+PublisherUrl: https://github.com/Psysonic
+PublisherSupportUrl: https://github.com/Psysonic/psysonic/issues
+PackageName: Psysonic
+PackageUrl: https://www.psysonic.de/
+License: GPL-3.0
+LicenseUrl: https://github.com/Psysonic/psysonic/blob/HEAD/LICENSE
+ShortDescription: Gorgeous, modern desktop client for Navidrome and Subsonic music servers
+Description: A beautiful desktop music player built for Subsonic API compatible servers (Navidrome, Gonic, etc.). Built with Tauri v2 and React, featuring a native Rust/rodio audio engine, community theme store, Last.fm integration, synchronized lyrics, EQ, crossfade, gapless playback, and more.
+Tags:
+- audio
+- music
+- navidrome
+- player
+- subsonic
+ReleaseNotes: |-
+  Added
+  Native Navidrome smart playlists — detect, edit, and refresh
+  By @JayDawgThaGOAT, PR #1428
+  - Smart playlists created in Navidrome or other clients now appear with a sparkle marker and keep their server-evaluated tracks read-only instead of exposing manual membership controls.
+  - The Playlists page can create and edit native rules in Basic, Advanced, or lossless JSON mode, preview matching tracks, refresh results, and preserve nested groups and server-specific fields.
+  - Feature availability follows the connected Navidrome version, with warnings when the server drops unsupported clauses after saving.
+  Scrobbles are no longer lost when a service is unreachable
+  By @Psychotoxical, PR #1482
+  - A play that could not be sent — no connection, a service that was down, an expired login — used to disappear without a trace. It is now kept and sent later, automatically: when the connection returns, when you reconnect the service, and otherwise every few minutes. Kept plays survive restarting Psysonic.
+  - Each destination in Settings → Integrations shows how many plays are still waiting to be sent, so a service that has quietly fallen behind is visible.
+  - Plays are kept for 14 days, which is as far back as the services accept them.
+  Windows updates install from inside the app
+  By @Psychotoxical, PR #1487 and PR #1488
+  - On Windows the update dialog now installs the new version itself, the way it already does on macOS: the installer is downloaded, its signature is checked against the key built into the app, and it runs in the background. Psysonic closes and reopens by itself when it is done.
+  - Until now Windows only offered the installer as a download to run by hand. Installs of this version and later update in place; an older install still downloads the next installer once.
+  - Long translated button labels stay inside the update dialog: the window is wider, and the controls wrap onto another row when needed.
+  Device Sync playlists reuse songs already on the device
+  By @cucadmuh, PR #1501
+  - Albums and playlists now share one physical copy of each song instead of placing another copy inside every playlist folder. Playlist files point to the shared artist and album path, saving device space, transfer time, and duplicate entries in portable-player libraries.
+  - Existing Device Sync layouts migrate on the next sync. Interrupted work keeps a recovery plan and only resumes or removes old files when the same removable device is connected again.
+  Choose where missing album covers come from
+  By @enncoded, PR #1502
+  - Settings → Integrations → Album artwork lets you order and switch the sources Psysonic falls back to when your server has no cover for an album: the server itself, Apple Music, and now Last.fm. The first enabled source that returns an image wins, and dragging reorders them.
+  - Discord keeps its own separate switch under Rich Presence and still publishes nothing until you pick an option there.
+  Rate the current track with a global shortcut
+  By @cucadmuh, PR #1503
+  - Settings → Input → Global shortcuts now offers separate, unbound actions for assigning 1–5 stars to the current track, even while Psysonic is out of focus.
+  Psysonic follows your desktop's theme
+  By @Manwe-777, PR #1507
+  - On a Linux desktop that publishes its colours — Omarchy does out of the box — Psysonic now themes itself to match, and re-themes itself within a couple of seconds when you switch your desktop theme. No restart, nothing to keep in sync by hand.
+  - The generated theme appears in Settings → Themes as Desktop — <your theme's name>, next to a Follow desktop theme switch. Existing installs keep the theme they already had and start with the switch off; picking any other theme by hand also turns following off, so your choice sticks.
+  - Any other desktop works too: point PSYSONIC_PALETTE_FILE at a file of name = "#rrggbb" lines. Naming only a background, a foreground and an accent is enough — the rest of the theme is derived from those three.
+  Servers that refuse browser-style requests can be added
+  By @Psychotoxical, PR #1511
+  - Some Subsonic servers — Bandcamp's among them — answer requests normally but do not permit them from an app window. Adding one failed with "Could not connect: Network Error" even though the server was reachable the whole time. Psysonic now recognises this and sends those servers' requests the same way it already sends streams and cover art.
+  - Servers that work today are unaffected: they keep the exact request path they had.
+  Dismiss the tour dates prompt in the info tab
+  By @Psychotoxical, suggested by @Trip7274, PR #1513
+  - The info tab in the right sidebar offers tour dates as an optional feature, but the prompt could not be turned down. It now has a close button that hides it for good, and a short message points to Settings → Integrations in case you want the feature later.
+  Rate several tracks at once
+  By @Psychotoxical, PR #1522
+  - Picking more than one track in an album, in Favourites or in a playlist now offers a star rating next to the selection count, and a right-click on the selection opens a menu for all of the picked tracks — play them, queue them, add them to a playlist, favourite them or rate them in one go.
+  - The stars show a rating only when every selected track already carries the same one, so a click always means "give all of them this rating".
+  - Ratings set through a context menu now stay visible after the server confirms them instead of falling back to the value the page first loaded.
+  Favourite a track straight from the queue
+  By @Psychotoxical, PR #1522
+  - A track in the queue could only be favourited by leaving the queue or going through its context menu. Every row now ends in a heart you can click.
+  - An unset heart stays visible as a faint outline, so the control is there when you look for it without cluttering a long queue.
+  - Settings → Personalisation → Queue settings has a switch for it, on by default.
+  Artists remember the selected view
+  By @cucadmuh, reported by @MrSunshine1988, PR #1523
+  - Switching Artists between the grid and list now keeps that choice when you leave the page or restart Psysonic, instead of returning to the grid every time.
+  Signed Flatpak updates with stable and RC channels
+  By @cucadmuh, PR #1525
+  - Supported per-user Flatpak installs now follow a signed Psysonic update repository, with separate stable and release-candidate channels so testing builds cannot replace stable releases.
+  - The update dialog follows the installed branch, shows its matching release notes, and gives the exact flatpak update command to run.
+  Windows: hide the title bar on the mini player
+  By @Psychotoxical, suggested by Doctor Hoen on Discord, PR #1528
+  - Settings → Appearance has a new switch that takes the system title bar off the mini player, so a small always-on-top window is not framed by buttons it does not need. Minimise makes little sense there, and both of the others lead back to the main window, which the player's own toolbar already does.
+  - Without the system bar the mini player uses its own slim one: drag it by the track title, with pin, main window and close beside it.
+  - Off by default, and it takes effect straight away — no restart. Windows only; Linux has always looked this way and macOS keeps its traffic lights.
+  Flatpak updates retain rollback history
+  By @cucadmuh, PR #1537
+  - The signed stable repository now keeps the current release and four previous releases, so a recent version can be selected again with Flatpak's commit rollback command instead of disappearing when the next update is published.
+  Global shortcuts can favourite the current track and use Command
+  By @cucadmuh, suggested by Rain on Discord, PR #1540
+  - Settings → Input → Global shortcuts now offers an unbound action for adding the current track to favourites, even while Psysonic is out of focus.
+  - On macOS, shortcut capture and labels now call the ⌘ modifier Command instead of Super. Existing shortcuts continue to work without being rebound.
+  Pronunciation beneath lyrics, with offline Japanese romaji
+  By @cucadmuh, PR #1541
+  - Settings → Lyrics → Pronunciation can show pronunciation supplied by the server beneath the original lyrics. When Japanese lyrics have no pronunciation layer, Psysonic can generate Hepburn romaji locally without contacting another service.
+  - Pronunciation follows the sidebar and both fullscreen lyric layouts. Word-timed lyrics fill the second line in step with the original, and auto-scroll keeps the current line in position when it appears.
+  Smooth word-by-word lyrics highlighting
+  By @cucadmuh, PR #1548
+  - Settings → Lyrics → Word highlighting can gradually fill each timed word as it is sung in the sidebar and both fullscreen lyric layouts. The existing step-by-step style remains the default.
+  - Pronunciation and generated romaji follow the same smooth progress as the original lyric line.
+  Fixed
+  Shared Top Albums pictures show their covers again
+  By @Psychotoxical, PR #1478
+  - The picture created from Statistics → Most Played Albums drew every album as an empty tile, showing only the rank and the play count. The New Albums export lost its covers the same way.
+  - Covers now come from the same place the album cards get theirs, so a shared picture also reuses artwork that is already on screen instead of fetching it a second time.
+  Navidrome libraries get their ISRC and MusicBrainz ids back, and analysis no longer fails on a stray server key
+  By @Psychotoxical, PR #1490
+  - Libraries indexed from Navidrome's native API kept the ISRC and MusicBrainz recording id of every track out of the local index, because the importer looked for field names Navidrome does not send. Both are read under their real names now, and a one-time background pass fills them in for existing libraries and links the tracks that were never linked, in small batches while Psysonic is idle.
+ReleaseNotesUrl: https://github.com/Psysonic/psysonic/releases/tag/app-v1.53.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

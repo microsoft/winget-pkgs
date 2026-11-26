@@ -1,0 +1,73 @@
+# Created with WinGet Updater using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Adamant.Messenger
+PackageVersion: 4.12.1
+PackageLocale: en-US
+Publisher: ADAMANT Foundation
+PublisherUrl: https://github.com/Adamant-im/adamant-im
+PublisherSupportUrl: https://github.com/Adamant-im/adamant-im/issues
+Author: Adamant-im
+PackageName: ADAMANT Messenger
+PackageUrl: https://github.com/Adamant-im/adamant-im
+License: GPL-3.0
+LicenseUrl: https://github.com/Adamant-im/adamant-im/blob/HEAD/LICENSE
+CopyrightUrl: https://raw.githubusercontent.com/Adamant-im/adamant-im/master/LICENSE
+ShortDescription: ADAMANT is a decentralized anonymous messenger client based on the ADAMANT Blockchain
+Description: ADAMANT is a decentralized anonymous messenger client based on the ADAMANT Blockchain
+Moniker: adamant-messenger
+Tags:
+- anonymity
+- anonymous
+- anonymous-messenge
+- bitcoin
+- blockchain
+- crypto-wallet
+- cryptocurrency
+- decentralization
+- decentralized
+- decentralized-messenger
+- encrypted
+- messenger
+- onion
+- private-keys
+- secure-messenger
+- wallet
+ReleaseNotes: |-
+  Release v4.12.1
+  Release v4.12.1 ships from master (074db965) on top of v4.12.0 (dfe094d3). Across 68 commits and 12 merged pull requests (plus direct maintenance commits including the synced adamant-wallets master update 9a7df1f), this release hardens CSP and security response headers across hosting targets, eliminates runtime eval/Function paths in Web3 validation, updates ADAMANT Node REST/WebSocket schemas and minimum node/IPFS API versions, expands localization to eight languages including Arabic RTL, repairs bounded crypto transaction history pagination with strict single-node affinity, adds build identity and cache reset controls on the login and settings screens, and updates Android 16 and macOS CI packaging.
+  Summary
+  - Enforce strict CSP and shared security response headers across hosting platforms (vercel.json, nginx templates, live CSP deployment checks) alongside dependency updates, Zod 4 jitless Web3 validation without runtime eval/Function, and a 7-day npm release-age gate
+  - Update ADAMANT Node REST/WebSocket schemas (includeDirectTransfers enum, [0, 8] socket subscription), enforce adm.nodes.minVersion 0.10.0 and adm.services.ipfsNode.minVersion 0.1.0, and split ETH PostgREST /ethtxs queries into bounded indexed requests
+  - Expand localization to eight languages (adding es, fr, ja, and ar RTL alongside reviewed de, ru, and zh), unify applyLocale()/pluralRules, and repair HTTP-origin IPFS CID hashing and notification i18n
+  - Repair ETH/BTC/DOGE transaction pagination with single-node affinity, safely reset persisted IndexedDB crypto pagination state, sync direct type-0 ADM transfers in chats, show build identity and SW Force Refresh on /login and /options, isolate single-variant network configs (mainnet.json), target Android 16 (API 36), and disable macOS CI notarization while preserving Developer ID signing
+  Security & CSP hardening
+  - Unified security response headers (#1006): defines PWA_SECURITY_HEADERS as a single source of truth in vite-config/plugins/cspHardeningPlugin.ts (frame-ancestors 'none', X-Frame-Options: DENY, X-Content-Type-Options: nosniff, Referrer-Policy: no-referrer, X-XSS-Protection: 0), applies catch-all rules in vercel.json restricting report-uri /api/csp-report to dev.adamant.im and Vercel preview hosts, excludes gh-pages from Vercel deployments, ships deploy/nginx/security-headers.conf and deploy/nginx/pwa-site.conf.example, and adds header/deployment specs (securityHeaders.spec.ts, cspDeployments.env.spec.ts, production-csp.live.spec.ts)
+  - Supply-chain & dependency hardening (#990, #1029): adds node scripts/check-dependency-release-age.mjs, .npmrc (min-release-age=7), .github/dependency-release-age-exceptions.json, and Dependabot cooldowns (8 days for npm, 7 days for GitHub Actions) in Security CI
+  - Eval-free Zod 4 & dependency remediation (#1029): uses Zod 4 (config({ jitless: true }) in src/lib/configureZod.ts) for web3-validator and abitype for web3-eth-abi, removes compiler entry points and expands the bundle gate in cspHardeningPlugin.ts against Function aliases, updates core runtime and build dependencies (dompurify, vue, vuetify, vue-router, vue-i18n, pinia, axios, marked, vite, electron, @capacitor/*), and removes b64-to-blob, file-saver, and jest-serializer-vue
+  - Playwright CI credential & artifact isolation (#999): rejects configured live account passphrases in Playwright CI, disables CI traces, screenshots, videos, and HTML/JSON reporters in playwright.config.ts, and stops uploading Playwright report artifacts in .github/workflows/playwright-ui-smoke.yml
+  - Electron main-bundle safety (9cf71bc2): dynamically imports electron-devtools-installer only in DEV mode, moves it to devDependencies, and verifies dist-electron/main.js during electron:build:prepare via scripts/electron/verifyMainBundle.mjs
+  API & schema updates
+  - ADAMANT Node API schema (src/lib/schema/schema.json): replaces boolean withoutDirectTransfers with integer enum [0, 1] parameters includeDirectTransfersInChatRooms (default: 1) and includeDirectTransfersInChats (default: 0) on /chats/get and chat retrieval endpoints (#984)
+  - ADAMANT WebSocket subscription (src/lib/sockets.js): connects on account unlock using active ADM nodes without delay and emits types for CHAT_TRANSACTION_TYPES ([Transactions.SEND, Transactions.CHAT_MESSAGE], types 0 and 8) (#984)
+  - Wallet OpenAPI & minimum API versions (src/types/wallets/index.ts, adamant-wallets 9a7df1f): adds optional minVersion?: string to Service, raises adm.nodes.minVersion to 0.10.0 across mainnet, testnet, and Tor (#984), sets adm.services.ipfsNode.minVersion to 0.1.0, updates IpfsClient instantiation in src/lib/nodes/ipfs/index.ts to read ipfsService.minVersion instead of adm.services.minVersion (#1003), and updates adamant-wallets to 9a7df1f (synced to adamant-wallets/master via Adamant-im/adamant-wallets#149) with regenerated src/config/mainnet.json, src/config/testnet.json, and src/lib/constants/cryptos/data.json fallback IPs (Adamant-im/adamant-wallets#148)
+  - ETH PostgREST indexer queries (src/lib/nodes/eth-indexer/EthIndexerClient.ts): ensures every /ethtxs request includes limit (limit ?? 25), splits native ETH history into two bounded indexed queries (txfrom=eq.{addr}&contract_to=eq. and txto=eq.{addr}&contract_to=eq.) merged and deduplicated by txhash client-side, preserves from/to time bounds, and adds getTimestampGroup to resolve pagination boundary collisions (#992)
+  Localization & RTL support
+  - Eight-language parity (#998): adds Spanish (es), French (fr), Japanese (ja), and Arabic (ar), reviews and updates German (de), Russian (ru), and Simplified Chinese (zh), aligns all eight locale JSON files to en.json, extracts hardcoded strings into locale keys, and uses <i18n-t> slot interpolation in PasswordSetDialog.vue
+  - Centralized i18n runtime & pluralization (#998): consolidates applyLocale() in src/i18n.js to synchronize vue-i18n, dayjs, Vuetify locales, and document lang/dir, corrects pluralRules (including Arabic, French, and Russian > 100 teen rules), initializes browser language locally from navigator.languages when no saved preference exists, and formats Arabic dates using ar-u-nu-latn
+  - Full Arabic RTL layout (#998): configures Vuetify rtl: { ar: true }, mirrors directional icons with a-directional-icon, adopts CSS logical properties across chat/wallet/settings views, sets dir="auto" on user-authored messages and the chat composer while preserving LTR rendering for passphrases, and adds RtlUiContract.spec.js and chat-rtl-layout-regression.spec.ts
+  Messaging, transaction history & node reliability
+  - Direct ADM transfers & preview sync (#984): ingests incoming type-0 ADM transfers across chat, chatroom, and WebSocket flows with deduplicated unread handling, derives fallback confirmation state when omitted, updates AChatTransaction.vue, ChatPreview.vue, AdmTransaction.vue, and TransactionListItem.vue, and maps PWA branches to adamant-wallets/dev vs master via scripts/wallets/sourceBranch.mjs
+  - Bounded pagination & strict single-node affinity (#992): updates ETH/ERC-20, BTC (walkHistory, recursion/cycle guards, page budgets, per-node exhausted tracking), and DOGE (confirmed non-PENDING offset calculation, overlap re-reading, double-spend tolerance) history pagination so every request window stays pinned to the active indexer without cross-operator address fan-out, wraps DASH history loaders in try ... finally, and adds src/lib/live-history-pagination.env.spec.ts
+  - IndexedDB module sanitization (#992): introduces toPersistedModule in src/lib/idb/state.js so persisted crypto modules omit transactions and reset bottomReached, oldTxState, newTxCatchUp, and historySession on save
+  - HTTP attachments & notifications (#989): adds an @noble/hashes SHA-256 multihash fallback in src/lib/files/ipfs.ts when crypto.subtle is absent on plain HTTP origins, resolves $t safely in src/lib/notifications.js, and preserves the Notifications instance in src/App.vue for unmount cleanup
+  Build identity, network configs & platform packaging
+  - Login & Settings build identity (#996): injects sanitized build metadata (version, branch, commit, prNumber, author, buildDate, isTestnet) via vite-config/plugins/buildInfoPlugin.ts (virtual:adamant-build-info), renders BuildInfo.vue and BuildInfoDialog.vue on /login and /options, provides a Service Worker + CacheStorage Force refresh action (preserving stored credentials/account data), and marks testnet builds with a hero chip and corner badge
+  - Isolated network configurations (#986): replaces development.json and production.json with shared mainnet.json, bundles a single config via virtual:adamant-network-config, enforces strict Vite mode validation, rejects unexpected JSON files in src/config and cross-network endpoint leaks, enforces npm run wallets:data:check in CI workflows, and consolidates contributor/build documentation into CONTRIBUTING.md
+  - Android 16 & Electron macOS CI (b378c2f8, #1035): raises Android compileSdkVersion/targetSdkVersion to 36, minSdkVersion to 24, AGP to 8.13.0, Gradle to 8.14.3, and cordovaAndroidVersion to 14.0.1 (versionCode 41201); bumps version metadata to 4.12.1; and sets APPLE_NOTARIZE: 'false' in .github/workflows/electron-mac.yml while keeping Developer ID signing and documenting Gatekeeper Open Anyway instructions in CONTRIBUTING.md
+  Breaking changes
+  - Minimum node/service API versions (#984, #1003, 98fc3815): ADM nodes below API 0.10.0 are excluded from all ADM requests, IPFS nodes below 0.1.0 are marked unsupported_version, and relocated fallback IPs replace older addresses (endless, testnode1, testnode3, dschubba)
+  - macOS CI notarization disabled (#1035): macOS artifacts ship Developer ID signed without Apple notarization (APPLE_NOTARIZE: 'false'), so Gatekeeper requires allowing the app once via System Settings → Privacy & Security → Open Anyway
+ReleaseNotesUrl: https://github.com/Adamant-im/adamant-im/releases/tag/v4.12.1
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

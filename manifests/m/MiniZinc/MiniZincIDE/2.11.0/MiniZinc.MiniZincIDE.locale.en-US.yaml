@@ -1,0 +1,84 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: MiniZinc.MiniZincIDE
+PackageVersion: 2.11.0
+PackageLocale: en-US
+Publisher: Data61 and Monash University
+PublisherUrl: https://www.minizinc.org/
+PublisherSupportUrl: https://github.com/MiniZinc/MiniZincIDE/issues
+PackageName: MiniZinc IDE
+PackageUrl: https://www.minizinc.org/downloads/
+License: MPL-2.0
+LicenseUrl: https://github.com/MiniZinc/MiniZincIDE/blob/HEAD/LICENSE.txt
+Copyright: https://www.minizinc.org/license/
+ShortDescription: Integrated development environment for the high-level constraint modelling language MiniZinc.
+Tags:
+- constraint
+- constraint-programming
+- ide
+- language
+- minizinc
+- modeling
+- optimization
+- programming
+- programming-language
+- solver
+ReleaseNotes: |-
+  Changes:
+  - Building MiniZinc from source now requires a C++17 compiler.
+  - Normalize linear expressions (term order, sign, and common divisor), so that common subexpression elimination finds more equal expressions.
+  - Parse files selected by MZN_TREE_SITTER_PARSER directly with tree-feller, using the tree-sitter runtime only to report syntax errors in models.
+  - Download the tree-sitter runtime when configuring instead of vendoring it, which raises the CMake required to build MiniZinc to 3.20.
+  - Decide at the end of flattening which linear expressions get a variable of their own. An expression that more than one item reads is defined once, and an expression with a single reader is written out in that reader. Linear expressions that differ only by a constant offset or a common factor share one definition. The option mzn_opt_eager_linear_aggregation restores the old behaviour, and the linear library sets it.
+  - Update URLs in documentation to use minizinc.org as the canonical domain for all MiniZinc resources.
+  - Report a type error when a var type-inst variable (for example in a parameter var $T: x) would be instantiated with a type that has no var version, such as string or set of float. Such calls used to produce invalid types like var string. Use any $T for parameters that can be both par and var.
+  - Make arg_val and arg_val_weak on par arrays of strings, integers or enums use a hash map that is built on the first call for an array and reused by later calls, so that repeated lookups in a large array no longer scan it. Add the function first_duplicate, which returns a value that occurs more than once in such an array, or <> if all values are distinct.
+  - Avoid copying or re-evaluating par arrays whose elements are already values (including arrays of strings, sets and optional values) each time they are passed to a function, which made repeated calls on large arrays take time linear in the size of the array.
+  - Make the codebase pass more clang-tidy checks.
+  - Replace the mark-and-sweep garbage collector with reference counting, so that nodes are freed as soon as they are no longer used. This makes the compilation of large models faster and reduces its peak memory use. MiniZinc now uses the mimalloc memory allocator.
+  - Make return type of internal var_dom(set of int: x, set of int: s) function par.
+  - Flatten the definitions of var bool variables (top-level and in lets), and of the elements of var bool arrays, after their uses, in the context of those uses. A variable that is only used positively can now be half-reified, together with the expressions in its definition, as when the definition is written in place.
+  Language changes:
+  - Add support for optional set variables (var opt set of int, including sets of enums). A var opt set is either a set or absent (<>), and absent is different from the empty set. The set operations (in, subset, union, intersect, card etc.) ignore absent operands, like the other operations on option types. Par optional sets support the same operations, including optional sets of floats.
+  - Allow record literals in data files (.dzn files and data given with -D) to omit optional fields of the declared record type. The missing fields are absent, so an array of records can be given as [(y: 1), (x: 2, y: 3)] for type record(opt int: x, int: y). This was already the case for JSON input, which now also supports record types that are combined using ++.
+  - Make x in S true when the optional value x is absent (it was false). An absent value is now ignored consistently: <> in S is equivalent to {<>} subset S, and agrees with the set_in constraint on optional integers and with the other relations on optional values, such as <=.
+  - Warn when op or lambda is used as an identifier or == is used where assignment syntax requires =. These forms are not accepted by the new parser.
+  Bug fixes:
+  - Allow multi-dimensional arrays in sum over optional values, forall/exists over optional Booleans, array2set and has_element.
+  - Fix optional variables whose definition turns out to be non-optional during compilation (for example an if-then-else with a fixed condition) being disconnected from their definition, which could lead to incorrect solutions.
+  - Fix the FlatZinc optimiser removing the definition of a variable that had been unified with another variable, which could lead to incorrect solutions.
+  - Fix a crash in polymorphic functions with a comprehension over an array of tuples or records with an any $T field (such as [x_i.2 | x_i in x] for x of type array [int] of tuple(int, any $T)).
+  - Fix an assertion failure when instantiating a polymorphic function whose parameter is a tuple or record with an any $T field with a par argument.
+  - Fix the evaluation of variables (an assertion failure or crash) in par tuple or record expressions that depend on variables, such as a tuple literal containing a par function call with variable arguments, or a field access of such a call.
+  - Fix a crash when printing an output tuple or record variable whose fields are defined in a let expression (or otherwise not top-level variables), including when another variable is defined from one of its fields.
+  - Fix the evaluation of if-then-else expressions whose condition is par but depends on variables (e.g. a par function applied to an array of variables defined by a comprehension), which could fail with an evaluation error or crash.
+  - Fix the type of fix (and other functions with a par return type) applied to an array of tuples or records with var fields, which kept the fields var.
+  - Report an error for a top-level variable or let variable of a tuple or record type with par fields that is not defined, instead of failing with an obscure evaluation error or output syntax error.
+  - Fix JSON input for multi-dimensional arrays with an empty index set (such as array[1..n, 1..0] of bool given as [[], [], []]), which failed since version 2.10.0.
+  - Make the output model deterministic for output sections that bind local declarations (such as those created by the visualisation library). The order of these declarations depended on memory addresses, so it could differ between runs.
+  - Fix array slices (such as x[i, ..]) that were never hashed, so that common subexpression elimination could not recognise them. A slice is now equal to any array with the same index sets and elements, so it can share the result of an equal array.
+  - Make warnings raised while parsing (for example, for deprecated syntax) respect -Werror and -w/--disable-warnings. Parser warnings were printed directly, bypassing all warning handling, and the warning options were only applied once flattening started (issue 1054).
+  - Report an error for -Werror when only checking a model or instance (--model-check-only, --instance-check-only, --model-interface-only and --model-types-only), rather than printing the warnings as errors but exiting successfully.
+  - Fix an “unexpected absent literal” internal error when a function that compares optional values is used to compute an output value (issue 1057).
+  - Fix “unexpected absent literal” internal errors for par array comprehensions that produce optional sets, and for functions returning arrays of optional sets that contain <>.
+  - Fix set variables that are only used in the output (for example as a field of a tuple) remaining in the FlatZinc for solvers without set support.
+  - Fix output variables that could be left unconstrained in the FlatZinc (and report arbitrary values) when they were defined through a chain of aliases to a reverse-mapped variable, for example a Boolean result of a function call with the linear library.
+  - Fix an “invalid set literal type” internal error when a user-defined operator with a polymorphic body (e.g. on set of $T) was evaluated on par arguments.
+  - Fix an internal error when a variable array access a[b[i, j]] into an enum-indexed array was composed with a multi-dimensional index array.
+  - Fix a crash when comparing par sets of floats (subset, superset, =, != and the set orderings), and add the missing array_union and array_intersect builtins for arrays of float sets.
+  - Coerce a set of integers used where a set of floats is expected element-wise, so that for example 1..3 becomes {1.0, 2.0, 3.0}. Mixing sets of integers and floats (e.g. {1} subset S for a float set S, x in 1..3 for a float variable x, or passing both to a function on set of $T) used to fail with internal errors, type errors, a crash, or coerce the set into an array.
+  - Fix user-defined operators used in the output missing from the output model (.ozn file), which made standalone output processing fail.
+  - Fix a Boolean argument of a user-defined operator with a non-Boolean result being flattened in the context of the whole expression, which could turn it into a top-level constraint (e.g. (x > 1) + "abc" for an operator '+'(var bool, string) required x > 1).
+  - Fix the elements of a Boolean array argument of a call being flattened in the context of the call, which could half-reify them although the call uses them in both polarities (e.g. xorall([x > 5, x > 7]) \/ q allowed x = 8 with q false).
+  - Fix an “arithmetic operation on infinite value” error when outputting a list of var declaration.
+  - Fix the decomposition of the reified sliding_sum constraint, where an operator precedence error made the prefix sum definitions part of the reified condition, which could produce an incorrect value for the control variable.
+  - Make MIPdomains process the variables of a clique in a deterministic order.
+  - Fix optional variables with a declared domain that are defined by an if-then-else expression with an absent branch, such as var opt 1..2: x = if c then 2 else <> endif. The bounds of the branches could fix the variable (losing the absent branch) or make the model fail.
+  - Fix mzn_compiler_version so that it can encode versions with a minor version greater than 9.
+ReleaseNotesUrl: https://docs.minizinc.dev/en/2.11.0/changelog.html
+Documentations:
+- DocumentLabel: Handbook
+  DocumentUrl: https://docs.minizinc.dev/en/stable/
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

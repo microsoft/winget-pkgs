@@ -1,0 +1,82 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: ESEngine.ReasonixDesktop
+PackageVersion: 1.39.6
+PackageLocale: en-US
+Publisher: reasonix
+PublisherUrl: https://esengine.cn/
+PublisherSupportUrl: https://github.com/esengine/DeepSeek-Reasonix/issues
+PackageName: Reasonix
+PackageUrl: https://esengine.github.io/DeepSeek-Reasonix/
+License: MIT
+LicenseUrl: https://github.com/esengine/DeepSeek-Reasonix/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Reasonix Contributors
+ShortDescription: A DeepSeek-native coding agent, for your terminal.
+Description: Reasonix talks straight to api.deepseek.com. The loop is append-only, engineered around DeepSeek's byte-stable prefix cache — long sessions hold 90%+ cache hit and input-token cost collapses to ~1/5. Terminal-first, leave it running.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- deepseek
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  修复升级后清不掉的配置告警、停顿后连接已断导致的请求失败、Windows 上的 shell 命令问题，以及多处桌面端会话与侧边栏问题。
+  发布渠道：稳定版 · v1.39.6
+  English → · 网页版完整更新日志 →
+  概览
+  Reasonix v1.39.6 — Reasonix 1.39.6
+  修复升级后清不掉的配置告警、停顿后连接已断导致的请求失败、Windows 上的 shell 命令问题，以及多处桌面端会话与侧边栏问题。
+  发布日期：2026-10-01
+  Desktop 18 · CLI 7
+  桌面端更新
+  重点内容
+  - [Desktop · CLI] 升级后不再残留清不掉的配置告警 — 从 1.38 升级到 1.39.5 后，旧版本写入的项目权限规则，以及同一个 Windows 文件夹的不同写法，会一直弹出配置有问题的提示，尽管对话本身正常。现在已有授权覆盖的规则会被识别，尚未批准的项目声明会保留供查看，不再被当作配置失败。项目设置仍然不能授予权限，也不能恢复已撤销的授权。 (#11431 by @SivanCola)
+  - [Desktop · CLI] 连接在空闲时已断开，不再让下一轮对话失败 — 停顿一段时间后，下一轮对话可能因 unexpected EOF 失败，原因是请求走了已被对端断开的复用空闲连接；自 1.39.0 起请求只发送一次，所以这个失败直接暴露给了用户。现在只有在请求使用了复用的空闲连接、且没有收到任何响应字节时，才会在新连接上重发一次；其他失败、超时和取消不会重发。 (#11271 by @esengine)
+  改进
+  - [Desktop · CLI] 新消息优先于被中断轮次的恢复提示 — 强制停止一轮对话后，恢复提示没有说明以哪条指令为准，无关的新消息可能被当成继续旧任务的信号。现在提示明确写出：以你的新消息为准，两者无关时不要恢复旧任务。 (#11386 by @esengine)
+  - [Desktop] 会话历史加载失败时显示具体原因 — 「无法加载此会话」原先用一句通用提示盖住了真实原因。现在「详情」里会附上读取失败的具体原因，便于反馈和排查。 (#11282 by @esengine)
+  - [Desktop] 历史对话导入失败时说明原因和查看位置 — 「导入并打开」失败时原先总是同一句话。现在提示条和历史列表会写出失败类别（例如工作区冲突、历史过大或损坏、版本不受支持、来源被占用），详情收在展开项里，并提供「查看恢复详情」入口，直接打开设置中的存储页。导入成功后打开失败，也不再被说成导入失败。 (#11294 by @esengine)
+  - [Desktop] 可以重置侧边栏的手动排序 — 项目手动调整排序后，即使选择按创建或更新时间排序，侧边栏仍保持手动顺序。项目菜单新增「重置手动排序」，关闭手动排序并保留已保存的分组和位置。 (#11303 by @KHG420)
+  - [Desktop] 关闭桌面端时释放机器人桥接和用量记录线程 — 桌面端每次启动都会留下机器人桥接线程和按目录的用量记录线程，运行期间一直不释放，长时间使用会越积越多。现在它们随应用一起关闭。 (#11415 by @jf200s)
+  修复
+  - [Desktop · CLI] Windows 上的 shell 命令不再先输出编码错误 — PowerShell 的前置脚本在没有控制台或处于 ConstrainedLanguage 模式时会在你的命令之前报错，每次结果前都带着错误行。现在每项设置都有保护。在 Windows PowerShell 5.1 上，> 和 Out-File 改为写入 UTF-8 而不是 UTF-16，通过管道传给原生程序的文本也不再以字节序标记开头；能真正启动的 Microsoft Store 版 PowerShell 7 也会被识别。 (#11253 by @esengine)
+  - [Desktop · CLI] Windows 命令行过长时给出明确原因，不再报「文件名太长」 — shell 命令内嵌大段文字时会超过 Windows 32,767 字符的命令行上限，过去只报「文件名或扩展名太长」。现在会在启动前拒绝，并说明实际大小和上限、告知没有执行任何内容，提示改用 write_file 或 edit_file。 (#11232 by @esengine)
+  - [Desktop · CLI] 恢复目标时不再因多余参数失败 — 模型在恢复目标时回传了目标描述、空的轮数上限和空的阻塞原因，会被工具拒绝。现在目标的生命周期操作会接受属于其他操作的字段但不应用它们，结果里会列出未生效的值，避免被误当成已生效的修改。 (#11238 by @SivanCola)
+  - [Desktop] 权限预设跟随各自的远程会话 — 在 SSH 远程工作区里，修改一个会话的权限预设可能影响另一个会话，切换会话或重启远程服务后选择还会丢失。现在每个会话各自保存预设，分叉出的会话权限不会比 workspace-write 更宽。 (#11086 by @KHG420)
+  - [Desktop] 机器人对话可以从机器人侧边栏打开 — 内嵌机器人仍占用会话时，从桌面端机器人侧边栏打开该对话可能失败。现在桌面端和内嵌机器人共用同一个会话服务，侧边栏以只读方式打开已保存的记录。 (#11273 by @KHG420)
+  - [Desktop] 手动排序的侧边栏里新对话不再找不到 — 拖动一个对话会开启手动排序，并把列表整个颠倒成最旧的在最上面，新对话还被追加到末尾，翻不到第一页。现在第一次拖动会保持你当时看到的顺序，新对话放在最前面。 (#11270 by @esengine)
+  - [Desktop] 移入废纸篓时旧版对话的所有版本只归档一次 — 对于带有未命名分叉或并发保存后产生版本的旧版对话，每点一次只归档一个版本，重复归档已处理的版本还可能多写出会话副本。现在会一次归档该对话的所有版本，已归档的版本不再重复复制，也不会删除任何内容。 (#11309 by @esengine)
+  - [Desktop] 归档旧版本时不再动正在使用的同级版本 — 归档旧版对话的某个版本时，可能给已作为活跃会话打开的同级版本再造一份副本，并把该会话的来源关联挪到副本上。现在已有来源关联的版本不会再被动到。 (#11319 by @KHG420)
+  - [Desktop] 仍在输出的思考块可以点「加载全文」 — 在仍在输出的思考块里点「加载全文」，下一段内容到达时会立刻退回 8000 字的预览。现在输出期间思考块会跟随实时文本，结束后再一次性加载完整内容。 (#11414 by @esengine)
+  - [Desktop] 每个已结束的轮次都能手动折叠 — 因停止、出错或留有未完成工具调用而结束的轮次会保持展开，且没有折叠入口。现在只要是带过程的已结束轮次都会显示折叠控件，并按轮次记住你的选择；这类轮次默认仍保持展开，使中断情况一目了然。 (#11405 by @esengine)
+  CLI 端更新
+  重点内容
+  - [Desktop · CLI] 升级后不再残留清不掉的配置告警 — 从 1.38 升级到 1.39.5 后，旧版本写入的项目权限规则，以及同一个 Windows 文件夹的不同写法，会一直弹出配置有问题的提示，尽管对话本身正常。现在已有授权覆盖的规则会被识别，尚未批准的项目声明会保留供查看，不再被当作配置失败。项目设置仍然不能授予权限，也不能恢复已撤销的授权。 (#11431 by @SivanCola)
+  - [Desktop · CLI] 连接在空闲时已断开，不再让下一轮对话失败 — 停顿一段时间后，下一轮对话可能因 unexpected EOF 失败，原因是请求走了已被对端断开的复用空闲连接；自 1.39.0 起请求只发送一次，所以这个失败直接暴露给了用户。现在只有在请求使用了复用的空闲连接、且没有收到任何响应字节时，才会在新连接上重发一次；其他失败、超时和取消不会重发。 (#11271 by @esengine)
+  改进
+  - [Desktop · CLI] 新消息优先于被中断轮次的恢复提示 — 强制停止一轮对话后，恢复提示没有说明以哪条指令为准，无关的新消息可能被当成继续旧任务的信号。现在提示明确写出：以你的新消息为准，两者无关时不要恢复旧任务。 (#11386 by @esengine)
+  修复
+  - [Desktop · CLI] Windows 上的 shell 命令不再先输出编码错误 — PowerShell 的前置脚本在没有控制台或处于 ConstrainedLanguage 模式时会在你的命令之前报错，每次结果前都带着错误行。现在每项设置都有保护。在 Windows PowerShell 5.1 上，> 和 Out-File 改为写入 UTF-8 而不是 UTF-16，通过管道传给原生程序的文本也不再以字节序标记开头；能真正启动的 Microsoft Store 版 PowerShell 7 也会被识别。 (#11253 by @esengine)
+  - [Desktop · CLI] Windows 命令行过长时给出明确原因，不再报「文件名太长」 — shell 命令内嵌大段文字时会超过 Windows 32,767 字符的命令行上限，过去只报「文件名或扩展名太长」。现在会在启动前拒绝，并说明实际大小和上限、告知没有执行任何内容，提示改用 write_file 或 edit_file。 (#11232 by @esengine)
+  - [Desktop · CLI] 恢复目标时不再因多余参数失败 — 模型在恢复目标时回传了目标描述、空的轮数上限和空的阻塞原因，会被工具拒绝。现在目标的生命周期操作会接受属于其他操作的字段但不应用它们，结果里会列出未生效的值，避免被误当成已生效的修改。 (#11238 by @SivanCola)
+  升级提醒
+  本版本无需手动迁移。
+  风险提示
+  - [Desktop · CLI] 重发的请求在极少数竞态下可能被重复计费 — 空闲连接已断开后的重发最多一次。如果连接断开前服务商恰好已收到第一次请求，这一轮会被计费两次，预计不常见。 (#11271 by @esengine)
+  下载与安装
+  - 官网按平台下载
+  - 查看完整差异
+  贡献者
+  感谢本版本的贡献者：@SivanCola、@esengine、@KHG420、@jf200s
+ReleaseNotesUrl: https://github.com/esengine/DeepSeek-Reasonix/releases/tag/desktop-v1.39.6
+Documentations:
+- DocumentLabel: FAQ
+  DocumentUrl: https://esengine.github.io/DeepSeek-Reasonix/index.html#faq
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

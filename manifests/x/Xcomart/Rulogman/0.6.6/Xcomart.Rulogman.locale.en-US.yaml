@@ -1,0 +1,72 @@
+# Created using wingetcreate 1.12.13.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Xcomart.Rulogman
+PackageVersion: 0.6.6
+PackageLocale: en-US
+Publisher: Xcomart
+PublisherUrl: https://github.com/xcomart
+PublisherSupportUrl: https://github.com/xcomart/rulogman/issues
+Author: Dennis Park
+PackageName: rulogman
+PackageUrl: https://github.com/xcomart/rulogman
+License: MIT
+LicenseUrl: https://github.com/xcomart/rulogman/blob/main/LICENSE
+Copyright: Copyright (c) 2026 Dennis Park
+ShortDescription: A multi-platform GUI SSH terminal with a files panel, a built-in editor and split panes.
+Description: |-
+  rulogman is a desktop SSH client written in Rust and drawn with gpui, the
+  GPU-accelerated UI framework behind the Zed editor. Connections are saved as
+  profiles — host, user, password or private key — and open in tabs that can be split
+  into panes, each with its own connection and its own scrollback. The terminal itself
+  is alacritty_terminal, so colors, cursor addressing, the alternate screen and
+  full-screen programs such as vim, tmux and htop behave as they do in any other
+  terminal.
+
+  Beside the terminal sits a files panel that browses the session's filesystem over
+  SFTP on a channel of the same connection, with drag-and-drop transfers and a
+  breadcrumb path. Right-clicking a file opens it in a built-in editor tab with line
+  numbers, find and replace, undo and syntax highlighting for seventeen formats, and
+  Ctrl+S writes it back over the connection it came from. Port forwarding rules,
+  including a SOCKS proxy, are saved with the profile and open as soon as the shell is
+  up, and profiles can be imported from the OpenSSH client's config file.
+
+  Not every terminal is remote: local shells are first-class too, with PowerShell, cmd
+  and every installed WSL distribution offered from the start screen. Host keys are
+  checked on the trust-on-first-use convention, and passwords and key passphrases go
+  to the Windows Credential Manager rather than to any configuration file. Themes and
+  terminal color schemes are picked independently, scheme files use Windows
+  Terminal's format, and the interface is available in eight languages.
+Moniker: rulogman
+Tags:
+- console
+- developer-tools
+- gui
+- port-forwarding
+- rust
+- scp
+- sftp
+- ssh
+- ssh-client
+- terminal
+- terminal-emulator
+- wsl
+ReleaseNotes: |-
+  rulogman 0.6.6 — idle Windows and WSL shells that close without asking, saves on a NAS whose SFTP view differs from its shell, a comment toggle that keeps the selection, and rugpui 0.1.17.
+  - Idle Windows and WSL shells close without asking. Closing a window asked first for every local shell on Windows, even one that had run nothing: a console has no foreground process group, and every Windows shell is started from a command line, which the close guard took for -e. cmd and PowerShell now count as idle when they have no child process and have drawn their prompt again since the last command line, which also catches a script or cmdlet running inside PowerShell itself. A WSL shell is read inside its distribution, like a remote one, and is idle while its terminal's foreground group is its own.
+  - Remote files save on a NAS whose SFTP view differs from its shell. A NAS such as Synology serves SFTP from a view of its own (/home, /photo, /usbshare1) while its shell sees /volume1/homes/<user>, /volume1/photo and /volumeUSB1/usbshare, so opening a file worked and saving it failed. A save now creates its staging directory over SFTP and asks the shell which directory holds it, and a root save matches the file by its opened bytes when the SFTP path does not exist in the shell.
+  - The comment toggle in the editor keeps the selection. The same lines stay selected, a backwards selection stays backwards, and the caret stays beside the character it was next to, instead of collapsing to a caret at the old offset.
+  - Shift+Backspace deletes backwards in editors and text fields, as Backspace does. It was bound to nothing and reached the text only through whatever the input method made of it.
+  - Shared libraries are updated to rugpui 0.1.17, and russh to 0.65 for RUSTSEC-2026-0492 and RUSTSEC-2026-0495. UI dependencies and framework patches are pinned to rugpui's published release commit.
+
+  Requirements
+  - Linux: glibc 2.35 or newer: Ubuntu 22.04, Debian 12 and later, or a distribution built on them, MX Linux 23 among them.
+
+  What's Changed
+  - chore: release 0.6.6 by @xcomart in #78
+ReleaseNotesUrl: https://github.com/xcomart/rulogman/releases/tag/v0.6.6
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/xcomart/rulogman/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

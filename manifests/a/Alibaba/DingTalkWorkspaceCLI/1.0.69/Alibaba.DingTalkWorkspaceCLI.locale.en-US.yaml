@@ -1,0 +1,57 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Alibaba.DingTalkWorkspaceCLI
+PackageVersion: 1.0.69
+PackageLocale: en-US
+Publisher: DingTalk (Singapore) Private Limited
+PublisherUrl: https://www.dingtalk.io/
+PublisherSupportUrl: https://github.com/DingTalk-Real-AI/dingtalk-workspace-cli/issues
+PrivacyUrl: https://terms.alicdn.com/legal-agreement/terms/suit_bu1_dingtalk/suit_bu1_dingtalk202102181006_34132.html
+Author: DingTalk (Singapore) Private Limited
+PackageName: DingTalk Workspace CLI
+PackageUrl: https://github.com/DingTalk-Real-AI/dingtalk-workspace-cli
+License: Apache-2.0
+LicenseUrl: https://github.com/DingTalk-Real-AI/dingtalk-workspace-cli/blob/HEAD/LICENSE
+Copyright: Copyright 2026 Alibaba Group
+CopyrightUrl: https://terms.alicdn.com/legal-agreement/terms/suit_bu1_dingtalk/suit_bu1_dingtalk202010161503_40649.html
+ShortDescription: dws — DingTalk Workspace on the command line, built for humans and AI agents.
+Description: |-
+  dws — DingTalk Workspace on the command line, built for humans and AI agents.
+  Why dws?
+  - For humans — --help for usage, --dry-run to preview requests, -f table/json/raw for output formats.
+  - For AI agents — structured JSON responses + built-in Agent Skills, ready out of the box.
+  - For enterprise admins — zero-trust architecture: OAuth device-flow auth + domain allowlisting + least-privilege scoping. Not a single byte can bypass authentication and audit.
+Moniker: dws
+Tags:
+- dingding
+- dingtalk
+ReleaseNotes: |-
+  本版本将 v1.0.69-beta.1 晋级正式版，并纳入下方列出的 beta 后变更。
+  Added
+  - 企业应用事件发送（#1616）— 新增 dws event send，支持使用企业应用凭据投递第三方事件，从内联 JSON、文件或标准输入读取载荷。支持本地预览和接收方去重，并校验 ACCEPTED、DUPLICATE 回执。
+  Changed
+  - VoIP MeetingSDK 凭据（#1619）— 优先读取 callerUserId，兼容 callerUid，并返回 SDK App ID 和有效期。动态 token 优先读取 body.sdkAuth.sdkToken，兼容旧消息头。需要使用 token 入会的数字员工可显式传入 --include-voip-sdk-token。常规输出继续隐藏敏感凭据。
+  Removed
+  - PR 准入（#1615）— ai-generated 标签的 30 文件上限及路径限制已移除。九项准入检查和同级评审继续执行，AI Behavior 仍会拦截草稿或已过期的提交。
+  Changes since v1.0.69-beta.1
+  Added
+  - Add WorkBuddy as a DWS Skill installation target: dws skill setup --target workbuddy and dws skill install <skillId> workbuddy. Installers and upgrades detect ~/.workbuddy (or WORKBUDDY_CONFIG_DIR) and use the existing shared Skill links with a copy fallback. WorkBuddy connector plugin caches remain independently managed.
+  - AI 语音外呼 (#1635)：新增 outbound-call create/detail，支持创建外呼任务、查询状态与听记链接，包含执行确认、预览和提交结果不确定性保护。
+  - dws sport 新增 7 个工具，保持 helpers 手写注册与隐藏的 misc 长尾入口：competition invite/update/delete/audit/export/export-task、step export；不接入 get_user_org_list。
+  - 比赛邀请支持员工与群至少一个目标，工号保持字符串；编辑使用完整 --request JSON 对象（支持 @文件），保留数值与显式 null，拒绝遗漏字段导致的误清空；删除不可恢复、审批同意会补发广播，均需用户确认且不自动重放。
+  - 比赛导出提交后返回 pending 与真实任务 ID；点查 PROCESSING/SUCCESS/FAILED 状态并保留 Long 精度、profile 及钉盘链接。步数报表只报告受理成功，无任务 ID、不自动等待或下载，文件由钉钉异步投递。
+  - 新工具操作人及企业身份由平台注入；同步 Help、Agent Schema、mono/misc 命令参考，明确灰度、权限、频控、编辑状态差异与“受理不等于完成”的边界。旧 create 的 FIXED 限制和既有参数保持不变。
+  - dws sport competition 新增 9 个只读命令，沿用 helpers 手写注册与隐藏的 misc 长尾入口：list（企业启用中的比赛）、rank-top（TopN 榜，支持 TOTAL 本期总榜）、ranking（全员分页排行榜）、my-list / my-can-join-count（我的比赛与可参与数量）、my-participated / my-participated-count（我参与过的期次与总数）、activity-detail（活动详情与我的报名状态）、my-achievement（我的达标进度）。同批材料中已接入的配置、期次与统计工具未重复注册。
+  - 分页列表只取一页：源 hasMore / nextCursor 转为 meta.pagination.endpoint_exhausted / next_token，Long 游标保持精度，空页不当作结束；个人列表与全员排行首页发送 cursor=null，企业列表首页为 0。缺少 success、分页字段、非法计数或声明有下一页却无有效游标的回执均按错误返回，不当成空结果。
+  - 企业与当前用户身份由平台注入，新命令不接受 --user-id / --corp-id；同步 Help、Agent Schema 与 mono/misc 命令参考。
+  Changed
+  - chat message send-a2ui-card 支持引用原消息，入群审批命令支持通过、删除、忽略、拒绝和拉黑。
+  - whiteboard +insert-image 支持在独立或内嵌白板插入本地 PNG/JPEG，并读回校验结果。
+  - sheet info 对空值、非对象和无效 JSON 返回结构化 API 错误。
+  - event consume --group 在提交订阅前拒绝逗号分隔的多群输入。
+  - AI 表格普通记录查询支持更大的服务页，在分页不完整时返回明确的恢复指引。
+  - aicard chart 支持离线查找预设和生成图表卡片，图表校验区分完整新卡与延迟注入数据的模板。
+ReleaseNotesUrl: https://github.com/DingTalk-Real-AI/dingtalk-workspace-cli/releases/tag/v1.0.69
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

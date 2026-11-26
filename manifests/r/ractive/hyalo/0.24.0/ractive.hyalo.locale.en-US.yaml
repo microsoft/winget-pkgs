@@ -1,0 +1,174 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: ractive.hyalo
+PackageVersion: 0.24.0
+PackageLocale: en-US
+Publisher: '@ractive'
+PublisherUrl: https://github.com/ractive
+PublisherSupportUrl: https://github.com/ractive/hyalo/issues
+Author: Jean-Pierre Bergamin
+PackageName: hyalo
+PackageUrl: https://github.com/ractive/hyalo
+License: MIT
+LicenseUrl: https://github.com/ractive/hyalo/blob/HEAD/LICENSE
+ShortDescription: CLI for exploring and managing Markdown knowledge bases with YAML frontmatter
+Description: Hyalo is a fast command-line tool for searching, filtering, and mutating collections of Markdown files with YAML frontmatter. It supports property queries, tag filtering, regex search, wikilink tracking, and bulk metadata updates. Compatible with Obsidian vaults, Zettelkasten systems, and any structured Markdown documentation.
+Moniker: hyalo
+Tags:
+- agent-skill
+- agentic-workflows
+- cli
+- knowledge-base
+- knowledge-management
+- markdown
+- obsidian
+- rust
+- zettelkasten
+ReleaseNotes: |-
+  [0.24.0] - 2026-09-13
+  Added
+  - Codex project integration with hyalo init --codex: managed AGENTS.md
+    guidance, skills under .agents/skills/, active profile workflows, and clean
+    removal through deinit. A skills-only plugin ships under plugins/hyalo/;
+    --codex-plugin configures projects without duplicate local skill copies.
+  - Agent Skills validation now includes .agents/skills/** as well as Claude's
+    skill directory. CI checks Codex plugin metadata and embedded asset parity.
+  - Ranked find results now include up to three body snippets with line numbers and
+    section context, alongside their relevance score. Snippets share stemming, phrase, OR
+    and CJK rules with ranked search; indexed queries read only final selected files after
+    the result limit.
+  Changed
+  - Directory overlap in fuzzy link confidence now admits a shared prefix that
+    outweighs its leftover in the shorter token, while basename tokens retain
+    the stricter factor of two. The GitHub Docs SAML directory relocation returns
+    from 0.795 to 0.804, above the default apply floor; Mathjax still does not
+    match mathpad. Both features retain the 0.85 Jaro-Winkler token floor.
+  - Loading a .hyalo-index snapshot no longer decodes the BM25 inverted
+    index. On a MDN-scale vault (14 375 entries, 116 MiB index) the BM25
+    section is 76 % of the file, and a find with no text query spent ~230 ms of
+    its ~400 ms walking postings it never read. The snapshot envelope is now
+    visited by hand and the parse stops at the bm25_index key, leaving the
+    section undecoded until something actually searches text. Measured on that
+    vault, release build, median of 7 runs: find --limit 1 --index 396 ms →
+    151 ms (2.6x); a text find <query> --index, which does decode the
+    section, is 399 ms → 402 ms — inside run-to-run noise. The on-disk format is
+    unchanged: indexes written before this release load unchanged, and indexes
+    written after it are read by the previous release, verified both directions.
+    (Superseded later in this same release: the snapshot header now carries a
+    format version, and one written before it is refused with a warning and a
+    fall back to disk — see the format-version entry below. The wire format is
+    still additive; the refusal is a deliberate correctness gate, because the
+    272/273 link and header changes make an older snapshot answer differently
+    from a disk scan of the same vault.)
+    Mutating commands (set, remove, append, task toggle, mv,
+    lint --fix --index) force the section before re-saving, so none of them can
+    drop the search index from a snapshot they only meant to patch.
+  - hyalo help <cmd> now prints the short -h page, not the long --help
+    one. hyalo help find was 28 701 bytes where hyalo find -h is 2 992 —
+    a 9.6x tax on the phrasing agents reach for first. The two are now
+    byte-identical, and a subcommand path works (hyalo help task toggle).
+    Because the forward is an argv rewrite rather than a page rendered from a
+    Help arm, it inherits everything the short page is assembled from — the
+    collapsed globals pointer, find's composed examples, the footer naming
+    hyalo find --help for the long form — and it inherits clap's did-you-mean
+    for an unknown name, which the generated help subcommand never had:
+    hyalo help fnd now suggests find. The long page is unchanged and one
+    line away.
+  - The envelope's dry_run claim is now true. hyalo --help's RESULTS
+    CONVENTIONS said "every mutating command reports dry_run and
+    skipped_count"; measured across all 23 mutating commands, 18 reported
+    neither or reported the same fact under a different name (apply,
+    applied). Every mutation result that is an object now carries dry_run —
+    added to batch mv, new, types remove, madr toc, okf index,
+    okf log, changelog add and changelog release. apply/applied are
+    kept and are always its exact inverse, so nothing that reads them breaks.
+    skipped_count is documented for what it is: bulk-family-only (set,
+    remove, append, properties rename, tags rename), because a
+    single-target command has no scanned-but-unchanged set. task toggle/task set return an array of per-task records with no top-level object and are
+    named as the exception; their dry-run records are the ones carrying
+    old_status.
+  - The root -h command group labelled config and scaffolds (write .hyalo.toml) now reads setup (writes config/index, not your notes):
+    create-index/drop-index write a snapshot index, not .hyalo.toml, and
+    what a caller needs from that label is whether the group can touch their
+    markdown.
+  - BREAKING: an explicit --fields is an exact projection. --fields title used to return {file, modified, size, lines, title} — the four
+    "structural" keys were unconditional, so a projection could never cost less
+    than they did, and there was no way to ask for just the paths and one
+    property. file is now the only key no projection can drop: it names the
+    result. modified, size and lines are ordinary members of the default
+    set — present when no --fields is given, because they are cheap and are the
+    inputs an agent uses to choose its next call (read --lines, recency) — but
+    dropped when an explicit --fields does not name them. So --fields title
+    is {file, title}, --fields size,lines is {file, size, lines},
+    --fields file is {file}, and --fields all is unchanged. Filter
+    auto-includes still add on top of whatever set is in force. A saved view's
+    pinned fields behaves exactly like an explicit --fields, and a CLI
+    --fields now replaces that pin instead of extending it — extending it
+    meant a view could only ever be widened, never narrowed. --format text
+    renders exactly the projected set: with none of the three present, a result's
+    header is the quoted path alone. On this project's own knowledgebase,
+    --fields title --limit 50 drops from 24.7 KB to 7.0 KB (−71 %).
+  - BREAKING: a non-string frontmatter title is reachable again. Only a
+    YAML string promoted to the title field, so title: 42, title: 1.0,
+    title: true and any unquoted date were invisible to --fields title,
+    --title and --sort title — the item fell back to the first H1 and the
+    authored value was reachable only through properties. YAML's type inference
+    is an accident of the syntax, not an authoring choice: every scalar now
+    promotes, stringified as written (42, 1.0, 2026-08-30, true), with
+    the typed value still under --fields properties-typed. Null, empty and
+    whitespace-only titles count as absent (H1 fallback) and stay in
+    properties. A list or map has no honest string form, so it does not
+    promote: the item's title falls back to the H1, the raw value stays in
+    properties.title rather than being stripped as a consumed promotion, and a
+    new default-on lint rule HYALO007 (title-not-scalar, warn; error under
+    --strict) reports it — title: [Draft] Notes is almost always a quoting
+    typo.
+  - One list of global flags, and it is the same list everywhere. The set was
+    written down three times — the root -h GLOBAL OPTIONS, the root --help
+    COMMAND REFERENCE block, and the 52 Global: … pointer lines — and the three
+    disagreed: the pointer omitted --dir, the reference omitted --hints. Both
+    renderings are now generated from one table. The contradictory
+    "Per-subcommand index flags" block is gone: --index/--index-file are not
+    global and already appear in the Options block of every subcommand that reads
+    a snapshot index. --hints is hidden from -h (it forces on what is already
+    on; --no-hints next to it says which way the default points) and stays
+    documented in --help.
+  - --dry-run, placeholders and one-line help read the same across all 52
+    pages. The nine different phrasings of --dry-run collapse to one;
+    <PATTERN>/<RECENT>/<THRESHOLD>/<MIN_CONFIDENCE>/<IGNORE_TARGET>/
+    <EXCLUDE_TITLE>/<EXCLUDE_TARGET_GLOB>/<PROFILE> become
+    <GLOB>/<N>/<SUBSTR>/<TITLE>/<NAME>, which also lets links fix -h
+    and links auto -h render in the compact single-line layout the other 50
+    pages use; summary -n loses its duplicated (default: 10); and read,
+    task read/toggle/set and backlinks get the same one-line
+    --file/--glob/--files-from help find has, down from the three-to-five
+    rendered lines each was wrapping to.
+  - BREAKING: find returns a compact result shape. The default field set
+    was properties, tags, sections, links on every item, so a 20-file listing
+    of this project's own knowledgebase was 73 KB of JSON — nine times the 8 KB
+    the same query costs with --fields properties, nearly all of it document
+    structure nobody had asked for. The default is now file, modified,
+    size, lines, title, properties and tags (11.9 KB for that same
+    listing). sections, tasks, links, backlinks and properties-typed
+    are opt-in — --fields all restores the previous shape and then some — but
+    a filter that implies a field still returns it with no flag: --section
+    adds sections, --task adds tasks, --broken-links/--dead-end add
+    links, --orphan adds both, and --sort links_count/backlinks_count
+    now return the field they rank on instead of computing it invisibly.
+    title is promoted: it joined the default set and is no longer repeated
+    inside properties, so read it as .results[].title
+    (--fields properties on its own still carries the raw property). Sorting
+    and filtering are unaffected — --sort property:title and
+    --property title=… compare exactly what they compared before.
+  - size and lines on every find and read result. Nothing in a
+    result used to say how big a file was before you read it. Both numbers are
+    now always present, count the whole file (a read --section reports the
+    file's totals, not the slice's), are identical between a disk scan and an
+    --index snapshot, and count CRLF and LF documents the same. read over
+    8 KB offers a line-range read and a section listing instead of another
+    whole-file pull, and --format text prints whichever of them the payload
+    carries in each result's header line, plus a fields: summary naming what
+ReleaseNotesUrl: https://github.com/ractive/hyalo/releases/tag/v0.24.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

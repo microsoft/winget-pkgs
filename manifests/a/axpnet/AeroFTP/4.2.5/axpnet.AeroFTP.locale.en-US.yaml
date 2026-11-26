@@ -1,0 +1,77 @@
+# Created with WinGet Releaser using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: axpnet.AeroFTP
+PackageVersion: 4.2.5
+PackageLocale: en-US
+Publisher: axpnet
+PublisherUrl: https://github.com/axpnet
+PublisherSupportUrl: https://github.com/axpnet/aeroftp/issues
+Author: axpnet
+PackageName: AeroFTP
+PackageUrl: https://github.com/axpnet/aeroftp
+License: GPL-3.0
+LicenseUrl: https://github.com/axpdev-lab/aeroftp/blob/HEAD/LICENSE
+ShortDescription: A modern, multi-protocol file manager and FTP client with integrated AI, cloud sync, and military-grade encryption.
+Description: |-
+  AeroFTP is an open-source, multi-protocol file manager built with Tauri 2 (Rust + React 18 + TypeScript).
+  It supports 16 protocols (FTP, FTPS, SFTP, WebDAV, S3, Google Drive, Dropbox, OneDrive, MEGA, Box, pCloud, Azure Blob, 4shared, Filen, Zoho WorkDrive, and Cryptomator vaults),
+  features an AI assistant with 45 tools and 15 LLM providers, military-grade encrypted vaults (AES-256-GCM-SIV + Argon2id),
+  bidirectional real-time sync, a built-in code editor, SSH terminal, and media player with visualizers.
+  Available in 47 languages with 4 themes.
+Moniker: aeroftp
+Tags:
+- cloud-storage
+- encryption
+- file-manager
+- file-transfer
+- ftp
+- ftp-client
+- multi-protocol
+- rust
+- s3
+- sftp
+- sync
+- tauri
+- webdav
+ReleaseNotes: |-
+  [4.2.5] - 2026-10-28
+  Safer Sync, Faster Proton Transfers, and Desktop Reliability
+  AeroSync preserves literal filenames, matches canonical Unicode names and keeps progress and template settings consistent. Proton Drive transfers make fewer requests and use native bulk operations in more places. Folder downloads can start before scanning finishes, while stricter destination checks prevent ambiguous filenames from overwriting one another. Windows portable updates, desktop file opening, diagnostics and translations receive further repairs.
+  The complete change record and remaining follow-ups are in the 4.2.5 release tracker.
+  Added
+  - Benchmark latency and service recommendations. Signal bars and measured latency help compare services from your own network; a best protocol is named only when two different protocols supplied comparable measurements (@EhudKirsh, #368, #277, #1341, #1361).
+  - Open any file with AeroFTP. Desktop file opening selects the file in AeroFile and previews images in AeroImage or text in the text preview. Linux integration works again, and files and archives opened during startup are retained (@EhudKirsh, #347, #1359).
+  Fixed
+  - AeroAgent diagnostics use the correct approval tier. The GUI classifies compiler and linter diagnostics as medium, matching the backend approval requirement for workspace build scripts and configuration code (#1391).
+  - Crypt connections open at the configured Remote Path. A landing above an encrypted island stays in plaintext until that island is entered, without visiting it during connection. Saved and Quick Connect paths retain their resolved landing and clear the previous session's frontend vault IDs. If a stored unlock fails when entering the encrypted scope, the locked-overlay banner offers manual recovery. Scope-entry activation retains its connection identity and discards obsolete navigation results after a session switch. Obsolete scope-entry attempts roll back their own activation by connection and activation identity; ordinary root-navigation errors retain best-effort positioning while connection-generation refusals abort activation (#1390, #1391).
+  - CLI checks request both sides of a checksum comparison. check --checksum detects different same-size contents when the provider supplies SHA-256; reconcile --checksum --json exposes per-pair comparison methods; check reports counts and nonmatching details without that field.
+  - AeroSync preserves folders and converged files. Compare retains shared and empty remote directories, S3 implicit parents and typed rclone entries, and skips files that already match while preserving actionable checksum and type conflicts (#1322).
+  - Literal Unix backslashes remain literal. Recursive uploads, sync, watchers and GUI transfers no longer confuse a backslash in a filename with a nested path. Windows drive and UNC roots remain navigable, remote parent-creation errors are handled, and escaped ignore reinclusions stay reachable (#1324, #1325).
+  - Canonical Unicode names match without losing their real paths. Compare, watcher events, resume and navigation retain exact object identities, including distinct siblings and rename collisions. Confirmation on the original macOS/SFTP setup remains pending (@bratushkadan, #1326, #1328, #1329).
+  - AeroSync progress and templates stay consistent. Compare and Plan retain scan progress, queue progress uses the whole plan, and compatible template imports reuse the comparison. Exported templates preserve Update and other Plan settings, reject invalid values and retain 4.2.4 defaults (@EhudKirsh, #347, #1366, #1368, #1372).
+  - Sync refuses incomplete or ambiguous destinations. AeroCloud does not upload over objects hidden by an incomplete scan; single-file fallback retains versioned backups. GUI and CLI folder downloads reject duplicate, sanitized, case-folded and canonical Unicode aliases instead of overwriting an earlier file (#1365, #1367, #1369).
+  - Recursive scans report their limits. Interrupted or capped scans report partial results; provider root spellings produce the right child paths. B2 bucket-root recursion is refused, internal upload symlinks are skipped, GitLab absolute paths remain repository-rooted, and FUSE children keep distinct inodes (#1343, #1349, #1367).
+  - Folder downloads start while scanning continues. CLI recursive downloads and GUI folder downloads stream discovered files on providers that can give each transfer its own session (#1363).
+  - Interrupted downloads can retry immediately. Failed HTTP and SFTP attempts settle their partial writes before returning, and a retry waits for the abandoned attempt. Unverified in-place partial downloads restart from byte zero; a local download cannot truncate its own source (#1342, #1357).
+  - FTP resumes retain their offset. REST is sent at the right point for servers that reject an earlier restart command. Servers without restart support receive a complete-file fallback, and unreadable listing sizes remain unknown rather than zero (#1331, #1339, #1367).
+  - Proton CLI bulk reaches more operations. Relative paths, interleaved sync trees, no-clobber transfers and MCP upload batches use suitable native groups. AeroSync and AeroCloud send runs through the provider's bulk path, and downloads verify the uploader's claimed size (#1334, #1360).
+  - Native Proton Drive makes fewer requests. My Files is fetched with the account keys, downloads avoid a redundant file lookup and keep up to ten blocks in flight, and up to five file transfers or folder scans can run together. CLI commands unlock the vault once (#1335, #1340, #1346).
+  - Proton mode changes preserve profile paths. CLI mode starts in My Files, and switching modes translates the initial path, AeroCloud folders and sync histories. Pending syncs and colliding histories block the switch, and a failed switch rolls back (#1352, #1369).
+  - MCP batches and first syncs retain their contracts. Upload batches honor batch-level no-clobber and delay settings, and a first sync into a missing directory ends successfully when all work succeeds. Whole-call bulk refusal can fall back to individual files without hiding failures (#1338, #1375).
+  - Provider probes distinguish absence from failure. Refused requests, unreadable metadata and incomplete listings do not authorize writes as if a destination were missing; protected writes use verified checks or native create-only guards (#1350).
+  - Filen Desktop uploads can be moved after publication. S3 preset renames and moves wait for a fresh upload to become visible, including through a new connection (#1371).
+  - WebDAV keeps real children and MEGAcmd's served path. MEGAcmd 2.6 bridge-root profiles reach the served folder and can create directories. Listings exclude the actual base entry while retaining a child named like its parent (#1348, #1369).
+  - OneDrive follows shortcuts and shared folders. Operations resolve their targets consistently across the provider's file operations (@EhudKirsh, #368, #1370).
+  - Google Drive permanent removal handles empty searches. Empty trash searches no longer fail parsing, and matching searches request the fields needed to identify the trashed item (#1364).
+  - Checksums handle ignored byte ranges. A server that returns the whole object gets one checked full-download fallback. MCP and AeroAgent validate hash lengths, and reconcile reports failed checksums separately with a partial verdict (#1373).
+  - Windows portable updates keep the application executable. Updates select the GUI executable by name, replace it without leaving the launch path empty, and support updates from older portable builds. Subsequent portable updates also replace the bundled CLI executables (#1351).
+  - Windows portable state survives startup and reboot. A dismissed isolation banner stays dismissed, vault preferences reconcile after initialization or unlock, and portable settings never change an installed copy's startup entry (@Detektywi, #1376, #1377).
+  - Portable logs stay inside the portable folder. Logging uses data/logs, startup survives an unavailable log destination, and diagnostics read the actual application log on every platform. The banner distinguishes an installed app's data from portable leftovers, and updater cleanup paths are not opened as user files (#1358, #1369).
+  - Benchmark runs stop and clean up with accurate results. Ctrl+C and timeouts stop owned work; picker columns, duration formatting, per-mode credentials and fallback warnings follow the tested behavior. Proton labels identify the client mode, trash cleanup is identity-checked, and reports disclose cleanup that a provider cannot perform (@EhudKirsh, #368, #277, #1341, #1353, #1362, #1370).
+  - Nextcloud benchmark cleanup removes only its own trash item. Benchmark and CLI speed-test cleanup on Nextcloud and ownCloud targets the deleted item. Koofr selective purge and Filen trash support remain follow-ups (#1374).
+  - Translations cover rendered interface text. Labels, activity lines, status messages, badges, dialogs, accessibility text and interpolated values use translations across all 47 languages. Counted labels use the locale's plural forms, with regression checks against rendered English and malformed counts (#1333, #1337, #1345, #1347, #1354).
+  Security
+ReleaseNotesUrl: https://github.com/axpdev-lab/aeroftp/releases/tag/v4.2.5
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

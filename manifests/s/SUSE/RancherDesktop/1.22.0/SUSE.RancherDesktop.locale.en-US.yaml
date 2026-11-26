@@ -1,0 +1,102 @@
+# Created with komac v2.14.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: SUSE.RancherDesktop
+PackageVersion: 1.22.0
+PackageLocale: en-US
+Publisher: SUSE
+PublisherUrl: https://github.com/rancher-sandbox/rancher-desktop
+PublisherSupportUrl: https://github.com/rancher-sandbox/rancher-desktop/issues
+Author: rancher-sandbox
+PackageName: Rancher Desktop
+PackageUrl: https://rancherdesktop.io/
+License: Apache-2.0
+LicenseUrl: https://github.com/rancher-sandbox/rancher-desktop/blob/HEAD/LICENSE
+CopyrightUrl: https://github.com/rancher-sandbox/rancher-desktop/blob/main/LICENSE
+ShortDescription: Kubernetes and container management to the desktop.
+Description: |-
+  Rancher Desktop is an open-source project to bring Kubernetes and container management to the desktop.
+  Windows, macOS and Linux versions of Rancher Desktop are available for download, though do note that the Linux version is considered a tech preview.
+Moniker: rancher-desktop
+Tags:
+- k3s
+- nerdctl
+- rancher
+ReleaseNotes: |-
+  This is the 1.22.0 release of Rancher Desktop, an open source desktop application to bring Kubernetes and container management to macOS, Windows, and Linux.
+  Installers
+  - Windows
+  - macOS x86_64
+  - macOS aarch64
+  - Linux install notes
+  Release Notes for 1.22.0
+  What's New
+  Select moby storage driver
+  Version 1.21.0 switched to the containerd-snapshotter storage driver by default. On Windows, this happened unconditionally (even on upgrades), which made existing images inaccessible.
+  Users can now choose between the classic and containerd-snapshotter storage drivers via rdctl:
+  rdctl set --experimental.container-engine.docker.storage-driver classic
+  rdctl set --experimental.container-engine.docker.storage-driver containerd-snapshotter
+  Rancher Desktop automatically selects the driver based on where your existing images are stored. See Migrating Images for instructions on moving images between storage drivers. Windows users affected by the 1.21.0 issue can switch back to the classic driver to regain access to their images. (#9732)
+  Docker 29 in the VM
+  Alpine Linux has been updated to version 3.23, which includes Docker 29. This fixes issues with docker inspect returning incomplete image metadata. (#9671, #9739)
+  Kubernetes Dashboard improvements
+  Pod log streaming now works in the Dashboard. This was broken since version 1.6.0. (#3212)
+  The Dashboard button now waits until the Steve API server accepts connections before becoming active. Previously, clicking the button too quickly after Kubernetes started would show a spinner that never resolved. (#8217)
+  The non-functional "Download KubeConfig" and "Kubectl Shell" buttons have been removed from the cluster dashboard. (#2208, #8151, #8757)
+  Docker Compose 5.0
+  Docker Compose has been updated to version 5.0. Key changes include:
+  - Compose can now be used as an SDK for third-party integrations
+  - The internal builder has been removed; builds are delegated to Docker Bake
+  - Hooks now run on restart
+  - New --wait option for the start command
+  Helm 4.0
+  Helm has been updated to version 4.0. See the Helm 4.0 release notes for details on the changes.
+  Diagnostics
+  Moby image store check
+  A new diagnostic reports when images exist in the inactive image store (classic vs. containerd-snapshotter), helping identify which images need migration. (#9733)
+  Windows: wsl-vpnkit detection
+  A new diagnostic warns when the wsl-vpnkit distribution is present, as it can cause networking issues with Rancher Desktop. (#9623)
+  Bug Fixes
+  macOS CA management with multiple keychains
+  Fixed a bug where certificates from multiple keychains were being written to the same file path, causing only the last keychain's certificates to be processed. (#9755)
+  K3s version channel labels not updating
+  Fixed an issue where version channel labels (e.g, stable, latest, v1.xx) were not removed from old versions when they moved to newer versions, causing multiple patch versions to appear in the recommended list. (#9709)
+  K3s image loading for older versions
+  Made the --all-platforms flag optional when loading K3s images, so older K3s versions (before 1.31) load images correctly. (#9708, #9710)
+  rdctl info works after upgrade
+  Fixed an issue where rdctl info failed with a BusyBox error for users who upgraded from version 1.19.3 or earlier, or restored an old snapshot. The 1.21.0 release notes mentioned a manual workaround; this is no longer needed. (#9546, #9554)
+  Containers page error handling
+  Fixed an "[object Object]" error that appeared on the Containers page when the backend became temporarily unavailable. (#9545, #9661)
+  Connectivity check uses HTTPS
+  The network connectivity diagnostic now uses an HTTPS HEAD request instead of HTTP GET, improving privacy by encrypting the request. (#9711)
+  Linux packaging fixes
+  Fixed an issue where the Debian package did not set the suid bit on chrome-sandbox, causing the application to fail to start on Debian and Ubuntu systems.
+  The virtualization support check now works correctly on Linux arm64 systems.
+  Extension fixes
+  Fixed several issues with Docker Desktop extensions:
+  - Uninstall and upgrade buttons on the Installed tab now work correctly
+  - Extension metadata and icons refresh properly after reinstalling an extension
+  - Extensions without containers no longer cause errors during uninstall
+  - The ddClient.extension object now includes the id and version fields as specified by the Docker Desktop Extension API
+  Updates to Bundled Utilities (from Rancher Desktop 1.21.0)
+  - docker 29.0.2 → 29.1.4
+  - docker-compose 2.40.3 → 5.0.1
+  - docker-credential-helpers 0.9.4 → 0.9.5
+  - helm 3.19.1 → 4.0.5
+  - nerdctl 2.2.0 → 2.2.1
+  - trivy 0.67.2 → 0.68.2
+  Unchanged:
+  - amazon-ecr-credential-helper 0.11.0
+  - docker-buildx 0.30.1
+  - kuberlr 0.6.1
+  - spin 3.5.1
+  - spin-shim 0.22.0
+  - spin-operator 0.6.1
+  Connect with the developers
+  - The issue queue
+  - Rancher Users Slack in the #rancher-desktop channel
+  Changelog
+  The full version changelog, from v1.21.0, can be found using GitHub compare and the details of the release can be found in the v1.22.0 milestone.
+ReleaseNotesUrl: https://github.com/rancher-sandbox/rancher-desktop/releases/tag/v1.22.0
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

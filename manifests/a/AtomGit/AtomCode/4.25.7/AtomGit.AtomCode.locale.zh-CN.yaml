@@ -1,0 +1,141 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: AtomGit.AtomCode
+PackageVersion: 4.25.7
+PackageLocale: zh-CN
+Publisher: 重庆开源共创科技有限公司
+PublisherUrl: https://atomgit.com/
+PublisherSupportUrl: https://atomgit.com/atomgit_atomcode/atomcode/issues
+PrivacyUrl: https://docs.gitcode.com/docs/help/home/protocol/privacy-policy
+Author: 重庆开源共创科技有限公司
+PackageName: AtomCode
+PackageUrl: https://atomcode.atomgit.com/
+License: MIT
+LicenseUrl: https://atomgit.com/atomgit_atomcode/atomcode/blob/main/LICENSE
+Copyright: Copyright (c) 2026 Yubang Xu
+CopyrightUrl: https://docs.gitcode.com/docs/help/home/protocol/ai-privacy-policy
+ShortDescription: AI 编程助手 在你的终端中运行
+Description: Claude Code / Cursor Agent 的开源平替，住在你的终端里。连接任意 OpenAI 兼容大模型，自主读文件、改代码、跑测试、自我验证 —— 用 Rust 构建。
+Tags:
+- 人工智能
+- 代码
+- 大语言模型
+- 智能体
+- 编程
+- 聊天机器人
+- 自主智能
+ReleaseNotes: |-
+  AtomCode v4.25.7 Release Notes
+  发布日期：2026-06-30
+  本版本聚焦于限流体验重构——当 CodingPlan 5 小时窗口耗尽时，不再粗暴红字报错，而是优雅暂停并显示恢复时间，近期窗口自动续跑。同时引入密码弹窗（sudo/SSH askpass 支持）、统一代理策略、会话原子写入、Windows 兼容性强化及多项稳定性修复。
+
+  ⚠️ 注意行为变化
+  - 限流（429）体验重构：v2 引擎收到 5 小时窗口限流时，按 reset 剩余时间分流——≤2 分钟自动等待续跑，>2 分钟优雅暂停并显示恢复时间，保住已产出内容，不再红字报错。非 CodingPlan 用户行为不变。
+  - 上下文百分比始终显示：TUI 底部上下文使用率（%）不再只在 ≥90% 时出现，现在始终显示，方便观察接近自动压缩阈值（~70%）的趋势。
+  - Esc 撤销上一轮：空闲且输入框为空时，连按两次 Esc 可撤销上一轮（2 秒窗口内）。首次 Esc 会显示提示。
+  - Ctrl-C 取消默认保留中断内容：新配置项 keep_interrupted_context = true（默认），取消时保留部分工作并注入中断标记，下一轮可继续。设为 false 恢复旧版撤销行为。
+  - WebUI 字号调大：对话区、输入框、代码块等字号统一增大，提升可读性。
+  - JetBrains 插件移除 JCEF 硬依赖：通过反射调用 JCEF API，兼容无 JCEF 的 IDE 环境。
+
+  ✨ 新增功能（Features）
+  Agent / 工具
+  - 限流暂停-自愈：v2 引擎收到 429 时，通过宿主 RateLimitHook 查询 CodingPlan 窗口，≤2 分钟自动等待续跑，>2 分钟优雅暂停。支持 OPEN 和 mid-stream 两种 429 场景。
+  - 输出截断自动续跑：模型输出因 token 限制截断时，自动注入续写提示继续生成（上限 2 次），不再静默结束回合。
+  - 误路由答案恢复：当模型答案被网关误放入 reasoning 通道时，自动提升为正文内容，用户不再看到空白回复。
+  - read_file 支持视觉模型：read_file 工具新增 vision 模式，视觉模型读取图片文件时返回 base64 图像而非"Binary file"文本。
+  - web_search 显示来源域名：TUI 中 web_search 结果行显示来源域名（如 eol.cn, gaokao.com +2），替代通用行数统计。
+  - todo 更新显示任务标题：todo update 工具调用行显示任务名称而非仅 ID（如 #4 Write tests → completed）。
+  - Goal 模式增强：新增轮数/时长上限（goal_max_rounds/goal_max_duration_secs）、连续无产出熔断、并行编辑文件追踪、评估器失败回退到默认 provider。
+  - 输出截断警告延迟：截断后若自动续跑成功则不发出警告，仅在无法恢复时提示。
+  Provider / 网络
+  - 统一代理策略：新增 [network.proxy] 配置，支持 follow_system / default_proxy / no_proxy 三种模式，所有出站 HTTP 客户端（provider、MCP、web_fetch、telemetry、self-update）统一遵守。
+  - Retry-After HTTP-date 解析：provider 层支持解析 HTTP-date 格式的 Retry-After 头（如 Anthropic 某些 429 响应），用于限流自愈。
+  - /proxy 命令：TUI 新增 /proxy 命令，交互式切换代理模式。
+  终端渲染 / Windows 兼容
+  - 密码弹窗（Askpass）：Unix 下新增 sudo/SSH 密码弹窗——子进程请求密码时弹出掩码输入框，密码不进入输入历史。支持 5 分钟缓存。
+  - Esc Esc 撤销：空闲空输入框时连按两次 Esc 撤销上一轮，首次 Esc 显示提示。
+  - Conhost 滚动提示：经典 Windows 控制台（conhost）启动时显示一次提示，告知任务执行中无法上滚，建议使用 Windows Terminal。
+  - Windows shell 兼容性：自动检测 Git Bash/MSYS2 bash，优先使用 bash 执行命令；仅当 bash 不可用时回退 cmd.exe 并拦截不兼容的 bash 语法（$()、<<<、< <()）。
+  - Windows GBK 编码修复：自动设置 PYTHONUTF8=1 环境变量，修复 Python 子进程在 GBK 编码下的 UnicodeDecodeError。
+  - Windows 路径 JSON 修复：工具参数 JSON 中未转义的 Windows 路径（如 D:\test\foo.py）自动修复，防止 \t/\f 被误解析。
+  - JSON 修复中间件：新增 RepairToolArgsMiddleware，自动修复模型输出的 JSON 参数（尾逗号、单引号、未转义引号/换行、Markdown 围栏等），降低弱模型工具调用失败率。
+  - 文件系统门控超时：权限门控的路径规范化操作增加 3 秒超时，防止挂载卡死导致整个回合冻结。
+  - Spinner 不闪烁工具名：工具执行期间 footer spinner 不再闪烁工具名，保持思考词一致。
+  WebUI
+  - 限流暂停卡片：WebUI 渲染限流暂停为暗色中性卡片（非红色错误），显示恢复时间，保留已完成内容。
+  - 会话切换同步：WebUI 侧栏切换会话时广播给同步模式的 TUI，TUI 加载该会话历史并切换工作目录。
+  - 同步开关重连：WebUI 重新开启同步时先广播当前会话给 TUI，再启动实时流，避免 TUI 被孤立。
+  - 新建会话同步控制：WebUI 新建会话时仅当 sync 开启才广播，sync 关闭时不牵连 TUI 新建。
+  - 字号调大：对话区、输入框、代码块等字号统一增大，提升可读性。
+  - GFM 删除线禁用：禁用 Markdown 波浪号删除线解析，避免 ~ 被误识别（issue #825）。
+  LiveSession 增强
+  - TUI→WebUI 会话切换同步：TUI 本地切换会话（/new、/session、/resume 选择历史会话等）后双向同步到 WebUI，补齐此前只有 WebUI→TUI 的单向同步缺口。
+  - 会话切换自回声守卫：避免广播回流导致双重渲染。
+  - 限流事件实时广播：RateLimited 事件通过 LiveWire 广播到 WebUI，渲染暂停卡片。
+  缓存稳定性
+  - 会话原子写入：SessionManager::save 使用原子写入（临时文件 + rename），防止部分写入损坏会话文件。
+  - 输入历史并发写入保护：InputHistory::append 增加文件锁，防止并发写入导致数据损坏。
+  - 粘贴内容历史回放：Up-arrow 回放历史时恢复粘贴内容（[Pasted #N] 占位符），不再发送字面占位符（issue #843）。
+  Plugin
+  - JetBrains 插件：官方 JetBrains 插件已上架 Marketplace，支持 IntelliJ IDEA / WebStorm / PyCharm / GoLand。
+  - JetBrains 移除 JCEF 硬依赖：通过反射调用 JCEF API，兼容无 JCEF 的 IDE 环境。
+  - JetBrains Artifact 流式渲染：修复 Artifact 代码块流式渲染，支持增量更新和围栏长度自适应。
+  权限 & 安全
+  - 信号安全终端恢复：Unix 下安装 SIGTERM/SIGINT/SIGHUP 信号处理器，被信号杀死时恢复终端（退出 raw mode、关闭 bracketed paste、弹出 Kitty 键盘协议），防止 shell 出现乱码。
+
+  🛠 修复（Fixes）
+  Agent / 工具
+  - 429 限流死锁修复：修复 429 WaitAndRetry 可能导致的活锁，增加 MAX_RATE_LIMIT_WAITS（5 次）安全熔断。
+  - Goal 模式修复：修复 goal 结束时未清除导致下一轮"僵尸复活"的问题；修复 MaxContinuations 计入无产出计数器；修复评估器失败时回退到默认 provider。
+  - 并行编辑测试隔离：parallel_edit 测试使用独立临时目录，避免共享 temp_dir 导致构建探测误判。
+  - Agent 循环修复：修复 truncation recovery、增量输出控制、spinner/stall UX 等问题。
+  - SubAgent 子回合修复：修复子 agent 推理内容被错误提升为正文的问题。
+  终端渲染 / Windows 兼容
+  - 粘贴内容丢失修复：修复历史回溯时粘贴内容发送的是 [Pasted #N] 占位符而非正文的问题（issue #843）。
+  - Windows 控制台窗口频闪修复：抑制 daemon 路径残留 spawn 的控制台窗口频闪。
+  - Windows cmd.exe 引号修复：修复 cmd.exe 下引号被吞的问题，提示模型使用 cmd.exe 语法。
+  - Windows 路径修复：修复工具调用参数中 Windows 路径的 JSON 转义问题（D:\test → D:<TAB>est）。
+  - 信号杀死终端恢复：修复信号杀死时终端残留 raw 模式和输入提示符的问题。
+  - Spinner 时钟锚定：修复工具参数流式传输时 spinner 时钟反复归零的问题。
+  - 压缩标签修复：修复慢速压缩标签中错误的"esc to cancel"提示（压缩不可取消）。
+  - 压缩事件翻译：修复 daemon 层压缩事件未翻译为 wire 事件，导致 WebUI 看不到压缩通知。
+  WebUI
+  - 会话切换不丢失历史：修复 WebUI 侧栏切换会话时广播回流导致历史被清空的问题。
+  - 同步重连不孤立 TUI：修复 WebUI 关闭同步后重新开启时 TUI 被孤立的问题。
+  - 新建会话不牵连 TUI：修复 sync 关闭时 WebUI 新建对话牵连 TUI 新建的问题（issue #850）。
+  - 限流事件类型修复：修复 RateLimited 事件未作为独立类型下发的问题。
+  - Markdown 删除线修复：修复波浪号被误识别为删除线的问题（issue #825）。
+  Provider / 网络
+  - 代理策略统一：修复 provider、MCP、web_fetch、telemetry、self-update 等未遵守统一代理策略的问题。
+  - OAuth 浏览器打开修复：修复 Windows 下 OAuth 登录时 cmd.exe 窗口频闪的问题。
+  - CodingPlan 套餐名修复：修复 /login 显示请求 tier 而非真实套餐名的问题（如显示"CodingPlan Max"实际是"Pro"）。
+  - 会话测试隔离：修复 ATOMCODE_HOME 环境变量在测试间泄漏的问题。
+  缓存稳定性
+  - 会话文件截断修复：修复会话保存更短内容时文件尾部残留旧数据的问题。
+  - 输入历史死模块删除：删除已被 tuix input::history 取代的 core::input_history 死模块。
+  - Git 自动提交路径修复：修复 Windows 下 generate_commit_message 使用 rsplit('/') 而非 Path::file_name() 的问题。
+  其他
+  - MCP 测试服务器重命名：修复二进制名冲突导致 MCP 集成测试失败的问题。
+  - Plugin 测试跳过：修复旧 git 版本下 sparse-checkout 测试失败的问题。
+  - OAuth 路径一致性：修复 auth_file_path() 在序列化测试中的路径不一致问题。
+
+  🔧 重构（Refactoring）
+  - Config::with_default_provider 辅助方法：消除各处重复的完整 struct 字面量。
+  - submit_agent_turn / sync_local_session_switch 提取：统一斜杠命令的回合提交和会话切换逻辑，减少重复代码。
+  - 月度限流死代码清理：删除已下线的月度限流 blocking_exhausted_window 及相关测试。
+  - input_history 死模块删除：删除已被 tuix input::history 取代的 core::input_history。
+  - CompactionUi 事件统一：统一自动和手动压缩的 UI 事件，消除旧的分支（manual=TextDelta, auto=Warning）。
+
+  📚 文档（Docs）
+  - README 更新：新增任务完成通知、Esc Esc 撤销快捷键说明。
+  - 网站 JetBrains 插件板块：首页新增 JetBrains 插件安装板块。
+  - 网站榜单奖励列移除：移除推荐页面的榜单奖励列及相关逻辑。
+  - Bash 文档更新：记录 Windows PYTHONUTF8 的已知权衡（二进制未修复、open() 编码镜像问题）。
+  - 限流设计文档：新增 v2 5 小时窗口限流暂停-自愈体验设计文档和实施计划。
+ReleaseNotesUrl: https://atomgit.com/atomgit_atomcode/atomcode/releases/v4.25.7
+Documentations:
+- DocumentLabel: 文档
+  DocumentUrl: https://atomcode.atomgit.com/docs/zh/index.html
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

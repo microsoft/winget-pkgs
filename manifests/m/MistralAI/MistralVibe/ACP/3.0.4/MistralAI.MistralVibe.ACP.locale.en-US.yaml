@@ -1,0 +1,97 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: MistralAI.MistralVibe.ACP
+PackageVersion: 3.0.4
+PackageLocale: en-US
+Publisher: Mistral AI
+PublisherUrl: https://mistral.ai/
+PublisherSupportUrl: https://github.com/mistralai/mistral-vibe/issues
+PrivacyUrl: https://legal.mistral.ai/terms/privacy-policy
+Author: Mistral AI
+PackageName: Mistral Vibe (ACP mode)
+PackageUrl: https://github.com/mistralai/mistral-vibe
+License: Apache-2.0
+LicenseUrl: https://github.com/mistralai/mistral-vibe/blob/HEAD/LICENSE
+Copyright: Copyright 2026 Mistral AI
+CopyrightUrl: https://legal.mistral.ai/terms
+ShortDescription: Minimal CLI coding agent by Mistral
+Description: |-
+  Mistral's open-source CLI coding assistant.
+  Mistral Vibe is a command-line coding assistant powered by Mistral's models. It provides a conversational interface to your codebase, allowing you to use natural language to explore, modify, and interact with your projects through a powerful set of tools.
+Tags:
+- agent
+- agentic
+- ai
+- code
+- coding
+- develop
+- development
+- programming
+ReleaseNotes: |-
+  Added
+  - /release-notes (alias /whatsnew) browses the release notes of every Vibe version in a searchable, full-screen view.
+  - Provider option preserve_api_base = true keeps a custom api_base that /whoami would otherwise overwrite (split-horizon / proxied deployments)
+  - VIBE_TERMINAL_KEY names the terminal --continue uses; an empty value makes it ignore the terminal
+  - Setup warns when an API key set in your shell overrides the key it saves.
+  - /whoami shows which credential source (shell, .env, or keyring) is in use.
+  - vibe -p --system-prompt-file PATH replaces Vibe's own instructions in the system prompt with the file's text.
+  - agent_max_output_tokens and compaction_max_output_tokens cap the output of every agent and compaction request on any provider, held to what the model and its context window leave room for; at 0, the default, a cap is still sent only where the provider requires one.
+  - vibe -p --model ALIAS runs with that model without changing your default.
+  - New /fork alias for the /branch command, which forks the current conversation into a new resumable session.
+  - Experimental experimental_worktree_copy_on_write setting on macOS: new worktrees of a trusted repository are cloned from a template checkout, so they use less disk and are created faster
+  - A model's thinking_levels can list levels of its own, such as ["low", "turbo"]: each one is offered in /thinking and sent to the provider as written. On a Mistral provider, a config warning flags a level the Mistral SDK does not support, which the SDK leaves out of the request
+  Changed
+  - Sessions open faster: Vibe reuses the loaded config until a config file, trust decision or environment variable changes.
+  - After an upgrade, a new session lists what is new in every release since your last visit, not only the latest one; resumed sessions no longer show it below the conversation.
+  - Opening or resuming a session no longer waits for your organization's settings when a copy is cached; Vibe checks for changes every 10 minutes in the background and retries a failed check after a delay.
+  - A change to your organization's settings now reaches open sessions at their next turn, taking away tools, connectors, MCP servers or a mode it disables.
+  - /mcp always opens its panel, showing empty sections when nothing is configured or connectors fail to load.
+  - Slash commands no longer echo in the transcript, and pickers no longer print open or close messages.
+  - Command outcomes and errors show as ✓, ⚠ or ✕ status rows, and content commands such as /help and /status render like an assistant reply under their own heading.
+  - Hooks imported from other agents' plugins are reported as not supported yet instead of being silently ignored.
+  - Markdown in assistant messages is easier to read on every theme: headings rank by style, links and inline code stand out, quotes are muted, and table, rule and quote lines share one subtle color.
+  - Code blocks show their language in the top border, and highlighted code is easier to read: function names are no longer underlined, plain identifiers keep the body color, and token colors stay readable on light themes.
+  - Links and plain code text outside markdown (diffs, file bodies, approvals, bottom bar) use the new link and body text colors.
+  - vibe-acp --setup now runs the same onboarding wizard as vibe --setup.
+  - Image descriptions, worktree names, teleport summaries, turn narration and the fast-model check now need a provider that reports token usage and a finish reason, like agent turns.
+  - Without such a provider, utility features stay on the active model.
+  - The subagent list now hides waiting subagents once their work ends, behind a N subagents waiting row; press a on the focused list to show all subagents.
+  - Vibe no longer loads custom Python tools from ~/.vibe/tools/ or .vibe/tools/: each file now shows a warning at startup. Ask Vibe to migrate it to a skill.
+  - Settings under a built-in tool's name, such as [tools.web_fetch] proxy_host, are now checked even when a custom tool of that name used them.
+  - A user skill named vibe or skill-creator is no longer silently skipped
+  - Opening a stored session reads only its latest history, so long sessions open faster
+  - An unknown thinking_levels value is kept instead of ignored: any word is a level. A value that is not a word, such as a blank, is still ignored with a warning
+  - A thinking level that is neither a standard level nor in the model's thinking_levels is now sent as written with a config warning, instead of being dropped
+  - Levels the Mistral model catalog lists are kept as written, including ones Vibe has no name for
+  - On providers that use the Chat Completions or Responses API, a model whose thinking_levels lists minimal sends minimal instead of low
+  Fixed
+  - Teleport and worktrees work in repositories that use Git's reftable ref format
+  - Messages the model writes before calling a tool now show in the transcript instead of staying hidden.
+  - On Windows, choosing "Update now" prints the upgrade command to run after closing Vibe instead of upgrading in place, which could leave the install broken
+  - A follow-up prompt queued while busy no longer reappears below newer messages.
+  - vibe --continue reopens the last session of the current terminal in the current folder again, instead of the folder's most recent session from any terminal
+  - vibe -c -p continues a session of the current folder instead of the most recent session anywhere on the machine
+  - A SOCKS proxy in the shell environment no longer breaks session creation.
+  - Hooks shipped in a native Vibe plugin's ai.mistral.vibe/hooks.toml now run, from the session's copy of the plugin with PLUGIN_ROOT and PLUGIN_DATA set, like the plugin's MCP servers.
+  - Inline code is readable on light themes, and ANSI themes pick link, code and function colors that suit a light or dark terminal.
+  - Diffs highlight edited lines inside multi-line strings and comments correctly.
+  - On ANSI themes, selecting a tool group or thought header now uses the same background color as the rest of the selection.
+  - Text after a nested blockquote stays inside its outer quote.
+  -  --setup with a non-Mistral model (litellm, local) now offers Mistral browser sign-in alongside the provider's API key.
+  - A shell default_timeout set without max_timeout_seconds loads again when it is at most 300 seconds, and runs under Vibe's 300-second maximum.
+  - Rust CLI on Windows: moving the mouse no longer types escape sequences into the prompt in terminals such as IntelliJ's.
+  - Model requests send a Mistral-Vibe/<version> User-Agent again instead of the HTTP library default, unless extra_headers sets one.
+  - An idle Vibe no longer burns CPU, and session locks left by killed Vibe processes are cleaned up
+  - Answering a subagent's question now reaches the subagent instead of leaving it stuck.
+  - Questions asked by several subagents at once are shown one after another instead of the latest replacing the others.
+  - A question answer the server rejects now shows a warning and reopens the question instead of failing silently.
+  - Answered questions from the agent now stay in the transcript when you reopen a session.
+  - Image descriptions and compaction on Mistral Large 4 no longer fail with a 400 when its config lists no thinking levels.
+  - The built-in vibe: skills are now available in the standalone vibe-acp binaries.
+  Removed
+  - The api_connect_timeout, api_write_timeout and api_pool_timeout settings no longer have any effect: connecting to the provider is now bounded by api_timeout.
+  - The tool_paths setting: Vibe removes it from config.toml at startup and leaves the folders it listed on disk.
+ReleaseNotesUrl: https://github.com/mistralai/mistral-vibe/blob/HEAD/CHANGELOG.md#304---2026-10-30
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

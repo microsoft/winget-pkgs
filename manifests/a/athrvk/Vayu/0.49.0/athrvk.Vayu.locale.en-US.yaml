@@ -1,0 +1,83 @@
+# Created with WinGet Releaser using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: athrvk.Vayu
+PackageVersion: 0.49.0
+PackageLocale: en-US
+Publisher: Atharva Kusumbia
+PublisherUrl: https://github.com/athrvk
+PublisherSupportUrl: https://github.com/athrvk/vayu/issues
+Author: Atharva Kusumbia
+PackageName: Vayu
+PackageUrl: https://github.com/athrvk/vayu
+License: AGPL-3.0
+LicenseUrl: https://github.com/athrvk/vayu/blob/HEAD/LICENSE
+Copyright: Copyright © 2026 Atharva Kusumbia
+ShortDescription: Open-source API client with a native C++ load-testing engine - Postman-style requests and k6-level load tests in one local app.
+Description: Vayu is a free, open-source desktop app for Windows, macOS, and Linux that combines a full REST and GraphQL request builder - with collections, environments, and scripting - and a high-throughput load tester powered by a C++20 engine, with all data staying on your machine.
+Moniker: vayu
+Tags:
+- api
+- api-client
+- api-testing
+- benchmark
+- developer-tools
+- graphql
+- http
+- insomnia
+- load-testing
+- performance
+- postman
+- rest
+ReleaseNotes: |-
+  0.49.0 - 2026-11-03
+  Read before updating: a header row with a name and no value is now sent as an empty header, an empty bearer token or an API key with no name now sends nothing, and a request's own Authorization header now wins over OAuth 2.0 without a token fetch (all under Changed). New: OAuth 2.0 tokens renew mid-run in collection load runs, JMeter imports keep controllers, HTTP Request Defaults and timeouts, and code snippets carry the request's redirect, TLS, timeout and HTTP version settings and send what Vayu sends.
+  Added
+  - OAuth 2.0 tokens renew mid-run in a collection load run. A run longer than the token's lifetime sent the expired token for the rest of the run, and the report had no auth section. Each distinct token now renews as it does on a single-request run, and the report shows it (#3199).
+  - The Run Collection dialog warns about each OAuth 2.0 token it cannot renew (placed in the query, Auto-refresh token off, or an authorization-code grant with no refresh token), and Run stays disabled until it is fixed, as in a request's load test dialog (#3199).
+  - Code snippets carry the request's redirect, TLS verification, timeout and HTTP version settings. Only curl read redirects and TLS verification before. A client that cannot express one says so in the snippet's notes (#3195).
+  - JMeter import keeps the controllers that group a plan. Simple, While, ForEach, Random, Interleave, Random Order, Runtime, Critical Section, Module, Include and Recording controllers import as folders holding their samplers. A Simple Controller used to drop itself and every sampler inside it. The preview names each controller whose looping or selection was not carried (#3190).
+  - JMeter HTTP Request Defaults apply to the samplers in their scope: host, port, path and timeouts, with nearer defaults winning and a ${var} host becoming {{var}}. A sampler's connect and response timeouts become the request's timeout (#3191, #3217).
+  - The JMeter import preview names each thread group's threads, ramp-up, duration and loops, and counts every sampler in a setUp or tearDown thread group it leaves out (#3190).
+  - Insomnia import flattens a nested environment value into dotted variables, so {{ _.a.b }} resolves. Send cookies or Store cookies turned off imports as cookies disabled, and an API key sent as a cookie becomes a Cookie header row (#3193).
+  - Pasting curl reads more of what browsers and docs write: short-flag clusters such as curl -XPOST -sSL -H'X: 1' (which imported as a GET with no header), Chrome's Copy as cURL (cmd), curl.exe, and $'...' escapes such as \xHH, é and octal (#3194).
+  - A pasted -H 'Name;' imports as an empty header, and -H 'Accept:' imports as leaving out that default header for Accept, Accept-Encoding, Content-Type, Expect, User-Agent and X-Vayu-Request-Id. Any other removal is listed as not imported (#3220).
+  Changed
+  - A header row with a name and no value is sent as an empty header. It used to be left out, so a blank Accept or Expect row let the default back in. A blank Content-Type still sends no Content-Type, and a blank Cookie row adds nothing (#3220).
+  - An empty bearer token or an API key with no name sends nothing. The bearer token went out as Authorization: Bearer with nothing after it. The response's Authentication note says why, and the Auth tab says "nothing sent" before you send. The request is not refused, so a variable left empty on purpose does not fail a run (#3203).
+  - A request's own Authorization header wins over OAuth 2.0 without fetching a token. A failed token fetch used to stop the send, and refuse a load run at start, although the typed header was what went out. A token placed in the query is fetched as before (#3202).
+  - A credential whose variable resolves to text with a line break is refused, naming the variable, as a header row's value is (#3203).
+  - A collection's Auth tab says when Vayu does not send its auth type (digest, Hawk and the others it stores but does not run), where it said every type was sent to requests set to Inherit (#3203).
+  - Token endpoint errors name the HTTP status and which side failed: "Token endpoint refused the request (HTTP 400): invalid_client (bad secret)" or "Token endpoint error (HTTP 503)". A gateway's HTML error page was reported as the provider refusing the grant. A load run refused at start for its token now carries the provider's error and description (#3201).
+  - Internal: tests and documentation were tidied.
+  Fixed
+  - On macOS, certificates are checked against the Keychain too. With no custom CA pasted, Vayu trusted only the system certificate file, so a site whose root the file lacks, or a CA your administrator installed, failed with "unable to get local issuer certificate".
+  - An OAuth 2.0 token that expires within 45 seconds of being issued was treated as expired at once, so every send fetched a new one (#3200).
+  - The bearer token and API key value fields are masked, and the inherited-auth banner no longer prints the collection's token.
+  - JSON-RPC and GraphQL snippets send the body Vayu sends: the {"query": ...} envelope, and "jsonrpc": "2.0" with "id": 1, including when values are {{variables}}. A GraphQL GET snippet puts the document in the URL with no body (#3198, #3211).
+  - Snippets write multipart parts in the rows' order, keep every part that shares a name in Python and PowerShell, and Python sends text fields as fields rather than file uploads and names file parts after the file (#3196, #3198, #3206).
+  - Repeated Cookie rows are one Cookie header in curl and HTTPie snippets, as Vayu sends them (#3198).
+  - user:pass@ in the URL becomes basic auth in every snippet, with the password masked. Node's fetch threw on it and PowerShell sent no credentials (#3197).
+  - An HTTPie snippet doubled a backslash in a form value (#3197).
+  - A PowerShell snippet whose form or urlencoded body repeats a name no longer fails to parse (#3206, #3216).
+  - JMeter numbers saved by JMeter's own editor were not read, so every loop count imported as forever, a regular expression extractor's match number was lost and a Constant Throughput Timer was refused. Constant and random timers imported as a 0 ms wait (#3192).
+  - A JMeter POST sampler's arguments were sent as a query string. They become a form body, or multipart when Use multipart/form-data is set (#3191).
+  - A JMeter sampler with an empty protocol imported as ://host (#3191).
+  - A JMeter Response Assertion with several patterns and a JSON Extractor with several variables kept only the first. A Throughput Controller's percent read as 100 (#3190).
+  - An element the JMeter import refused was listed twice in the preview (#3190).
+  - An Insomnia auth type Vayu cannot send (ASAP, netrc) imported as inherit and sent the parent folder's credentials. It imports as no auth and is listed, and a script using the insomnia object is named in the preview (#3193).
+  - A pasted -F 'meta={"x":1};type=application/json' lost its type, and -b cookies.txt was sent as a Cookie header instead of listed as a cookie file (#3194).
+  Every asset except the .sha256 checksums carries a build-provenance attestation: gh attestation verify <asset> --repo athrvk/vayu.
+  Which file do I download?
+  - macOS (Apple Silicon and Intel): run bash -c "$(curl --proto '=https' --tlsv1.2 -fsSL https://athrvk.github.io/vayu/install.sh)". The .dmg and .zip are the same universal build, unsigned.
+  - Windows (x64): winget install athrvk.Vayu, or Vayu-x64.exe.
+  - Linux (x86_64 only, there is no arm64 build): the .AppImage, or sudo apt install ./Vayu-amd64.deb.
+  - The .yml, .blockmap and .sha256 files are for the auto-updater and for checking a download. You do not need them.
+  If your OS warns you
+  Vayu is not code-signed, so the OS can stop a downloaded file on first launch. Nothing is wrong with the file.
+  macOS says an app downloaded from this page (.dmg or .zip) is "damaged", because Vayu is not notarized. This command installs it without the warning:
+  bash -c "$(curl --proto '=https' --tlsv1.2 -fsSL https://athrvk.github.io/vayu/install.sh)"
+  Windows shows "Windows protected your PC". Choose More info, then Run anyway. winget install athrvk.Vayu skips it.
+ReleaseNotesUrl: https://github.com/athrvk/vayu/releases/tag/v0.49.0
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

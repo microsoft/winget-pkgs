@@ -1,0 +1,55 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: poco-ai.Agentero
+PackageVersion: 0.11.7
+PackageLocale: zh-CN
+Publisher: poco-ai
+PublisherUrl: https://github.com/poco-ai
+PublisherSupportUrl: https://github.com/poco-ai/Agentero/issues
+PackageName: Agentero
+PackageUrl: https://github.com/poco-ai/Agentero
+License: MIT
+LicenseUrl: https://github.com/poco-ai/Agentero/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 poco-ai
+ShortDescription: Agent 友好的文献管理方式。
+Description: 传统文献管理器对 Agent 并不友好：阅读高亮和笔记被锁在单篇文件里，Agent 很难跨论文复用；每次对话都要重新提供上下文，缺少稳定的本地知识地图；PDF 对人友好，但对 Agent 来讲不是最舒服的阅读材料。Agentero 旨在构建 Agent 友好、Agent 原生的文献管理方式，探索人与 Agent 在文献管理中的协作方式。通过 ACP 连接本机 Agent（BYOA），支持划词对话、论文导入与 Skill 导入，兼容 Zotero 生态，提供论文翻译、双链与知识图谱、PDF 深度阅读等功能。
+Tags:
+- agent
+- pdf
+- zotero
+- 学术
+- 引用
+- 文献
+- 文献管理
+- 研究
+- 论文
+ReleaseNotes: |-
+  本次发布为广场带来原生 CCF 截稿面板，并为 CLI 增加 agentero ui / paper open 等外部工作区控制；论文库可从 arXiv 模板推断投稿 venue 标签，arXiv 发现新增查询式检索、语义排序与 MCP 工具。同时修复了 Agent 代理环路、双栏翻译同步与 venue 标签等一批问题。
+  新功能
+  - CCF 截稿面板：广场新增原生面板，直接读取上游 ccf-deadlines 数据，按 CCF 评级、会议官网、本地截稿时间与时区、剩余天数列出即将截止的会议，顶部提供评级多选筛选，并在每次打开时刷新。（0d44f120, cefdd696, d590c0db, 2c7483e4 by @Phil-Fan）
+  - 未官宣截稿推算：对尚未公布下一届的 CCF A/B/C 会议，合并上游历史届次数据推算下一届截稿（保留星期几，限定最近 18 个月、预测落在未来 12 个月内），并以「预计」角标标注，补上面板原先整条缺失的会议。（2b143516 by @Phil-Fan）
+  - CLI 工作区控制：新增 agentero ui open|close|window|split 命令组与 agentero paper open，可从命令行打开、关闭、新建窗口，拆分工作区面板，并在运行中的应用里打开指定论文。（579ec8f5, 5b4018cb, 0a53b7c3 by @Phil-Fan）
+  - arXiv 投稿 venue 标签：扫描 arXiv 源码中的 LaTeX 模板（documentclass 与样式包）并投影到论文标签：模板命中显示 #submitted:<VENUE> <YEAR>，权威发表信息替换为 #venue:；论文库标签列提供手动刷新。（be7c49ae by @Phil-Fan）
+  - 查询式 arXiv 发现：core 与 CLI 新增不依赖 Vault 与 embedding 的发现原语（agentero discover arxiv），按关键词做确定性排序并给出可解释的命中项，支持剔除已在库论文的新颖性过滤与 shortlist 导出。（656faf94, 507e47b6 by @Phil-Fan）
+  - 语义排序与 MCP 发现工具：可选地在词法得分上叠加 embedding 余弦项（默认关闭，端点失败降级为词法），并新增 discover_arxiv MCP 工具，让 Agent 直接驱动 arXiv 发现。（81f62433, 39c1d118 by @Phil-Fan）
+  - Agent 会话历史重命名：会话历史行新增悬停改名入口，标题作为本地覆盖持久化，不再被 ACP 的会话更新覆盖。（459aa4e4, 4d426ce8 by @ffy6511; Fix #710）
+  - Markdown 划词行号：Markdown（Plate）划词后计算磁盘行号，随引用 chip 与提示词携带 (lines A-B)，与 CodeMirror 一致，Agent 输入框的引用 chip 也显示行号。（50e063d5, 1ebc6ba2 by @ffy6511; Fix #709）
+  - 广场来源浏览状态恢复：关闭并重开 Cool Papers / ModelScope 标签时恢复站内路径、前进 / 后退历史与滚动位置，Cool Papers 还会重放此前已请求的 Kimi 总结。（#716 by @Kokeip）
+  - MCP Vault 搜索：内置 MCP server 暴露 vault_search，复用 Host 的 Markdown 关键词搜索，PAPER.md 命中可返回 1-based 物理页码与元数据筛选。（#708 by @Zhou-Ruichen）
+  改进
+  - 机构代理学校预设：机构代理前缀旁新增已验证的 WebVPN 网关预设下拉（ZJU、USTC、XJTU 等），选择即填入前缀并切换网关类型；测试状态改用统一探针圆点，并移除冗余说明文案。（672c846f, 6f5d3187, 9a2322d2, ec03061d by @Phil-Fan）
+  - EasyScholar 密钥入口：设置中 EasyScholar 密钥旁新增外链按钮，直接打开签发密钥的开放 API 页面。（1aeee33f by @Phil-Fan）
+  - 发现结果缓存按参数隔离：广场推荐缓存改为按来源 / 模型 / top_n / 分类散列的多行表（schema v8），修复切换 embedding 模型或来源后仍复用旧结果、以及更大 top_n 返回更小列表的陈旧问题。（23dbba9c by @Phil-Fan）
+  - CLI 复用共享机构代理：无头 CLI 启动时读取共享设置中的机构代理，使 import id 与 paper download 与桌面端使用同一网关配置。（d87bf4dd by @Phil-Fan）
+  修复
+  - Agent 代理绕过本地回环：向 Agent 注入代理环境变量时合并 NO_PROXY=127.0.0.1,localhost,::1，修复开启网络代理后 opencode 无法通过本地回环启动、模型列表为空的问题。（f832d2cd by @Phil-Fan; Fix #638）
+  - 双栏翻译与版面分析同步：版面分析未完成时从翻译面板进入共享布局队列（给出排队 / 取消提示），并把源文档的版面结果镜像到翻译页，修复过早打开翻译面板会永久停留在空白的问题。（47528699 by @Phil-Fan）
+  - 翻译显示模式接线：翻译设置改为写入 translate.displayMode（overlay / dual pane），替换已废弃的布尔开关，修复开启双栏后不生效的问题。（fc31b273 by @Phil-Fan）
+  - venue 标签排除预印本仓库：将 arXiv、bioRxiv、OpenReview 等仓储型 publication 视为无 venue，落到模板推断路径而非生成 #venue:arXiv (Cornell University)，并清理旧的仓储派生标签；模板 venue 标签显示为 "Submitted to …"，#venue: / #submitted: chip 去掉命名空间前缀。（34a21efc, 7310a7fe by @Phil-Fan）
+ReleaseNotesUrl: https://github.com/poco-ai/Agentero/releases/tag/v0.11.7
+Documentations:
+- DocumentLabel: 文档
+  DocumentUrl: https://agentero-docs.poco-ai.com/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

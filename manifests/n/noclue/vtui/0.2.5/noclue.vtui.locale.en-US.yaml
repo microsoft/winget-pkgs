@@ -1,0 +1,52 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: noclue.vtui
+PackageVersion: 0.2.5
+PackageLocale: en-US
+Publisher: noclue
+PublisherUrl: https://github.com/noclue
+PublisherSupportUrl: https://github.com/noclue/vtui/issues
+PackageName: vtui
+PackageUrl: https://github.com/noclue/vtui
+License: Apache-2.0
+LicenseUrl: https://github.com/noclue/vtui/blob/HEAD/LICENSE
+ShortDescription: Explore your vCenter environment in the terminal
+ReleaseNotes: |-
+  Release Notes
+  Added
+  - VM Summary (s on the Virtual Machine inventory table): opens a centered popup with a consolidated view of the selected VM—name and MO id, primary IP(s), overall status, power state and uptime, guest OS, vCPU count and CPU usage (MHz), a one-line VMware Tools summary, host memory in use versus configured size, resolved host name, provisioned disk usage, plus scrollable Networking and Disks tables. Networking lists each NIC (label, network name when it can be resolved from the backing, MAC, guest IPs); disks list virtual disks with path/backing and datastore names when available. The vSphere work runs asynchronously so typing, search, and redraws stay responsive; you briefly see “Loading VM summary…” until data arrives. Esc or q closes the popup; while it is open, ↑/↓, j/k, Page Up/Page Down, Home/End, g/G, and Ctrl+B/Ctrl+F scroll the content.
+  - VM Summary networking labels include standard port groups, distributed port groups (with a clear placeholder when the port group name is not yet resolved), NSX-style opaque networks (type and opaque network id), and SR-IOV (physical or virtual function device name, or a PCI-style id when the name is empty). If the backing cannot be interpreted, the network cell may show - as before.
+  Changed
+  - Demand-driven PropertyCollector and performance polling: terminal input and PropertyCollector WaitForUpdatesEx long-polls no longer share one tokio::select!, so keystrokes no longer cancel and restart in-flight waits (which previously amplified server load during UI activity). A watch channel gates when long-polls run: on for the resource inventory table and the managed-object property browser, off for the static/event JSON property browser and during shutdown. Long-polls use a 60-second server-side wait window instead of a short timeout loop. Performance (QueryPerf) requests are explicitly cleared when perf should stop (property browsers, VM summary popup open, or other pauses) so the background worker does not keep polling with a stale visible-row set. refresh_polling_demand() centralizes these rules; polling_policy unit tests document PropertyCollector vs perf demand.
+  - Suppress redundant ad-hoc perf refreshes: changing the selected row within the same visible VM/Host window no longer re-arms the background PerformanceManager worker. vTUI now only sends an immediate perf refresh when the effective observed entity set, pause/running state, or perf generation actually changes.
+  - Logging (breaking operational change): vTUI no longer writes logs/vtui.log under the current working directory. Application and wire diagnostics use flexi_logger with append, rotation, retention, and optional compression under the platform state directory: on Unix-like systems $XDG_STATE_HOME/vtui/logs/ (or ~/.local/state/vtui/logs/ when XDG_STATE_HOME is unset or not absolute), and on Windows %LOCALAPPDATA%\vtui\logs\. Filenames follow flexi_logger conventions (e.g. current vtui-app / vtui-wire logs plus rotated siblings). Timestamps are UTC with millisecond precision and a Z suffix. Configure verbosity and rotation in a global [logging] section of config.toml; LOG_LEVEL remains supported and applies application logging only. Wire capture is configured with [logging.wire] mode (off, summary, detailed) and is passed to vim_rs::WireLoggingMode on ClientBuilder::wire_logging; targets vim_rs::wire::json and vim_rs::wire::soap are routed to vtui-wire.log without flooding vtui-app.log. Per-target overrides use [[logging.filters]]. Legacy [environments.*].log_level is still read for one release when no global [logging].level and no LOG_LEVEL apply, with a deprecation warning. RUST_LOG is intentionally ignored for vTUI’s own logger setup (a note is printed if set). If file logging cannot be initialized, vTUI warns and falls back to stderr-only logging instead of aborting.
+  - Background VM action prefetch and execution off the UI loop: introduce an async operations facility under src/ops so vSphere work for the VM power-action flow no longer blocks the main event loop (terminal input, property updates, redraws).
+  Fixed
+  - Preserve Unicode in pretty-printed JSON dumps (previously corrupted non-ASCII content).
+  Install vtui 0.2.5
+  Install prebuilt binaries via shell script
+  curl --proto '=https' --tlsv1.2 -LsSf https://github.com/noclue/vtui/releases/download/v0.2.5/vtui-installer.sh | sh
+  Install prebuilt binaries via powershell script
+  powershell -ExecutionPolicy Bypass -c "irm https://github.com/noclue/vtui/releases/download/v0.2.5/vtui-installer.ps1 | iex"
+  Install prebuilt binaries via Homebrew
+  brew install noclue/tap/vtui
+  Download vtui 0.2.5
+  ──────────────────────────────────────────┬───────────────────┬─────────────
+  File                                      │Platform           │Checksum
+  ──────────────────────────────────────────┼───────────────────┼─────────────
+  vtui-aarch64-apple-darwin.tar.xz          │Apple Silicon macOS│checksum
+  ──────────────────────────────────────────┼───────────────────┼─────────────
+  vtui-x86_64-apple-darwin.tar.xz           │Intel macOS        │checksum
+  ──────────────────────────────────────────┼───────────────────┼─────────────
+  vtui-aarch64-pc-windows-msvc.zip          │ARM64 Windows      │checksum
+  ──────────────────────────────────────────┼───────────────────┼─────────────
+  vtui-x86_64-pc-windows-msvc.zip           │x64 Windows        │checksum
+  ──────────────────────────────────────────┼───────────────────┼─────────────
+  vtui-aarch64-unknown-linux-gnu.tar.xz     │ARM64 Linux        │checksum
+  ──────────────────────────────────────────┼───────────────────┼─────────────
+  vtui-x86_64-unknown-linux-gnu.tar.xz      │x64 Linux          │checksum
+  ──────────────────────────────────────────┴───────────────────┴─────────────
+ReleaseNotesUrl: https://github.com/noclue/vtui/releases/tag/v0.2.5
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,143 @@
+# Created with WinGet Updater using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: DoltHub.Dolt
+PackageVersion: 2.3.3
+PackageLocale: en-US
+Publisher: DoltHub
+PublisherUrl: https://github.com/dolthub/dolt
+PublisherSupportUrl: https://github.com/dolthub/dolt/issues
+Author: DoltHub
+PackageName: Dolt
+PackageUrl: https://www.dolthub.com/
+License: Apache-2.0
+LicenseUrl: https://github.com/dolthub/dolt/blob/HEAD/LICENSE
+CopyrightUrl: https://raw.githubusercontent.com/dolthub/dolt/master/LICENSE
+ShortDescription: Dolt is a SQL database that you can fork, clone, branch, merge, push and pull just like a git repository.
+Description: |-
+  Dolt is a SQL database that you can fork, clone, branch, merge, push and pull just like a git repository.
+  Connect to Dolt just like any MySQL database to run queries or update the data using SQL commands.
+  Use the command line interface to import CSV files, commit your changes, push them to a remote, or merge your teammate's changes.
+Moniker: dolt
+Tags:
+- cli
+- data
+- git-for-data
+- versioning
+ReleaseNotes: |-
+  Merged PRs
+  dolt
+  - 11757: go/store/nbs: byte_sink.go: Fix an error in non-archive push and GC paths which could result in table files with missing indexes.
+    Failure to properly handle a boundary condition in BufferedFileByteSink meant that a table file writer that was producing a large table file could end up writing it out with a broken index. All chunk data made it to the file, but the file itself was unusable without manual recovery because the index portion of the file was wrong.
+  - 11746: Added DESC indexes and NULL ordering
+    This implements DESC indexes and NULL ordering (nulls can be set to be first or last). NULL ordering is primarily used by Doltgres. This is a feature version bump for Dolt because, now that we support DESC indexes, old databases trying to read a DESC index would read it incorrectly and return incorrect results.
+    Related PRs:
+    - dolthub/vitess#491
+    - dolthub/go-mysql-server#3820
+    - dolthub/doltgresql#3285
+  - 11745: Coalesce git remote read fetches, answer absent keys from the cache.
+    A cache-missing Get or Exists ran its own git fetch of the whole data ref, so a burst of concurrent readers opened a connection each and every probe for a key that does not exist fetched again. Concurrent read-path fetches now share one fetch, and a key missing from a cache already merged from a commit is reported absent without fetching. A fetch that finds the head unchanged now also refreshes the dedup window, which previously never renewed against a quiet remote.
+  - 11744: go: git remotes: kill the process group on cancel, bound the wait on inherited pipes.
+    A cancelled DOLT_PUSH/DOLT_FETCH wedged sql-server indefinitely (#11741): exec.CommandContext's default Cancel kills only the direct git child, so the transport it spawned survives holding the write end of the pipe Run reads from, and cmd.Wait() waits on an EOF nobody will send. Set cmd.Cancel to kill the whole group -- CmdSetsid already makes git the group leader, and Windows shells out to taskkill /T -- and set cmd.WaitDelay as a backstop for a holder that left the group, such as an ssh ControlMaster. Cancellation and expired-wait errors now report ctx.Err() rather than a bare kill signal, and skip the credential hints NormalizeError appends.
+  - 11743: integration-tests/mysql-client-tests/Dockerfile: Bump java_clients_build off EOL Debian bullseye to maven:3.9-eclipse-temurin-17-noble.
+  - 11742: go/store/nbs: Clone table file sources which are already open on Conjoin, instead of always opening them anew.
+  - 11710: Fix misleading paths in multiple .doltcfg error message
+    Fix #10688
+  - 11697: Report branch update, force push, and tag status on dolt push
+    Dolt now prints standard status messages when pushing branches and tags to a remote database. Update display the commit transition range old...new, and when forced are explicitly marked (forced update).
+    - Inspects the remote reference state before transferring chunks in actions.Push. to capture OldHash, NewHash, and existence.
+    - Add PushRefResult to distinguish new branches, fast-forward, updates, forced updates, deletions, and tags.
+    - Add formatPushSuccess to format push success messages.
+      Fix #11352
+      Close #11590
+  - 11693: Name the conflicting ref in ExistingRefError
+    Include the full conflicting ref in ExistingRefError messages, and give tag and workspace creation their own already-exists errors.
+    Fixes #11434
+    Close #11708
+  - 11692: build(deps): bump google.golang.org/grpc from 1.82.1 to 1.83.1 in /go
+    Bumps google.golang.org/grpc from 1.82.1 to 1.83.1. Release notes
+    Sourced from google.golang.org/grpc's releases.
+    > Release 1.83.1
+    >
+    > Security
+    > - xds/rbac: Fix a bug where nested Principal or Permission rules with :scheme or grpc- prefixed header matchers were not rejected, which could cause DENY rules to fail open. (#9258)
+    >   - Special Thanks: @nvxbug
+    > - xds/rbac: Fix a bug where the host header matcher was not being replaced with :authority in nested Principal or Permission rules. (#9258)
+    >   - Special Thanks: @nvxbug
+    > - xds/rbac: Fix a bug where a header matcher whose name was not lowercase, such as X-Role, matched no header, which could cause DENY rules to fail open. (#9332)
+    >   - Special Thanks: @alimony
+    > - xds/rbac: Fix a bug where a :scheme or grpc- prefixed header matcher was accepted when its name was not lowercase. (#9332)
+    >   - Special Thanks: @alimony
+    > - xds/rbac: Fix a bug where a Host header matcher was not replaced with :authority. (#9332)
+    >   - Special Thanks: @alimony
+    >
+    > Performance
+    > - transport: Restrict memory overhead of buffering small data frames. (#9331)
+    >
+    > Release 1.83.0
+    >
+    > Security
+    > - server: Stop reading from connections when flooded by HTTP/2 frames to mitigate resource exhaustion. The default value for this limit is 100 frames, excluding DATA and HEADERS, and may be changed by setting environment variable GRPC_GO_EXPERIMENTAL_CONTROL_BUFFER_THROTTLE_LIMIT.
+    > - xds/rbac: Support Metadata and RequestedServerName permissions matcher fields. If present in a DENY rule, previously these would be ignored and fail-open.
+    > - xds/rbac: Fix panic when parsing unsupported fields in NotRule/NotId permissions.
+    > - xds/rbac: Support the deprecated source_ip principal identifier by treating it as equivalent to direct_remote_ip.
+    > - xds: Fix panic when parsing route header matchers configured with empty exact_match, prefix_match, or suffix_match strings. (#9223)
+    >
+    > New Features
+    > - xds/googlec2p: Enable DirectPath over Interconnect support for on-premises clients via the force-xds target URI query parameter. (#9133)
+    > - xds: Enable xDS configuration to control which fields get propagated from ORCA backend metric reports to LRS load reports. (#9145)
+    > - authz: Add OnPolicyUpdate callback to FileWatcherOptions to notify when an authz policy is loaded or updated. (#9142)
+    >   - Special Thanks: @hnefatl
+    > - xds: Add support for the GCP Authentication HTTP Filter, which automatically fetches and attaches GCP Service Account Identity JWT tokens to outgoing RPCs.
+    >   - This feature can be enabled by setting environment variable GRPC_EXPERIMENTAL_XDS_GCP_AUTHENTICATION_FILTER=true. (#9119)
+    > - xds: Add support for xDS-based HTTP CONNECT proxies.
+    >   - This feature can be enabled by setting environment variable GRPC_EXPERIMENTAL_XDS_HTTP_CONNECT=true. (#9151)
+    > - xds: Add support for contains_match in route header matchers. (#9223)
+    >
+    > Bug Fixes
+    > - credentials/alts: Fix panic when processing malformed frames by validating that the message frame length exceeds the message type field size. (#9197)
+    > - grpc: Fix compilation on Plan 9 targets (GOOS=plan9), broken since v1.81.0. (#9255)
+    >   - Special Thanks: @Yusufihsangorgel
+    >
+    > Release 1.82.2
+    >
+    > Security
+    > - server: Reject requests missing both :authority and Host headers with HTTP 400 and status Internal. (grpc/grpc-go#9365)
+    ... (truncated)
+    Commits
+    - 1550d9e Change version to 1.83.1 (#9336)
+    - ebba6f3 Cherry-pick #9258 and #9332 into v1.83.x (#9335)
+    - 8cfeca0 Cherry-pick #9331 to v1.83.x (#9333)
+    - dec6951 Change version to 1.83.1-dev (#9229)
+    - 4c226da Change version to 1.83.0 (#9228)
+    - c198988 Cherrypick 9223 into v1.83.x (#9279)
+    - 8ce3ebf Cherrypick PR 9255 into v1.83.x (#9263)
+    - e393849 Cherry-pick recent changes from master (#9240)
+    - 2a112a8 authz: add onPolicyUpdate callback to authz file watcher (#9142)
+    - 1a80fca vet: adds a check to disallow usage of regex.Compile in xDS code (#9216)
+    - Additional commits viewable in compare view
+    [![Dependabot compatibility score](https://dependabot-badges.githubapp.com/badges/compatibility_score?dependency-name=google.golang.org/grpc&package-manager=go_modules&previous-version=1.82.1&new-version=1.83.1)](https://docs.github.com/en/github/managing-security-vulnerabilities/about-dependabot-security-updates#about-compatibility-scores) Dependabot will resolve any conflicts with this PR as long as you don't alter it yourself. You can also trigger a rebase manually by commenting `@dependabot rebase`. [//]: # (dependabot-automerge-start) [//]: # (dependabot-automerge-end) --- Dependabot commands and options
+    You can trigger Dependabot actions by commenting on this PR: - `@dependabot rebase` will rebase this PR - `@dependabot recreate` will recreate this PR, overwriting any edits that have been made to it - `@dependabot show ignore conditions` will show all of the ignore conditions of the specified dependency - `@dependabot ignore this major version` will close this PR and stop Dependabot creating any more for this major version (unless you reopen the PR or upgrade to it yourself) - `@dependabot ignore this minor version` will close this PR and stop Dependabot creating any more for this minor version (unless you reopen the PR or upgrade to it yourself) - `@dependabot ignore this dependency` will close this PR and stop Dependabot creating any more for this dependency (unless you reopen the PR or upgrade to it yourself) You can disable automated security fix PRs for this repo from the [Security Alerts page](https://github.com/dolthub/dolt/network/alerts).
+  - 11687: Fix keyless COUNT column projection
+    Keyless value tuples store row cardinality before user columns. Advance non-primary-key COUNT field ordinals past that hidden value so COUNT(column) examines the requested column.
+    Fixes #11521
+    Depends on: go-mysql-server #3779
+  - 11669: build(deps): bump mysql2 from 3.22.0 to 3.23.1 in /integration-tests/mysql-client-tests/node
+    Bumps mysql2 from 3.22.0 to 3.23.1. Release notes
+    Sourced from mysql2's releases.
+    > v3.23.1
+    >
+    > 3.23.1 (2026-07-19)
+    >
+    > Bug Fixes
+    > - security: fix unbounded decompression of server-supplied compressed packets, reported by alanturing881 (7c48343)
+    > - parser: call typeCast for NULL values in the binary protocol (#4394) (01f1092)
+    >
+    > v3.23.0
+    >
+    > 3.23.0 (2026-07-13)
+    >
+    > Features
+ReleaseNotesUrl: https://github.com/dolthub/dolt/releases/tag/v2.3.3
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

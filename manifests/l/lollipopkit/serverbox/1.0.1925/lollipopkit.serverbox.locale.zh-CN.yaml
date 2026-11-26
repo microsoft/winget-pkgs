@@ -1,0 +1,65 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.28.0.schema.json
+
+PackageIdentifier: lollipopkit.serverbox
+PackageVersion: 1.0.1925
+PackageLocale: zh-CN
+ShortDescription: 服务器状态与工具箱，内置 SSH 终端、SFTP 和容器管理
+Description: ServerBox 通过 SSH 或 monitor 代理监控服务器，并在一个应用中提供终端、SFTP 文件管理、容器、进程和服务管理、虚拟化（libvirt、Proxmox VE）以及远程桌面。
+Tags:
+- sftp
+- ssh
+- 服务器
+- 监控
+- 终端
+ReleaseNotes: |-
+  升级前须知
+  Section titled “升级前须知”
+  - 移除使用情况统计与“完整”诊断级别。原设为“完整”的安装会自动改为“基础”，仅上传错误和崩溃信息。
+  - Monitor v0.4.0 改为单账户，仅使用密码登录。 登录后即拥有 Monitor 运行所用系统账户的权限；角色、按功能细分的权限、文件根目录和只读模式均已移除。升级时保留最早创建的管理员账户，其余账户的任务、记忆和桌面数据并入该账户。App 不再要求输入用户名；连接早于 v0.4.0 的 Monitor 时，会先提示升级再登录。
+  - Monitor 自签名证书改为按指纹一次性信任。 移除“忽略证书”开关，改用 SHA-256 证书指纹绑定：首次连接时可在服务器卡片或详情页核对并信任证书，此后仅当证书变更时才再次提示。
+  - 同步改用增量加密格式。 iCloud 和 WebDAV 改为同步逐项变更而非整份备份，数据使用由备份密码保护的同步密钥加密。移除 GitHub Gist 和 Monitor 托管备份同步目标。共用同一同步目标的设备需设置相同的备份密码并全部升级至本版本，旧版本无法读取新版本写入的变更。
+  - Monitor 面板的终端不再通过 SSH 登录，而是直接以 Monitor 运行所用的系统账户打开本机 shell。
+  - 下文涉及 Monitor 面板的新功能、Monitor 标签页的管理视图及新增通知渠道均需配合 Monitor v0.4.0 使用。
+  新增
+  Section titled “新增”
+  - 存储与文件共享（App 与 Monitor 面板）：管理磁盘、分区、RAID 阵列、ZFS 存储池、LUKS 加密与 SMART 健康状态，并支持配置 SMB 共享（含 Time Machine 与回收站）和 NFS 导出。
+  - Monitor 面板升级为多窗口桌面：各项功能以独立窗口运行，提供菜单栏、Dock、Spotlight 搜索、通知中心、终端与文件的多标签页和分屏，以及自定义壁纸与主题。
+  - Monitor 面板补全服务器管理工具：进程、服务、计划任务、容器（镜像、日志、进入容器终端，以及数据卷和挂载目录的定时备份）、系统用户与用户组、代码片段、防火墙、跑分、tmux、iperf、文件编辑器、远程桌面（VNC、RDP）、虚拟化与 BMC（Redfish）。
+  - 自托管 Web 应用商店：在 Monitor 面板中通过 Docker Compose 部署和更新 40 余款常用服务（如 Immich、Jellyfin、Nextcloud、Vaultwarden、Home Assistant、Gitea、Open WebUI、Grafana、n8n 等），支持自定义应用源与本地应用包，提供端口冲突检查、健康状态告警、共享媒体目录及内置反向代理访问。
+  - Monitor 桌面应用（.fsba）：支持安装运行在沙箱中、按授权权限隔离的第三方应用，并在应用商店提供官方签名应用包：本地推理（按本机 GPU 匹配 Ollama、llama.cpp、vLLM、SGLang 与 MLX）、AI Agent 工具（Codex、Claude Code、pi、opencode、Hermes、OpenClaw）、反向代理与 WAF（nginx、Caddy、Traefik 及 ModSecurity + OWASP CRS）、Tailscale、内核管理、Ubuntu Pro 与 系统清理。
+  - Monitor Agent 模式及客户端协同：在 Linux、macOS 和 Windows 服务器上直接运行 AI 运维任务，支持按任务选择模型、思考深度与权限模式，提供执行计划、命令风险检查、sudo 提权确认、文件附件、记忆、MCP 服务器（含 OAuth 登录及已部署应用的 MCP）和技能扩展；也可在 App 的 Agent 标签页中直接发起、实时跟进和回复服务器上的任务。
+  - Agent 命令权限控制：提供手动、自动和全部允许三种模式，可配置允许、询问或拒绝特定命令的规则，同时适用于本机 Agent 与服务器上的 Monitor Agent 模式。
+  - Monitor 标签页、在线升级与设置备份：集中查看所有已连接 Monitor 的版本状态并支持一键升级，查看正在触发的告警规则、通知、已部署的 Web 应用（有可用更新的排在前面，可通过 Monitor 代理直接在浏览器打开），以及每台服务器的审计日志和已登录会话与受信任设备（可随时结束或移除）。服务器详情页也会列出其已部署应用；Monitor 还支持将自身设置以 age 加密归档备份至 WebDAV。
+  - ServerBox OS（sbOS）可引导系统镜像：基于 Alpine Linux（musl）和 Debian 13（GNU）构建，支持 x64（BIOS 与 UEFI）和 arm64（UEFI），预装 Monitor 与 Docker，可在内存 Live 模式下直接运行或写入磁盘安装。
+  - 服务器自动发现：从局域网、SSH 配置文件、Tailscale 和 Cloudflare Tunnel 中查找 SSH 服务器，并连同跳板机一并添加；首次启动引导流程也围绕此功能重新设计。
+  - 按类别选择同步内容：设置、AI 偏好、凭据、密钥口令、文件和跑分记录可分别开启或关闭同步；字体、图片、技能、主题包和图标包现已纳入同步。重新设计的同步页面会展示各同步目标的实时状态。
+  - Monitor 已登录设备免受异地失败登录锁定：Monitor 通过下发的设备令牌识别曾成功登录的设备，其他来源的失败尝试不会将其锁定。
+  - 新增通知渠道：支持 SMTP 邮件、Telegram、Discord 和 ntfy，并支持在 config.toml 中通过 ${ENV} 引用环境变量配置推送凭据；Bark 新增副标题、Markdown、重要警告音量、角标、图片、复制、归档选项及 AES-CBC 加密推送。
+  - 通过 Monitor 连接的服务器支持查看 GPU 进程。
+  - iOS：设备文件与已安装的 Linux 环境接入系统“文件”App；终端中通过系统菜单粘贴时按括号粘贴模式发送。
+  - Windows 安装程序（.exe）：无需管理员权限即可为当前用户安装，内置 Visual C++ 运行库，并支持通过 WinGet 安装；便携版 .zip 压缩包继续提供。
+  - tmux：支持缩放窗格，切换窗格时保持缩放状态。
+  - 全新服务器全屏视图：覆盖全平台，可切换展示单台或全部服务器，并内置防烧屏保护。
+  变更
+  Section titled “变更”
+  - 导出的备份文件改用 age 格式，可直接使用 age -d 命令配合备份密码解密；旧格式备份仍可恢复。Monitor 上保存的凭据和 Agent 模式对话现已加密落盘。
+  - 关闭重开 App 后不再自动恢复上次打开的终端和文件标签页。
+  - 优化终端中的鼠标滚轮与触控板滚动：滚轮按整行滚动，触控板可在全屏终端程序内顺畅滚动，并合并重复滚动条。
+  - 通知渠道编辑器现在会展示该渠道支持的全部配置项，包括尚未填写的字段。
+  - 百分比图表的纵轴上限不再超过 100%。
+  - 补全并润色 App、Monitor 面板与文档中所有支持语言的翻译。
+  修复
+  Section titled “修复”
+  - macOS：Intel 版 DMG 改用 Skia 渲染器，修复 Intel Mac 上文字显示错乱的问题（#1798）。
+  - 数据库：修复打开旧版本数据库（schema v31 之前）时的迁移失败问题；Windows 上打开数据库遇到暂时性 I/O 错误时会自动重试。
+  - tmux：修复窗格与窗口目标解析、跨窗口切换、安全分离、切换窗格时的实时画面跟随，以及断线重连后的输出回放问题。
+  - 终端：修复快速输入时字符重复、从选择器打开会话后未切换到对应标签页、更换终端背景图片后不立即生效的问题；从终端打开文件页时无需向终端输入探测命令即可定位当前目录。
+  - 编辑器：修复开启输入法时复制大段选中文本会丢行的问题。
+  - 设置与导航：离开含有未保存修改的设置页前会提示确认；在多标签页、工作区分屏和宽窗口布局下，返回操作均能回到当前可见页面。
+  - 对话框打开期间调整窗口大小或旋转屏幕后，对话框按钮仍可正常点击。
+  - 移动端：修复 iOS 文本框与终端中的粘贴问题，合并前台保活会话通知，并修复切换视图时的键盘反复弹起问题。
+  - 当服务器仅支持标准 RDP 安全层时，远程桌面会给出明确说明。
+  - Monitor：修复 Linux 构建在不支持 AVX 指令集的 CPU 上无法启动的问题；驱动未上报单进程显存占用时（Windows、WSL）仍正常列出 NVIDIA GPU 进程；通知渠道报错信息不再暴露可能含 token 的请求 URL；新安装的 Monitor 不再向空白占位渠道发送告警。
+ReleaseNotesUrl: https://serverbox.lollipopkit.com/docs/zh/changelog/#v101925--2026-11-11
+ManifestType: locale
+ManifestVersion: 1.28.0

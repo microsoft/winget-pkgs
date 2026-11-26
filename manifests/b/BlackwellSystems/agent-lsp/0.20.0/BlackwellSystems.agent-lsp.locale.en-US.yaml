@@ -1,0 +1,35 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: BlackwellSystems.agent-lsp
+PackageVersion: 0.20.0
+PackageLocale: en-US
+Publisher: Blackwell Systems
+PublisherUrl: https://github.com/blackwell-systems
+PublisherSupportUrl: https://github.com/blackwell-systems/agent-lsp/issues
+PackageName: agent-lsp
+PackageUrl: https://github.com/blackwell-systems/agent-lsp
+License: MIT
+LicenseUrl: https://github.com/blackwell-systems/agent-lsp/blob/main/LICENSE
+ShortDescription: MCP server giving AI agents reliable access to language server protocol
+Description: agent-lsp is a stateful MCP server over real language servers. It keeps the language server's semantic index warm and adds a skill layer that turns multi-step code operations into single, correct workflows. 50 tools, 30 languages, persistent sessions.
+Tags:
+- ai
+- code-intelligence
+- developer-tools
+- language-server
+- lsp
+- mcp
+ReleaseNotes: |-
+  ### Added
+  • **MQL4/MQL5 support via `mql-lsp-server` (32nd CI-verified language)** ([#30](https://github.com/blackwell-systems/agent-lsp/pull/30))：MetaTrader 4/5's language, covering `.mq4`/`.mq5`/`.mqh` through a single neutral `mql` languageId (the server resolves the dialect per file, so shared `.mqh` headers do not misroute). The `multi-lang-mql` CI job runs the real server through the same harness as the other 31 languages. Contributed by [@davalillo](https://github.com/davalillo).
+
+  ### Fixed
+  • **`open_document` sent an empty `didOpen` buffer** ([#34](https://github.com/blackwell-systems/agent-lsp/pull/34))：when the optional `text` argument was omitted, `open_document` opened the document with an empty buffer and relied on the language server reading the file from disk. That is not spec-compliant (LSP clients are expected to send the current document text), and servers that take the `didOpen` buffer literally degraded: cross-file resolution failed when the real content arrived later via `didChange`. `open_document` now reads the file and sends its real content in `didOpen`. The read runs on the workspace-validated path (the value returned by `ValidateFilePath` is now threaded through the URI, languageID, auto-scope, and the disk read), closing a time-of-check/time-of-use gap where a symlink swapped between validation and the read could escape the workspace root. Affects every language. Contributed by [@davalillo](https://github.com/davalillo).
+
+  ### Changed
+  • **`multi-lang-mql` CI is pinned to `mql-lsp-server` v2.4.2 with a sha256 checksum** ([#32](https://github.com/blackwell-systems/agent-lsp/pull/32), [#34](https://github.com/blackwell-systems/agent-lsp/pull/34)) instead of fetching `releases/latest`. A floating version made the Tier-2 baseline (a deterministic contract of real server behavior) non-reproducible; v2.4.2 also fixes upstream defects surfaced by this integration (constructor-style declaration parsing and method-call signatureHelp). The MQL Tier-2 baseline was re-derived honestly against the pinned binary, with per-tool rationale for every allowed-skip.
+  • **Automated PR review via CodeRabbit**：added a `.coderabbit.yaml` tuned for this repo, with path instructions encoding the project's review priorities (pinned+checksummed third-party binaries in CI, honest Tier-2 baselines, `ValidatePath` confinement on file I/O, strict-YAML skill front-matter) and the relevant linters enabled. Advisory only; it never blocks a merge.
+ReleaseNotesUrl: https://github.com/blackwell-systems/agent-lsp/releases/tag/v0.20.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

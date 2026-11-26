@@ -1,0 +1,90 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: SteveTheKiller.KillerShell
+PackageVersion: 1.6.0
+PackageLocale: en-US
+Publisher: Steve the Killer
+PublisherUrl: https://github.com/SteveTheKiller
+PublisherSupportUrl: https://github.com/SteveTheKiller/KillerShell/issues
+Author: Steve the Killer
+PackageName: KillerShell
+PackageUrl: https://github.com/SteveTheKiller/KillerShell
+License: GPL-3.0
+LicenseUrl: https://github.com/SteveTheKiller/KillerShell/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Steve the Killer
+ShortDescription: File browser, terminal, text editor and admin toolkit for Windows. Install or run portable. GPLv3. No account, no agent, no telemetry.
+Description: KillerShell puts a file browser, a PowerShell or CMD terminal, a text editor and an admin toolkit in one window, on one tab strip and one set of keys. Search any folder by filename wildcard or by file content, streamed live with no index to build. Processes, services, performance and the registry are one key away. Runs portable or installs for you or every user - no runtime, no agent, no account. Open source under GPLv3.
+Moniker: killershell
+Tags:
+- csharp
+- dotnet
+- dual-pane
+- explorer-replacement
+- file-explorer
+- file-manager
+- file-search
+- gplv3
+- grep
+- msp
+- portable
+- powershell
+- sysadmin
+- tabs
+- terminal
+- text-editor
+ReleaseNotes: |-
+  1.6.0 turns the right-click menus into cards with quick buttons, puts the pane layouts in the footer, makes exported search results, saved size filters and on-screen dates read the same on every Windows region, fixes dialog crashes, lost favorites and slow archive extraction, makes every killer script command work like the website's one-liner, and makes updates and the file pickers recover from more failures.
+  Security
+  - An all-users install can apply later updates. The elevated update compared the certificate's full name against part of it and refused every release. Update signatures must now carry the exact publisher name and pass a revocation check, falling back to an offline check only when the revocation server cannot be reached. Update metadata downloads are capped at 1 MB, and an install and an update of one folder lock each other out.
+  Fixed
+  - Clear scrollback preserves pending terminal input and running programs.
+  - Killer script commands restore the terminal's execution policy after the script finishes or fails.
+  - A favorite on a share that is offline or a drive that is unplugged stays in its place in the favorites drawer, dimmed, with a tooltip that says it can't be reached, and it lights up again once the folder is back the next time the drawer opens. Before, it disappeared at launch and the next save deleted it for good, and upgrading from a version before 1.5.0 triggered that save on the first launch. KillerShell no longer waits on such a share before its window opens; the drawer checks its favorites in the background.
+  - Paste refuses to copy or move a folder into itself or one of its own subfolders, the same way drag and drop already did.
+  - Dragging the title bar of the registry, rename, file operation, folder picker, process, service, event and terminal profile dialogs no longer crashes KillerShell when the click arrives after the mouse button is already up.
+  - Changing the file type in the save picker while the name box holds characters no file name can carry no longer crashes KillerShell; the name keeps its text and shows the invalid-path message.
+  - Changing the file type in the save picker while the name is in quotes, such as "report.csv", no longer crashes KillerShell, and the Save button turns on as soon as a full path is typed while the folder listing is unavailable.
+  - A per-user or portable update reopens KillerShell even when antivirus or a locked-down PowerShell stops the update helper from loading.
+  - A per-user update that finds another install running, or finds the installed copy changed, reopens KillerShell instead of leaving it closed.
+  - A failed all-users update says what went wrong, such as a refused download, another install running or a full disk, instead of Windows' "This installation is forbidden by system policy" or "Incorrect function."
+  - Updating KillerShell no longer removes a relaunch another Killer app scheduled for its own update.
+  - Clicking or pressing a key while KillerShell fades out after Exit no longer leaves it hidden in the tray, and a window hidden partway through that fade comes back visible.
+  - Opening the recents menu no longer freezes the window while a folder on a dead share times out. Every folder is checked at once, and one that doesn't answer within a second is left out of that opening.
+  - Extract All reads a zip, tar or tgz twice in total instead of once per file, so a large archive extracts in a steady run instead of looking hung. Names that escape the destination or collide on Windows are still refused before anything is written, and a name stored with a doubled slash extracts instead of refusing the archive.
+  - File cards open archive contents correctly and copy folder names. Windows menus refuse incomplete selections and support drive roots.
+  - Killer script commands such as amort run with their own defaults when typed with no options, and every option reaches the script as typed, so -RetainDays 30 keeps its name and amort -D means the script's -DryRun instead of PowerShell's -Debug. Each command now does exactly what the website's one-liner does: it downloads the latest script to %TEMP% and runs it. The copy of the commands that ships with KillerShell loads ahead of one installed from PSGallery, and peek is available. When the download fails, the command stops instead of running an older copy left in %TEMP%, and a computer where Group Policy sets the execution policy shows no error. Two terminal tabs running the same command at once each run their own copy. An option such as -N or -Name goes to the script instead of choosing which script to download.
+  - About opens at once instead of waiting on the signature check, which can stall for many seconds on a network that drops revocation traffic; the publisher and thumbprint fill in when it finishes.
+  - Typing the name or path of another file in the text editor's path box and pressing Enter opens that file in the editor instead of refusing it as already existing, and a bare name such as .env means the file beside the open document. A blank untitled document gives its tab to the file; one with text in it keeps its tab and the file opens in a new one.
+  - Logs being written by another program open in the editor. An unfinished UTF-8 character no longer garbles the text, and unchanged saves preserve every byte.
+  - With Windows set to use Unicode UTF-8 for worldwide language support, a file saved in the older Windows encoding for your region, such as Western European, opens in the text editor instead of being refused as damaged, and saving it as ANSI writes that encoding instead of UTF-8.
+  - Switching to one pane and then quickly to two panes no longer leaves the second pane missing while the window acts as if it were open.
+  - Closing the last tab in the first pane while two panes are open folds the window back to one pane holding the second pane's tabs, the same as dragging that tab out does, instead of opening a new folder tab in its place.
+  - A relative address typed in the address bar, such as .., Downloads or \Windows, opens relative to the folder the tab is showing, and D: opens that drive's root, instead of resolving against the folder KillerShell was started from.
+  - Search here uses the chosen folder, and keyboard-opened tree menus use the focused item.
+  - A folder that refreshes in place, because something changed in it, you clicked back into its pane or you changed a view option, stays scrolled where you were instead of jumping to the top or to the selected item, and the folder tree no longer scrolls back to that folder while you are looking elsewhere in it.
+  - Opening a folder from a tab of search results drops the match count and query from that pane's footer, which kept describing the search under the folder listing.
+  - Pulling a USB drive or losing a share while browsing it moves the pane to This PC instead of leaving a listing of a place that is gone.
+  - Opening a file that is already open in the hidden second pane switches to that tab instead of opening the file a second time.
+  - Toggling hidden folders in the tree twice in quick succession no longer leaves tree clicks unable to navigate.
+  - A file that grows or changes while its folder is open keeps its selection and keyboard focus.
+  - A picture that can't be shown as a thumbnail is no longer locked until KillerShell closes, so it can be renamed or deleted, and it isn't read again every time its row redraws.
+  - Clear all Data keeps the file associations KillerShell registered, so it stays listed in Windows Default apps.
+  - Exported search results write dates as 2026-11-02 14:30:00 whatever the Windows region, so Thai and Finnish settings no longer produce years like 2569 or times like 14.30 in the CSV and HTML, and sizes and counts in the HTML reports keep a decimal point.
+  - A size filter such as 1,5 MB saved with your session loads back the same under any region, and sizes saved by earlier versions still load.
+  - Process start times, event times, and the dates in the file operation window and both file pickers read as 2026-11-02 14:30 whatever the Windows region, the same as the exports.
+  - Suggested export file names use the same date and time digits whatever the Windows region.
+  - KillerPivot and the killer script commands add TLS 1.2 to what the session already allows instead of replacing it, so they no longer switch off TLS 1.3 for the rest of a PowerShell session.
+  - The file picker loads icons and picture previews in the background, refreshes overwritten previews, and restores its position on any monitor.
+  - The file picker accepts a full path typed into the name box when the folder listing failed or timed out, and refuses a name no path can carry with its message even while a folder is still loading.
+  - A folder typed into the file picker that cannot be opened keeps its reason on the status line after the picker goes back to the last folder that listed.
+  - The folder picker comes back on a monitor to the left of or above the main one instead of forgetting where it was, and a spot that is no longer on any screen is pulled back onto one.
+  - The window menu from a right-click on the title bar or Alt+Space opens at the pointer instead of about 20 pixels below and to the right of it.
+  - Dragged tabs keep their current appearance and size.
+  - A tab dragged partway and then interrupted, by Alt+Tab or a UAC prompt before the button came up, no longer stays drawn out of its place over its neighbor. It settles back into its slot.
+  - Modifying a REG_NONE value edits its bytes and saves it as REG_NONE, and the value list shows its data as hex instead of "System.Byte[]". A value of a type KillerShell cannot write back says so instead of opening the text editor.
+  - Escape cancels the registry value editor without saving, and its close button has a name for screen readers.
+  - Text in the registry and confirmation dialogs follows a theme or high-contrast switch made while the dialog is open.
+ReleaseNotesUrl: https://github.com/SteveTheKiller/KillerShell/releases/tag/v1.6.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

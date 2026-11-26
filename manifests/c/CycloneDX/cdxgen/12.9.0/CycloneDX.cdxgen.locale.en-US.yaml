@@ -1,0 +1,57 @@
+# Created with WinGet Updater using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: CycloneDX.cdxgen
+PackageVersion: 12.9.0
+PackageLocale: en-US
+Publisher: OWASP Foundation
+PublisherUrl: https://owasp.org/
+PublisherSupportUrl: https://github.com/CycloneDX/cdxgen/issues
+Author: CycloneDX
+PackageName: CycloneDX Generator (cdxgen)
+PackageUrl: https://github.com/CycloneDX/cdxgen
+License: Apache-2.0
+LicenseUrl: https://github.com/CycloneDX/cdxgen/blob/HEAD/LICENSE
+ShortDescription: A polyglot tool and a library for generating various Bill of Materials in CycloneDX specification.
+Description: Generate Software Bill of Materials (SBOM) for most applications and container images with a single command. Generate Operations Bill of Materials (OBOM) for Linux and Windows hosts. Integrate with any CI/CD pipeline. Automatically submit the generated BOM to your dependency track server for analysis.
+Moniker: cdxgen
+Tags:
+- bom
+- cbom
+- containers
+- cyclonedx
+- docker
+- oci
+- owasp
+- package-url
+- purl
+- saasbom
+- sbom
+- sca
+- software-bill-of-materials
+- supply-chain
+ReleaseNotes: |-
+  This release backports the PHP version work from the 13.x branch (#4547) to the 12.x LTS line. When a PHP security release lands, the first thing everyone asks is which PHP they are running, and until now a cdxgen SBOM could not tell them. Composer SBOMs now keep the PHP facts their lock file carries, --include-formulation records the PHP and Composer of the machine that generated the BOM, and container and OS scans read the version of PHP that was built from source. Two new audit rules use that version to flag builds affected by CVE-2026-109618 and CVE-2026-109619, the unauthenticated remote code execution bugs fixed in PHP 8.2.35, 8.3.36, 8.4.27 and 8.5.12. (#4539, #4540)
+  Composer projects
+  A composer.lock knows more than cdxgen used to keep. Its platform, platform-dev and platform-overrides entries now become properties on the project's component, such as cdx:composer:platform:php = ^8.1 and cdx:composer:platformOverride:php = 8.1.27. When the composer.json in the scanned directory has no name, they go in the document's metadata.properties instead. Each locked package also keeps its own php, hhvm, ext-* and lib-* requirements as cdx:composer:require:* properties, so psr/log now carries cdx:composer:require:php = >=8.0.0. These are constraints, not the PHP that runs, so none of them becomes a component and the dependency graph is unchanged.
+  Formulation
+  With --include-formulation, the toolchain list now includes php and composer as platform components with generic purls and CPEs, for example pkg:generic/php@8.5.11 with cpe:2.3:a:php:php:8.5.11:*:*:*:*:*:*:*, and pkg:generic/composer@2.10.3 with cpe:2.3:a:getcomposer:composer:2.10.3:*:*:*:*:*:*:*. cdxgen runs php -n -v, which loads no php.ini, and composer --version --no-plugins --no-scripts --no-interaction. The PHP path that Composer prints is never recorded. A distro build such as Ubuntu's 8.1.2-1ubuntu2.14 keeps the version it reports but gets no CPE, because distros backport fixes under the old upstream number. Like the other toolchains, these components have no bom-ref, and they describe the build machine rather than the runtime of whatever the BOM describes. Set PHP_CMD or COMPOSER_CMD to choose which commands are run.
+  Container images and OS scans
+  Images built on the official php images, FrankenPHP and other /usr/local builds compile PHP from source, so no package database records it. Container and rootfs scans now read the version compiled into php, php-fpm, php-cgi, phpdbg, libphp*.so and frankenphp, or from the installed php_version.h. They tag those file components with cdx:php:buildVersion, cdx:php:buildVersionSource and cdx:php:sapi, and add one pkg:generic/php@<version> platform component with a CPE for each version found. -t os and obom do the same for a short, fixed list of directories, looking at no more than 64 files and executing nothing. PHP installed by a package manager (deb, rpm, apk, Homebrew, Nix, Guix or Chocolatey) is still identified by its package, and gets neither the generic component nor the properties.
+  Audit rules
+  PHP-RCE-001 (critical) flags a source-built PHP-FPM, php-cgi, libphp or FrankenPHP older than 8.2.35, 8.3.36, 8.4.27 or 8.5.12, or an 8.6.0 pre-release before RC4. PHP-RCE-002 (medium) flags the same builds of the CLI and phpdbg, which aren't reachable from the network themselves but share the vulnerable code with the web SAPIs built alongside them. Turn them on with --bom-audit --bom-audit-categories php-security. Builds from the php-src CVE backport branches keep their old version number, so the rules can't tell them apart from vulnerable builds; the finding text says so. Distro PHP is left to your vulnerability database.
+  Other changes
+  oci:image:appLanguage now names the language of an image's command. The check compared array positions instead of language names, so a command containing 0 , such as a port number, was labelled 0, and no image was ever labelled php, node or any other language.
+  One behaviour differs from 13.x: when --project-name replaces the main component in a multi-type scan, the Composer project component it displaces is dropped, and its platform properties go with it. The per-package cdx:composer:require:* properties are unaffected.
+  Checking your copy
+  cdxgen -t php --include-formulation -o bom.json .
+  jq -c '.formulation[].components[] | select(.name == "php" or .name == "composer") | {name, version, purl, cpe}' bom.json
+  With PHP 8.5.11 and Composer 2.10.3 from Homebrew on macOS, this prints:
+  {"name":"php","version":"8.5.11","purl":"pkg:generic/php@8.5.11","cpe":"cpe:2.3:a:php:php:8.5.11:*:*:*:*:*:*:*"}
+  {"name":"composer","version":"2.10.3","purl":"pkg:generic/composer@2.10.3","cpe":"cpe:2.3:a:getcomposer:composer:2.10.3:*:*:*:*:*:*:*"}
+  What's Changed
+  - feat: backport PHP version recording (#4547) to 12.x and release 12.9.0 by @prabhu in #4548
+  Full Changelog: v12.8.9...v12.9.0
+ReleaseNotesUrl: https://github.com/cdxgen/cdxgen/releases/tag/v12.9.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

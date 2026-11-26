@@ -1,0 +1,100 @@
+# Created using wingetcreate 1.12.13.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Bennewitz.Ninja.ClaudeForge
+PackageVersion: 2026.3.922
+PackageLocale: en-US
+Publisher: Brian Bennewitz
+PublisherUrl: https://github.com/JanusMael
+PublisherSupportUrl: https://github.com/JanusMael/ClaudeForge/issues
+Author: Brian Bennewitz
+PackageName: ClaudeForge
+PackageUrl: https://github.com/JanusMael/ClaudeForge
+License: MIT
+LicenseUrl: https://github.com/JanusMael/ClaudeForge/blob/main/LICENSE
+Copyright: Copyright (c) 2024-2026 ClaudeForge Contributors
+CopyrightUrl: https://github.com/JanusMael/ClaudeForge/blob/main/LICENSE
+ShortDescription: A cross-platform desktop editor for Claude Code and Claude Desktop configuration files.
+Description: ClaudeForge is a cross-platform desktop editor for Claude Code and Claude Desktop configuration. It provides schema-validated, guided editors for settings.json, permission allow/deny/ask rules, hooks, MCP servers, environment variables, the model catalog, user-memory files, and agents/skills/slash-commands — plus backup and restore.
+Moniker: claudeforge
+Tags:
+- claude
+- claude-code
+- anthropic
+- ai
+- configuration
+- settings
+- editor
+- developer-tools
+- avalonia
+- dotnet
+ReleaseNotes: |-
+  ## Downloads
+
+  | Platform              | Architecture   | File                                                                       |
+  |-----------------------|----------------|----------------------------------------------------------------------------|
+  | Windows               | x64            | `ClaudeForge-win-x64.zip`                                       |
+  | Windows               | ARM64          | `ClaudeForge-win-arm64.zip`                                     |
+  | Linux                 | x64            | `ClaudeForge-linux-x64.tar.gz`                                  |
+  | Linux                 | ARM64          | `ClaudeForge-linux-arm64.tar.gz`                                |
+  | macOS (Intel)         | x64            | `ClaudeForge-osx-x64.tar.gz`                                    |
+  | macOS (Apple Silicon) | ARM64          | `ClaudeForge-osx-arm64.tar.gz`                                  |
+
+  The version (2026.3.922) is encoded in the release tag rather than in
+  the archive filenames — publish.ps1 produces unversioned artefact names
+  so local dev builds and CI builds share one filename pattern.
+
+  **Linux:** Extract, then run the bundled `linux-setup.sh` to install a per-user `.desktop` entry so Wayland compositors render the window icon correctly:
+  ```bash
+  tar -xzf ClaudeForge-linux-x64.tar.gz -C ~/ClaudeForge
+  cd ~/ClaudeForge
+  ./linux-setup.sh
+  ./ClaudeForge
+  ```
+
+  **macOS:** The binary is unsigned. Use the bundled `allow-app-to-run.sh` to strip the Gatekeeper quarantine xattr from every file in the extracted directory:
+  ```bash
+  tar -xzf ClaudeForge-osx-arm64.tar.gz -C ~/ClaudeForge
+  cd ~/ClaudeForge
+  ./allow-app-to-run.sh
+  ./ClaudeForge
+  ```
+
+  ---
+
+  ## What's Changed
+
+  ### Added
+
+  - **Claude Opus 5.5.** The model picker and the `model` suggestion list now carry Opus 5.5
+    (`claude-opus-5-5`), and the `opus` alias resolves to it. Opus 5 keeps its row and stays
+    pinnable as an exact snapshot; it simply leaves the default picker and gives up the alias.
+    **Opus 5.5 defaults to `medium` effort rather than `high`** - the only model in the current
+    lineup whose default differs - which is recorded in the catalog and is what an unrecognized
+    effort value now coerces toward under `opus`.
+
+  ### Fixed
+
+  - **Enterprise policy is read from the directory Claude Code actually reads it from.**
+    ClaudeForge looked for `managed-settings.json` in `~/.claude/`; Claude Code reads it from a
+    per-OS *system* directory - `C:\Program Files\ClaudeCode\` on Windows,
+    `/Library/Application Support/ClaudeCode/` on macOS, `/etc/claude-code/` on Linux and WSL.
+    It failed both ways and silently: a machine with real policy showed **no managed layer**, so
+    the effective view told you your own value won where policy actually overrides it; and a file
+    you placed at `~/.claude/managed-settings.json` displayed as enforced while doing nothing.
+    `managed-mcp.json` is now handled as well.
+  - **`CLAUDE_CONFIG_DIR` is honoured.** The app documented this variable in its own tooltips and
+    then ignored it, so anyone who had relocated their Claude home was shown - and was editing -
+    the settings in `~/.claude` instead. Every path derived from the home now resolves through it,
+    including the ones behind the Memory and Agents & Skills pages, which previously read a
+    different tree than the settings pages did. `~/.claude.json` is deliberately unaffected: it
+    sits beside the home rather than inside it, so Claude Code does not move it either.
+  - **The restore progress bar no longer names `~/.claude/` when the home is somewhere else.**
+    The label said `Restoring ~/.claude/...` in all nine languages regardless of where the restore
+    was actually writing.
+ReleaseNotesUrl: https://github.com/JanusMael/ClaudeForge/releases/tag/v2026.3.922
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/JanusMael/ClaudeForge/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

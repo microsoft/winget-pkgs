@@ -1,0 +1,29 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.28.0.schema.json
+
+PackageIdentifier: YichengWang.Runner
+PackageVersion: 0.20.2.20261120.0150
+PackageLocale: zh-CN
+ShortDescription: 让 Claude Code、Codex、Copilot CLI 等终端编码智能体在同一个 mission 上协同工作。
+Description: Runner 是一款原生桌面应用，让终端智能体协同工作。Claude Code、Codex、OpenCode、Cursor CLI、Grok Build、Antigravity CLI、Copilot CLI 与 pi 可以在同一个任务、同一个 mission 中配合，每个智能体都保留自己真实终端里的 TUI，由 lead 把决策带回给你。Runner 的一切能力都对应一个 `runner` 命令：mission、crew、role、project、chat、session 与 msg 都能在命令行操作，后台服务是 `runnerd`。智能体在 Windows 上原生运行，不需要 WSL，PowerShell 7 为可选。当前状态：alpha，持续发布。原生支持 macOS（Apple Silicon）与 Windows（x64，Windows 10 1809 或更高版本）；不支持 Intel Mac、Windows ARM64 与 Linux。安装程序、应用与 CLI 辅助程序均使用签发给 Open Source Developer Yicheng Wang 的 Certum 开源代码签名证书签名。
+Tags:
+- claude-code
+- codex
+- 人工智能
+- 命令行
+- 控制台
+- 终端
+ReleaseNotes: |-
+  Runner 0.20.2 是 macOS、Windows 和 Linux 上基于 0.20.1 的功能版本：应用内支持 git worktree，Codex 状态改为读取 Codex 自身的终端状态报告，并完成了远程控制断开、应用卡死问题的修复。
+  新功能
+  - 应用内支持 git worktree。 在 Git 仓库中启动本地聊天、终端或 mission 时，启动器 Location 行会出现 Checkout 控件：可以留在主 checkout、选择已有 worktree，或选择 New worktree…，用新分支名和基准分支在 .worktrees/ 下创建关联 worktree。在侧边栏 Projects 视图中，位于关联 worktree 的会话会在第二行显示分支；在 Active 视图中，分支会替代子文件夹显示。归档 Runner 创建的 worktree 中最后一个聊天、标签页或 mission 时，确认对话框会提供 Remove worktree 选项，默认勾选。远程聊天位于 worktree 中时，Info 会显示主机上的分支和基准。 (#1213)
+  - Codex 状态直接来自 Codex。 Runner 现在在聊天和 mission 中读取 Codex 内置的状态报告，不再安装状态 hook，因此 Codex 会话也能显示 Approval needed、Answer needed、未读完成标记和 Response failed。Settings → Agents → Launch 中 Codex 的 Status hooks 开关已移除。关闭 Status hooks 的 Claude Code 和 pi 聊天，现在也会通过终端状态显示等待、失败和未读完成标记。Runner 现在要求 Codex 0.164.0 或更高版本；较旧的 Codex 会显示 Update needed，启动时会先自动更新。 (#1320)
+  问题修复
+  - 远程控制不再断开并卡死应用。 0.20.1 修复了其中一个原因，本版本修复了其余部分：一个缓慢或卡住的远程通道不再拖慢其他通道或整个连接；后台服务不再在等待会话时占用数据库；应用窗口的日常刷新也不再等待后台服务。Runner 还会记录较慢的服务步骤和应用卡顿，便于排查残留问题。 (#1377)
+  - 进入 Settings 再返回后保留远程控制。 在远程窗口中打开本机 Settings 再返回，会回到原来的远程标签页，并保留终端控制权。 (#1385)
+  - ⌘W 关闭当前聚焦的 mission 抽屉 shell。 在 mission 的终端抽屉中，⌘W（Windows 和 Linux 上为 Ctrl+Shift+W）现在会像点击 × 一样关闭当前聚焦的 shell 标签，而不是隐藏整个抽屉。 (#1398)
+  - 选择项目时总是使用项目文件夹。 在启动器中选择项目时，即使当前文件夹位于该项目内，也会从项目文件夹开始；因此被注册为项目的父文件夹不会再让你停留在它下面的某个仓库中。No project 会回到默认工作目录，若该设置为空则回到主目录。 (#1392)
+  - 在侧边栏中重新排序远程项目。 在远程电脑的侧边栏中拖动项目时，现在每个项目的上方和下方都会显示放置位置，而不只是在底部。 (#1395)
+  - Linux：窗口阴影更柔和。 在浅色桌面上，浮动窗口的阴影末端不再出现生硬的灰色边线。 (#1387)
+ManifestType: locale
+ManifestVersion: 1.28.0

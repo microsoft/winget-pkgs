@@ -1,0 +1,75 @@
+# Created by Anthelion using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: CaddyServer.Caddy
+PackageVersion: 2.11.9
+PackageLocale: en-US
+Publisher: Stack Holdings GmbH.
+PublisherUrl: https://github.com/caddyserver
+PublisherSupportUrl: https://github.com/caddyserver/caddy/issues
+PackageName: Caddy
+PackageUrl: https://github.com/caddyserver/caddy
+License: Apache-2.0
+LicenseUrl: https://github.com/caddyserver/caddy/blob/HEAD/LICENSE
+ShortDescription: HTTP/2 web server with automatic HTTPS
+Tags:
+- acme
+- automatic-https
+- caddy
+- caddyfile
+- go
+- golang
+- hacktoberfest
+- http
+- http-server
+- http3
+- https
+- privacy
+- reverse-proxy
+- security
+- tls
+- web-server
+ReleaseNotes: |-
+  This is a quick follow-up on top of 2.11.8, to fix a regression it introduced and a few more security issues, mostly in FastCGI. It contains only fixes backported from master, plus a couple of small additions. If you're on 2.11.8 and serve PHP, we recommend upgrading.
+  Huge thank you to our sponsors for keeping the project alive with resources, and for our maintainers who triage and assist tirelessly in this relentless new age of AI.
+  Highlights
+  - Fixed: PHP directory indexes (regression in 2.11.8). A request for a directory with a trailing slash, like /wp-admin/, was matched by the directory itself instead of its index.php, so it never reached PHP and usually got a 404. This broke WordPress admin pages and other apps that serve an index through a trailing-slash URL. A try_files pattern now only matches a directory when it ends in /. Thanks @dunglas! (#8352)
+  - Path matchers with placeholders now work as expected: placeholders like {env.FOO} are no longer lower-cased into {env.foo} before they're looked up, and their values are compared case-insensitively against the request path, like static patterns. Thanks @BenMacha! (#8343)
+  - New plain_time_format option for file_server browse: sets the time layout of plain-text directory listings (Accept: text/plain). Thanks @steffenbusch! (#8084)
+  - Fewer allocations in path cleaning, header rewriting and weighted_round_robin selection. Thanks @jvoisin! (#7842)
+  - For plugin authors: new httpcaddyfile.Helper.IsNamedRoute() tells a directive whether it's being parsed inside a named route. (#8354)
+
+  ⚠️ Breaking changes
+  - Conflicting client_auth is now a Caddyfile error. When two site blocks share TLS connection policies for the same hostname but set different client_auth, the adapter used to keep the first one and silently drop the other, which could quietly remove a stricter mTLS requirement. (#8306)
+  - FastCGI requests that are ambiguous about which script they run get 400:
+    - when the escaped path (which %-containing path matchers see) and the decoded path would select different scripts, e.g. /public/tool.php%2f..%2f..%2fadmin%2ftool.php (#8357)
+    - on Windows, script paths with an 8.3 short name component (like ADMINI~1) or a : (NTFS alternate data streams) (#8356)
+  - FastCGI env values now take precedence over request headers, so a client can no longer override HTTP_* variables you set with env (see below). (#8358)
+
+  Security fixes
+  Thank you to everyone who reported responsibly and helped with patches:
+  - fastcgi: A client could override any HTTP_* variable set with the FastCGI transport's (or php_fastcgi's) env subdirective by sending a matching request header, for example choosing the user an application sees in HTTP_X_AUTH_USER. Configured values now win. Reported by @JebeenLee and @Camel4, fixed by @dunglas. (GHSA-q34h-28rj-5hjm, #8358)
+  - fastcgi: On Windows, NTFS 8.3 short names and alternate data streams could run a script that a path rule was meant to deny, completing the FastCGI fix from 2.11.8. Thanks @dunglas. (GHSA-9cr8-wmhh-39pm, #8356)
+  - fastcgi: Encoded slashes and dot segments could make a %-containing path matcher approve one script while another one runs. Thanks @dunglas. (#8357)
+  - fastcgi: Over HTTP/2, a host field sent next to :authority could make the application see a different host (HTTP_HOST) than the one Caddy routed the request to. Thanks @dunglas. (#8355)
+  - httpcaddyfile: A stricter client_auth could be silently dropped when merging TLS connection policies (see above). Thanks @sam-kota. (#8306)
+  - Updated go-jose to v4.1.6 for GHSA-mgcc-cww5-fp2q. (#8299)
+  ⚠️ These security patches may be breaking if your application relies on the buggy behaviors.
+  🚨 Notice for Caddy plugin maintainers: Dependabot will probably alert you to the security fixes in Caddy and urge you to upgrade it in your go.mod file. Please ONLY upgrade the Caddy dependency if there's a change to an exported API your plugin uses.
+
+  What's Changed
+  - caddyhttp: lower-case path patterns with placeholders at request time by @BenMacha in #8343
+  - httpcaddyfile: reject conflicting client_auth when merging TLS policies by @sam-kota in #8306
+  - build(deps): bump the actions-deps group across 1 directory with 10 updates by @dependabot[bot] in #8340
+  - build(deps): bump github.com/go-jose/go-jose/v4 from 4.1.5 to 4.1.6 by @dependabot[bot] in #8299
+  - fileserver: make plain-text browse time format configurable by @steffenbusch in #8084
+  - fileserver: only match a dir when the pattern ends by / by @dunglas in #8352
+  - httpcaddyfile: add Helper.IsNamedRoute by @dunglas in #8354
+  - fastcgi: take HTTP_HOST from the routed host only by @dunglas in #8355
+  - fastcgi: reject Win 8.3 aliases and alt data streams paths by @dunglas in #8356
+  - caddyhttp: presize buffers in hot paths to reduce allocations by @jvoisin in #7842
+  - fastcgi: let configured env variables override request headers by @dunglas in #8358
+  - fastcgi: reject paths whose escaped form selects another script by @dunglas in #8357
+ReleaseNotesUrl: https://github.com/caddyserver/caddy/releases/tag/v2.11.9
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

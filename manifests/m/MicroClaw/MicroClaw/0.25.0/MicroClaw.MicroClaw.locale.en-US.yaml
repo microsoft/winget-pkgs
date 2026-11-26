@@ -1,0 +1,145 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: MicroClaw.MicroClaw
+PackageVersion: 0.25.0
+PackageLocale: en-US
+Publisher: MicroClaw
+PublisherUrl: https://microclaw.ai/
+PublisherSupportUrl: https://github.com/microclaw/microclaw/issues
+PackageName: MicroClaw
+PackageUrl: https://microclaw.ai/
+License: MIT
+LicenseUrl: https://github.com/microclaw/microclaw/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 everettjf
+ShortDescription: An agentic AI assistant that lives in your chats, inspired by nanoclaw and incorporating some of its design ideas. Built with Rust
+Description: |-
+  MicroClaw is a Rust chat bot that connects LLM to your chats with agentic tool execution. It can run shell commands, read and edit files, search codebases, browse the web, schedule tasks, and keep persistent memory across conversations. It is a Rust rewrite of nanoclaw (TypeScript) with additional capabilities and a single-binary deployment model.
+
+  What makes it different
+  - Agentic loop with tool execution, not just a single API call
+  - Full file system and shell tooling from inside chat
+  - Long-lived memory backed by AGENTS.md files
+  - Built-in scheduler for cron and one-time tasks
+  - Group chat catch-up: reads all messages since last reply
+  - Multi-chat permission model (control_chat_ids) for cross-chat tool authorization
+  - Agent skills system with bundled skills (including macOS Apple Notes/Reminders/Calendar helpers)
+  - Customizable personality via SOUL.md files (global + per-chat)
+
+  How it works
+  chat message
+      |
+      v
+   Store in SQLite --> Load chat history + memory
+                           |
+                           v
+                     LLM API (with tools)
+                           |
+                      stop_reason?
+                     /            \
+                end_turn        tool_use
+                   |               |
+                   v               v
+             Send reply      Execute tool(s)
+                                |
+                                v
+                          Feed results back
+                          to LLM (loop)
+  MicroClaw enters an agentic loop for every message. LLM can call tools, inspect results, call more tools, and reason through multi-step tasks before responding. The loop is capped by MAX_TOOL_ITERATIONS for safety.
+
+  Core capabilities
+  - Agentic tool use (bash, file I/O, glob, grep)
+  - Web search, fetch, and browser automation
+  - Scheduling with cron expressions
+  - Mid-conversation messaging for progress updates
+  - Persistent memory (global + per-chat)
+  - Personality customization via SOUL.md
+  - Conversation archiving (automatic before compaction, manual via /archive)
+  - Typing indicator that stays active during tool use
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- claw
+- large-language-model
+- llm
+ReleaseNotes: |-
+  The MicroClaw Code interaction and configuration release. The planned 0.24
+  (TUI), 0.25 (settings and permissions) and 0.26 (innovations) ship together;
+  see docs/roadmap/mccode-ux-config-plan-2026-11-cn.md.
+  Added
+  - TUI look: theme tokens with truecolor, 256- and 16-colour fallback;
+    11 built-in themes, user YAML themes and OpenCode theme files; Markdown
+    replies with syntax highlighting; diffs with line numbers, word-level
+    highlights and a side-by-side layout on wide terminals; consecutive reads
+    and searches grouped into one "Explored" row; a side panel for the plan,
+    checks, changed files and running sub-agents; a per-item render cache; an
+    inline mode that uses the terminal's own scrollback (tui.screen: inline,
+    falling back to full screen when the terminal does not report the cursor).
+  - TUI interaction: Enter queues a message while the agent works and
+    Ctrl+S steers the running turn; fuzzy / and @ pop-ups and a Ctrl+P
+    palette; per-project prompt history with Ctrl+R search; Ctrl+G edits in
+    $EDITOR; ! runs a shell command yourself; large pastes become a chip;
+    Ctrl+V attaches a clipboard image; Ctrl+T opens the transcript with search;
+    Esc Esc rewinds the files to an earlier turn; model, theme (live preview)
+    and session pickers; mouse scrolling and click-to-expand; desktop
+    notifications (OSC 9/777) when the terminal is unfocused; rebindable keys
+    (tui.keymap, /keys).
+  - Per-turn receipts (files, checks, sandbox and network use, tokens, cost
+    when the price is known, checkpoint), hunk-level review on F2 (revert a
+    hunk, or turn comments into a prompt), /goal (keep going until a
+    condition holds and the checks pass), /btw (a side question in a copy
+    of the session) and /configure (describe a settings change; the model
+    proposes it and you confirm).
+  - Layered settings for MicroClaw Code: user, project, local and managed
+    YAML layers with a JSON schema (docs/schema/code-settings.v1.json) and
+    per-key provenance; mccode config show|get|set|unset|paths|doctor|init|schema|migrate|edit;
+    mccode import claude|codex|opencode; provider profiles that can replace
+    the configuration file; per-role models (plan, review, summary).
+  - Permission rules (allow / ask / deny for bash, read, edit,
+    net, mcp, agent, tool; Claude Code spellings accepted) and hooks
+    compatible with the Claude Code protocol (ten events; exit code 2 blocks;
+    permissionDecision, updatedInput, additionalContext). Both are
+    enforced through a new engine ToolGate (SDK MicroClawBuilder::tool_gate),
+    so sub-agents go through them too. ACP and MCP-server modes load the same
+    settings.
+  - Approvals and notifications in chat: with a paired Server, MicroClaw
+    Code sends approval cards (buttons on Telegram, Discord and Slack; numbered
+    options on Feishu) and "done" notifications while you are away
+    (notify.chat); Server endpoints /api/code/notify and
+    /api/code/approvals.
+  - SDK: MicroClawBuilder::summary_model; the ToolGate types are re-exported.
+  Fixed
+  Found by testing this release with DeepSeek (deepseek-flash,
+  deepseek-v4-pro):
+  - The shell tool ran commands in the login shell ($SHELL); zsh aborts on an
+    unmatched glob such as grep --include=*.rs. Commands now run in bash when
+    it is installed (Server and Code).
+  - bash_kill stopped only the shell, so a child (a dev server under
+    npm run dev) kept running and the process stayed "running". Background
+    commands now run in their own process group and are stopped as a group.
+  - Role models sent profile/model to the provider as the model name; an
+    ask rule could be answered by auto mode; -p 1 after a pause looped when
+    a prompt hook added context to the answer.
+  Changed
+  - Writing .microclaw/settings.local.yaml adds it to the repository's
+    .git/info/exclude.
+  - scripts/generate_docs_artifacts.mjs leaves #[serde(skip)] config fields
+    out of the generated defaults.
+  Security
+  - vodozemac 0.11.2 (Matrix end-to-end encryption), which restores secret
+    zeroization (RUSTSEC-2026-0445, published on release day).
+  Known gaps
+  Ctrl+B does not move a running command to the background (it toggles the
+  side panel); Esc Esc rewinds files but not the conversation; there is no
+  sub-agent role model; model presets carry no prices; read(...) rules do not
+  cover shell commands and net(...) rules cover web_fetch only.
+ReleaseNotesUrl: https://github.com/microclaw/microclaw/releases/tag/v0.25.0
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://microclaw.ai/docs/overview
+- DocumentLabel: Quick Start
+  DocumentUrl: https://microclaw.ai/docs/quickstart
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

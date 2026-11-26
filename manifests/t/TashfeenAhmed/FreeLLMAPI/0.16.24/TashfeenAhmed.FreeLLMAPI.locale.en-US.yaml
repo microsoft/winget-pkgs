@@ -1,0 +1,49 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: TashfeenAhmed.FreeLLMAPI
+PackageVersion: 0.16.24
+PackageLocale: en-US
+Publisher: tashfeenahmed
+PublisherUrl: https://tashfeen.me
+PublisherSupportUrl: https://freellmapi.co/faq
+PrivacyUrl: https://freellmapi.co/privacy
+Author: Tashfeen Ahmed
+PackageName: FreeLLMAPI
+PackageUrl: https://freellmapi.co
+License: MIT
+LicenseUrl: https://github.com/tashfeenahmed/freellmapi/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Tashfeen Ahmed
+ShortDescription: Local OpenAI-compatible router that aggregates free LLM providers.
+Description: |-
+  FreeLLMAPI aggregates the free tiers of dozens of LLM providers, plus custom OpenAI-compatible chat, embedding, image, and audio endpoints, behind a single /v1 API.
+
+  A router picks the best available model for each request, falls over to the next provider when one is rate-limited, and tracks per-key usage so you stay under every free-tier cap. Provider keys are stored encrypted, and the router refreshes its model catalog from a signed feed. Built for personal use only; each provider's terms of service apply.
+Tags:
+- ai
+- gateway
+- large-language-model
+- llm
+- proxy
+- router
+ReleaseNotes: |-
+  PowerTokens provider
+  - Add PowerTokens (api.powertokens.ai) as an OpenAI-compatible provider. Its glm-4.7-flash model is listed at $0 (0 Credits); chat, streaming and tool calling were tested through the app router.
+  - PowerTokens is often overloaded and answers 429 (code 1305). The router cools the key down and moves on, so treat it as an extra fallback rather than a primary route.
+  - Keys restricted to other models in the PowerTokens dashboard return 403 token_model_forbidden; allow glm-4.7-flash on the key.
+  The model arrives through the signed catalog. Premium receives the live catalog; Free receives the new row after the unchanged 30-day aging period. Thanks @PowerTokens for the original contribution (#1659).
+  Fixes
+  - Custom endpoints with several keys now rotate image, speech, transcription and embedding requests across those keys when one is disabled, out of budget, rate limited or rejected (#1738, fixes #1737). Thanks @w21180239.
+  - Free.ai is no longer offered for chat routing, and "Test" on a legacy non-chat model row explains that the platform does not support chat instead of reporting a missing key (#1769). Thanks @w21180239.
+  - "Probe now" gives reasoning models room for their hidden thinking (#1862).
+  - freellmapi setup-opencode stores the key in auth.json instead of an environment placeholder (#1861).
+  Docs
+  - Turkish README translation (#1805). Thanks @alkank.
+ReleaseNotesUrl: https://github.com/tashfeenahmed/freellmapi/releases/tag/v0.16.24
+PurchaseUrl: https://freellmapi.co/pricing
+InstallationNotes: Open the app, then copy the unified API key shown in the tray popover and add your provider keys on the Keys page before pointing a client at the local /v1 endpoint.
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://github.com/tashfeenahmed/freellmapi/blob/HEAD/docs/en/README.md
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

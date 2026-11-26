@@ -1,0 +1,73 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: UmageAI.CodeShellManager
+PackageVersion: 0.7.0
+PackageLocale: en-US
+Publisher: umage.ai
+PublisherUrl: https://umage.ai/
+PublisherSupportUrl: https://github.com/umage-ai/CodeShellManager/issues
+PackageName: CodeShellManager
+PackageUrl: https://github.com/umage-ai/CodeShellManager
+License: MIT
+LicenseUrl: https://github.com/umage-ai/CodeShellManager/blob/HEAD/LICENSE
+ShortDescription: A Windows desktop app for running multiple AI coding agents side-by-side in a tabbed and grid-layout terminal host.
+Description: CodeShellManager is a WPF desktop application that hosts multiple pseudo-terminal sessions in a configurable grid layout. It is built for managing many parallel CLI tool sessions — Claude Code, Codex, GitHub Copilot, ssh remotes, or any shell — with full-text search across every session's output, alert detection when an agent is waiting for input, per-session git status, sleep/wake to park sessions without losing them, and full session persistence across restarts.
+Tags:
+- claude
+- cli
+- conpty
+- copilot
+- developer-tools
+- pseudo-terminal
+- terminal
+- xterm
+ReleaseNotes: |-
+  Reliability release. Your sessions survive a crash, your terminals stop fighting each other for focus, and closing the app actually waits for your agents to shut down cleanly. Plus you can now reconfigure a session instead of recreating it.
+  Highlights
+  Edit any session's configuration — working folder, command, SSH target, appearance. Reachable from the ⚙ on the terminal toolbar, the sidebar right-click menu, and on a sleeping session (which reconfigures it without waking it). The session keeps its id, group, run commands and sidebar position. You're asked before anything restarts, and a Claude session resumes its conversation rather than starting fresh. Thanks @mortenaslo.
+  Click or type in a pane to make it active. Previously only the sidebar could change the active session, so clicking straight into a terminal left the highlight — and the output priority — on the wrong pane.
+  state.json is now written atomically, with a backup and recovery. It's rewritten on ~33 different actions, so an interrupted write used to be a realistic way to lose your whole workspace: the truncated file loaded as empty, silently, and the next save overwrote it. Now it swaps a temp file into place, keeps a .bak, falls back to it on a bad read, and logs rather than starting empty in silence.
+  Shutdown waits properly. Closing with many live agents used to kill most of them without waiting, because a handful of already-dead panes consumed the whole time budget. Now sessions that already exited are recognised immediately, the budget is sized from real measurements, and the overlay stays up while it works.
+  Faster, quieter startup — the fixed per-session launch delay is gone from several paths, and a thread-pool thread is no longer parked for the lifetime of every terminal.
+  Fixes
+  - One SQLite connection was shared by the search index and every session's output writer with no synchronisation, corrupting it during restore. That's serialised now — and the mysterious shutdown NullReferenceException we'd been swallowing stopped appearing with it.
+  - Post-run URLs are restricted to http/https. They fire automatically on success with no confirmation, and ShellExecute would otherwise launch a local executable or protocol handler.
+  - --resume honours CLAUDE_CONFIG_DIR.
+  - Sessions launched through a wrapper prefer PowerShell 7, so your PS7 profile functions resolve.
+  - A malformed colour scheme in an imported settings file no longer stops a session from starting.
+  - Binaries report the correct File version — this was fixed in v0.6.0 and is verified again here.
+  Known issues
+  - On restore, the input line can be drawn one character into the placeholder text (#116). Cosmetic, and resizing the window or changing layout corrects every pane.
+  - Restoring many sessions is still slow — roughly 5s each on a loaded machine, dominated by WebView2 creation and agent startup rather than anything the app is waiting on (#82).
+  Install
+  winget install UmageAI.CodeShellManager
+  Or grab the MSI or portable ZIP below. Chocolatey is not updated for this release yet.
+  What's Changed
+  - ci(release): auto-sync winget fork and document the real release process by @AThraen in #90
+  - fix(terminal): make the pane you click or type in the active session by @AThraen in #93
+  - fix(state): write state.json atomically with a backup and recover from it by @AThraen in #94
+  - fix(pty): prefer pwsh.exe over powershell.exe in BuildCmdLine wrapper by @AThraen in #68
+  - refactor(pwsh): one PowerShell locator instead of two disagreeing ones by @AThraen in #95
+  - perf(startup): gate Claude launches on the config file settling, not a flat 2s by @AThraen in #96
+  - fix(terminal): don't let mouse movement steal focus or repaint every pane by @AThraen in #99
+  - Bump the nuget group with 3 updates by @dependabot[bot] in #97
+  - fix(pty): always fire Exited so a failed DuplicateHandle can't stall shutdown by @AThraen in #100
+  - perf(shutdown): bound total shutdown time and log per-session timings by @AThraen in #101
+  - fix(terminal): promote on real key events, not on anything xterm sends by @AThraen in #106
+  - perf(layout): skip the grid rebuild when nothing visible changes; harden pwsh lookup by @AThraen in #105
+  - feat(sessions): edit any session's configuration after it was created by @mortenaslo in #98
+  - fix(startup): run the Claude config gate off the UI thread by @AThraen in #107
+  - fix(terminal): make clicking a pane activate it, from the page side by @AThraen in #108
+  - perf(pty): wait for process exit without holding a thread-pool thread by @AThraen in #110
+  - revert(startup): flat Claude launch stagger; keep the adaptive gate at shutdown by @AThraen in #111
+  - fix(chocolatey): serve the icon from a CDN and check for WebView2 by @AThraen in #112
+  - Bump the nuget group with 1 update by @dependabot[bot] in #109
+  - fix(terminal): re-fit once the font has loaded, not on a timing guess by @AThraen in #113
+  - docs: correct and complete CLAUDE.md for the v0.7.0 release by @AThraen in #114
+  - fix: release-review findings, verified over three passes by @AThraen in #115
+  - fix(shutdown): flat post-exit pause and a budget sized from measurement by @AThraen in #117
+  Full Changelog: v0.6.0...v0.7.0
+ReleaseNotesUrl: https://github.com/umage-ai/CodeShellManager/releases/tag/v0.7.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

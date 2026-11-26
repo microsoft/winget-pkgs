@@ -1,0 +1,144 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Zettlr.Zettlr
+PackageVersion: 4.10.0
+PackageLocale: en-US
+Publisher: Hendrik Erz
+PublisherUrl: https://www.zettlr.com/
+PublisherSupportUrl: https://github.com/Zettlr/Zettlr/issues
+PrivacyUrl: https://www.zettlr.com/privacy
+Author: Hendrik Erz
+PackageName: Zettlr
+PackageUrl: https://www.zettlr.com/
+License: GPL-3.0
+LicenseUrl: https://github.com/Zettlr/Zettlr/blob/HEAD/LICENSE
+Copyright: Zettlr © Hendrik Erz 2017–2026
+ShortDescription: Your one-stop publication workbench
+Description: Zettlr brings simplicity back to your texts. Open-minded writing that adapts to your style. Fast information retrieval that finds what matters to you. Versatile exporting that enables you to adapt to whatever publication pipeline your employer or school uses.
+Tags:
+- academics
+- citation
+- cite
+- docs
+- document
+- editor
+- markdown
+- research
+- writer
+ReleaseNotes: |-
+  Quality of Life Improvements | Cleanup | Fixes
+  This new update of Zettlr primarily fixes things that were either broken for some time, or broke in 4.9. However, it also includes a set of features and other improvements that will come in handy.
+  Among the most notable changes in this update are: (1) attachments specified in BibTeX or BibLaTeX libraries are properly opened via the context menu in Zettlr; (2) Mermaid diagrams will render again; (3) keywords and tags in YAML frontmatters are clickable again; (4) we fixed a bunch of shortcuts that stopped working after the custom shortcut update; (5) the LanguageTool linter now additionally checks various text-fields in your frontmatters; and (6) we have begun homogenizing Zettlr's UI across all platforms. macOS-users should not see many differences, but on Windows and Linux, the app will look considerably different. This change does not affect the placement or functionality of any UI elements, only their styling.
+  There's much more that has changed, so we again invite you to read the Changelog below before updating. Happy writing!
+  Do you enjoy Zettlr? Then consider making a donation to help us pay for the development costs. You can donate monthly on Patreon or once via PayPal. Additionally, you can directly sponsor Hendrik Erz on GitHub or send a tip on Ko-Fi. Thanks for your support!
+  Changelog
+  GUI and Functionality
+  - Feature: The context menus for links and images now also feature various
+    items that may be useful for formatting aspects of the link/image descriptions
+    (#6417).
+  - Feature: Make the "find next" and "find previous" commands of the editor
+    search configurable. Previously, both Mod-g and F3 would move to the next
+    search result, but after implementing custom shortcuts, these two commands
+    were left unconfigurable and hard-coded to Mod-g. These are now configurable
+    so that you can change the default keybinding of Mod-g to F3 if you wish
+    (#6575).
+  - Feature: The LanguageTool linter now also lints text-only properties in
+    the frontmatter, using the same language as the rest of the document. This
+    allows spotting issues with these metadata fields as well. Currently, the
+    linter includes in its detection the following properties:
+    - title
+    - subtitle
+    - abstract
+    - abstract-title
+    - description
+    - shorttitle
+    - shortsubtitle
+    - thanks
+  - Change: The styles and layouts of various UI components have been
+    adjusted. The following components should now look mostly the same across all
+    operating systems:
+    - Toolbar
+    - File Tree
+    - Sidebar
+  - Change: Removed the .md extension from the default new filename pattern
+    in the Advanced Preferences menu. This pattern is used as the filename, so the
+    extension is unnecessary. Previously, creating a new file with the default
+    pattern would result in the .md extension being added twice to markdown
+    files, or added incorrectly to non-markdown files. Existing users should
+    update the pattern manually by removing .md from it. For new installations,
+    the pattern will be correct. (#6638).
+  - Change: The layout of the document information popover is now improved.
+    We have moved the bold styling over to the actually important parts, improved
+    legibility of the popover, and included more information -- notably,
+    regardless of which unit (words or characters) you select in the preferences,
+    the popover will now display both numbers, with your preferred one clearly
+    visible.
+  - Fixed a misaligned size distribution between the file manager, editor view,
+    and sidebar. Now, when double-clicking the dividers between these three
+    components, they will resize so that both sidebars take up 20% of the window
+    width, as opposed to a distribution of 20% for the file manager and ca. 15%
+    for the sidebar. This way, both sidebars of the main window are visually
+    equally sized.
+  - Fixed a bug where Zettlr would never load attachments from your main
+    database if that database was in BibTeX or BibLaTeX format, as a small
+    logical error made the relevant code for retrieving attachments never find the
+    database in memory and thus would always fall back to attempting to contact
+    Zotero, which would, logically, fail for JabRef users (#6619).
+  - Library loading on boot is now asynchronous, also we register a
+    long-running task during database loads to visualize especially the loading of
+    large library files.
+  - Fixed a bug that prevented Mermaid diagrams from rendering due to an
+    underlying bug in the new API (#6625).
+  - Fixed an issue that would cause full-text searches to start even as the input
+    field was still composing non-latin text (#6597; #6604).
+  - Fixed the spacing on the changelog entries to make it more pleasant to read.
+  - Fixed an issue that could, under the right circumstances, write unusual values
+    for resized split views into the configuration, necessitating a configuration
+    modification to render Zettlr usable again (#5829).
+  - Fixes various issues pertaining to keywords/tags which are present in YAML
+    frontmatters of files. Zettlr now again correctly detects these and they are
+    clickable, yielding a search for keywords, which also includes keywords with
+    spaces (#2443; #2590; #4498; see PR #6496).
+  - Fixed a 404-link to an old documentation page in the onboarding dialog.
+  - Fixed the LanguageTool language overrides. Previously, if you wanted to change
+    the language in which LanguageTool would check your document via the lang
+    property (e.g., lang: fr to force French instead of autodetection), you had
+    to reload the entire document. Now changes are detected on the fly as you
+    modify the lang property in the YAML frontmatter.
+  - Fixed the styles of both subscripts (e.g., H~2~O) and superscripts (e.g.,
+    2^10^). Previously, both types of elements were not displayed using a
+    small font and set to super or sub alignment.
+  - The formatting characters for subscripts and superscripts are now
+    appropriately hidden if "Render emphasis" is turned on.
+  - Fixed many of the newly customizable shortcuts which would mostly work on just
+    macOS, since we accidentally declared the Mac-specific Command-key to be part
+    of the shortcut, instead of also providing an alternative with the Control
+    key. We remain puzzled why nobody complained about this issue since it
+    affected quite a few important shortcuts. (If you are reading this right now,
+    you're not included in this statement 😉.
+  Under the Hood
+  - Update Electron to v44.10.
+  - Update Pandoc to v3.14. Caution: Pandoc 3.13 has switched its underlying
+    YAML parser. For the most part, this change should not affect you, but it
+    could if you relied on odd behavior of YAML, such as treating no as false
+    instead of a string. If you receive errors during exports, this is a potential
+    cause.
+  - Update the gettext-parser to v10.
+  - Added error-handling code in case titlebar overlays cannot be set for windows
+    (see #6417).
+  - Exchanged biblatex-csl-converter with bibliojson.
+  - Refactor the splash screen to silence an error caused by a benign race
+    condition during the boot sequence.
+  - Pin the AppImage toolset in Electron builder to use a more modern one which
+    depends on fuse3 instead of the deprecated fuse2 library. This change must be
+    reverted once Electron builder is updated to v27 (#6632).
+  - Refactored the render-code plugin to allow for a generic set of persistent
+    decorators for various elements.
+  Full Changelog: https://github.com/Zettlr/Zettlr/compare/v4.9.0...v4.10.0
+ReleaseNotesUrl: https://github.com/Zettlr/Zettlr/releases/tag/v4.10.0
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://docs.zettlr.com/
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

@@ -1,0 +1,42 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: AlexGladkov.Harnest
+PackageVersion: 0.12.0
+PackageLocale: en-US
+Publisher: Alex Gladkov
+PublisherUrl: https://github.com/AlexGladkov
+PublisherSupportUrl: https://github.com/AlexGladkov/harnest/issues
+PackageName: Harnest
+PackageUrl: https://github.com/AlexGladkov/harnest
+License: CC-BY-NC-4.0
+LicenseUrl: https://github.com/AlexGladkov/harnest/blob/main/LICENSE
+ShortDescription: AI coding assistant configurator — generate configs for Claude Code, Cursor, Windsurf, Codex, OpenCode, and Qwen Code.
+Tags:
+- ai
+- cli
+- coding-assistant
+- claude-code
+- cursor
+- windsurf
+- codex
+- opencode
+- qwen-code
+- developer-tools
+ReleaseNotes: |-
+  ## profile-router — субагент-планировщик флоу (новое)
+  `install` генерит `~/.claude/agents/profile-router.md` (claude-code). Точка входа любого чистого флоу：детектит профиль по **Keywords** из `## Meta`, читает профиль + проектный `CLAUDE.md`, резолвит роли→агенты/scope/Models и возвращает **ПЛАН ОРКЕСТРАЦИИ**. Сам не спавнит и не пишет код — вложенный спавн запрещён harness; спавнит по плану main («мозг / руки»). Плюс секция «Шаг 0» в global-шаблоне.
+
+  ## Fix：дублирование managed-блока
+  Осиротевшие немаркированные копии шаблона теперь вычищаются, а не дублируются аппендом (корень бага удвоенного `~/.claude/CLAUDE.md`).
+
+  ## Надёжность
+  `installGlobalConfig` и запись агента атомарны (tmp+rename) с бэкапом `.bak`.
+
+  ## Тесты
+  `install_test.go`：create / idempotency / dedup / rewrap / append / backup / agent-gen. `go test ./...` зелёный.
+
+  **Upgrade:** `harnest install` — почистит дубль, поставит profile-router (старый CLAUDE.md уйдёт в `.bak`).
+ReleaseNotesUrl: https://github.com/AlexGladkov/harnest/releases/tag/v0.12.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,61 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: QuantumNous.NewAPI
+PackageVersion: 1.0.0-rc.43
+PackageLocale: zh-CN
+Publisher: Quantum Nous
+PublisherUrl: https://www.newapi.ai/
+PublisherSupportUrl: https://www.newapi.ai/support/
+Author: 锟腾科技（杭州）有限公司
+PackageName: New API
+PackageUrl: https://www.newapi.ai/
+License: AGPL-3.0
+LicenseUrl: https://github.com/QuantumNous/new-api/blob/HEAD/LICENSE
+Copyright: Copyright © 2026 Quantum Nous. All Rights Reserved.
+ShortDescription: 新一代大模型网关与 AI 资产管理系统
+Description: New API 是一个新一代大模型网关与 AI 资产管理系统，基于 One API 进行二次开发。该项目旨在提供一个统一的接口来管理和使用各种 AI 模型服务，包括但不限于 OpenAI、Anthropic、Gemini和 Midjourney 等。
+Tags:
+- anthropic-api
+- openai-api
+- openai-response
+- 人工智能
+- 大语言模型
+- 聊天机器人
+ReleaseNotes: |-
+  Important
+  完善了 i18n，控制台、API 错误、邮件、通知和服务器日志都支持多语言。使用 DEFAULT_LANGUAGE 环境变量设置默认语言，不设置时为英文。
+  渠道新增“忽略上游证书校验”开关，可以连接使用自签证书的上游。
+  任务插件新增 utils.fetch，可以读取上游数据。
+  豆包 Seedance 1.5 Pro、2.x 和万相 3.0 支持传 -1 自动选择时长，按上游回报的时长计费。
+  Improved i18n. Console messages, API errors, emails, notifications, and server logs are now multilingual. Set the default language with the DEFAULT_LANGUAGE environment variable. It defaults to English.
+  Channels have a new Skip Upstream TLS Verification switch for upstreams that use self-signed certificates.
+  Task plugins can read upstream data with the new utils.fetch.
+  Doubao Seedance 1.5 Pro and 2.x, and Wan 3.0, accept -1 to pick the video duration automatically and bill the duration the upstream reports.
+  New Features
+  - Improved i18n. The web console shows API messages and log entries in all seven interface languages. The backend translates errors for AI clients, emails, and notifications into English, Simplified Chinese, or Traditional Chinese, using the account language first and then the request's Accept-Language header. Log entries written before this release keep their original text.
+  - DEFAULT_LANGUAGE (en, zh-CN, or zh-TW) sets the default language of backend messages and server logs. It defaults to en.
+  - Skip Upstream TLS Verification is under the HTTP settings of each channel. It covers the channel's relay requests, Responses and Realtime WebSocket, task submission and polling, plugin fetches, balance, usage, and model-list queries, and media proxied through the channel. Codex OAuth refresh and Vertex or plugin service-account tokens still verify certificates.
+  - Task plugins can call utils.fetch in the submit, query, and content-download hooks. It reaches the channel Base URL and the additional request domains the plugin declares, and the upload dialog lists those domains. The Task Plugin API v1 document lists the hooks and limits.
+  - Plugins can call utils.json.clone and export parseSubmitEventDelta with no capability declaration. Plugins that declare json-clone@1 or submit-sse-delta@1 keep loading.
+  - Doubao 1.3.0 and Alibaba Bailian 1.4.2 accept a duration of -1 for Seedance 1.5 Pro and 2.x and for Wan 3.0. The request reserves the model's longest duration (12 seconds for Seedance 1.5 Pro, 15 for 2.0, 30 for 2.5 and Wan 3.0) and bills the duration the upstream reports. A JSON duration on /v1/videos now reaches Ark, and Wan 3.0 smart duration works on /v1/video/generations. (#7700)
+  Fixes and Improvements
+  - Responses input converted for Claude and Gemini drops assistant text that comes after the last user message or tool result, and records a trailing_assistant_omitted warning. Codex sends such input when it retries a stream that failed after a reply finished. Claude 4.6 and later, Gemini 3.6 Flash, and Gemini 3.5 Flash-Lite and later rejected it with a 400. Chat Completions and Claude Messages requests keep their prefill.
+  - xAI Grok Imagine 1.1.0 bills video edits and extensions at the output resolution. The output keeps the input video's resolution up to 720p. The plugin reads the output file header and bills 480p when the shorter side is 480 pixels or less. It bills 720p otherwise, and when the header cannot be read.
+  - Hailuo 1.2.1 downloads MiniMax v1 videos through the file retrieve link. Those downloads returned 410 before. (#7709)
+  - Multipart task submissions send the Content-Type of the rebuilt body, so the boundary matches the body the upstream receives. (#7655)
+
+  What's Changed
+  - fix(task-plugin): set multipart content type for upstream requests by @LauZzL in https://github.com/QuantumNous/new-api/pull/7655
+  - feat(i18n): translate web console messages in the frontend and AI-client errors in the backend by @Calcium-Ion in https://github.com/QuantumNous/new-api/pull/7712
+  Full Changelog: https://github.com/QuantumNous/new-api/compare/v1.0.0-rc.42...v1.0.0-rc.43
+ReleaseNotesUrl: https://github.com/QuantumNous/new-api/releases/tag/v1.0.0-rc.43
+Documentations:
+- DocumentLabel: 使用指南
+  DocumentUrl: https://www.newapi.ai/guide/
+- DocumentLabel: 维基百科
+  DocumentUrl: https://www.newapi.ai/wiki/
+- DocumentLabel: 接口文档
+  DocumentUrl: https://www.newapi.ai/api/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

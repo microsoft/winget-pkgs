@@ -1,0 +1,137 @@
+# Created with komac v2.13.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: BiomeJS.Biome
+PackageVersion: 2.3.5
+PackageLocale: en-US
+Publisher: BiomeJS
+PublisherUrl: https://biomejs.dev/
+PublisherSupportUrl: https://github.com/biomejs/biome/issues
+Author: Biome Developers and Contributors
+PackageName: Biome
+PackageUrl: https://biomejs.dev/
+License: Apache-2.0
+Copyright: Copyright (c) 2023-present Biome Developers and Contributors
+ShortDescription: Biome is a toolchain for web projects, aimed at providing functionalities to maintain them. It offers a formatter and linter, usable via CLI and LSP.
+Moniker: biome
+Tags:
+- css
+- formatter
+- javascript
+- json
+- jsx
+- linter
+- static-code-analysis
+- typescript
+- web
+ReleaseNotes: |-
+  2.3.5
+  Patch Changes
+  - #8023 96f3e77 Thanks @ematipico! - Added support Svelte syntax {@html}. Biome now is able to parse and format the Svelte syntax {@html}:
+    -{@html   'div'}
+    +{@html 'div'}
+    The contents of the expressions inside the {@html <expression>} aren't formatted yet.
+  - #8058 5f68bcc Thanks @ematipico! - Fixed a bug where the Biome Language Server would enable its project file watcher even when no project rules were enabled.
+    Now the watching of nested configuration files and nested ignore files is delegated to the editor, if their LSP spec supports it.
+  - #8023 96f3e77 Thanks @ematipico! - Added support Svelte syntax {@render}. Biome now is able to parse and format the Svelte syntax {@render}:
+    -{@render   sum(1, 2)   }
+    +{@render sum(1, 2)}
+    The contents of the expressions inside the {@render <expression>} aren't formatted yet.
+  - #8006 f0612a5 Thanks @Bertie690! - Updated documentation and diagnostic for lint/complexity/noBannedTypes. The rule should have a more detailed description and diagnostic error message.
+  - #8039 da70d8b Thanks @PFiS1737! - Biome now keeps a blank line after the frontmatter section in Astro files.
+  - #8042 b7efa6f Thanks @dyc3! - The CSS Parser, with tailwindDirectives enabled, will now accept at rules like @media and @supports in @custom-variant shorthand syntax.
+  - #8064 3ff9d45 Thanks @dibashthapa! - Fixed #7967: Fixed the issue with support for advanced SVG props
+  - #8023 96f3e77 Thanks @ematipico! - Added support Svelte syntax {@attach}. Biome now is able to parse and format the Svelte syntax {@attach}:
+    -<div {@attach    myAttachment   }>...</div>
+    +<div {@attach myAttachment}>...</div>
+    The contents of the expressions inside the {@attach <expression>} aren't formatted yet.
+  - #8001 6e8a50e Thanks @ematipico! - Added support Svelte syntax {#key}. Biome now is able to parse and format the Svelte syntax {#key}:
+    -{#key   expression} <div></div> {/key}
+    +{#key expression}
+    +  <div></div>
+    +{/key}
+    The contents of the expressions inside the {#key <expression>} aren't formatted yet.
+  - #8023 96f3e77 Thanks @ematipico! - Added support Svelte syntax {@const}. Biome now is able to parse and format the Svelte syntax {@const}:
+    -{@const   name = value}
+    +{@const name = value}
+    The contents of the expressions inside the {@const <expression>} aren't formatted yet.
+  - #8044 8f77d4a Thanks @Netail! - Corrected rule source references. biome migrate eslint should do a bit better detecting rules in your eslint configurations.
+  - #8065 1a2d1af Thanks @Netail! - Added the nursery rule useArraySortCompare. Require Array#sort and Array#toSorted calls to always provide a compareFunction.
+    Invalid:
+    const array = [];
+    array.sort();
+    Valid:
+    const array = [];
+    array.sort((a, b) => a - b);
+  - #7673 a3a713d Thanks @dyc3! - The HTML parser is now able to parse vue directives. This enables us to write/port Vue lint rules that require inspecting the <template> section. However, this more complex parsing may result in parsing errors where there was none before. For those of you that have opted in to the experimental support (aka experimentalFullSupportEnabled), we greatly appreciate your help testing this out, and your bug reports.
+  - #8031 fa6798a Thanks @ematipico! - Added support for the Svelte syntax {#if}{/if}. The Biome HTML parser is now able to parse and format the {#if}{/if} blocks:
+    <!-- if / else-if / else -->
+    {#if porridge.temperature > 100}
+    -<p>too hot!</p>
+    +  <p>too hot!</p>
+    {:else if 80 > porridge.temperature}
+    -<p>too cold!</p>
+    +  <p>too cold!</p>
+    {:else if 100 > porridge.temperature}
+    -<p>too too cold!</p>
+    +  <p>too too cold!</p>
+    {:else}
+    -<p>just right!</p>
+    +  <p>just right!</p>
+    {/if}
+  - #8041 beeb7bb Thanks @dyc3! - The CSS parser, with tailwindDirectives enabled, will now accept lists of selectors in @custom-variant shorthand syntax.
+    @custom-variant cell (th:has(&), td:has(&));
+  - #8028 c09e45c Thanks @fmajestic! - The GitLab reporter now outputs format errors.
+  - #8037 78011b1 Thanks @PFiS1737! - indentScriptAndStyle no longer indents the frontmatter in Astro files.
+  - #8009 6374b1f Thanks @tmcw! - Fixed an edge case in the useArrowFunction rule.
+    The rule no longer emits diagnostics for or offers to fix functions that reference
+    the arguments object,
+    because that object is undefined for arrow functions.
+    Valid example:
+    // Valid: this function cannot be transformed into an arrow function because
+    // arguments is not defined for arrow functions.
+    const getFirstArg = function () {
+      return arguments[0];
+    };
+  What's Changed
+  - feat(html/svelte): key blocks by @ematipico in #8001
+  - chore(parser): increase size of TokenSet by @ryan-m-walker in #7997
+  - feat(html/svelte): parsing of new blocks by @ematipico in #8023
+  - fix(useArrowFunction): make useArrowFunction rule fixer safer by @tmcw in #8009
+  - fix(deps): update rust crates by @renovate[bot] in #7889
+  - feat(cli): add format errors to GitLab reporter by @fmajestic in #8028
+  - fix(html/astro): don't indent Astro frontmatter by @PFiS1737 in #8037
+  - fix(html/astro): keep a blank after the frontmatter by @PFiS1737 in #8039
+  - fix(parse/tailwind): fix lexing inset-x, border-slate-500, and others by @dyc3 in #7975
+  - fix(parse/css/tailwind): make @custom-variant accept selector lists by @dyc3 in #8041
+  - docs: rules.rs cleanup by @Netail in #8044
+  - docs: update documentation + diagnostic for noBannedTypes description by @Bertie690 in #8006
+  - refactor(deserialize): exact allocation for arrays and maps by @Conaclos in #8040
+  - feat(parse/tailwind): add benchmark by @dyc3 in #7976
+  - feat(html/svelte): if/else syntax by @ematipico in #8031
+  - fix(parse/css/tailwind): make @custom-variant accept at-rules like @media by @dyc3 in #8042
+  - chore: enable more rustc lints by @Conaclos in #8047
+  - ci: trigger benches when formatter changes by @ematipico in #8046
+  - chore(deps): update github-actions by @renovate[bot] in #8048
+  - chore(deps): update dependency eslint to v9.39.1 by @renovate[bot] in #8049
+  - chore(deps): update rust crate jiff to 0.2.16 by @renovate[bot] in #8050
+  - chore(deps): update rust crate quote to 1.0.42 by @renovate[bot] in #8051
+  - chore(deps): update rust crate ureq to 3.1.4 by @renovate[bot] in #8052
+  - chore(deps): update rust docker tag to v1.91.0 by @renovate[bot] in #8056
+  - chore(deps): update typescript-eslint monorepo to v8.46.3 by @renovate[bot] in #8057
+  - feat(parse/html): support vue directive syntax by @dyc3 in #7673
+  - fix(lsp): biome project watcher by @ematipico in #8058
+  - fix(no_unknown_attribute): added support for new dom attributes by @dibashthapa in #8064
+  - feat(biome_js_analyze): implement useArraySortCompare by @Netail in #8065
+  - ci: release by @github-actions[bot] in #8003
+  New Contributors
+  - @tmcw made their first contribution in #8009
+  - @fmajestic made their first contribution in #8028
+  - @PFiS1737 made their first contribution in #8037
+  Full Changelog: https://github.com/biomejs/biome/compare/@biomejs/biome@2.3.4...@biomejs/biome@2.3.5
+ReleaseNotesUrl: https://github.com/biomejs/biome/releases/tag/@biomejs/biome@2.3.5
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://biomejs.dev/guides/getting-started/
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

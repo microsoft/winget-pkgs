@@ -1,0 +1,84 @@
+# Created by Anthelion using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Duplicati.Duplicati.Canary
+PackageVersion: 2.4.1.102
+PackageLocale: en-US
+Publisher: Duplicati Team
+PublisherUrl: https://www.duplicati.com/
+PublisherSupportUrl: https://github.com/duplicati/duplicati/issues
+Author: Kenneth Skovhede
+PackageName: Duplicati 2
+PackageUrl: https://www.duplicati.com/
+License: MIT
+LicenseUrl: https://github.com/duplicati/duplicati/blob/HEAD/LICENSE
+ShortDescription: Duplicati is a free, open source, backup client that securely stores encrypted, incremental, compressed backups on cloud storage services and remote file servers.
+Moniker: duplicati-canary
+Tags:
+- backup
+- crypted
+- data
+- duplicati
+- incremental
+ReleaseNotes: |-
+  This release is a canary release intended to be used for testing.
+  MCP server for agents
+  Duplicati now has a Model Context Protocol (MCP) server at /mcp, so an AI agent can use Duplicati to keep secure offsite backups of its work, and restore if something fails. The agent can list backups, run a backup, follow and stop tasks, browse and search the versions of a backup, and restore files.
+  The endpoint is off by default. It is turned on in the settings of the new UI, or with --webservice-enable-mcp-server. Turning it off again deletes the issued tokens.
+  An agent gets its own access token, which is separate from the login to the UI. A token has a permission level, where each level includes the previous: Read to list and browse, Backup to also run backups and stop tasks, and Restore to also restore files. It can be limited to specific backups, and it expires. A token can always restore files to where they were backed up from, and to other folders only below the restore folders it was issued with.
+  Tokens are created and deleted in the settings of the new UI, which also shows how to set the token up in Claude Code, Claude Desktop, VS Code, Cursor, Codex CLI, Gemini CLI, GitHub Copilot CLI and opencode. A token is shown once and is not stored. The same can be done with the issue-mcp-token, list-mcp-tokens and revoke-mcp-token commands of duplicati-server-util. For agents that start MCP servers as local commands, duplicati-server-util mcp forwards standard input and output to the endpoint.
+
+  File system watcher
+  A backup can now use a watcher that monitors its source folders between runs and records what changes. When the backup runs, it gets the list of changes and examines only those files instead of walking the whole source. This trades a little background work while no backup runs for much less disk activity when one does.
+  The watcher has no record when Duplicati starts, or before a backup has been monitored, so the first run is a full walk of the sources. The mode is opt-in for each backup with the advanced option --use-file-watcher. The settings in the new UI have a toggle that turns the watcher off for all backups, as does --disable-file-watcher on the server.
+
+  Changes to be aware of
+  - An option typed on the command line that Duplicati does not know, such as a misspelled one, used to give a warning while the operation ran without it. The command line now stops with an error. Options from a parameters file, and jobs run from the UI, still only warn, thanks @JamBalaya56562.
+  - A local folder destination now uploads one volume at a time, and a restore reads it with one volume downloader, unless --asynchronous-upload-limit or --restore-volume-downloaders is set. A local folder is often an external hard disk, where several transfers at once are slower, thanks @JamBalaya56562.
+  - --asynchronous-upload-limit=0 now means no limit, as the help says. It allowed only one upload at a time, thanks @JamBalaya56562.
+  - Change tracking and the check for duplicate paths are now always case-sensitive. They followed the operating system, which failed for remote sources, such as S3 or Google Drive, with files that differ only in casing. Filters still follow the operating system unless --filter-case-sensitivity is set.
+  - When a file is chosen as a source, its folder is now recorded as well, so a restore can give the folder its recorded owner and times. The folder is the root of such a backup when it is listed for a restore, thanks @JamBalaya56562.
+  - Jottacloud uploads now use the newer allocation API. --jottacloud-legacy-upload=true selects the previous method.
+  - The user and password of an HTTP report URL are now sent as Basic authentication, and left out of the request URL and the logs. They were ignored before, thanks @JamBalaya56562.
+
+  New backup options
+  - --one-file-system leaves out folders on other file systems below a source folder, such as mounted disks, network shares and /proc, like the rsync option of the same name. On Windows it also finds volumes mounted in a folder, thanks @JamBalaya56562.
+  - --skip-files-modified-before and --skip-files-modified-after skip files by their modification time. The value is a date, or an interval back from now such as 1W. With --changed-files, or a source that tracks its own changes, only a date is accepted, thanks @JamBalaya56562.
+  - --max-upload-per-run stops a backup once it has uploaded the given size, for destinations with a transfer cap. The backup is saved as a partial backup, and the next run continues. Volumes in progress are finished, so a run can upload somewhat more than the limit, thanks @JamBalaya56562.
+  - --filter-case-sensitivity chooses if filters are case-sensitive. With the default, the operating system decides as before, except for sources that are known to be case-sensitive, which now get case-sensitive filters.
+  - --use-hardlink-for-get makes a local folder destination link a volume into the temporary folder instead of copying it, and falls back to a copy when the link cannot be made, thanks @JamBalaya56562.
+  - --alternate-destination-marker now also works without --alternate-target-paths, so a share that is not mounted is not written to through its empty mount point, thanks @JamBalaya56562.
+  - The file given with --log-file is no longer backed up when it is inside the source, thanks @JamBalaya56562.
+  - The default exclude filters for the root of a drive, such as $Recycle.Bin and System Volume Information, now also apply at the root of a remote source, thanks @JamBalaya56562.
+
+  Synchronization
+  - --sync-snapshot-folders creates a timestamped folder for each synchronization, and --sync-keep-snapshots sets how many to keep. On file:// and smb:// destinations, unchanged files are hard-linked to the previous snapshot to save space, which --sync-snapshot-disable-hardlinks turns off. --sync-then-delete is not supported with snapshots.
+  - The new UI can restore from synchronization jobs, and configure the synchronization mode for secondary destinations, thanks @JamBalaya56562.
+  - --sync-keep-modification-time keeps the modification times of the local files, for WebDAV servers that accept the X-OC-Mtime header, such as Nextcloud and ownCloud, and for local folders, thanks @JamBalaya56562.
+  - A remote source given as @mountpoint|url was skipped and nothing was copied, and several sources failed with a missing folder. Both work now, and a warning for a missing source no longer shows the credentials of its URL, thanks @JamBalaya56562.
+  - Backends that cannot stream, such as rclone, Tencent COS and a local folder with --use-move-for-put, were refused. They are now used through a temporary file, thanks @JamBalaya56562.
+
+  Storage providers
+  - Internxt Drive is a new destination, next to the existing S3 option. There is no official API, so it follows the public source of the Internxt CLI, and may need a subscription tier where the CLI is supported. The tokens last 3 days, so Duplicati needs the MFA secret to log in again by itself.
+  - The S3 setup in the new UI handles more providers, and can fill in the fields from a pasted provider URL. Blomp, thanks @fusionfoto, and dosya, thanks @firatkaya1, were added, and more public S3 hosts are recognized.
+  - --s3-server-side-encryption requests server-side encryption with AES256 or aws:kms, with an optional --s3-server-side-encryption-kms-key-id, thanks @JamBalaya56562.
+  - --s3-assume-role-arn lets the S3 backend reach a bucket through an IAM role with temporary credentials from STS, with --s3-assume-role-session-name, --s3-assume-role-external-id and --s3-sts-endpoint, thanks @JamBalaya56562.
+  - The Minio S3 client logged an upload that the server refused and went on as if the file was stored, so it was only found missing by the next verification. The upload now fails and is retried, thanks @JamBalaya56562.
+  - A Storj download that failed part way was returned as a success with the bytes received so far. It now fails and is retried, thanks @JamBalaya56562.
+  - Some destinations, such as pCloud, list a file only a few seconds after it is uploaded, so the backup failed with missing remote files. A just uploaded file is now listed again before it is reported as missing, thanks @JamBalaya56562.
+  - Drime listings failed when a folder was listed ahead of the files, when the total of a later listing window did not match, and when other uploads added files during the name check before an upload, thanks @JamBalaya56562.
+  - Google Drive and Google Cloud Storage uploads failed when they had to resume a stream that cannot seek, thanks @JamBalaya56562.
+  - FTP servers that refuse a listing of a missing folder with another code than 550 or 450 now get the offer to create the folder, thanks @JamBalaya56562.
+  - A timeout on an SMB or MEGA call now drops the connection, so the call does not keep using it. Async calls that ignore the timeout, as MEGA, Storj and SharePoint calls do, are no longer waited for, and SharePoint upload chunks have a timeout, thanks @JamBalaya56562.
+
+  Google Workspace and Microsoft 365
+  - --google-use-user-ids-in-paths builds the paths from the user's internal id instead of the email. Other items now use stable ids in their paths instead of names, which could collide or be invalid as a path. The UI maps the ids to names.
+  - --google-use-ou-paths places each user folder and shared drive folder in a folder per organizational unit, nested as the units are, so a whole unit can be selected or left out. Users that move between units then follow the filters. It is off by default as it changes the paths, and toggling it makes the next backup read everything again.
+  - At most 4 requests are sent to a Microsoft 365 mailbox at a time, and they share the wait when one is throttled.
+  - Chats that live in another tenant are logged once instead of for each message, and a logging problem with many concurrent requests is fixed.
+  - A Microsoft 365 restore into a library did not find the drive to restore to.
+
+  Reports
+ReleaseNotesUrl: https://github.com/duplicati/duplicati/releases/tag/v2.4.1.102_canary_2026-11-14
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

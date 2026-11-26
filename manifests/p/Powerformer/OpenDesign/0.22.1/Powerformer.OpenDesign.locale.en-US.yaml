@@ -1,0 +1,80 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Powerformer.OpenDesign
+PackageVersion: 0.22.1
+PackageLocale: en-US
+Publisher: Powerformer, Inc.
+PublisherUrl: https://nexu.io/
+PublisherSupportUrl: https://github.com/nexu-io/open-design/issues
+Author: Powerformer, Inc.
+PackageName: Open Design
+PackageUrl: https://open-design.ai/
+License: Apache-2.0
+LicenseUrl: https://github.com/nexu-io/open-design/blob/HEAD/LICENSE
+Copyright: Copyright 2026 Open Design contributors
+ShortDescription: The open-source alternative to Claude Design. Your existing coding agent — Claude · Codex · Cursor · Gemini · OpenCode · Qwen — becomes the design engine, driven by 31 composable skills and 72 brand-grade design systems.
+Description: |-
+  The open-source alternative to Claude Design. Local-first, web-deployable, BYOK at every layer — 16 coding-agent CLIs auto-detected on your PATH (Claude Code, Codex, Devin for Terminal, Cursor Agent, Gemini CLI, OpenCode, Qwen, Qoder CLI, GitHub Copilot CLI, Hermes, Kimi, Pi, Kiro, Kilo, Mistral Vibe, DeepSeek TUI) become the design engine, driven by 31 composable Skills and 72 brand-grade Design Systems. No CLI? An OpenAI-compatible BYOK proxy is the same loop minus the spawn.
+
+  Why this exists
+  Anthropic's Claude Design (released 2026-04-17, Opus 4.7) showed what happens when an LLM stops writing prose and starts shipping design artifacts. It went viral — and stayed closed-source, paid-only, cloud-only, locked to Anthropic's model and Anthropic's skills. There is no checkout, no self-host, no Vercel deploy, no swap-in-your-own-agent.
+  Open Design (OD) is the open-source alternative. Same loop, same artifact-first mental model, none of the lock-in. We don't ship an agent — the strongest coding agents already live on your laptop. We wire them into a skill-driven design workflow that runs locally with pnpm tools-dev, can deploy the web layer to Vercel, and stays BYOK at every layer.
+  Type make me a magazine-style pitch deck for our seed round. The interactive question form pops up before the model improvises a single pixel. The agent picks one of five curated visual directions. A live TodoWrite plan streams into the UI. The daemon builds a real on-disk project folder with a seed template, layout library, and self-check checklist. The agent reads them — pre-flight enforced — runs a five-dimensional critique against its own output, and emits a single <artifact> that renders in a sandboxed iframe seconds later.
+  That's not "AI tries to design something". That's an AI that has been trained, by the prompt stack, to behave like a senior designer with a working filesystem, a deterministic palette library, and a checklist culture — exactly the bar Claude Design set, but open and yours.
+  OD stands on four open-source shoulders:
+  - alchaincyf/huashu-design — the design-philosophy compass. Junior-Designer workflow, the 5-step brand-asset protocol, the anti-AI-slop checklist, the 5-dimensional self-critique, and the "5 schools × 20 design philosophies" idea behind our direction picker — all distilled into apps/daemon/src/prompts/discovery.ts.
+  - op7418/guizang-ppt-skill — the deck mode. Bundled verbatim under skills/guizang-ppt/ with original LICENSE preserved; magazine-style layouts, WebGL hero, P0/P1/P2 checklists.
+  - OpenCoworkAI/open-codesign — the UX north star and our closest peer. The first open-source Claude-Design alternative. We borrow its streaming-artifact loop, its sandboxed-iframe preview pattern (vendored React 18 + Babel), its live agent panel (todos + tool calls + interruptible generation), and its five-format export list (HTML / PDF / PPTX / ZIP / Markdown). We deliberately diverge on form factor — they are a desktop Electron app bundling pi-ai; we are a web app + local daemon that delegates to your existing CLI.
+  - multica-ai/multica — the daemon-and-runtime architecture. PATH-scan agent detection, the local daemon as the only privileged process, the agent-as-teammate worldview.
+Tags:
+- agent
+- agentic
+- ai
+- claude
+- design
+- large-language-model
+- llm
+ReleaseNotes: |-
+  Open Design 0.22.1 builds on 0.22.0 with a simpler start for supported design tasks and clearer ways to recover when a run goes wrong.
+  🔁 Changed
+  - 🧭 Start supported design tasks with OD Next. Prototypes, slide decks, marketing designs, and Hyperframes videos use OD Next by default on supported agents. Settings → Labs → Design Harness still lets you turn it off, and an existing choice to disable it stays respected. (#7876)
+  - 🧰 Keep design work focused. OD Next uses more concise tool guidance, clearer completion instructions, and the active run's workspace when loading media skills. (#7804)
+  📥 Download Open Design 0.22.1
+
+  | Platform | Architecture          | Installer |
+  | -------- | --------------------- | --------- |
+  | macOS    | Apple Silicon (arm64) | Download  |
+  | macOS    | Intel (x64)           | Download  |
+  | Windows  | x64                   | Download  |
+
+  🐛 Fixed
+  💬 Conversations & recovery
+  - 🛟 A failed run keeps a useful next step. Failure cards survive returning to a conversation, retain timeout and retry information, and keep Retry available when the current chat cannot switch the run to Cloud. (#7871, #7884, #7897) Thanks @lefarcen.
+  - 🔑 An invalid API key points you to the right fix. Bring-your-own-key authentication errors have their own explanation and a shortcut to model settings. (#7893) Thanks @lefarcen.
+  - 🗺️ Get clearer explanations for run and preview problems. Messages for unavailable models, unsupported capabilities, timeouts, missing preview files, and regional restrictions give more specific guidance. (#7887) Thanks @lefarcen.
+  - 📝 Keep your answers when sending fails. If a clarification answer cannot start a run, it remains in the conversation with a Retry action that resends the same answer. Internal routing text stays hidden. (#7900) Thanks @lefarcen.
+  - 📜 Keep following a reply as it grows. A browser scroll adjustment no longer silently switches off automatic following. Scrolling up yourself still lets you read earlier messages. (#7898) Thanks @lefarcen.
+  🎨 Design & delivery
+  - 🎬 Failed media work no longer looks complete. When image, video, or audio generation fails before the turn finishes, the turn shows unfinished work instead of a completed checkmark. (#7933) Thanks @lefarcen.
+  - 💬 A greeting gets a reply. OD Next no longer invents a website for a greeting or a request that does not call for a design, and an explained blocked result avoids a duplicate failure card. (#7725)
+  - ✅ Keep your web deliverable while syntax checks do their best. Eligible HTML deliverables receive final syntax checks and safe automatic repairs without another agent turn. If a check is incomplete or a safe repair is unavailable, the original artifact remains available and delivery continues. (#7801, #7925) Thanks @lbjzz-hash.
+  - 🧩 Continue the brief you just collected. The official Codex plugin accepts the workflow identifier returned by brief collection when confirming that brief, while still rejecting mismatched identifiers. (#7779) Thanks @taljeon.
+  🗂️ Workspace & settings
+  - 🎯 Find your current model immediately. Reopening the model picker brings your current model into view, including its company in the two-level OpenDesign model list. (#7917) Thanks @lefarcen.
+  - 📣 Announcement buttons describe where they lead. What’s New supports localized button labels that match the announcement’s destination. (#7943)
+  - 🔗 Reference projects from the workspace you are using. Project references list the active workspace's projects and refresh when you switch workspaces. (#7701)
+  - 🤖 See which model a local CLI actually used. Connection tests show the resolved model behind a rolling alias, making the result easier to check. (#6386) Thanks @MumuTW.
+  - 🇫🇷 More consistent French guidance. Settings and recovery messages, along with core documentation, use updated French wording. (#7753, #7754) Thanks @davezfr.
+  - 🌍 Social-link hints follow your language. Navigation tooltips are localized and support right-to-left layouts. (#7665)
+  🖥️ Installation & Docker
+  - 🖼️ Browse bundled plugins with previews in Docker. Plugin posters and hover clips are available again in Docker installations. (#7028) Thanks @jiulongche.
+  - 📁 Respect existing contents when choosing a download location. Directories and symbolic links with names resembling system clutter are no longer mistaken for ignorable system files when deciding whether a download folder can be adopted. (#7718) Thanks @mikemikimike.
+  🙏 Thanks to everyone who shipped 0.22.1
+  @MumuTW · @davezfr · @jiulongche · @lbjzz-hash · @lefarcen · @mikemikimike · @taljeon
+ReleaseNotesUrl: https://github.com/nexu-io/open-design/releases/tag/open-design-v0.22.1
+Documentations:
+- DocumentLabel: Quick Start
+  DocumentUrl: https://github.com/nexu-io/open-design/blob/HEAD/QUICKSTART.md
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

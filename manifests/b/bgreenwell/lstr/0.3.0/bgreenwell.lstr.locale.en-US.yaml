@@ -1,0 +1,108 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: bgreenwell.lstr
+PackageVersion: 0.3.0
+PackageLocale: en-US
+Publisher: Brandon Greenwell
+PublisherUrl: https://github.com/bgreenwell
+PublisherSupportUrl: https://github.com/bgreenwell/lstr/issues
+PackageName: lstr
+PackageUrl: https://github.com/bgreenwell/lstr
+License: MIT
+LicenseUrl: https://github.com/bgreenwell/lstr/blob/main/LICENSE
+ShortDescription: A fast, minimalist directory tree viewer, written in Rust
+Moniker: lstr
+Tags:
+- cli
+- command-line
+- command-line-tool
+- developer-tools
+- filesystem
+- git
+- ls
+- nerd-fonts
+- rust-lang
+- tree
+- tui
+ReleaseNotes: |-
+  Release Notes
+  Added
+  - Added comprehensive sorting options for both classic and interactive modes:
+    - --sort <TYPE>: Sort by name (default), size, modified time, or extension
+    - --dirs-first: Sort directories before files
+    - --case-sensitive: Use case-sensitive sorting with specific order (numbers → uppercase → lowercase)
+    - --natural-sort: Version-aware sorting (file1 < file2 < file10)
+    - --reverse: Reverse any sort order
+    - --dotfiles-first: Priority ordering (dotfolders → folders → dotfiles → files)
+  - Added comprehensive examples directory (examples/sample-directory/) with various file types, nested structures, and test scenarios for validating lstr functionality including icons, gitignore behavior, and tree display.
+  - Added interactive search functionality in TUI mode:
+    - Press / to enter search mode with real-time filename filtering
+    - Case-insensitive substring matching filters files as you type
+    - Press Esc to exit search and restore full file list
+    - Status line shows current search query and match count
+    - Preserves tree structure and selection state during filtering (Closes #30)
+  Added
+  - Releases are now built with cargo-dist: shell/PowerShell installers, a Windows MSI, six prebuilt targets (x86_64/aarch64 for Linux, macOS, Windows), and automated publishing to Homebrew, Scoop, AUR (lstr-bin), and WinGet
+  - Added --du to show directories with the cumulative size of their contents (like tree --du, implies -s); the summary line and JSON report include the total (Closes #12)
+  - Added --output json for machine-readable classic-mode output, including sizes, permissions, and git status when the matching flags are set (progress toward #7)
+  - Added mouse support in interactive mode: scroll wheel moves the selection, click selects, and clicking the selected entry opens/toggles it (Closes #28)
+  - Added --file-depth <LEVEL> to hide individual files below a depth, summarized per directory as [+N files] — useful for high-level project overviews (Closes #9)
+  - Added --max-items <N> to cap entries shown per directory, summarizing the rest as [+N more] (Closes #8)
+  - Interactive mode now returns to the tree after closing the editor instead of exiting, preserving expansion and selection and picking up file changes (Closes #3, Closes #22)
+  - Added --editor <COMMAND> to interactive mode for custom file openers, and $VISUAL is now honored before $EDITOR (Closes #26)
+  - Added h/← (collapse selected or parent directory) and l/→ (expand/open) navigation keys in interactive mode (Closes #41, thanks @Kr1ngl3)
+  - Directories now show the most severe git status of their contents with -G, in both classic and interactive modes
+  Changed
+  - File permissions now display l for symlinks and the setuid/setgid/sticky special bits (s/S, t/T)
+  - Improved sorting performance: metadata lookups and string allocations now happen once per entry instead of once per comparison (--sort modified on a 40k-entry tree: ~2.6× faster)
+  - Improved -G git-status performance in classic mode by removing a filesystem canonicalization syscall per entry (~2× faster on a 10k-file repository)
+  Fixed
+  - Fixed hyperlink escape sequences being emitted under --color never and into pipes; hyperlinks now follow the colorization decision
+  - Fixed the TUI capturing mouse events it never handled, which broke click-drag text selection in the terminal
+  - Fixed interactive mode printing Windows \\?\ verbatim paths from Ctrl+s (Closes #24)
+  - Fixed wrong tree connectors with --dirs-only, where a directory could render ├── because filtered-out files after it were counted as siblings
+  - Fixed quadratic tree-connector computation that made large directory trees (tens of thousands of entries) take seconds instead of milliseconds
+  - Fixed ignore files (.ignore, global gitignore, .git/info/exclude) filtering output even without the -g flag; all standard ignore filters are now tied to -g in both classic and interactive modes
+  - Fixed the interactive TUI quitting when typing q (or other command keys) into a search query
+  - Fixed a crash when navigating an empty directory or empty search results in interactive mode
+  - Fixed the terminal being left in raw mode on the alternate screen when the TUI exited with an error or panic
+  - Fixed expanding a directory during search corrupting the restored file list; search mode now exits before toggling
+  - Fixed search rejecting printable punctuation characters (e.g. +, #, () in filenames
+  - Fixed the selection jumping to an unrelated entry after exiting search mode
+  - CRITICAL: Fixed fundamental tree structure corruption caused by flat sorting destroying parent-child relationships. Implemented tree-aware hierarchical sorting that preserves proper tree traversal order while sorting siblings within their respective parent directories. This resolves multiple cascading issues:
+    - Fixed tree display connector issue where all entries showed └── instead of proper mixed ├── and └── connectors (Closes #36)
+    - Fixed incorrect file nesting where children appeared under wrong parents or in jumbled order
+    - Fixed duplicate/phantom entries in interactive TUI mode caused by corrupted tree structure
+    - Fixed missing entries when tree structure calculations failed
+    - Ensured consistent output between classic and TUI modes
+  - Added shared sort_entries_hierarchically() function to sort module for tree-aware sorting used by both classic and interactive modes
+  - Fixed alignment issues with permissions (-p) and git status (-G) flags where root directory formatting was inconsistent with tree entries. Root directory now properly displays permissions and git status spacing for consistent output alignment. (Closes #32)
+  Install lstr 0.3.0
+  Install prebuilt binaries via shell script
+  curl --proto '=https' --tlsv1.2 -LsSf https://github.com/bgreenwell/lstr/releases/download/v0.3.0/lstr-installer.sh | sh
+  Install prebuilt binaries via powershell script
+  powershell -ExecutionPolicy Bypass -c "irm https://github.com/bgreenwell/lstr/releases/download/v0.3.0/lstr-installer.ps1 | iex"
+  Install prebuilt binaries via Homebrew
+  brew install bgreenwell/tap/lstr
+  Download lstr 0.3.0
+  ──────────────────────────────────────────┬───────────────────┬─────────────
+  File                                      │Platform           │Checksum
+  ──────────────────────────────────────────┼───────────────────┼─────────────
+  lstr-aarch64-apple-darwin.tar.xz          │Apple Silicon macOS│checksum
+  ──────────────────────────────────────────┼───────────────────┼─────────────
+  lstr-x86_64-apple-darwin.tar.xz           │Intel macOS        │checksum
+  ──────────────────────────────────────────┼───────────────────┼─────────────
+  lstr-x86_64-pc-windows-msvc.zip           │x64 Windows        │checksum
+  ──────────────────────────────────────────┼───────────────────┼─────────────
+  lstr-x86_64-pc-windows-msvc.msi           │x64 Windows        │checksum
+  ──────────────────────────────────────────┼───────────────────┼─────────────
+  lstr-aarch64-unknown-linux-gnu.tar.xz     │ARM64 Linux        │checksum
+  ──────────────────────────────────────────┼───────────────────┼─────────────
+  lstr-x86_64-unknown-linux-gnu.tar.xz      │x64 Linux          │checksum
+  ──────────────────────────────────────────┼───────────────────┼─────────────
+  lstr-x86_64-unknown-linux-musl.tar.xz     │x64 MUSL Linux     │checksum
+  ──────────────────────────────────────────┴───────────────────┴─────────────
+ReleaseNotesUrl: https://github.com/bgreenwell/lstr/releases/tag/v0.3.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

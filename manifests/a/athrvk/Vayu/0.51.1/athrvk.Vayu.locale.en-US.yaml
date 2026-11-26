@@ -1,0 +1,84 @@
+# Created with WinGet Releaser using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: athrvk.Vayu
+PackageVersion: 0.51.1
+PackageLocale: en-US
+Publisher: Atharva Kusumbia
+PublisherUrl: https://github.com/athrvk
+PublisherSupportUrl: https://github.com/athrvk/vayu/issues
+Author: Atharva Kusumbia
+PackageName: Vayu
+PackageUrl: https://github.com/athrvk/vayu
+License: AGPL-3.0
+LicenseUrl: https://github.com/athrvk/vayu/blob/HEAD/LICENSE
+Copyright: Copyright © 2026 Atharva Kusumbia
+ShortDescription: Open-source API client with a native C++ load-testing engine - Postman-style requests and k6-level load tests in one local app.
+Description: Vayu is a free, open-source desktop app for Windows, macOS, and Linux that combines a full REST and GraphQL request builder - with collections, environments, and scripting - and a high-throughput load tester powered by a C++20 engine, with all data staying on your machine.
+Moniker: vayu
+Tags:
+- api
+- api-client
+- api-testing
+- benchmark
+- developer-tools
+- graphql
+- http
+- insomnia
+- load-testing
+- performance
+- postman
+- rest
+ReleaseNotes: |-
+  0.51.1 - 2026-11-18
+  If you are on 0.51.0 or earlier, install 0.51.1 by hand, once. The in-app updater in those versions cannot verify any update ("Couldn't verify Vayu 0.51.1. Couldn't load the Sigstore trusted root"), so it installs nothing. Update with one of these:
+  - Windows: winget upgrade athrvk.Vayu (winget can trail a release), or download Vayu-x64.exe from this release and run it.
+  - macOS and Linux: re-run the install command, which updates in place:
+    bash -c "$(curl --proto '=https' --tlsv1.2 -fsSL https://athrvk.github.io/vayu/install.sh)"
+  From 0.51.1 on, in-app updates work again. This release also adds collection load runs to History compare and trends, shows a run's drain on the dashboard, and settles a live run when the engine dies under it.
+  Added
+  - A collection load run can be compared, trended and set as a baseline in History, like a single-request run, and the MCP baseline lookup follows it (#3586).
+  - The dashboard shows a run's drain. After the planned duration it reads "Finishing, waiting on N requests", with a Stop waiting button (#3587).
+  - A collection run's row in History is marked failed when it missed a budget, and its notification and spoken ending name the budget (#3589).
+  - A collection run's iterations mode reads Fixed passes everywhere, with its configured count in Test config and its pass time shown as the mean iteration time (#3627).
+  - The load test notification states the run's verdict (#3603).
+  - MCP: list_requests without a collection pages through the whole workspace (#3611). get_run_timeseries and get_run_monitor fold a whole run with maxPoints, and MCP results are compact JSON (#3629). The element catalogue and script API are read by tool, and an unknown element kind lists the valid ones (#3631).
+  Changed
+  - Close, quit and Restart engine ask first when a live run would be stopped, and the question names the run (#3622).
+  - A load run is judged by its whole assertion block, in the app, the report export and MCP, so every failed check counts the same way everywhere (#3581).
+  - An out-of-range load test value is refused before Start instead of after it (#3566).
+  - A stopped run is announced as stopped, and a collection run can end as stopped (#3623).
+  - A run's mean in-flight figure measures how long requests were open rather than completed latency, and the utilisation card follows it (#3590).
+  - The copied Claude Code command registers Vayu at user scope, and Connect for Claude Code is safe to click twice (#3620, #3625).
+  - MCP Settings shows Starting until the first start settles (#3624).
+  - MCP: an undeclared tool or prompt argument is refused rather than dropped (#3615), the redaction marker is refused as a credential on writes and sends (#3597), and a run report in a resource or prompt is bounded the way the tool bounds it (#3616).
+  - Internal: documentation and test clean-ups.
+  Fixed
+  - The in-app updater verifies updates again. It refused to install any update, because the Sigstore trusted root could not be loaded inside the app. The updated TUF packages also carry a newer embedded Sigstore root, replacing one that expires on 2026-11-20 (#3639).
+  - A live run ends when the engine's process dies under it, and a load test's report loads once an engine is back (#3619).
+  - The window stays open when the engine's first start fails, a recorded crash is not shown as Starting, and a page that has not loaded is never asked to save (#3618).
+  - A zero-request run no longer passes an error-rate budget, and a plan that skips every step no longer pins a core (#3591).
+  - A Stop that cuts a finished run's drain leaves it Not judged, and the dashboard no longer says the run had already finished (#3593, #3613).
+  - A constant-rate run skips a think timer instead of reserving it (#3585), and a ramp sends nothing after its duration ends (#3601).
+  - Reconnect resumes the live stream where it stopped instead of replaying it (#3594).
+  - A live frame's request total is consistent with its own status (#3626).
+  - A collection run ended by an engine stop is announced (#3630), and a collection load run the engine did not finish is named in History (#3595).
+  - An opened collection run's pill matches its History row (#3600).
+  - Writing a request's URL derives its Params rows (#3582), and update_request keeps the credentials withheld from its URL (#3565).
+  - MCP header writes accept the rows a read returns for requests and examples (#3583), run_collection_smoke carries the engine's error (#3584), run_request by id follows the saved request's stream setting (#3617), and an HTTP client's cancel aborts the call it names and ends on Stop and quit (#3596, #3599).
+  - MCP lists its static resources with the engine down and words an outage accurately (#3628).
+  - The load test dialog focuses the Run label when it opens (#3612), and the export toast names the saved file (#3614).
+  Every asset except the .sha256 checksums carries a build-provenance attestation: gh attestation verify <asset> --repo athrvk/vayu.
+  Which file do I download?
+  - macOS (Apple Silicon and Intel): run bash -c "$(curl --proto '=https' --tlsv1.2 -fsSL https://athrvk.github.io/vayu/install.sh)". The .dmg and .zip are the same universal build, unsigned.
+  - Windows (x64): winget install athrvk.Vayu, or Vayu-x64.exe.
+  - Linux (x86_64 only, there is no arm64 build): the .AppImage, or sudo apt install ./Vayu-amd64.deb.
+  - The .yml, .blockmap and .sha256 files are for the auto-updater and for checking a download. You do not need them.
+  If your OS warns you
+  Vayu is not code-signed, so the OS can stop a downloaded file on first launch. Nothing is wrong with the file.
+  macOS says an app downloaded from this page (.dmg or .zip) is "damaged", because Vayu is not notarized. This command installs it without the warning:
+  bash -c "$(curl --proto '=https' --tlsv1.2 -fsSL https://athrvk.github.io/vayu/install.sh)"
+  Windows shows "Windows protected your PC". Choose More info, then Run anyway. winget install athrvk.Vayu skips it.
+ReleaseNotesUrl: https://github.com/athrvk/vayu/releases/tag/v0.51.1
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

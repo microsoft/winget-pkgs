@@ -1,0 +1,58 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: RightNow-AI.OpenFang
+PackageVersion: 0.6.1
+PackageLocale: en-US
+Publisher: RightNow AI, Inc.
+PublisherUrl: https://www.rightnowai.co/
+PublisherSupportUrl: https://github.com/RightNow-AI/openfang/issues
+PrivacyUrl: https://www.rightnowai.co/privacy-policy
+Author: RightNow AI, Inc.
+PackageName: OpenFang
+PackageUrl: https://www.openfang.sh/
+License: MIT
+LicenseUrl: https://github.com/RightNow-AI/openfang/blob/HEAD/LICENSE-MIT
+Copyright: Copyright (c) 2026 OpenFang Contributors
+ShortDescription: Open-source Agent Operating System
+Description: |-
+  OpenFang is an open-source Agent Operating System — not a chatbot framework, not a Python wrapper around an LLM, not a "multi-agent orchestrator." It is a full operating system for autonomous agents, built from scratch in Rust.
+  Traditional agent frameworks wait for you to type something. OpenFang runs autonomous agents that work for you — on schedules, 24/7, building knowledge graphs, monitoring targets, generating leads, managing your social media, and reporting results to your dashboard.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- claw
+- large-language-model
+- llm
+ReleaseNotes: |-
+  This release resolves 12 community-reported issues across kernel, channels, runtime, and the dashboard. All fixes verified with cargo clippy clean and 2497 tests passing.
+  Kernel & Heartbeat
+  - #1102 Heartbeat now exempts idle reactive agents. No more false Crashed transitions for agents waiting on input.
+  - #1089 Streaming agent loop stamps last_active before the LLM call. Prevents heartbeat false-positives on slow local models.
+  - #1087 Agent config syncs the full set of fields from agent.toml on restart. Kernel-assigned workspace and inherited exec_policy are preserved when the TOML omits them.
+  Channels
+  - #1120 Router default-agent map keyed on user_id instead of channel_id. Fixes Discord and Slack multi-tenancy collision.
+  - #1081 Lark websocket respects the region setting. International users no longer hit the wrong server.
+  - #1088, #1064 Cron job results now broadcast to chat WebSocket clients in real time.
+  Runtime
+  - #1128 claude-code driver subprocess timeout is configurable via DriverConfig.subprocess_timeout_secs and the OPENFANG_SUBPROCESS_TIMEOUT_SECS env var.
+  - #1051 Audio transcription base URL is configurable via media.audio_base_url. Works with local OpenAI-compatible Whisper backends. TTS and image-gen URL overrides are still pending.
+  Init & Build
+  - #1079 MiniMax now appears in openfang init provider list.
+  - #1092 NixOS flake build fixed. Adds nativeBuildInputs, wrapGAppsHook3, and libayatana-appindicator runtime closure.
+  Code Quality
+  - #1121 Workspace passes cargo fmt --all --check. CI gate strengthened to enforce it across all crates.
+  Stats
+  - 2497 tests passing
+  - Zero clippy warnings (--workspace --all-targets)
+  - All fixes live-tested with a running daemon and real Groq calls where applicable
+  - Tauri desktop config bumped so .dmg and .msi filenames track the release version
+  Full Changelog: https://github.com/RightNow-AI/openfang/compare/v0.6.0...v0.6.1
+ReleaseNotesUrl: https://github.com/RightNow-AI/openfang/releases/tag/v0.6.1
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://www.openfang.sh/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

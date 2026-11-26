@@ -1,0 +1,49 @@
+# Created by Anthelion using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: mostlygeek.llama-swap
+PackageVersion: '273'
+PackageLocale: en-US
+Publisher: mostlygeek
+PublisherUrl: https://mostlygeek.com/
+PublisherSupportUrl: https://github.com/mostlygeek/llama-swap/issues
+PackageName: llama-swap
+PackageUrl: https://github.com/mostlygeek/llama-swap
+License: MIT
+LicenseUrl: https://github.com/mostlygeek/llama-swap/blob/HEAD/LICENSE.md
+Copyright: Copyright (c) 2024 Benson Wong
+ShortDescription: Model swapping for llama.cpp
+Description: llama-swap is a light weight, transparent proxy server that provides automatic model swapping to llama.cpp's server.
+Moniker: llama-swap
+Tags:
+- golang
+- llama
+- llamacpp
+- localllama
+- localllm
+- openai
+- openai-api
+- vllm
+ReleaseNotes: |-
+  A new fit selector strategy for capacity-aware model selection, some UI polish and a fix for the failing Docker builds.
+  Ohh! A new type of selector that allows loading variations of a model that best
+  fits in the currently available resources. Sometimes the full fat version of a
+  model isn't the right choice and you want a smaller version, perhaps with less
+  context or a lower quant. The new "fit" selector combined with the capacity
+  router to the rescue! Now llama-swap can choose a variation that can fit in the
+  currently available resources to serve the request. Thanks to @GitEventhandler
+  for the feature request!
+  This release also includes some UI changes:
+  - Support pasting of images into the Playground chat, thanks @kaczy44
+  - Improvements to the capture view to split the summary, request and responses. Less scrolling yay.
+  - Activity token counts adapt to screen size. Great for users who have send more than a hundred million tokens through llama-swap!
+  Also some docker container build changes. Thanks Opus, you're a better SRE than I ever was!
+  - PR #1332 ui: reload when a lazy route chunk fails to load: reloads the page once when a lazily loaded route chunk fails, because a tab left open across an upgrade asks for old hashed chunk names, the server 404s them as text/plain and the page hung on its loading spinner (guarded with a 10 s sessionStorage timestamp to avoid reload loops) by @mostlygeek
+  - a36540b docker/unified: optimize build with ccache: adds ccache to speed up unified image compiles and reduces ARM64 builds to GB10 only, to get the GitHub image builds passing again after they started failing on Nov 6 by @mostlygeek
+  - PR #1334 ui: support pasting images into Playground chat: pastes screenshots and other images straight into the Playground chat message box with Ctrl+V, previewing them alongside file-picker attachments so they can be reviewed or removed before sending (plain text paste is unchanged) by @kaczy44
+  - PR #1339 ui: split capture dialog into summary/request/response tabs: reworks the capture dialog into Summary, Request and Response tabs, because stacking request/response headers and bodies in one column always buried the body of interest under the section above it by @mostlygeek
+  - PR #1340 Add fit selector strategy for capacity-aware model selection: adds a fit selector strategy that routes each request to the target that is cheapest to run right now, ranked by lowest total evict_cost of the models it would unload, then fewest models unloaded, then readiness, then targets order, along with settings.no_evict (429 instead of evicting), read-only LocalRouter.Evictions/Scheduler.Evictions queries, validation, /v1/models metadata and a "no evict" tag in the Models page; it requires routing.router.use: capacity and other selectors keep working when it is misconfigured by @mostlygeek
+  - PR #1341 ui: use compact numbers in Activity stats on small screens: shows compact units such as 309.7M (full value on hover) below lg and lays the stats out in a 2x2 grid below sm, because large comma-separated token counts overlapped each other on narrow screens by @mostlygeek
+ReleaseNotesUrl: https://github.com/mostlygeek/llama-swap/releases/tag/v273
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

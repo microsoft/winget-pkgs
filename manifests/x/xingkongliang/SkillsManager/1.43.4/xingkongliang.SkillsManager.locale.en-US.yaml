@@ -1,0 +1,44 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: xingkongliang.SkillsManager
+PackageVersion: 1.43.4
+PackageLocale: en-US
+Publisher: xingkongliang
+PublisherUrl: https://github.com/xingkongliang
+PublisherSupportUrl: https://github.com/xingkongliang/skills-manager/issues
+PackageName: Skills Manager
+PackageUrl: https://skillsmanager.dev/
+License: MIT
+LicenseUrl: https://github.com/xingkongliang/skills-manager/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Tianliang Zhang
+ShortDescription: One app to manage AI agent skills across all your coding tools.
+Description: |-
+  Skills Manager is a desktop app that keeps AI agent skills in one central library and installs them into coding tools such as Claude Code, Codex, Cursor, Copilot, and Gemini CLI. Skills can be installed from Git repositories, local folders, .zip or .skill archives, or the skills.sh marketplace, then grouped into presets, tagged and filtered, and tracked for upstream updates.
+  Global and project workspaces show what each agent actually sees, and skills sync to any supported tool via symlink or copy. Skills Manager also backs the library up to a Git remote for multi-device sync and records every install, remove, update, and sync operation in an activity log.
+Tags:
+- agent
+- agentic
+- ai
+- large-language-model
+- llm
+- skills
+ReleaseNotes: |-
+  Release date: 2026-11-10
+  Commit range: v1.43.3...v1.43.4
+  Release Overview
+  - Three fixes: TRAE CN project skills land in the folder TRAE CN reads, a stuck backup no longer blocks update checks indefinitely, and a skill in a folder several agents share appears once when scanning local skills.
+  User-facing
+  - TRAE CN project skills go where TRAE CN reads them — In a project workspace, skills for TRAE CN were deployed to <project>/.trae-cn/skills, which TRAE CN does not read; only its global folder is ~/.trae-cn/skills. They now go to <project>/.trae/skills, and TRAE CN shares that row with TRAE IDE, which reads the same folder. Skills that earlier versions put in .trae-cn/skills are left there: add them to the project again, and the old folder can be deleted. Thanks to @zhirogo (#645, #632, #247).
+  - A stuck backup no longer blocks update checks indefinitely — When the backup remote stopped answering during a background backup (for example an SSH connection that never replies), the backup kept the library locked, and every update check failed with "skills repository is busy" for as long as it stayed stuck. Git commands that reach the backup remote now give up after 300 seconds and report an error, so update checks wait at most five minutes. Your own SSH configuration is used as before. Thanks to @Carlo1911 (#585).
+  - Each skill appears once when scanning local skills — Several agents read the same folder; Codex, GitHub Copilot, Pi and others all read ~/.agents/skills. Scan Local Skills listed a skill in that folder once for each of them, so one skill showed up with six identical locations. Each folder is now listed once, under the first agent that finds it (#646, #641).
+  Developer & Governance
+  - Network git in the backup repository (fetch, push, pull, ls-remote, clone) now runs through a killable wait with a 300s deadline, matching the clone timeout, with GIT_TERMINAL_PROMPT=0, a closed stdin and an HTTP low-speed abort. No GIT_SSH_COMMAND is injected. The auto-backup fetch stays inside RepoLock, because a fetch outside it races a clone that replaces the directory, so this bounds the hang rather than removing the busy errors (#585).
+  - scanner::push_discovered skips a path that is already recorded, so the scan's skills_found and discovered list count each path once, under the first adapter that finds it. Later adapters no longer hash the same directory again (#646).
+  - The trae_cn adapter now has project_relative_skills_dir = ".trae/skills"; it used to fall back to its global .trae-cn/skills. Nothing is migrated (#645).
+  Current Verification
+  - ✅ Cross-platform build passed (macOS Intel / macOS ARM / Windows x64 / Linux x64 / Linux ARM64)
+  - ✅ TypeScript typecheck passed
+ReleaseNotesUrl: https://github.com/xingkongliang/skills-manager/releases/tag/v1.43.4
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

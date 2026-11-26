@@ -1,0 +1,154 @@
+# Created with YamlCreate.ps1 v2.0.4 $debug=QUSU.7-2-1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.1.0.schema.json
+
+PackageIdentifier: SWI-Prolog.SWI-Prolog
+PackageVersion: 8.4.1
+PackageLocale: en-US
+Publisher: SWI-Prolog
+PublisherUrl: https://www.swi-prolog.org/
+PublisherSupportUrl: https://www.swi-prolog.org/community.html
+# PrivacyUrl: 
+Author: Jan Wielemaker
+PackageName: SWI-Prolog
+PackageUrl: https://www.swi-prolog.org/
+License: BSD-2-Clause
+LicenseUrl: https://www.swi-prolog.org/license.html
+Copyright: Copyright (c) 2021, SWI-Prolog Solutions b.v. All rights reserved.
+# CopyrightUrl: 
+ShortDescription: A versatile implementation of the Prolog language
+Description: SWI-Prolog offers a comprehensive free Prolog environment. Since its start in 1987, SWI-Prolog development has been driven by the needs of real world applications. SWI-Prolog is widely used in research and education as well as commercial applications.
+Moniker: swipl
+Tags:
+- Prolog
+- logic
+- language
+- programming
+# Agreements: 
+ReleaseNotes: |-
+  [Nov 16 2021]
+  - FIXED: Saved state handling of a dict whose first key value (in the internal order) and tag are both avoid variables. This patch is less invasive than 4de9114a76cd44659591296627e999cf1072d744.
+
+  [Nov 15 2021]
+  - FIXED: Saved state handling of a dict whose first key value (in the internal order) and tag are both avoid variables. Reported by Matt Lilley.
+
+  [Nov 12 2021]
+  - FIXED: Be more relaxed about existence of the current predicate when pushing and popping the compilation context.
+
+  [Nov 11 2021]
+  - ENHANCED: Get version info into the Prolog flag. Now uses CMake rather than a shell script and provides a new Prolog flag `cmake_build_type`.
+
+  [Nov 10 2021]
+  - DOC: meta_predicate/1: updated mode declarations.
+
+  [Nov 8 2021]
+  - EHNACED: pack_rebuild/1,2 for CMake based packages to use `cmake --build `and` cmake --install` for the build and install steps rather than calling `make`, `ninja`, etc. directly. Suggested by Wouter Beek.
+  - MAINTENANCE: Possible segv in retract/1 when compiled using O_DEBUG.
+
+  [Nov 7 2021]
+  - FIXED: Possible race conditions between the various ways a thread can be joined.
+  - FIXED: Do not start a new thread to join garbage collected threads while shutting down the system.
+  - MAINTENANCE: On a system error we only go into interactive mode if both stdin and stderr are connected to a terminal. Otherwise we print the message, C and Prolog stack and abort.
+  - MAINTENANCE: Use of guarded C-stack using `sigaltstack()` doesn't go with ASAN. Results in the error below. Disabled guarding the C stack when compiling using address sanitizer. ` =`101190`=ERROR: AddressSanitizer failed to deallocate 0x2000 (8192) bytes at address 0x6250000b1900 =`101190`=AddressSanitizer CHECK failed: ../../../../src/libsanitizer/sanitizer_common/sanitizer_posix.cc:60 "(("unable to unmap" && 0)) != (0)" (0x0, 0x0)
+
+  [Nov 3 2021]
+  - FIXED: CMake packs must use environment variables.
+  - ADDED: Support `ninja` builds when using CMake
+  - FIXED: pack_install/1,2: If we use CMake for configuration, we should also build in the CMake directory.
+  - TEST: Signalled thread may already be dead.
+
+  [Nov 2 2021]
+  - ADDED: pack_install/1,2: provide `pack_install(.)` to add the local directory to the pack registry and build it. Also add option `link(true)` and `rebuild(When)` to provide more fine control over the build.
+  - FIXED: pack_install/1,2: do not remove contents if the package registered as a symbolic link.
+  - FIXED: memberchk/2 for partial lists where the unbound part is constrained. Reported on Discourse by Abramo Bagnara.
+  - BUILD: Avoid GCC-11 warning
+
+  [Oct 31 2021]
+  - ENHANCED: Protect assertz/1 and friends (compiler) against C-stack overflows.
+  - ENHANCED: Use `setjmp()` instead of `sigsetjmp()` to reduce the overhead of the C-stack guarding.
+  - MAINTENANCE: Updated C calltree analysis for CMake build and new coding style and conventions.
+
+  [Oct 30 2021]
+  - FIXED: Fallback to find a place for packages to install executables.
+  - FIXED: Hash consistency on pointer sided integers for 64-bit bigendian machines. Only affects consistency of term_hash/2 over platforms.
+  - FIXED: Checking that an uncaught exception is caught in an outer environment, i.e., nested C<->Prolog callback.
+
+  [Oct 28 2021]
+  - FIXED: Make C-stack guarding work in threads.
+  - ENHANCED: Use C-stack guarding for read/1 and friends.
+  - FIXED: format/2,3: Term printing using ~[kpqw] did not propagate exception.
+
+  [Oct 27 2021]
+  - ENHANCED: Handle C-stack overflows gracefully on POSIX targets with `sigaltstack()`.
+
+  [Oct 26 2021]
+  - ADDED: argv_options/3: allow including longer descriptions as header, usage and footer in the usage message.
+  - ADDED: argv_options/3: Allow the user to redefine the bindings for help. Suggested by @swi.
+  - PORT: Alignment on ppc64el. Better version than df1f0bf795a16edd313a2a25f0678ce044a4a71d
+  - PORT: Alignment on ppc64el (Debian). See https://github.com/SWI-Prolog/issues/issues/104
+
+  [Oct 25 2021]
+  - FIXED: `pl_get_uint64()` for GMP numbers on 32-bit systems.
+  - ADDED: argv_options/3,4: allow for disjunctive types.
+
+  [Oct 24 2021]
+  - ADDED: library(prolog_versions) to simplify demanding minimal version and features of the hosting Prolog system.
+  - ADDED: argv_options/4: `options_after_arguments(false)` option to stop processing options after the first positional argument.
+  - ADDED: win_get_user_preferred_ui_languages/2 to get access to the user's preferred UI languages on Windows.
+  - INSTALL: Windows: avoid confusing uninstall version message.
+
+  [Oct 22 2021]
+  - ENHANCED: Allow loading library(prolog_debug) if `spy` and/or `nospy` are defined as operators.
+  - FIXED: Do not reclaim memory on termination when we failed to terminate all threads.
+  - ENHANCED: Provide a non-polling process termination procedure for systems that do not have `sem_timedwait()` such as MacOS.
+  - ENHANCED: Improve performance for process shutdown on POSIX systems that support `sem_timedwait()` by avoiding a polling loop. This typically saves 0.1 second on the elapsed time for short lived executables.
+
+  [Oct 21 2021]
+  - ADDED: Allow `--no-pce` together with `-c` (compile) to produce a state that does not include xpce.
+  - FIXED: Retract for `retract((a:-true))`. Reported by Fernando Sáenz-Pérez.
+
+  [Oct 20 2021]
+  - ADDED: argv_options/3: type `term`
+
+  [Oct 19 2021]
+  - ADDED: argv_options/3 to provide a full featured and lightweight alternative to library(optparse).
+  - FIXED: format/2 and friends: verify error when emitting rubber.
+  - ADDED: format/2 and friends: support `~:|`, the colon modifier for tab stops to insert a newline if the current column already passed the tab stop.
+  - FIXED: Issue#896: Claim that memory streams as used by e.g. open_string/2 are reported as repositionable. Reported by Matthijs van Otterdijk.
+  - ENHANCED: Allow 64-bit seek function to work on memory streams.
+  - ADDED: Allow stream contol functions to return whether the stream is repositionable.
+
+  [Oct 18 2021]
+  - FIXED: det/1: avoid false non-determinism claim if all relevant choicepoints are debug choicepoints.
+
+  [Oct 14 2021]
+  - FIXED: Predicate access in nested transactions for clauses that are removed in the parent (or a previous nested) transaction. We must inspect the affected clauses of all parent transactions. Reported by Eric Zinda.
+
+  [Oct 11 2021]
+  - FIXED: Answer subsumption tabling case provided by Annie Liu.
+  - ADDED: Predicate property `sig_atomic`. Currently only for the built-in sig_atomic/1.
+
+  [Oct 9 2021]
+  - FIXED: Delay signals in prolog_exception_hook/4.
+
+  [Oct 10 2021]
+  - ADDED: sig_atomic/1 to run goals protected from signals. This predicate used to be available as the undocumented '$sig_atomic'/1. '$sig_atomic'/1 is now available from `library(backcomp)`.
+  - ENHANCED: thread_signal/2: reduce the locked section
+
+  [Oct 11 2021]
+  - FIXED: thread_wait/2: return when condition is true before this predicate is called.
+  - FIXED: thread_wait/2: `wait_preds` option accepted non-predicate indicators.
+  - ADDED: sandbox: call_delays/2 as safe meta predicate
+
+  [Oct 6 2021]
+  - FIXED: Issue#889: `swipl --abi-version` crashed.
+
+  [Oct 5 2021]
+  - ENHANCED: trace/2 to delete that we are tracing this predicate if the port list is empty.
+
+  [Oct 1 2021]
+  - DOC: Document key `pc` of prolog_choice_attribute/3
+  - FIXED: 91d73fb8a859c6e0f0d97ff553f96903816bc18c triggers another case where the falsecount of a node can underflow during re-evaluation. Bit dubious.
+  - DOC: LaTeX formatting error
+ReleaseNotesUrl: https://www.swi-prolog.org/ChangeLog?branch=stable&from=8.4.0&to=8.4.1
+ManifestType: defaultLocale
+ManifestVersion: 1.1.0

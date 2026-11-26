@@ -1,0 +1,109 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: IbrahimDursun.jjui
+PackageVersion: 0.10.0
+PackageLocale: en-US
+Publisher: Ibrahim Dursun
+PublisherUrl: https://idursun.com/
+PublisherSupportUrl: https://github.com/idursun/jjui/issues
+Author: Ibrahim Dursun
+PackageName: Jujutsu UI
+PackageUrl: https://github.com/idursun/jjui
+License: MIT
+LicenseUrl: https://github.com/idursun/jjui/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 ibrahim dursun
+ShortDescription: Jujutsu UI (jjui) is a Text User Interface (TUI) designed for interacting with the Jujutsu version control system.
+Moniker: jjui
+Tags:
+- jj
+ReleaseNotes: |-
+  Wow, a major release after a very long time. As promised, v0.10 is ready, and it comes with breaking changes.
+  First, thank you to everybody who contributed code, bug reports, ideas, and testing for this release. In particular, thanks to @baggiiiie for various features and fixes, @nickchomey for contributions and continuous feedback, and @vic for updating the documentation website. Thanks as well to everyone else for various code contributions, reporting issues, and verifying fixes.
+  We changed a lot in v0.10, but the biggest shift is that we finally got rid of some legacy configuration and moved to a unified actions + bindings model. Old concepts like [custom_commands] and [leader] are now replaced by a more consistent system built around actions, bindings, and first-class support for leader-style key sequences.
+  This release also introduces config.lua, which makes it much easier to customise and extend jjui with real scripting instead of only static configuration. Between config.toml, config.lua, Lua actions, and bindings, much more of the UI can now be customised in one consistent way.
+  The documentation has been updated with migration notes and examples such as the Lua Cookbook.
+  From my testing it looks ready, but I am sure more rough edges will show up once more people start using it, so please keep reporting issues as you find them.
+  ⚠️ Breaking Changes
+  v0.10 replaces the legacy keybinding and customisation model with the new actions + bindings system.
+  - [keys] configuration is no longer used.
+  - [custom_commands] is replaced by [[actions]] and [[bindings]].
+  - [leader] sequences are replaced by sequence bindings via seq.
+  If you have an existing configuration, plan to migrate it rather than expecting a drop-in upgrade from v0.9.x.
+  ✨Highlights
+  - Unified actions + bindings system. Keyboard input now flows through a single dispatch pipeline, default bindings are declared in TOML, actions are discoverable, and custom behaviour can be defined in both TOML and Lua.
+  - Much stronger scripting support. Lua setup now receives the full config plus runtime context, generated intent-backed actions replace handwritten drift-prone bridges, and new helpers like wait_close() and wait_refresh() make multi-step scripts more predictable.
+  - Upgraded TUI foundations. Moving from Bubble Tea v1 to v2 brings better terminal support, a new rendering engine for better performance, and better input handling, including support for bindings like ctrl+space and dedicated shift+... style keys.
+  - Improved diff and selection workflows. The diff view now supports word wrap, revisions and details support modifier-based mouse selection, and several details and evolog interactions are more consistent.
+  🚀 New and Improved
+  Command History
+  - Added command history, available with shift+w, to review dismissed command runs together with their output.
+  - Moved running command information out of the status area and into dedicated flash messages, so the command and its output are now shown together in one place.
+  Help and Status
+  - Reintroduced a dedicated Help view for full keybinding discovery, with filtering and scrolling, alongside the existing inline help.
+  - Changed status/help binding presentation to column-major order so related bindings are easier to scan.
+  Lua and Configuration
+  - Shipped the unified actions + bindings architecture introduced in v0.10.
+  - Exposed the full config object to Lua setup, including runtime context such as repository path via config.repo, and terminal state via config.terminal.dark_mode, config.terminal.fg, and config.terminal.bg.
+  - Standardised closeable action naming around open_* and aligned apply/close semantics for more predictable scripted workflows.
+  Oplog
+  - Added quick search to oplog and shared the search behavior with revision search.
+  Evolog
+  - Changed evolog preview defaults to show interdiff output, matching jj evolog -p more closely.
+  Abandon
+  - Added s in abandon mode to target descendants of the selected revision(s).
+  Revset
+  - Kept revset editing open when the expression is invalid, improving iteration while editing.
+  - Improved revset editing so function completion inserts ( when appropriate, while the function list display is cleaner and less noisy.
+  Diff
+  - Added word wrap in the diff view, with explicit wrapped and unwrapped modes plus soft-wrap-aware scrolling.
+  - Added g and G in the diff view to jump to the top and bottom.
+  Details and Revisions
+  - Added Ctrl+click single-item toggle and Alt+click range selection in revisions and details.
+  - Added a revisions.details.select_file action for finer control in details workflows.
+  🛠️ Fixes
+  - Fixed rendering issues with double-width characters.
+  - Simplified divergent revision handling by using change_id/offset directly from the jj log prefix template.
+  - Fixed git push --all behaviour for deleted bookmarks and corrected related command descriptions.
+  ⚙️ Internal Updates
+  - Upgraded to Bubble Tea v2.
+  - Replaced remaining cellbuf usage with ultraviolet.
+  - Hardcoded model-level key handling has been removed in favor of dispatcher-driven intents.
+  - Continued internal cleanup around rendering, overlays, display context, and generated action plumbing to support the new architecture.
+  What's Changed
+  - Unified Actions + Bindings system by @idursun in https://github.com/idursun/jjui/pull/533
+  - feat(oplog): add QuickSearch to oplog, share logic with revision search by @baggiiiie in https://github.com/idursun/jjui/pull/521
+  - fix: add missing keys in bindings by @baggiiiie in https://github.com/idursun/jjui/pull/538
+  - feat(evolog): change default evolog command to show interdiff by @academician in https://github.com/idursun/jjui/pull/539
+  - fix: add back esc to clear checked revisions by @baggiiiie in https://github.com/idursun/jjui/pull/541
+  - remove gh-pages workflow from main branch. by @vic in https://github.com/idursun/jjui/pull/542
+  - docs: fix readme links by @baggiiiie in https://github.com/idursun/jjui/pull/549
+  - Update CONTRIBUTING.md for documentation by @vic in https://github.com/idursun/jjui/pull/547
+  - feat(lua): add "filter" and "ordered" option to choose lua api by @baggiiiie in https://github.com/idursun/jjui/pull/548
+  - feat(abandon): use s for selecting descendants by @idursun in https://github.com/idursun/jjui/pull/544
+  - feat: add change_offset in jj log prefix template for divergent revisions by @baggiiiie in https://github.com/idursun/jjui/pull/550
+  - fix: make bookmark input visible when user has custom template-aliases by @baggiiiie in https://github.com/idursun/jjui/pull/551
+  - fix(evolog): keep restore mode navigation on revisions and esc close by @baggiiiie in https://github.com/idursun/jjui/pull/554
+  - Expose full config to Lua setup and add runtime context (repo + terminal) by @idursun in https://github.com/idursun/jjui/pull/553
+  - feat(flash): command history by @idursun in https://github.com/idursun/jjui/pull/556
+  - Update to bubbletea v2 by @idursun in https://github.com/idursun/jjui/pull/558
+  - Ctrl+click and Alt+click for single and range selection by @idursun in https://github.com/idursun/jjui/pull/563
+  - feat: add ( to functions when autocompleted by @nickchomey in https://github.com/idursun/jjui/pull/564
+  - feat(status): change display to column major order by @baggiiiie in https://github.com/idursun/jjui/pull/569
+  - fix: remove parentheses from functions list, but add when autocomplete by @nickchomey in https://github.com/idursun/jjui/pull/567
+  - fix(git): prevent panic when opening git menu with no selected revision by @baggiiiie in https://github.com/idursun/jjui/pull/571
+  - Refactor/Lua bridge by @idursun in https://github.com/idursun/jjui/pull/572
+  - fix(ui): guard against nil commit in OpenBookmarks intent by @baggiiiie in https://github.com/idursun/jjui/pull/573
+  - feat(diff): word wrap by @idursun in https://github.com/idursun/jjui/pull/575
+  - Add pgup/pgdown keybindings to evolog and details by @academician in https://github.com/idursun/jjui/pull/576
+  - feat(lua): make default actions overridable and expose jjui.builtin.* by @idursun in https://github.com/idursun/jjui/pull/577
+  - feat(help): add "help view" bound to f1 by @idursun in https://github.com/idursun/jjui/pull/578
+  New Contributors
+  - @academician made their first contribution in https://github.com/idursun/jjui/pull/539
+  Full Changelog: https://github.com/idursun/jjui/compare/v0.9.12...v0.10.0
+ReleaseNotesUrl: https://github.com/idursun/jjui/releases/tag/v0.10.0
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/idursun/jjui/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

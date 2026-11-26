@@ -1,0 +1,141 @@
+# Created with WinGet Updater using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Sidero.omnictl
+PackageVersion: 1.8.0
+PackageLocale: en-US
+Publisher: Sidero Labs
+PublisherUrl: https://github.com/siderolabs/omni
+PublisherSupportUrl: https://github.com/siderolabs/omni/issues
+PrivacyUrl: https://www.siderolabs.com/privacy-policy/
+Author: Sidero Labs
+PackageName: omnictl
+PackageUrl: https://github.com/siderolabs/omni
+License: Mozilla Public License Version 2.0
+LicenseUrl: https://github.com/siderolabs/omni/blob/HEAD/LICENSE
+ShortDescription: A command line tool for communicating with Omni
+Moniker: omnictl
+Tags:
+- k8s
+- kubernetes
+- omni
+- talos
+ReleaseNotes: |-
+  Omni 1.8.0 (2026-05-21)
+  Welcome to the v1.8.0 release of Omni!
+  Please try out the release binaries and report any issues at
+  https://github.com/siderolabs/omni/issues.
+  Urgent Upgrade Notes (No, really, you MUST read this before you upgrade)
+  As Omni is now using --join-tokens-mode=legacyAllowed by default it won't start if there are any nodes running Talos below 1.6 connected to the instance.
+  If you want to keep using Omni with the outdated Talos you will need to set the flag to legacy. But of course we strongly recommend you to update Talos ASAP.
+  omnictl cluster template has breaking changes: it now restricts including files outside of the current directory.
+  If using files in the parent dirs, old behavior can be enabled by using --allowed-dir.
+  Additional Audit Log Filters
+  Audit logs gain a generic search box and sortable columns in the UI, plus CLI filters for event_type, resource_type, resource_id, cluster_id, and actor.
+  Per-Actor etcd Write Metrics
+  New omni_etcd_operations_total and omni_etcd_resource_bytes_total Prometheus counters track etcd writes, split by operation (create/update/teardown/destroy), actor (internal/user/service account/infra provider), actor ID, and resource type. Byte sizes are captured from the actual on-disk payload via a new WithObserver hook in state-etcd.
+  Disks and Devices on Machine Pages
+  The frontend now shows disks and devices on the machines and individual machine pages.
+  Talos Version Text on Installation Media Wizard
+  The installation media wizard's Talos version text has been updated for clarity.
+  Switching Logs Inside the Logs Tab
+  The logs tab now allows switching between log sources directly inside the tab.
+  Quick Switching Between Cluster Machines
+  The frontend allows quickly switching between machines within a cluster from the machine detail view.
+  In-UI Notifications
+  Omni notifications are now shown in the UI as dismissible banners.
+  Frontend Quality-of-Life Improvements for Machines
+  The cluster machine page gains a copy-UUID button, the machines list page can toggle between hostnames and UUIDs (with the preference saved), and machine and cluster machine pages gain kernel args tabs for editing kernel arguments inline instead of through a modal.
+  Re-Saving the Omni Support Bundle
+  The frontend now allows re-saving a previously generated Omni support bundle without regenerating it.
+  Support Modal
+  A new support modal in the frontend exposes links to GitHub issues, support channels, documentation, community resources, and office hours.
+  Helm Chart Values Generated From Config Schema
+  A new helmvaluesgen tool, run on make generate, updates the config: section of the Helm chart's values.yaml from Omni's config schema, applying chart-specific overrides for defaults, omissions, and descriptions.
+  Legacy Installation Media Proxying Removed
+  Omni no longer proxies legacy installation media download requests to the Talos Image Factory. Such requests are now rejected with a message asking users to upgrade omnictl, which downloads installation media directly from the factory.
+  Image Factory Proxy for Infra Providers
+  Infra provider Image Factory requests can now be proxied through Omni via a new schematic creation API that accepts raw YAML. This is useful when Omni holds authentication for the Image Factory or when multiple Image Factory endpoints need to be supported.
+  Imported Cluster Secrets Cleanup
+  A new controller tears down ImportedClusterSecrets once their content has been copied into ClusterSecrets and marked Imported=true, so imported bootstrap material does not linger in the state after a successful import.
+  Infra Provider Factory Endpoint
+  Infra providers now use the Image Factory endpoint configured in Omni's features state (sourced from args/config) instead of a hardcoded default. The configured factory URL is exposed on the provider.
+  Installation Media Placeholders
+  InstallationMediaConfig now accepts empty strings for talosVersion and joinToken, which resolve to the current stable version and default token at download time. The create wizard exposes "Automatic" options for these fields, and the download modal shows version/token/arch pickers for all presets.
+  Reader Access to Join Tokens
+  Users with the reader role can now read join tokens.
+  Reader had access to it before through Talos logs, so making the access more consistent.
+  More fine grained access will come with RBAC v2 later on.
+  Multi-Port Workload Proxy
+  The omni-kube-service-exposer.sidero.dev/port annotation now accepts a comma-separated list of host-port or host-port:service-port entries, each producing its own ExposedService URL. Label, icon, and prefix annotations gain per-host-port suffixed variants (e.g. label-30080). Existing single-port exposed services keep their URLs across the upgrade.
+  Configurable Log Level and Format
+  Omni's log level and log format are now configurable via flags and config.
+  Provision Step Errors on Machine Requests
+  A new Error field on ClusterMachineRequestStatus surfaces provision step failures so users can see why a request is stuck without scraping logs. Errors are now persisted on both failure and requeue paths.
+  omnictl media Command Group
+  A new omnictl media preset {create,list,delete} command group manages InstallationMediaConfig presets from the CLI, and omnictl media download <preset> downloads from them. Preset validation runs against the server's CloudPlatformConfig, SBCConfig, and TalosExtensions resources at create time. The legacy omnictl download is preserved but deprecated.
+  Plain Download Links for Images
+  The frontend now uses plain browser download links for factory image downloads instead of intercepting them.
+  Powered Off Machine State
+  Machines that are shut down now appear as "Powered Off" in the UI instead of being stuck in "Shutting Down" with a greyed-out unreachable state. Static infra providers honor the shutdown until the machine goes through a deallocation cycle, instead of automatically powering it back on. The CLI gains omnictl machine shutdown and omnictl machine power-on commands.
+  Per-Key Creation and Last-Active Tracking for Service Accounts
+  Service account key listings now include per-key creation timestamps and last-active times. omnictl serviceaccount list shows KEY CREATED and KEY LAST ACTIVE columns alongside the existing SA-level LAST ACTIVE. A new PublicKeyLastActive resource backs this tracking, and the activity interceptor records last-used timestamps per signing key fingerprint.
+  Commented omnictl serviceaccount create Output
+  The output of omnictl serviceaccount create is now commented out by default, making it friendlier for piping into .env files and shell automation.
+  Talos Version End-of-Support Notifications
+  Omni now tracks machines running Talos versions approaching or past end of support relative to MinTalosVersion, emits two new notifications (approaching end of support, end of support reached), and exposes Prometheus metrics for both.
+  Download talosctl From Factory
+  talosctl binaries are now downloaded directly from the Talos Image Factory instead of GitHub.
+  Cluster Template Include Directory Restrictions
+  By default, cluster templates can only include files from the same directory as the template file. This prevents malicious templates from including arbitrary files like /etc/passwd. The previous behavior can be restored with --allowed-dir.
+  Raw Bytes Support in Template Inline Fields
+  Inline fields for manifests and config patches now accept three forms: a single inline map (for backward compatibility), a list of inline maps, or raw bytes (which may contain multiple YAML documents). omnictl cluster template export now exports patches and manifests as raw bytes so multi-document values round-trip correctly.
+  Template Includes Resolved Relative to Template File
+  omnictl cluster template commands now resolve patch and Kubernetes manifest includes relative to the template YAML file, rather than the current working directory of omnictl.
+  Contributors
+  - Edward Sammut Alessi
+  - Oguz Kilcan
+  - Utku Ozdemir
+  - Artem Chernyshev
+  - Andrey Smirnov
+  - Noel Georgi
+  - Mateusz Urbanek
+  - Justin Garrison
+  - Maja Bojarska
+  - Orzelius
+  - Quentin Joly
+  - Spencer Smith
+  Changes
+  83 commits
+  - c2ba458a release(v1.8.0): prepare release
+  - df05dbae release(v1.8.0-beta.1): prepare release
+  - b5e5e86e refactor: update minio env names
+  - 5a894a21 chore: update helm README with new install instructions
+  - 4fe2a67f chore: rekres, bump deps and default versions
+  - 6fab9972 release(v1.8.0-beta.0): prepare release
+  - ac81e59f feat: collect ClusterKubernetesManifestStatus in the support bundles
+  - 64a1d536 fix: wrong role promotion for some etcd APIs
+  - 7cc7e181 test: fix workload proxy integration test for upgrade scenario
+  - 2c8b1789 feat: add per-actor etcd write metrics
+  - 49322f05 feat: use plain download links for image downloads
+  - 01742e71 feat: add log level and format configuration
+  - 7fb5b164 chore: bump deps
+  - cab06214 feat(frontend): allow switching logs inside logs tab
+  - c890ecec refactor(frontend): move node logs logic into machinelogscontainer
+  - 75cdb09f refactor(frontend): extra machine service list into a composable
+  - 9f1bb2fa docs: add COSI resource operations in API usage examples
+  - 13c3f289 fix: add more input validations to management API
+  - ced79da6 fix: consume SAML sessions once
+  - 7b72ac64 chore(frontend): bump dependencies
+  - ed7738b3 fix: do not panic is ssa apply with multi-version CRDs
+  - e08e566d feat: destroy imported cluster secrets after bundle is consumed
+  - d01a6f66 fix(frontend): keep machine details open when switching
+  - 25fa9e14 fix: change ImportedClusterSecrets access level to operator
+  - 39ee2f01 feat: proxy image factory requests done by the providers through Omni
+  - e7aee25c test(frontend): add e2e tests for join tokens in frontend
+  - e6be461c fix(frontend): add apexcharts formatter workaround
+  - ba6205f5 fix(frontend): fix apexcharts broken tooltips and initial state
+  - addf6624 feat: add omnictl media command group with preset support
+ReleaseNotesUrl: https://github.com/siderolabs/omni/releases/tag/v1.8.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

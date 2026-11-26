@@ -1,0 +1,185 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: libjxl.libjxl
+PackageVersion: 0.12.0
+PackageLocale: en-US
+Publisher: libjxl
+PublisherUrl: https://github.com/libjxl
+PublisherSupportUrl: https://github.com/libjxl/libjxl/issues
+PackageName: libjxl
+PackageUrl: https://github.com/libjxl/libjxl
+License: BSD-3-Clause
+LicenseUrl: https://github.com/libjxl/libjxl/blob/HEAD/LICENSE
+ShortDescription: JPEG XL image format reference implementation
+Description: A reference implementation of JPEG XL (encoder and decoder). This software library is used by many applications that support JPEG XL.
+Tags:
+- cjxl
+- djxl
+- iec18181
+- iso18181
+- jpegxl
+- jpgxl
+- library
+- netpbm
+- openexr
+Moniker: libjxl
+ReleaseNotes: |-
+  Added
+  - A new buffering flag is now available in the CLI, alongside support for
+    streaming input with buffered output. (#4634)
+  - Introduced the new jxltran tool, which supports extracting codestreams from
+    jxlp boxes and packing raw codestreams into jxlc boxes. (#4161, #4165,
+    #4168, #4196)
+  - Added the --reconstruct_jpeg flag to djxl to losslessly reconstruct a
+    JPEG and fail if impossible (mutually exclusive with --pixels_to_jpeg and
+    --jpeg_quality). (#4498)
+  - Added JXL_DEC_UNSUPPORTED (kUnsupported) status code to the core API to
+    better indicate when requested features or operations are not supported by
+    the decoder. (#4390)
+  - tools: added support for ProPhoto (#4824) and Adobe98 / AdobeRGB
+    (#4199) color space names in CLI arguments (cjxl / djxl).
+  - decoder API: support for out-of-order jxlp boxes (ftyp minor version 1).
+    (#4741)
+  - encoder API: JXL_ENC_FRAME_SETTING_OUTPUT_MODE frame setting to control how
+    the codestream is written to the output. Mode 0 (default) buffers the output
+    internally and produces a normally ordered, progressively decodable
+    codestream. Mode 1 uses seek-based streaming (reduces peak memory for large
+    images, requires a seekable output stream). Mode 2 uses out-of-order jxlp
+    boxes (reduces peak memory without requiring seeking, but requires a decoder
+    that supports ftyp minor version 1). (#4745)
+
+  Changed
+  - Major overhaul for faster decoding and progressive lossless. (#4201, #4641,
+    #4811)
+    - Progressive lossless images are around 30-40% smaller and are now
+      multithreaded increasing encoding performance by 2-5x.
+    - Lossless images with faster decoding are now 30-80% smaller and their
+      decoding speeds properly scale as the faster decoding level increases
+      from 1-4.
+    - Disabled global palette for progressive images, fixing glitchy progressive
+      loading for indexed/low color images and restoring transparency support
+      (Note: this causes a density/speed penalty for very low bit-depth images).
+  - Numerous speed/memory usage improvements.
+    - Improved encoding speeds by SIMDifying EstimateCost (+5% performance) and
+      speeding up uint-coding trials. (#4322, #4330)
+    - Accelerated modular encoding and decoding via SIMD optimizations for
+      forward RCT transforms and upsampling (up to 4x faster). (#4332, #4384)
+    - Massive overhaul to histogram encoding and decoding, providing significant
+      performance optimizations for modular mode. (#4123, #4132, #4136, #4185)
+    - Tweaked JPEG recompression logic to improve density and efficiency. (#4202)
+    - Fixed performance regressions in fast lossless modes and optimized
+      text-like patch detection. (#4341, #4448)
+    - Refined x86 XCR0 CPU checks to prevent issues on specific hardware.
+      (#4449)
+    - Migrated Windows release builds to use clang-cl, which improves
+      performance across the board. (#4529)
+    - Improved use of SIMD in tree construction hot loop. (#4720)
+    - Improved spline caching. (#4857)
+    - Postponed JPEG coeffs allocation until first SOS. (#4863)
+  - The default buffering level in the CLI has been changed to 2, greatly
+    improving encoding performance for images under 2048x2048. Additionally,
+    output is buffered by default to allow basic progressive loading. (#4635,
+    #4637, #4642)
+  - Better Density/Speed tradeoff for lossless effort levels. (#4236)
+  - Improved visual quality of gradients by using channel-offset blue noise
+    dithering instead of bayer when decoding to lower bitdepths. (#4305, #4559)
+  - Lossy modular encoding quality/density improvements. (#3575)
+  - local_tone_map tool: Now produces SDR output in the DisplayP3 color space
+    rather than Rec2020. Also added an optional third command-line argument to
+    dump the HDR image as a raw rgba1010102 file for use with the libultrahdr
+    example app. (#4210)
+  - Significant improvements to EXR input/output handling for cjxl. Now supports
+    reading float32, multilayer, per-channel bitdepth, and writing greyscale
+    EXR images. (#4312, #4460)
+  - The decoder API for JxlDecoderSetImageOutBuffer and
+    JxlDecoderSetPreviewOutBuffer has been clarified; their timeframes are now
+    non-intersecting, preventing accidental buffer overwrites. (#4671)
+  - Layered JXL files are no longer coalesced when re-encoding with cjxl, and
+    can now be decoded to separate PNG/PAM files with djxl by using
+    --no_coalescing. (#4299)
+  - The progressive flag -p in cjxl will now encode a more progressive image.
+    (#4258, #4699)
+  - When lossy encoding, resampling 2 is now enabled at distance 10, and is up to
+    10x faster below effort 10 by using a faster downsampling method. (#4147)
+  - Faster PNG compression. (#3819)
+  - decoder API: documented that at most one preview image exists in a
+    codestream.
+    (#4671)
+  - encoder API: corrected documentation for box size header in
+    JxlEncoderAddBox (0 means box extends to end of file, 1 means 64-bit size
+    follows). (#4081)
+  - Performance & memory: tracked memory for temporary box/codestream storage
+    (#4852) and reduced allocation overhead in ValidateTree (#4851) and low
+    memory rendering pipeline. (#4495, #4496)
+  - Quality: improved HDR behavior at effort 8+. (#3885)
+  - tools: jxlinfo rewritten in C++ with human-friendly output formatting.
+    (#4300)
+  - tools: image viewers now perform CMS color transforms in parallel across
+    threads. (#4326)
+
+  Deprecated
+  - encoder API: JXL_ENC_FRAME_SETTING_BUFFERING mode 3 is deprecated; output
+    buffering should now be controlled via JXL_ENC_FRAME_SETTING_OUTPUT_MODE.
+    (#4745)
+
+  Removed
+  - The jpegli codebase has been removed as it is now maintained as a separate
+    project at google/jpegli. (#4657)
+  - Dropped GIMP plugin (libjxl-gimp-plugin). (#4875)
+
+  Fixed
+  - Allows -E to be used in jpeg-transcoding again. (#4729)
+  - Fixed an issue where Lossy Delta Palette encoding failed on images larger
+    than 2048x2048. (#4201)
+  - Fixed Delta Palette with Weighted Predictor decoding. (#4837)
+  - JxlEncoderAddChunkedFrame incorrectly called JxlEncoderCloseInput
+    instead of JxlEncoderCloseFrames, resulting in corrupted files when
+    trying to add more boxes. (#4466)
+  - Float16 values roundtrip more accurately. (#4461)
+  - JXL input to cjxl no longer gets double orientation applied and also now
+    keeps frame names. (#4374, #4561)
+  - JxlBasicInfo.alpha_premultiplied was not correctly forwarded. (#4357)
+  - CMYK JXL files would not decode to PNG correctly. (#4301)
+  - Encoder would hang with specific parameters on images containing more than
+    256 groups. (#4302)
+  - Decoding would fail with LZ77 runs that crossed entropy-coded streams within
+    the same section. (#4298)
+  - Images could be corrupted when encoding effort 1 lossless. (#4027, #4291)
+  - Extremely high quality lossy would not conform to Level 5 of the spec.
+    (#4238)
+  - Density regression with Predictor Zero since v0.11. (#4225)
+  - Progressive VarDCT encoding would create non-progressive files. (#4223)
+  - Extremely tall/wide images failed to encode using modular. (#3937, #4308)
+  - Empty DHT markers no longer cause JPEG transcoding to fail. (#2704)
+  - Fixed photon noise encoding for progressive images. (#4866)
+  - Correctly handled mistakenly set "interleaved" alpha. (#4862)
+  - Fixed grayscale over-read in EncodeWithSJpeg. (#4871)
+  - Fixed djxl SelectFormat failure when converting grayscale images to PPM.
+    (#4691)
+  - Fixed segmentation fault when attempting to open non-existing input files in
+    CLI tools. (#4846)
+  - Fixed GIF always being decoded as RGBA. (#4849)
+  - Added a warning when an unsupported GIF disposal mode is encountered. (#3918)
+  - Fixed PNG color space information reading. (#4598)
+  - Fixed MSVC ARM64 build and restricted _sub_overflow_i32 to x86/x64. (#4877)
+  - Corrected specialized decoding path for fast lossless. (#4836)
+  - Rejected duplicate out-of-order jxlp indices. (#4814)
+  - Used png_bit_depth to correctly determine pixel layout. (#4854)
+  - Fixed memory leak in GetContext() in jxl_cms.cc. (#4663)
+  - Fixed stdin evaluation if file - exists. (#4668)
+  - Fixed JXL primary color representation detection. (#4618)
+
+  Security
+  - Extensive security and hardening fixes across the core decoder/encoder, box
+    buffers, and plugins (EXR, GIF, APNG/PNG, PAM/PNM/PGX). This includes fixes
+    for integer overflows/underflows, out-of-bounds reads/writes, buffer
+    overflows, and null pointer guards. (#4629, #4631, #4646, #4683, #4685,
+    #4687, #4688, #4722, #4746, #4758, #4764, #4766, #4773, #4775, #4777,
+    #4778, #4788, #4791, #4792, #4795, #4797, #4799, #4808, #4839, #4840,
+    #4850, #4855, #4870, #4874)
+  Note: This release is for evaluation purposes and may contain bugs, including security bugs, that may not be individually documented when fixed. See the SECURITY.md file for details. Always prefer to use the latest release.
+  Please provide feedback and report bugs here.
+ReleaseNotesUrl: https://github.com/libjxl/libjxl/releases/tag/v0.12.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

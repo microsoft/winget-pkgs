@@ -1,0 +1,83 @@
+# Created by Anthelion using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: jj-vcs.jj
+PackageVersion: 0.47.0
+PackageLocale: en-US
+Publisher: jj-vcs
+PublisherUrl: https://github.com/jj-vcs
+PublisherSupportUrl: https://github.com/jj-vcs/jj/issues
+PackageName: jj
+PackageUrl: https://github.com/jj-vcs/jj
+License: Apache-2.0
+LicenseUrl: https://github.com/jj-vcs/jj/blob/HEAD/LICENSE
+ShortDescription: A Git-compatible VCS that is both simple and powerful
+Description: A Git-compatible VCS that is both simple and powerful
+Moniker: Jujutsu
+Tags:
+- cli
+- git
+- mercurial
+- vcs
+ReleaseNotes: |-
+  Release highlights
+  - Templates now have a top-level revset(revset: Stringify) -> List<Commit>
+    function for evaluating revsets during templating.
+  - In colocated workspaces, jj describe -r@, jj restore --into=@, etc. no
+    longer reset the staging area, just as snapshotting doesn't. jj new @- still
+    resets it.
+
+  Breaking changes
+  - In non-colocated workspaces, jj git fetch and push no longer update
+    remote-tracking Git refs. Use jj git export to export remote bookmarks to
+    Git.
+  - In non-colocated workspaces, jj git import; jj undo; jj git import no longer
+    re-imports external changes. Run jj git export to reflect undone changes in
+    Git. jj git fetch; jj undo; jj git fetch continues to work as expected.
+  - Timestamp.format() now follows jiff's strftime
+    syntax instead of
+    chrono's. Most directives, including the default format, are unchanged, but:
+    - %v and %+ are no longer supported. Use %e-%b-%Y and
+      %Y-%m-%dT%H:%M:%S%.3f%:z (which always includes milliseconds) instead.
+    - %c, %x, and %r produce different output. For example, %x now
+      formats as 2001 M07 8 rather than 07/08/01.
+    - %f now prints only as many digits as needed rather than always 9. Use
+      %9f or %N for the old behavior. Similarly, %.f no longer pads to 3, 6,
+      or 9 digits, so it formats as .12 rather than .120.
+    - %Z now prints a time zone abbreviation. Use %:z to get an offset.
+    - %:::z now includes the minutes of an offset when they are non-zero.
+    - New directives and flags such as %N, %Q, %^a, and %5Y are now
+      accepted. %#z no longer panics.
+    - json(timestamp) now prints a UTC time zone offset as +00:00 instead of
+      Z.
+  - The bookmarks and tags list now include absent targets for conflicted
+    bookmarks and tags. The .removed_targets() and .added_targets() template
+    methods now return List<Option<Commit>>.
+
+  New features
+  - jj git push with git.sign-on-push enabled now signs commits in a
+    separate operation before the push, so commits stay signed if the push
+    fails and a new push doesn't have to sign them again.
+  - Diff hunk headers now include symbol context even for unsupported languages.
+  - jj resolve gained a built-in :editor merge tool that opens the conflicted
+    file with conflict markers in your text editor. Unlike the other merge tools,
+    it supports conflicts with more than two sides.
+  - jj config gc now also cleans up workspace configs whose paths no longer
+    exist.
+  - Commit.contained_in() now accepts a Stringify instead of a StringLiteral.
+    This enables dynamic query building during templating.
+  - Templates now have a top-level revset(revset: Stringify) -> List<Commit>
+    function for evaluating revsets during templating.
+  - The TreeEntry template type now has .removed_values() -> List<Option<TreeValue>>
+    and .added_values() -> List<Option<TreeValue>> methods, and TreeValue now
+    exposes .object_id(), .file_type(), and .executable() methods for
+    inspecting each side of a (possibly conflicted) tree entry.
+  - The WorkspaceRef template type now has a .current_workspace() -> Boolean
+    method, which can be used to identify the current workspace. This is slightly
+    different than self.target
+ReleaseNotesUrl: https://github.com/jj-vcs/jj/releases/tag/v0.47.0
+Documentations:
+- DocumentLabel: Homepage
+  DocumentUrl: https://jj-vcs.github.io/jj/
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

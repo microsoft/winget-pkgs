@@ -1,0 +1,78 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Gravitational.Teleport
+PackageVersion: 18.11.9
+PackageLocale: en-US
+Publisher: Gravitational, Inc.
+Author: Gravitational, Inc.
+PackageName: Teleport
+License: AGPL-3.0
+LicenseUrl: https://github.com/gravitational/teleport/blob/HEAD/LICENSE
+Copyright: © 2026 Gravitational Inc.; all rights reserved.
+ShortDescription: Teleport provides connectivity, authentication, access controls and audit for infrastructure.
+Description: |-
+  Teleport includes an identity-aware access proxy, a CA that issues short-lived certificates, a unified access control system and a tunneling system to access resources behind the firewall.
+  We have implemented Teleport as a single Go binary that integrates with multiple protocols and cloud services:
+  - SSH nodes.
+  - Kubernetes clusters
+  - PostgreSQL, MongoDB, CockroachDB and MySQL databases.
+  - Internal Web apps.
+  - Windows Hosts.
+  - Networked servers.
+  You can set up Teleport as a Linux daemon or a Kubernetes deployment.
+  Teleport focuses on best practices for infrastructure security:
+  - No need to manage shared secrets such as SSH keys or Kubernetes tokens: it uses certificate-based auth with certificate expiration for all protocols.
+  - Two-factor authentication (2FA) for everything.
+  - Collaboratively troubleshoot issues through session sharing.
+  - Single sign-on (SSO) for everything via GitHub Auth, OpenID Connect, or SAML with endpoints like Okta or Microsoft Entra ID.
+  - Infrastructure introspection: Use Teleport via the CLI or Web UI to view the status of every SSH node, database instance, Kubernetes cluster, or internal web app.
+  Teleport uses Go crypto. It is fully compatible with OpenSSH, sshd servers, and ssh clients, Kubernetes clusters and more.
+ReleaseNotes: |-
+  - Fixed high memory use by the app service on startup in clusters with many app servers.
+  - Fixed AWS KMS multi-region replicas of session recording encryption keys being tagged TeleportCluster instead of TeleportClusterEncryption. This doesn't affect existing replicas keys, they keep their old tags until rotation.
+  - Added support for pam_group.so.
+  - Fixed DynamoDB-backed session searches to correctly apply RBAC predicates containing OR expressions, map references, and repeated fields.
+  - Fixed Teleport Database Service connectivity issues with Oracle databases when Oracle SCAN is enabled.
+  - Improved the reliability of automatic database user provisioning and cleanup for PostgreSQL and Redshift.
+  - Added dnsConfig and dnsPolicy support to the tbot and tbot-spiffe-daemon-set Helm charts.
+  - Fixed tsh proxy kube failing for every cluster when one Kubernetes cluster has no running agent.
+  - Reduced connections and hardware key signatures for concurrent Kubernetes requests through tsh proxy kube and Teleport Connect by multiplexing them over HTTP/2.
+  - Update how web and app sessions with a missing user or role are handled, ensuring consistent re-login UX.
+  - tsh no longer prints generic SSH exit-status errors. Exit codes and error details are preserved.
+  - Session summarization inference resources (inference_model, inference_secret, inference_policy, retrieval_model) now require MFA for administrative actions.
+  - Updated saml_idp_service_provider resource API to validate attribute value predicates when creating or updating the resource.
+  - The Teleport proxy and desktop agents now export Prometheus metrics for remote desktop connection attempts and their latency.
+  - Improved the performance of access checks, reducing the CPU usage of Auth Service instances when listing resources.
+  - Fixed excessive database reads as a result of reading or listing certain resource types (SSH servers, Kubernetes clusters, applications).
+  - Reduced TLS handshakes in tsh proxy kube and Teleport Connect Kubernetes gateways, which now reuse upstream connections instead of handshaking on every request. Under a hardware key policy this also removes a private key signature per request.
+  - Added canonical teleport.dev/aws-region labels to auto-discovered EC2 instances.
+  - Added a 30 second timeout for each attempt of a PostgreSQL backend operation, so a stalled query no longer holds a pool connection indefinitely.
+  - Added canonical teleport.dev/account-id and teleport.dev/aws-region labels to auto-discovered AWS databases.
+  - Support scoped integrations, AWS OIDC and Roles Anywhere console apps through tsh and tctl.
+  - EC2 auto-discovery now processes SSM installation groups concurrently with bounded concurrency.
+  - Add canonical teleport.dev/account-id and teleport.dev/aws-region label to discovered EKS clusters.
+  - Add scope support for AWS console apps.
+  - Raised limit of unique version numbers supported Bot Instances report from 20 to 40.
+  - Fixed Access Request creation failures and incorrect duration labels when requests cross daylight saving time transitions.
+  - Prevented overlapping EC2 discovery matchers from submitting duplicate SSM installation commands during the same discovery scan.
+  - Added connection pool metrics and improved connection failure logging for the PostgreSQL backend.
+  - Improved EC2 auto-enrollment failure diagnostics with SSM invocation links and retry information.
+  - Added installation backoff for EC2 instances enrolled through AWS SSM.
+  - Fixed static SPIFFE federation configurations being unnecessarily re-synced.
+  - Added retry timing and attempt metadata to EC2 discovery UserTasks.
+  - Support AMR evaluation of Access Requests containing K8s Namespace resources.
+  - Fixed an issue where the Auth Service logged "Failed to complete upload" after every app session chunk upload.
+  - Fixed SSH sessions not being logged in logind on modern Linux systems.
+  - Allow multiplexed tsh aws proxy to work without needing to login to app when role choice is unambiguous.
+  - Add --all flag to multiplexed tsh aws proxy commands to allow proxying all authorized AWS apps.
+  - Fixed workload-identity-api not renewing the X509-SVIDs over the Envoy SDS API on a consistent interval.
+  - Introduced jitter to tbot renewal loops to smooth load characteristics at scale.
+  - Add support for using system credentials with the intune integration.
+ReleaseNotesUrl: https://github.com/gravitational/teleport/releases
+PurchaseUrl: https://goteleport.com/pricing/
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://goteleport.com/docs/
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

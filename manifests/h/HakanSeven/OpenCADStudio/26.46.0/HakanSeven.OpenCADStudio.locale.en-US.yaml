@@ -1,0 +1,64 @@
+# Created with komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: HakanSeven.OpenCADStudio
+PackageVersion: 26.46.0
+PackageLocale: en-US
+Publisher: Hakan Seven
+PublisherUrl: https://github.com/HakanSeven12
+PublisherSupportUrl: https://github.com/HakanSeven12/OpenCADStudio/issues
+PackageName: Open CAD Studio
+PackageUrl: https://github.com/HakanSeven12/OpenCADStudio
+License: GPL-3.0
+LicenseUrl: https://github.com/HakanSeven12/OpenCADStudio/blob/HEAD/LICENSE
+ShortDescription: A CAD application built with Rust — 2D/3D drawing, DWG/DXF support, and GPU-accelerated rendering.
+Tags:
+- cad
+- dwg
+- dwg-compatible
+- dwg-editor
+- dwg-files
+- dwg-parser
+- dwg-reader
+- dwg-support
+- dwg-viewer
+- dxf
+- dxf-editor
+- dxf-files
+- dxf-parser
+- dxf-reader
+- dxf-viewer
+- rust
+ReleaseNotes: |-
+  OpenCADStudio - Release v2026.46 (2026-11-15)
+  > Summary: Added a parameter order cell to the Parameters Manager, the EATTEDIT command, an SHX Big Font picker in Text Style settings, and corrected Big5 SHX big-font code-page detection, named ATTSYNC, the attribute definition card and the attribute manager's labels; added the GEOGRAPHICLOCATION drawing CRS command, automatic PDFATTACH GeoPDF placement and Geospatial PDF (GeoPDF) plot export.
+  🌟 Notable Release Notes
+  - Parameters Manager Order: Each parameter carries a whole-number rank that every one of its rows prints and that is kept with the parameter in the drawing, so it survives saving and reopening. (Contributed by @KarimJerbi)
+  - EATTEDIT and ATTSYNC: EATTEDIT opens the attribute editor on a selected reference or starts the pick; ATTSYNC <block> synchronises a named block directly. (Contributed by @KarimJerbi)
+  🚀 New Features
+  - GEOGRAPHICLOCATION: The command (also on the Edit menu) sets the root drawing's coordinate reference system in native GEODATA from an EPSG code such as EPSG:5514, a WKT definition, or a MapGuide XML definition that carries an EPSG CoordinateSystem alias. It preserves the other geographic metadata (design and reference points, north and up directions, unit scales), works as one undo step, and persists in DWG and DXF. Version 2/3 GEODATA stores the interoperable MapGuide XML beside the authored WKT, so external CAD libraries such as ezdxf read the CRS back, and a GEODATA the dialog creates defaults north to +Y, up to +Z with unit scales from INSUNITS.
+  - PDFATTACH Auto Placement: The Attach dialog offers Place automatically (GeoPDF): in root model space, when the drawing has a GEODATA CRS (explicit INSUNITS for a projected CRS; a geographic CRS places without units) and every selected page carries a CRS-equivalent ISO /VP or legacy /LGIDict frame, Attach places the page by its georeferencing instead of asking for the point, scale and rotation. The fit supports affine rotation and non-uniform X/Y scale, accepts registration coordinates the PDF stored at single precision, and keeps the manual values for underlays it cannot georeference, such as multiple or conflicting frames, shear, reflection or paper space. The command-line form always asks the manual prompts.
+  - GeoPDF Plot Export: The Plot dialog's PDF output offers Geospatial PDF (GeoPDF) under Plot options, off by default. An opted-in model-space plot writes an ISO 32000-2 geospatial viewport whose registration follows the actual plot scale, offsets, paper size and upside-down rotation, and converts drawing coordinates to the drawing CRS's base geographic system individually, without a WGS84 pivot: EPSG:5514 exports geographic EPSG:4156 plus projected display EPSG:5514. The option needs a drawing CRS and a top-down orthographic view; a drawing without a CRS, or with a projected CRS and unknown drawing units, exports as an ordinary plain PDF, while malformed geospatial state or a scene the option cannot serve reports an error. Preview and ordinary printing never carry the metadata.
+  - Plugin Layout Tab Order: Plugin API v23 adds TableOperation::LayoutSetTabOrder: a plugin puts the paper-space layout tabs in a new order as one undo step, the way dragging a tab does, instead of copying and deleting layouts.
+  - Plugin Geographic Location: Plugin API v22 adds set_geo_location and remove_geo_location: a plugin writes the drawing's GEODATA (CRS, design and reference points, north) the way GEOGRAPHICLOCATION stores it, as one undo step, so a location set by a plugin opens georeferenced in other CAD programs.
+  - Assistant Pallet: ASSISTANT (alias AI, also on View ▸ Palettes) docks a chat pallet for an AI agent that drives the drawing through the --mcp endpoint. Requests and Markdown replies read as a conversation, each tool step shows as a card with its state, duration, input, result and viewport captures, and Stop cancels after the current step. The agent is an external service on the loopback interface (one JSON object per line, described in docs/assistant-panel.md), started on demand from OCS_ASSISTANT_COMMAND; no model, key or vendor is built in.
+  - Big Font Picker: The Text Style manager replaces the plain numeric input for big-font files with a dedicated font picker listing big fonts in the drawing, SHX files adjacent to the drawing, and SHX files in configured font folders.
+  - Parameter Order: The Parameters Manager's Order cell takes a whole-number rank for the parameter its row names; both rows of an XY or polar parameter print the same rank; an emptied cell clears it; the listed rows stay alphabetical.
+  - EATTEDIT: The command reaches the editor ATTEDIT opens, on a selected block reference or after the pick, and completes from the command line.
+  - Civil 3D Objects: TIN surfaces, alignments, profile views, profiles, corridors, sample lines and assemblies draw from the geometry their records store, each component with its own style's visibility, layer, color, linetype and lineweight. Alignments hide their masked station ranges; profile views draw their grid, geometry-point lines, axes, tangent extensions and data bands; labels take their text, attachment, offsets, rotation, ticks and leader lines from the label style, scaled by the current annotation scale. Data bands label the profiles the band names, from the alignment start; station axes also label the view's first and last station; grade labels sit half way along the straight part of each tangent and read "Vertical" on vertical ones. Drawings from Civil 3D 2013 draw their styled surfaces, alignments, profile views, assemblies and every corridor baseline. A Civil 3D object draws the display cache Civil 3D saved with it, styles applied, whenever the drawing keeps one, which brings pipes, structures, parcels, feature lines and labels drawn exactly as Civil 3D drew them; drawings that keep only a placeholder (the class name and a box at the origin) draw what is decoded from the records and nothing for classes not yet decoded. Spirals keep their shape (clothoid, Bloss, sinusoidal, biquadratic, cubic parabola, Japanese cubic, sine half-wave). Pipes draw from their records where the drawing keeps no display cache: centerline, inside and outside walls and end lines, each by its pipe style, sized from the part's inner diameter and wall thickness in drawing units, and cut back where they enter a structure. Display-cache arcs are divided finely enough that large-radius curves do not show their chords. Alignments from newer Civil 3D releases draw their spiral groups (between lines, between curves, reverse and long spiral-curve groups), fillets through a point, curves to a point or direction, lines to or from a point and open curves by their centre. Profiles draw every vertical curve type (symmetric and asymmetric parabolas, circular curves) and every way of laying them out (by length, K, radius, grade or points, floating and free tangents), each with its profile style component. Offset alignments draw their spirals and widening transitions, and connected alignments their three-centered arcs. Labels show stations past an alignment's station equations as Civil 3D does, and an alignment's Properties list its start station, design speeds and station equations.
+  - -LINETYPE: The command-line form creates, renames and deletes linetypes as well as listing, loading and setting them, with quoted names for scripts.
+  - Linetype Files: -LINETYPE EXPORT writes linetypes to a .lin file, including their text and shapes; -LINETYPE SAVE adds one to your own library; -LINETYPE RELOAD picks up new .lin files without a restart.
+  - Linetype Manager: LINETYPE opens a manager in the style of the other style managers: create, copy, rename and delete linetypes, edit their dashes, gaps and dots against a live preview, and set the linetype scales and your library in one place.
+  - GROUPEDIT: Picks a group by one of its members or by name, then adds objects to it, removes members picked one at a time, or renames it; each edit is one undo step.
+  - Group Selection Shortcut: Ctrl+Shift+A turns group selection (PICKSTYLE) on and off and reports <Groups on> or <Groups off>.
+  - FILLET in Any Plane: Two lines that share a plane out of plan, such as a vertical one, are filleted in that plane, the arc lying in it.
+  - SVG Text as Outlines: The Plot dialog's SVG output offers Text as outlines, drawing the positioned glyph strokes and fills as vector paths so the viewer needs no installed fonts. The preference defaults off and retains searchable SVG text when disabled.
+  - SVG Web-Map Strokes and Automation Options: SVG Plot offers Non-scaling strokes for constant-width linework under downstream viewer transforms such as web-map layers; the preference defaults off and PDF output never sees it. Automation plot requests expose non-scaling strokes, scaled lineweights, shade mode, paperspace ordering, and explicit plot-style enable/disable.
+  - Batched Script Edits: The Python ocs module reads an entity's colour and kind, the handles carried by a layer and an entity's layer from the one snapshot a script dispatch holds, and rewrites colours and layer assignment in batches: set_entity_colors and set_entity_layers apply a list of updates as a single host transaction and undo step and skip entities that already match, while ensure_layer, freeze_layer and thaw_layer create, recolor and flag layer records within the script's undo step. Batch writes touch top-level entities only and refuse a layer the drawing does not carry. Colour reads follow the records schema (index, true colour or ByLayer) and writes accept an index, an RGB triple or "ByLayer".
+  🐛 Bug Fixes
+ReleaseNotesUrl: https://github.com/HakanSeven12/OpenCADStudio/releases/tag/v2026.46
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/HakanSeven12/OpenCADStudio/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

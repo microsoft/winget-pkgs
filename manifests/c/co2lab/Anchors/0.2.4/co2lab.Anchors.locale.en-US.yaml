@@ -1,0 +1,41 @@
+# Created with WinGet Releaser using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: co2lab.Anchors
+PackageVersion: 0.2.4
+PackageLocale: en-US
+Publisher: co2lab
+PublisherUrl: https://github.com/co2-lab
+PublisherSupportUrl: https://github.com/co2-lab/anchors/issues
+PackageName: Anchors
+PackageUrl: https://github.com/co2-lab/anchors
+License: Elastic License 2.0
+LicenseUrl: https://github.com/co2-lab/anchors/blob/HEAD/LICENSE
+ShortDescription: Spec-first continuity framework for AI-assisted development
+Description: Anchors ties spec, feature and test together through a shared identity code, then confronts each artifact against the rules declared in anchors.yaml. It maps the project as a graph, propagates change from the anchor outward, and gates every step — so work guided by AI stays anchored to what was decided.
+Moniker: anchors
+Tags:
+- ai
+- ai-agents
+- cli
+- developer-tools
+- golang
+- spec-first
+ReleaseNotes: |-
+  v0.2.4
+  - Change intents. A change carries an intent under changelog.intents.path (.anchors/changes/ by default): a front matter with the product, how far it moves the version (bump, a part of the scheme or none) and its type, then the text, in the product's words. The strategy intents raises the latest release by the largest bump of the product's intents waiting. An output with source: intents renders them; a release consumes them, deleting them or, with consume: archive, moving them under released/<version>/, where the changelog reads them again. changelog-valid confronts each intent: it parses, names a declared product, a part of its scheme or none, a declared type, says something within max_chars, and was not added before its product's latest release. (INTNA, VRSNE, VRSNN, CLGCM, CHVLA)
+  - promote and script. { strategy: promote, from: <branch> } takes the version that branch carries at its head (its latest release, for a product with no source). { strategy: script, run: <command> } runs the project's command with the product's state, as anchors version --json prints it, on its stdin, and takes the first line it prints; a command that fails or prints nothing decides nothing. (VRSNE, VRSNI)
+  - Prerelease labels. A branch rule's label: { name: rc, in: tag | source | both } makes its versions prereleases, 1.1.0-rc.<n>, n one above the highest tag. bump writes it where it goes, a stage that releases tags it (the next GitHub does not hold, or the one already on its sha), and expected takes it. A prerelease tag is never the latest release, splits no changelog release, and owes no changelog block. (VRSNN, VRSNI, RLSTA, VRQRA, CLGCM, CHVLA)
+  - updater: and after_bump:. A source a path or a regex does not cover names updater: <command>, which gets get <file> and set <file> <version> over a copy of the file. after_bump: <command> runs once a bump wrote every source, with $ANCHORS_PRODUCT and $ANCHORS_VERSION. (VRSNN, VRSNI)
+  - anchors version apply. A product's apply: says how the version its branch asks for enters the repository. release_pr (the default) commits the release on anchors/release/<product> — the version in every source, its block in every changelog output, the intents consumed —, pushes it and opens, or updates, its pull request into the branch: merging it is the release. commit confirms a bump made by hand. build writes the version into the workspace's sources, commits nothing, and prints version= and tag=, into $GITHUB_OUTPUT too. The release's block of a version not tagged yet passes changelog-valid. (VAPLA, CHVLA)
+  release_pr needs a token that may push anchors/release/* and open pull requests, and the branch flow must take anchors/release/* into the branch. To use the new keys, install this binary first: an older one refuses them.
+  Changelog
+  - 37d6128 docs(release): v0.2.4 notes
+  - a5bd6b7 feat(changelog): change intents move the version and write the notes
+  - 8ea44bf feat(version): anchors version apply brings the computed version in
+  - 7525d90 feat(version): prerelease labels, updater sources and after_bump
+  - e09e3c8 feat(version): promote and script decide a branch's version
+  - 8c7d54d fix(changelog): a CRLF checkout of the same release proposes nothing
+ReleaseNotesUrl: https://github.com/co2-lab/anchors/releases/tag/v0.2.4
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

@@ -1,0 +1,65 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: axpnet.AeroFTP
+PackageVersion: 3.6.6
+PackageLocale: en-US
+Publisher: axpnet
+PublisherUrl: https://github.com/axpnet
+PublisherSupportUrl: https://github.com/axpnet/aeroftp/issues
+Author: axpnet
+PackageName: AeroFTP
+PackageUrl: https://github.com/axpnet/aeroftp
+License: GPL-3.0
+LicenseUrl: https://github.com/axpdev-lab/aeroftp/blob/HEAD/LICENSE
+ShortDescription: A modern, multi-protocol file manager and FTP client with integrated AI, cloud sync, and military-grade encryption.
+Description: |-
+  AeroFTP is an open-source, multi-protocol file manager built with Tauri 2 (Rust + React 18 + TypeScript).
+  It supports 16 protocols (FTP, FTPS, SFTP, WebDAV, S3, Google Drive, Dropbox, OneDrive, MEGA, Box, pCloud, Azure Blob, 4shared, Filen, Zoho WorkDrive, and Cryptomator vaults),
+  features an AI assistant with 45 tools and 15 LLM providers, military-grade encrypted vaults (AES-256-GCM-SIV + Argon2id),
+  bidirectional real-time sync, a built-in code editor, SSH terminal, and media player with visualizers.
+  Available in 47 languages with 4 themes.
+Moniker: aeroftp
+Tags:
+- cloud-storage
+- encryption
+- file-manager
+- file-transfer
+- ftp
+- ftp-client
+- multi-protocol
+- rust
+- s3
+- sftp
+- sync
+- tauri
+- webdav
+ReleaseNotes: |-
+  [3.6.6] - 2026-04-27
+  Agent surface, onboarding polish, server speedtest, community wishlist
+  The full v3.6.6 cycle ran in roughly 36 hours and is shaped by two parallel community feedback waves. Issue #125 (@EhudKirsh) — a clean reproduction of CLI/Terminal bugs — prompted a 4-Sonnet black-box audit of the AI-agent surface that surfaced 13 friction points; the same thread invited Ehud to point an AI assistant at agent-info --json and agent-bootstrap --json, and the audit closes that loop. Issue #130 (@scottonanski) reframed the first-run empty state, and most of the onboarding polish ships in response. Issue #129 stayed open as the v3.6.6 wishlist thread, and many of the small UX wins below answer specific items voted up there.
+  Added
+  - aeroftp-cli agent-connect <profile> + MCP tool aeroftp_agent_connect — single-shot connect surface for AI agents. Returns one JSON payload with per-block status (connect, capabilities, quota, path), replacing the boilerplate sequence connect → about → df → ls /. Block status values are ok / unsupported / unavailable / error; agents read connect.status for the go/no-go decision and degrade gracefully on the rest. Live-connect allowlist (FTP / FTPS / SFTP / WebDAV / S3 / GitHub / GitLab) is documented inline in --help. For protocols outside the allowlist (pCloud, Filen, Dropbox, etc.) the response still includes valid capabilities, path and profile blocks; only the connect block reports status: "unsupported" and the CLI exits 0 because the rest of the payload is still actionable. New lib module agent_session.rs is the single source of truth, also translating profile.options camelCase keys (bucket, region, tlsMode, privateKeyPath, …) into ProviderConfig.extra snake_case so S3 / Azure / SFTP-key / FTPS profiles connect via vault for the first time on the agent path.
+  - agent-info --json exposes a protocol_features map keyed by protocol → list of feature tokens (share_links, resume, server_copy, versions, thumbnails, change_tracking, etc.) plus an agent_connect_supported_protocols array. Collapses what used to require N agent-connect calls (one per profile) into a single batch query — driven by the audit's Battery D where one agent had to walk 69 profiles to discover share-link capability.
+  - head -c / --bytes <N> byte-range preview for remote files. Works on binary content (returns base64 in JSON when bytes aren't valid UTF-8) and reports bytes_returned / total_size / truncated / encoding. Closes the audit's Battery A "no way to get the first 4KB without a full download" gap.
+  - ls --limit N, --files-only, --dirs-only flags. Summary now carries truncated: bool and total_before_limit: int so agents can detect partial results unambiguously. Same trio added to find, plus a --name <glob> alias for the positional pattern (the natural first-attempt form for agents who expect named args).
+  - Cross-profile multi-select on My Servers — click a server card body to toggle Cross-Profile selection (icon button still triggers Connect). Up to two cards selected; third click drops the oldest FIFO. Indigo ring + arrow-up-right badge for source, emerald + arrow-down-left for destination. Always-visible Cross-Profile button in the toolbar with three brightness states (0 / 1 / 2 selected) and a counter badge. Right-click context menu offers Set as source / destination for direct assignment. Drag-to-reorder now works while a filter chip is active or a search query is typed.
+  - Server SpeedTest — new isolated benchmark dialog and CLI parity. GUI: Single / Compare tabs, multi-select up to 8 servers, parallel selector, ranked compare table with tri-state integrity, history summary card with regression warning (last < median × 0.7), Esc cancels running test. CLI: speed subcommand upgraded with random non-compressible payload (was zeros), SHA-256 integrity, TTFB measurement, --no-integrity flag, --json-out. New speed-compare subcommand emits JSON v1, CSV, and Markdown reports. redact_url_for_display() is applied to every report and error path so passwords never appear in stdout / JSON / CSV / MD; csv_cell_safe() neutralizes spreadsheet formula triggers (=, +, -, @); md_cell_safe() escapes pipes / newlines / backslashes. Streaming download to NamedTempFile with TTFB measurement, tempfile pre-allocation before connect to eliminate orphan/leak windows, SQLite history (WAL, 0600/0700 perms, 1000-row cap, server_name forced NULL at insert as defense in depth), spawn_blocking for SHA-256 hashing and random payload generation. 22 speedtest lib tests + 6 CLI tests for redact_url, CSV/MD escaping. Schema aeroftp.speedtest.v1 is stable across CLI and GUI.
+  - Selected-server chips on the Compare tab — each chip shows the display name, protocol tag, and an inline X to remove the server from the comparison without scrolling the list.
+  - Provider IconPicker dialog (closes Ehud's wishlist ask in #129 modeled on KeePassXC's icon library) — replaces the bare file dialog under "Choose icon" with a structured picker. "Provider icons" tab shows every entry in PROVIDER_LOGOS grouped by catalog category with curated popularity priority; "Custom icons" tab is the user's persisted library (localStorage aeroftp-custom-icons) with per-icon trash button. Live free-text search. SVG support throughout: Tauri file dialog accepts .svg and stores them as data:image/svg+xml;base64,… data URLs without canvas rasterization, preserving vector fidelity at every render size. Always consumed via <img src> so embedded scripts are sandboxed. Live re-detection on dialog open: "On server" card auto-fires detect_*_favicon and surfaces the live result, with a "Matches server" check on the In Use card when the live and saved values agree.
+  - Server Health Check legend — dialog header shows the threshold dots inline (green 80+, yellow 50-79, red <50) instead of only on hover; ScoreGauge stacks /100 under the numeric score. Closes Ehud's specific "name the boundaries" ask in #129 for both single-server and Check All runs.
+  - Two WebDAV provider presets (closes Ehud's #129 suggestions): OpenDrive WebDAV (opendrive-webdav, server https://webdav.opendrive.com, regular login password) and Yandex Disk WebDAV (yandexdisk-webdav, server https://webdav.yandex.ru, app-specific password with deep-link to id.yandex.com/security/app-passwords). Both appear automatically in the Discover catalog under WebDAV.
+  - passwordGenUrl field on ProviderConfig — surfaces in the connection-form footer as a "Generate password" link (amber, key icon) next to the existing Create Account / Docs links. Wired up for Koofr WebDAV and Yandex WebDAV.
+  - PasswordStrengthBar in the Export Encrypted Backup flow — same component as AeroVault, gives users a 0-100 score with color-coded feedback while typing. Was previously only inside Vault; parity was the user-visible ask.
+  - File associations for .aeroftp and .aeroftp-keystore — Tauri fileAssociations extended with application/x-aeroftp (server-profiles export bundle) and application/x-aeroftp-keystore (full keystore). Linux MIME XML extended with both new types alongside the existing AeroVault entry. Per-format icons not shipped yet — file managers fall back to the generic AeroFTP icon.
+  - "Close to tray instead of quitting" Settings toggle (closes Ehud's #129 follow-up). When enabled, clicking the window close button hides AeroFTP to the system tray instead of terminating, so background tasks like AeroCloud sync keep running. Independent from "Start minimized on autostart"; default off to preserve existing behaviour. Esc on either panel now clears file selections when no modal/dialog/preview is open, mirroring the right-click-empty-area gesture.
+  - mkdir --json reports already_existed: bool so audit trails distinguish "I created it" from "it was already there" on idempotent -p invocations.
+  - Inline saved-profile inventory in agent-bootstrap --json plus per-profile auth_state (valid / expired / needs_refresh / no_credentials / unknown) wired into all three list surfaces (profiles --json, agent-bootstrap --json, MCP aeroftp_list_servers). Eliminates the round-trip an agent had to do after agent-bootstrap and stops connect-then-fail loops on profiles whose OAuth tokens expired silently. New profile_auth_state lib module is the single source of truth; pure local, never touches the network.
+  Changed
+  - First-run empty state on My Servers (issue #130, @scottonanski) — visible "+ New" header label instead of icon-only +. Empty state now reads "Get started" with a primary CTA "Add your first server" (was "Quick Connect", which read as "rapid versus what?") and a 2x3 category grid (Protocols / S3 / WebDAV / Cloud / Media / Developer) that jumps straight into the relevant Discover slice in one click.
+  - Cross-Profile gating — toolbar button, card click selection, and right-click "Set as source / destination" menu items are now gated on servers.length > 1. Selecting a single server as source/destination was nonsensical and used to ship a confusing badge in the toolbar.
+  - Discover service cards — replaced the responsive grid-cols-1/2/3/4/5 cascade with auto-fill minmax(260px, 1fr). Earlier breakpoints were truncating provider names to "Cloudflar...", "Backblaz...", "S3 Co...". The auto-fill grid keeps each card readable and only adds columns when the panel actually has room. WebDAV preset logos (OpenDrive, Yandex Disk) mapped to the existing PROVIDER_LOGOS so the new presets show proper icons everywhere (Discover, ConnectionScreen, SessionTabs, SettingsPanel, MyServers).
+  - My Servers grid breakpoints — grid-cols-2 md:3 lg:4 xl:5 2xl:6 with p-1 breathing room so the selection ring is no longer clipped at the edges. IntroHub container spans the same width as the connected file manager view, so switching between IntroHub and an active session no longer produces a visual jump.
+ReleaseNotesUrl: https://github.com/axpdev-lab/aeroftp/releases/tag/v3.6.6
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,79 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: QuantumNous.NewAPI
+PackageVersion: 1.0.0-rc.46
+PackageLocale: zh-CN
+Publisher: Quantum Nous
+PublisherUrl: https://www.newapi.ai/
+PublisherSupportUrl: https://www.newapi.ai/support/
+Author: 锟腾科技（杭州）有限公司
+PackageName: New API
+PackageUrl: https://www.newapi.ai/
+License: AGPL-3.0
+LicenseUrl: https://github.com/QuantumNous/new-api/blob/HEAD/LICENSE
+Copyright: Copyright © 2026 Quantum Nous. All Rights Reserved.
+ShortDescription: 新一代大模型网关与 AI 资产管理系统
+Description: New API 是一个新一代大模型网关与 AI 资产管理系统，基于 One API 进行二次开发。该项目旨在提供一个统一的接口来管理和使用各种 AI 模型服务，包括但不限于 OpenAI、Anthropic、Gemini和 Midjourney 等。
+Tags:
+- anthropic-api
+- openai-api
+- openai-response
+- 人工智能
+- 大语言模型
+- 聊天机器人
+ReleaseNotes: |-
+  Important
+  修复 CVE-2026-111943，请尽快升级。这一版用 Go 1.26.10。Go 校验证书时，会拒绝一小批已经不再可信的中间证书。用源码编译的，Go 也要换成 1.26.10。
+  Fixes CVE-2026-111943. Please upgrade soon. This release runs on Go 1.26.10. When Go checks a certificate, it rejects a small set of intermediate certificates that are no longer trusted. Builds from source need Go 1.26.10 too.
+  中文
+  - 安全：修复 CVE-2026-111943。运行时改为 Go 1.26.10，校验证书时会拒绝一小批已经不再可信的中间证书。
+  - 邮件：新增用 Resend 发邮件的功能，可以代替 SMTP。发件地址和发件人名称单独填。
+  - 数据看板：新增缓存用量的显示，和总 token 放在一起。
+  - 向量：新增阿里云百炼多模态向量模型 qwen3-vl-embedding 的支持，同系列的视觉向量模型也走这个接口。
+  - 任务：修复任务换渠道重试时还按上一次价格计费的问题。更贵的渠道会先补预扣，余额不够就不会发出去。修复任务提交和轮询没用上「请求头覆盖」的问题。修复轮询跳到别的地址时密钥跟着过去的问题。
+  - 渠道：修复可灵不接受单个密钥的问题。插件 1.1.1，不带竖线的密钥可以直接用。修复 DeepSeek 美元余额是 0、人民币有钱时，余额显示成 0 的问题。
+  - 修复：修复通知限流每到整点就重新计数的问题，超过 60 分钟也按你设的时长算。修复 Claude 流式请求在准备和重试期间断开的问题。修复连续的助手消息合并后丢掉工具调用、Claude 报错的问题。修复 Redis 清掉脚本后限流失效的问题。发给 Gemini 的向量请求里带了图片或视频时，会直接拒绝，不再计费。
+  English
+  - Security: Fixed CVE-2026-111943 by moving to Go 1.26.10. Certificate checks reject a small set of intermediate certificates that are no longer trusted.
+  - Email: Added Resend for sending mail, in place of SMTP. The sender address and sender name are set on their own.
+  - Dashboard: Added cache usage next to the total token count.
+  - Embeddings: Added Alibaba Bailian multimodal embeddings, starting with qwen3-vl-embedding. The other vision embedding models on Bailian use the same endpoint.
+  - Tasks: Fixed a retry on another channel still using the previous price. A more expensive channel reserves the difference first, and is not called when the balance cannot cover it. Fixed task submission and polling ignoring Request Header Override. Fixed polling redirects carrying the key to another address.
+  - Channels: Fixed Kling rejecting a single key. Plugin 1.1.1 accepts a key with no vertical bar. Fixed DeepSeek balance showing 0 when the USD wallet is 0 and the CNY wallet has money.
+  - Fixes: Fixed notification rate limits resetting at each hour, so a window longer than 60 minutes lasts for the time you set. Fixed Claude streams dropping during preparation and retries. Fixed merged assistant messages dropping tool calls, which made Claude reject the request. Fixed rate limiting after Redis flushed its scripts. An embedding sent to Gemini with an image or video is rejected and not billed.
+
+  What's Changed
+  - fix(notify): keep notification limit window from resetting every hour by @RedwindA in https://github.com/QuantumNous/new-api/pull/7877
+  - fix(audit): add composite index for audit log ordering by @stl25 in https://github.com/QuantumNous/new-api/pull/7874
+  - fix(relay): Claude 流式请求在准备和重试期间持续保活 by @mameikagou in https://github.com/QuantumNous/new-api/pull/7857
+  - feat(email): 添加 resend 邮件服务商接口 by @imysen in https://github.com/QuantumNous/new-api/pull/7880
+  - feat(dashboard): show cache usage alongside total tokens by @seefs001 in https://github.com/QuantumNous/new-api/pull/7773
+  - fix(task): 修复任务提交与轮询的请求头覆盖 by @qinhanlei in https://github.com/QuantumNous/new-api/pull/7918
+  - feat: 支持阿里多模态向量化模型 qwen3-vl-embedding by @feitianbubu in https://github.com/QuantumNous/new-api/pull/5179
+  - fix(relaykit): keep tool calls when merging adjacent assistant messages for Claude by @rjchien728 in https://github.com/QuantumNous/new-api/pull/7921
+  - fix(kling): 支持单 API Key by @ZIYUT in https://github.com/QuantumNous/new-api/pull/7897
+  - fix(limiter): recover redis script after flush(#6412) by @BradleyZhang in https://github.com/QuantumNous/new-api/pull/6486
+  - fix: fall back to CNY when the DeepSeek USD wallet is zero by @brushax in https://github.com/QuantumNous/new-api/pull/7917
+  - chore(deps): bump github.com/klauspost/compress from 1.18.3 to 1.18.7 by @dependabot[bot] in https://github.com/QuantumNous/new-api/pull/7931
+  - chore(deps-dev): bump vitest from 4.1.10 to 5.0.4 in /web by @dependabot[bot] in https://github.com/QuantumNous/new-api/pull/7838
+  - fix: upgrade Go to 1.26.10 for CVE-2026-111943 by @seefs001 in https://github.com/QuantumNous/new-api/pull/7942
+  New Contributors
+  - @stl25 made their first contribution in https://github.com/QuantumNous/new-api/pull/7874
+  - @mameikagou made their first contribution in https://github.com/QuantumNous/new-api/pull/7857
+  - @imysen made their first contribution in https://github.com/QuantumNous/new-api/pull/7880
+  - @qinhanlei made their first contribution in https://github.com/QuantumNous/new-api/pull/7918
+  - @ZIYUT made their first contribution in https://github.com/QuantumNous/new-api/pull/7897
+  - @BradleyZhang made their first contribution in https://github.com/QuantumNous/new-api/pull/6486
+  - @brushax made their first contribution in https://github.com/QuantumNous/new-api/pull/7917
+  Full Changelog: https://github.com/QuantumNous/new-api/compare/v1.0.0-rc.45...v1.0.0-rc.46
+ReleaseNotesUrl: https://github.com/QuantumNous/new-api/releases/tag/v1.0.0-rc.46
+Documentations:
+- DocumentLabel: 使用指南
+  DocumentUrl: https://www.newapi.ai/guide/
+- DocumentLabel: 维基百科
+  DocumentUrl: https://www.newapi.ai/wiki/
+- DocumentLabel: 接口文档
+  DocumentUrl: https://www.newapi.ai/api/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,61 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: rullerzhou-afk.clawd-on-desk
+PackageVersion: 1.7.0
+PackageLocale: en-US
+Publisher: rullerzhou-afk
+PublisherUrl: https://github.com/rullerzhou-afk
+PublisherSupportUrl: https://github.com/rullerzhou-afk/clawd-on-desk/issues
+PackageName: Clawd on Desk
+PackageUrl: https://github.com/rullerzhou-afk/clawd-on-desk
+License: AGPL-3.0-only
+LicenseUrl: https://github.com/rullerzhou-afk/clawd-on-desk/blob/v1.7.0/LICENSE
+Copyright: Copyright (c) 2026 rullerzhou-afk
+ShortDescription: A pixel desktop pet that watches Claude Code, Codex, Cursor & other AI coding agents — so you don't have to.
+Description: |-
+  Clawd on Desk is an open-source desktop pet that shows the activity of AI coding agents, including Claude Code, Codex, Cursor, and others. It reacts to working, permission requests, and task completion with animations and supports multiple concurrent sessions.
+
+  It includes Clawd, Calico, and Cloudling themes, custom themes, a sessions dashboard, optional permission bubbles, and a local activity recap.
+Tags:
+  - claude-code
+  - codebuddy
+  - codex
+  - copilot-cli
+  - cursor
+  - desktop-pet
+  - gemini-cli
+  - kiro
+  - opencode
+ReleaseNotes: |-
+  v1.7.0
+  Clawd v1.7.0 adds a Remote SSH mode for jump hosts that block reverse forwarding, lets one pet follow several Claude Code profiles, and adds Meeting Mode for screen sharing. You can choose which three quota coins appear beside the pet and show your DeepSeek prepaid balance. This release also improves Qoder Desktop, CodeBuddy IDE and DeepSeek Harness desktop sessions, and lets themes match your system's light or dark appearance.
+  Remote SSH
+  - Jump host mode — if a POSIX jump host blocks ssh -R or rejects multiline commands, disconnect the profile, then go to Settings → SSH Hosts → Edit → SSH transport compatibility and select “Jump host mode”. Save and run “Deploy / Repair Hooks” again. The default still uses reverse forwarding. Jump host mode requires parallel SSH sessions and a connection that passes bytes through unchanged, without a forced PTY. Windows remotes and single-session transports such as Codespaces are unsupported. The port field is now “Remote bridge port”, and “Copy diagnostics” gives you a redacted report for troubleshooting. After “Deploy / Repair Hooks” detects a new remote Node path, the next connection uses it, and if the bridge cannot start because Node is missing or cannot run, Clawd stops retrying and prompts you to run the repair again. Thanks to @commiyou. (PR #1366, PR #1404)
+  - Claude Code approval hook verification — “Deploy / Repair Hooks” now verifies Clawd's own approval hook even when another tool's local HTTP approval hook is listed first. The other hook stays in place. This was checked before release from a macOS development build against Windows 11 and Debian remote hosts. (PR #1355)
+  - Deployment progress — every step in the “Deploy / Repair Hooks” log now has a readable name in the selected language, including acquiring the deployment lock and finding the remote paths. (PR #1383)
+  Agent integrations
+  - Several Claude Code profiles, one pet — add folders under Settings → AI Coding Tools → Claude Code → “Claude config folders” to follow profiles such as ~/.claude and ~/.claude-work together. With multiple folders registered, editable labels such as work or personal appear in the Dashboard, Session HUD and approval bubbles. Claude quota still comes from the folder Clawd was started with (CLAUDE_CONFIG_DIR, or ~/.claude by default). Thanks to @rexxless. (PR #1329, PR #1358, issue #1250)
+  - Claude Desktop sessions clear when idle — a finished local conversation in the Code tab clears from the Session HUD and Dashboard after “Session timeout (idle)” and comes back when you send another message. Clawd keeps the row while there is an open card, a question reminder waiting to fire or a Telegram completion message you can still reply to. Thanks to @e25254 for the report. (PR #1372, issue #1365)
+  - Codex Desktop resumes live work — when Codex Desktop's background process restarts, Clawd can restore the in-progress session as soon as fresh progress arrives and use the new process to focus it once a new hook reports. After the computer reboots, Clawd uses the current boot time when available to keep unfinished turns and question prompts from the previous boot out of the live session list. Thanks to @200780381. (PR #1272, PR #1401)
+  - Codex cancellations and delegated tasks — cancelling a local session Clawd has never seen leaves no blank idle row and neither wakes the pet nor prolongs its startup wait. A delegated task's own Dashboard row settles to idle when it finishes. Slack now filters Codex subtask and Guardian (automatic review) completions the same way Telegram does. Thanks to @200780381. (PR #1370, PR #1373, PR #1398, issue #1254)
+  - Copilot sessions in the HUD — an untouched session appears in the Dashboard and joins the HUD when work begins or Copilot needs you. Ending a session clears its row, including VS Code's built-in Copilot sessions. An end event for a session Clawd has never seen leaves the existing rows alone, even when the list is full. (PR #1381)
+  - Cursor session model — the Dashboard shows the model name for Cursor sessions when Cursor's hook supplies it. Thanks to @easyhak. (PR #1348, related PR #999)
+  - DeepSeek Harness desktop conversations — clicking a local desktop session in the HUD or Dashboard switches to that conversation. Open dsh web tabs stay where they are. Clawd updates the desktop plugin once, then the desktop app needs one restart. Desktop and web running together were checked on macOS before release. Thanks to @Free-LZJ. (PR #1362, PR #1378)
+  - DeepSeek Harness desktop discovery on Windows — Windows installations registered as plain “DeepSeek Harness”, a name used since 0.2.2-alpha.2, can be found again in custom folders such as on the D: drive. This also applies when deploying via Remote SSH to Windows. The remote registry lookup was checked on Windows 11 before release. The packaged end-to-end deployment to a custom folder is pending. Thanks to @CheeseAgent. (PR #1363, PR #1374, related issue #1119)
+  - Qoder Desktop titles and delegated tasks — the Session HUD and Dashboard show native chat titles and reported context usage. The parent row shows the delegated task count, and the pet juggles while the children work. Clawd rechecks new child sessions to avoid false completion cues, stops juggling when a child goes stale, and keeps “Block sleep while working” active while a child is still working after its parent finishes. A failed tool call can stay working and finish normally. Qoder delegation also works with Codex disabled. Native titles, context percentage and delegation were checked in Qoder Desktop on Windows before release. The macOS and Linux desktop data paths still need real-machine verification. Thanks to @200780381. (PR #1393, PR #1399)
+  - CodeBuddy IDE session links and titles — on local macOS IDE sessions, “Open CodeBuddy” in the Dashboard finds the running CodeBuddy app that owns the session, including Insiders. Builds that support conversation links can open the matching chat. Otherwise Clawd raises the app window or falls back to terminal focus. CodeBuddy CLI and Windows, Linux and WSL IDE sessions use the existing terminal focus path. Telegram Direct Send copies IDE replies to the clipboard for manual paste. The original integration was checked with both macOS editions. Real-machine testing of the final click behavior is pending. Thanks to @XYZliang. (PR #1386, PR #1402)
+  Pet and themes
+  - Meeting Mode — before sharing your screen, choose “Hide for 30 Minutes”, “Hide for 1 Hour” or “Hide for 2 Hours” from the tray or right-click menu. Clawd hides the pet, Session HUD and bubbles and turns on Do Not Disturb. Open and new approval requests go back to the agent for a decision. When time runs out, Clawd restores your prior visibility and Do Not Disturb settings. You can also end the meeting from the menu, by showing or waking the pet, or by clicking its Dock icon on macOS. The tray's “Exit Mini Mode” item is available again once the mini transition finishes. Thanks to @AidanZhang06 for the request. (PR #1390, issue #1382)
+  - Smoother Free roam — Clawd starts walking smoothly from its idle pose and settles smoothly when it stops. The walk sways less and stays upright. Mini Mode uses the same art, and worn accessories return to their lower-power update rhythm after the entrance animation. Thanks to @AllanOliveiraM. (PR #1349, PR #1356, issue #1325)
+  - Light and dark theme assets — themes can now include both appearances. The default “Follow system” uses the system's light or dark setting, and you can choose “Light” or “Dark” under Settings → Theme → Customize → Appearance → “Color scheme” for a theme that ships dark assets. If Clawd cannot prepare a theme’s dark assets, it loads the same theme’s light assets and logs the cause. (PR #1361, PR #1404, issue #1323)
+  - Community theme catalog — Clawd Dev Life by @alwinecor reaches 1.2.0 with Mini Mode and both color schemes in one theme. The bundled offline list is now catalog 13 and also includes Clawd Alive 1.0.0 by @AllanOliveiraM. Community themes remain separate downloads under Settings → Theme → “Community themes”. (issue #1371, theme catalog PR #15)
+  Quota
+  - Choose up to three quota coins — Settings → Sessions → “Show beside the pet” lets you choose which coins appear when you click the pet. The “+N” button is gone. Once you choose, a new provider only appears beside the pet if you select it. The Dashboard still shows all providers. (PR #1385)
+  - DeepSeek prepaid balance — in Settings → AI Coding Tools → DeepSeek Harness → “Prepaid balance”, use “Manage balance…” to connect your own API key with the integration enabled. The option starts off. Clawd encrypts the key locally and checks the official DeepSeek balance endpoint every five minutes. The balance appears beside the pet if selected, and in the Dashboard. The ring uses the balance after the last detected top-up as full. Thanks to @ypjn for the idea and coin design. (PR #1388, PR #1278, PR #1379)
+  - Kimi quota controls — manage collection through “Connect” and “Disconnect” on the Kimi card. Existing connections and collection settings carry over, with quota refresh still manual. (PR #1389)
+  Windows
+  - Clear installation permission errors — when the account lacks permission to modify a required file in an “only for me” installation, the interactive installer shows the folder and explains the permission problem. Fix the folder permissions and retry, or run the installer as an administrator. If the old uninstaller fails during a silent install, the installer exits instead of waiting on a hidden dialog. The permission problem was reproduced on Windows x64. The original ARM64 report is still open. Thanks to @moc033702-svg for tracing the x64 case. (PR #1367, issue #882)
+ReleaseNotesUrl: https://github.com/rullerzhou-afk/clawd-on-desk/releases/tag/v1.7.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

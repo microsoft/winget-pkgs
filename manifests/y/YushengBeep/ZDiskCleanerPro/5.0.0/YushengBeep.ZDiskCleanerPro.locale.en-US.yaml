@@ -1,0 +1,48 @@
+# Created by Anthelion using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: YushengBeep.ZDiskCleanerPro
+PackageVersion: 5.0.0
+PackageLocale: en-US
+Publisher: YushengBeep
+PublisherUrl: https://github.com/yusheng266186-beep
+PublisherSupportUrl: https://github.com/yusheng266186-beep/zdisk-cleaner-pro/issues
+PackageName: ZDiskCleaner Pro
+PackageUrl: https://github.com/yusheng266186-beep/zdisk-cleaner-pro
+License: MIT
+LicenseUrl: https://github.com/yusheng266186-beep/zdisk-cleaner-pro/blob/HEAD/LICENSE
+ShortDescription: Safe disk space manager — indexed scan, guarded cleanup, reversible vault.
+Description: |-
+  ZDiskCleaner Pro v3 is a Rust-core disk space manager for Windows:
+  single-pass parallel scan (60 guarded rules), seven-day reversible vault,
+  elevation worker, treemap radar, duplicate finder, storage migration center
+  and Ed25519-signed in-app updates.
+Tags:
+- cleaner
+- cleanup
+- disk
+- storage
+ReleaseNotes: |-
+  v5.0.0 大版本「可信」——基于全代码库审计（docs/AUDIT-2026-08-31-全方位评估.md）的一次系统级改造。
+  数据安全（内核 P0 全修）
+  - Vault 暂存 journal 化：先落台账再动手，崩溃/掉电不再产生「台账外孤儿→被误删」；孤儿 GC 三保险（名单获取失败熔断 / 24h 宽限 / pending 批次不碰）
+  - 台账吞错全面 Result 化 + SQLite WAL；批次 id 换随机熵根除同秒覆盖；守卫禁删区由环境变量派生（非 C 系统盘同护），USERPROFILE 缺失 fail-closed
+  - 提权白名单：管理员运行后 Windows Update 缓存/系统 Temp/传递优化等 15 个窄前缀真正可清（此前 9 条 admin 规则永远清不掉）
+  - 启动项：备份先落盘再删注册表值、单条恢复、类型保真
+  可清理面 60→70
+  - 新增：清空回收站（体检台卡片）、pnpm store、INetCache、Java/系统级 WER/CBS 日志面、国产生态缺口补齐路径；Chrome Beta/Dev、Brave/Opera/Vivaldi 子缓存补全
+  - min_age 规则维度（Temp/WER 默认只清 7 天前）；路径全面 %WINDIR%/%TEMP% 派生
+  性能与正确性
+  - 扫描器 rayon 并行 + 线程局部聚合（百万文件级不再 O(深度) 全局锁）；UI 探针实测 1-2ms
+  - 体积/去重改磁盘簇口径（稀疏文件不虚报）；硬链接归并、云占位跳过防脱水风暴；大文件/去重/雷达可取消
+  壳与界面
+  - 29 个 IPC 命令全量结构化错误码；undo/purge 全成后结清语义（历史页幽灵行绝迹+批次明细下钻+筛选）；单实例；结果页可再入；危险操作两段式确认全站统一（兑现设置页承诺）；迁移切页不丢进度、历史页可撤销
+  - 清理遮罩 remount bug 修复；浅色主题系统性补课（AA 对比度）；RollNumber/Treemap/Toast 动效收编
+  CLI 与工程
+  - zclean：scan --json / bigfiles / dupes --json / sweep --days；退出码 0/1/2/3；提权链路 -EncodedCommand+nonce+原子回写+猝死检测
+  - Rust 测试 47→91 全绿（vault_journal 安全回归网）；QA 三套→五套、三态计数（SKIP 不再记绿）、失败截图、报告带 git SHA/exe 哈希
+  - CHANGELOG 补齐 v3.0.1–v5.0.0；文档/便携/winget 全同步
+  已知限制：规则暂不可用户自定义（v5.1 候选）；无定时清理/托盘；en 语言包未做。
+ReleaseNotesUrl: https://github.com/yusheng266186-beep/zdisk-cleaner-pro/releases/tag/v5.0.0
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

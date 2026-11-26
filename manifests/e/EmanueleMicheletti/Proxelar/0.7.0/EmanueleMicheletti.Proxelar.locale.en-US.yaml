@@ -1,0 +1,53 @@
+# Created by Anthelion using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: EmanueleMicheletti.Proxelar
+PackageVersion: 0.7.0
+PackageLocale: en-US
+Publisher: Emanuele Micheletti
+PublisherUrl: https://micheletti.io/
+PublisherSupportUrl: https://github.com/emanuele-em/proxelar/issues
+Author: Emanuele Micheletti
+PackageName: Proxelar
+PackageUrl: https://github.com/emanuele-em/proxelar
+License: MIT
+LicenseUrl: https://github.com/emanuele-em/proxelar/blob/main/LICENSE-MIT
+Copyright: Copyright (c) Emanuele Micheletti
+ShortDescription: Scriptable local traffic workbench for HTTP, HTTPS, and WebSocket debugging
+Description: Proxelar is a single-binary MITM proxy for developers. Capture, inspect, intercept, replay, and rewrite HTTP/HTTPS and WebSocket traffic from a TUI, web GUI, or headless REST API, with Lua scripting, declarative rules, session persistence, and HAR/curl export.
+Moniker: proxelar
+Tags:
+- cli
+- debugging
+- developer-tools
+- http
+- mitm
+- proxy
+- rust
+- tui
+- websocket
+ReleaseNotes: |-
+  New features
+  - Use your own handler: Proxy::start_with_handler runs a forward proxy with any HttpHandler, not only CapturingHandler. The allowlist example in proxyapi/examples/ shows how (thanks @ajanon). (#196)
+  - Filter DNS queries: DnsHandler and Proxy::start_with_dns_handler run a DNS proxy that decides on each query. Blocked queries get NXDOMAIN and never reach the upstream resolver. See the dns_allowlist example (thanks @ajanon). (#200)
+  - Filter raw TCP tunnels: HttpHandler::handle_tunnel returns a TunnelDecision for CONNECT tunnels that carry neither TLS nor HTTP. A tunnel you close never contacts its target. The allowlist example covers it too (thanks @ajanon). (#205)
+  - ARM64 containers: the Linux container image now comes for both AMD64 and ARM64, built and smoke-tested on native runners, with HTTP/3 enabled. (#201)
+
+  Bug fixes
+  - Fixed Python 3.13+ and other strict X.509 clients rejecting intercepted connections with Missing Subject Key Identifier. A root CA created by an older release is re-issued at startup with the same key, subject and validity, so clients that already trust it keep working. The previous certificate is kept as proxelar-ca.legacy.pem. (#216)
+
+  Dependencies
+  - Fixed TLS and QUIC security advisories: rustls is now at least 0.23.46, quinn-proto 0.11.19 and quinn-udp 0.5.16. (#200, #216)
+  - Replaced chrono, which is no longer maintained, with jiff. (#217)
+  - Updated boring to 5.4 and quiche to 0.30 (both used for HTTP/3), tokio to 1.54 and toml to 1.2. (#195, #209, #211, #213)
+
+  Updating from 0.6
+  - Saved sessions: sessions are now saved in format v3. Files saved by 0.6 or earlier are rejected with a version error, and there is no migration. (#200)
+  - DNS names in the Rust API: DNS handlers, overrides, query events and captured exchanges use DnsName instead of strings. Names compare whole labels, ignoring ASCII case, and serialize as escaped DNS presentation strings; ordinary domain names keep the same JSON shape. (#200)
+  - The re-issued root: clients that read proxelar-ca.pem from disk (--cacert, SSL_CERT_FILE, REQUESTS_CA_BUNDLE) pick it up with no further step. If you installed the old root into a trust store, such as the system keychain, a strict client keeps failing until you install the new proxelar-ca.pem there. (#216)
+ReleaseNotesUrl: https://github.com/emanuele-em/proxelar/releases/tag/v0.7.0
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://proxelar.micheletti.io/
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

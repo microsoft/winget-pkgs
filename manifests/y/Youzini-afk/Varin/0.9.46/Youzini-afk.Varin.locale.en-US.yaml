@@ -1,0 +1,47 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.28.0.schema.json
+
+PackageIdentifier: Youzini-afk.Varin
+PackageVersion: 0.9.46
+PackageLocale: en-US
+ShortDescription: An independent agent workspace and full harness for coding, research, and other project work.
+Description: 'Varin is an independent agent workspace and full harness for coding, research, and other project work, centered on local and desktop experiences. It bundles the Pi runtime: the model and provider stack, session tree, package manager, and extension model remain Pi-owned, while Varin owns the surrounding tool environment, working state, recovery, retrieval, context policy, task governance, and workbench surfaces. Varin ships two first-party working shapes: an Agent Workspace centered on sessions, tasks, and context, and an IDE Workbench centered on editors, search, Git, diagnostics, and debugging with the agent as a dockable panel.'
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- pi
+- pi-agent
+- programming
+- research
+ReleaseNotes: |-
+  Varin 0.9.46 reduces repeated work when opening conversations, updating the sidebar and displaying streamed replies. It also fixes older tool definitions blocking task recovery after an upgrade, improves scheduled tasks using native workspaces, and makes preparation failures easier to understand.
+  Conversation and streaming performance
+  - Read conversation state, history and related execution information together, and use independent database read connections so unrelated queries do not all wait behind the execution writer.
+  - Share one observation connection per Host. Conversation lists, categories, context views and usage displays react to the events they need; routine activity updates refresh affected conversations instead of repeatedly reloading the entire catalog.
+  - Append new history and coalesce streamed UI updates while reusing unchanged conversation rows and rendered content. Opening another view updates its observation interests without interrupting an existing reply stream.
+  - Send small Host/kernel messages directly and keep large transfers chunked, reducing transport overhead while retaining cancellation and control delivery.
+  - Fix HTTP backpressure handling so a temporarily busy connection queues subsequent progress and resumes on drain. A connection that can no longer keep up requests synchronization explicitly instead of silently dropping updates.
+  Resume work with current tools
+  - Ordinary queued and recovered work now prepares the current built-in tools and enabled extension directory. Tools added, changed or disabled since the previous execution no longer leave the task tied to an obsolete directory.
+  - Apply current definitions to subsequent execution while retaining each historical request's original tools, arguments and results. Recovery follows existing execution receipts without repeating completed operations to refresh a tool definition.
+  - Fix tool-free summary preparation and preserve the parent's observation of manually started context jobs, including their completion and failure.
+  Scheduled tasks and native workspaces
+  - Fix preparation of scheduled work against native workspace backends, including registered document/execution views whose IDs differ from their owning workspace. Preserve the selected branch and directory scope through local and managed preparation.
+  - Show which preparation stage failed, provide an explanation for recognized causes, and retain technical details in an expandable section alongside the existing retry action.
+  Reliability and maintenance
+  - Keep cached settings reads current after external writes, file replacement and directory creation. Unchanged files reuse their cached text; settings no longer retain directory watchers or background timers.
+  - Reduce repeated disk reads during trusted-device authentication and keep credential initialization behind the Host's startup admission, so refusing startup for an offline restore does not first create identity files.
+  - Preserve media references in conversation snapshots so image and file reads continue to resolve their original content.
+  - Update Hono and its Node adapter, keeping production and cloud-runtime dependency pins aligned.
+  - Add varin@astrmira.com to the project's contact information and desktop About page.
+  Desktop release targets cover Windows x64/ARM64, Linux x64/ARM64 and macOS Apple Silicon. The signed Android APK connects to an existing Varin Host. Standard and toolbelt Docker images use the container release workflow; optional local embedding components remain separate downloads.
+  Source deployments: rebuild the application and Rust kernel together, then restart the Host. Supported conversation stores upgrade automatically on opening; keep a backup before upgrading.
+  Full changelog
+ManifestType: locale
+ManifestVersion: 1.28.0

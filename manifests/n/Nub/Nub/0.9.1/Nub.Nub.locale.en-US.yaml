@@ -1,0 +1,80 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Nub.Nub
+PackageVersion: 0.9.1
+PackageLocale: en-US
+Publisher: nub contributors
+PublisherUrl: https://nubjs.com/
+PublisherSupportUrl: https://github.com/nubjs/nub/issues
+Author: nub contributors
+PackageName: Nub
+PackageUrl: https://nubjs.com/
+License: MIT
+LicenseUrl: https://github.com/nubjs/nub/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 nub contributors
+CopyrightUrl: https://github.com/nubjs/nub/blob/HEAD/LICENSE
+ShortDescription: The all-in-one JavaScript toolkit that augments Node.js instead of trying to replace it.
+Description: "An all-in-one toolkit for Node.js. One Rust binary to run your files and scripts, install dependencies, and manage Node itself — a Bun-like modern DX on top of the node you already have. There's no new runtime to adopt and no lock-in: every augmentation rides on Node's own public extension surfaces."
+Moniker: nub
+Tags:
+- javascript-runtime
+- node-version-manager
+- nodejs
+- package-manager
+- script-runner
+ReleaseNotes: |-
+  Nub now sizes libuv's threadpool to the cores of the machine on every augmented run, takes a prefix command in nub.jsonc, runs npm ci and npm install on its own engine behind an opt-in shim, and accepts more of the npm lockfiles and projects that npm ci accepts.
+  Important
+  Augmented runs on a machine with more than four cores now get a larger libuv threadpool. Nub sets UV_THREADPOOL_SIZE to the larger of four and the cores available to the process (a container gets its cgroup quota; Windows stops at eight). On Linux the threads beyond Node's four run at nice 10, so they yield under contention. Child processes start with Node's default of four. A UV_THREADPOOL_SIZE you set yourself is used as is, and --node / NODE_COMPAT keep Node's default. See Threadpool.
+  Runtime
+
+  Threadpool sized to the machine
+  Node hands async fs, dns.lookup, async zlib and crypto calls, and native addons such as bcrypt and sharp, to a pool of four threads whatever the core count. Nub now sets the size when it starts Node, on every launcher: the file run, nub run, nubx, nub watch and lifecycle scripts.
+  nub server.ts                        # pool sized to the cores, 16 on a 16-vCPU box
+  node server.ts                       # pool of 4
+  UV_THREADPOOL_SIZE=6 nub server.ts   # your value, used as is
+  The preload removes Nub's own value from process.env once the pool exists, so a cluster worker or child_process spawn gets Node's default; a child that runs through nub is sized again. On Linux the threads beyond four are reniced to 10 after the pool is built, and on the compat tier (Node 18.19–22.14) a --require sidecar builds the pool so the demoted set is exact. A bcrypt route on a 16-vCPU box went from 18 to 66 requests per second under autocannon at 64 connections, mean of three rounds (benchmark); routes that use the pool lightly are within noise of plain Node. The Threadpool page documents the behavior. (#919)
+
+  A prefix command in nub.jsonc
+  A project can put a command in front of everything Nub runs for it: a file run, a package.json script, and nub watch.
+  {
+    "prefix": "dotenvx run --"   // split like a shell; the array form takes exact arguments
+  }
+  A script is wrapped as a whole, so a script that starts no Node process still runs behind the prefix. The program resolves from the project's node_modules/.bin chain, then PATH; a path form anchors to the file that set it. A nested nub run, or a wrapper written in Node, does not wrap the same project again. The nubx, nub dlx and node shim entrypoints do not take it, and compat mode runs without it. The field is in the config reference and the JSON schema. (#915)
+
+  AsyncContextFrame on Node 22.9–23.x
+  Nub passes --experimental-async-context-frame on Node 22.9 through 23.x, the band where the flag exists and does not throw. Node 24 made that AsyncLocalStorage implementation the default; on the 22 line it roughly halves the cost of carrying a store across await, which tracing SDKs and request-context plugins pay on every request. (#912)
+
+  Memory-constrained launches
+  On Linux x64, a direct Node launch inside a cgroup memory budget starts the main isolate with a 16 MiB V8 semi-space on two measured releases: Node 22.23.2 in a 512 MiB–1 GiB budget and Node 24.20.0 at 512 MiB. The flag is hidden from process.execArgv, Workers keep their own resourceLimits, and the tuning stands down when Node options, preloads, NODE_OPTIONS, PnP, a prefix, or an environment loader own startup. Other releases, larger budgets, budgets below 512 MiB, watch mode, and compiled executables keep Node's defaults. (#917)
+
+  User loader hooks layered above Nub's
+  Running tsx script.ts under nub run, or a prepare script that does, failed with require is not defined in ES module scope. Nub's load results now carry responseURL, both tiers step aside when an outer resolve hook labels a .ts file with a bare commonjs/module format, and a require.extensions handler that is already registered stays in charge of its extension. (#920)
+
+  Package manager
+
+  npm installs on Nub's engine
+  One opt-in routes the two npm verbs an install pipeline runs through Nub's engine:
+  nub pm shim --route-installs
+  With the marker set, a bare npm ci in a project with a package-lock.json runs nub ci, and a bare npm install runs nub install, both from the same lockfile. Everything else reaches the real npm as typed, including an install that names a package or carries a flag Nub does not translate. Lifecycle scripts run as npm runs them, with NODE_ENV=production when dev dependencies are omitted and ignore-scripts honored from .npmrc and the environment. The engine also runs a file: directory dependency's lifecycle scripts in the link target on an npm-lockfile install, as npm does. The --no-route-installs flag turns the routing off. (#925, docs)
+
+  npm lockfile compatibility
+  Frozen-installing popular npm projects under Nub found refusals of lockfiles npm itself wrote.
+  ─────────────────┬──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┬─────────
+  Area             │What changed                                                                                                                                                                                                                                                                                                                                                                                                          │PR
+  ─────────────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼─────────
+  Workspace peers  │A member's required peer is recorded on its importer, so the freshness check no longer reads every member with a peer as manifest adds <peer>                                                                                                                                                                                                                                                                         │#918
+  ─────────────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼─────────
+  Nested members   │A member nested inside another member resolves through the parent member's own node_modules before the root                                                                                                                                                                                                                                                                                                           │#918
+  ─────────────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼─────────
+  Links            │A link target with no version, as npm writes for a name-only local package, parses                                                                                                                                                                                                                                                                                                                                    │#918
+  ─────────────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼─────────
+  Integrity        │A space-separated multi-digest SRI value verifies when any digest of the strongest algorithm matches, as ssri does                                                                                                                                                                                                                                                                                                    │#918
+  ─────────────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼─────────
+ReleaseNotesUrl: https://github.com/nubjs/nub/releases/tag/v0.9.1
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://nubjs.com/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

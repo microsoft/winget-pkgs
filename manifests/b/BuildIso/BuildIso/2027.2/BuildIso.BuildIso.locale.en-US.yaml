@@ -1,0 +1,140 @@
+# Created by Anthelion using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: BuildIso.BuildIso
+PackageVersion: '2027.2'
+PackageLocale: en-US
+Publisher: BuildIso
+PublisherUrl: https://github.com/BuildIso
+PublisherSupportUrl: https://github.com/BuildIso/BuildIso/issues
+PackageName: BuildIso
+PackageUrl: https://github.com/BuildIso/BuildIso
+License: MIT
+LicenseUrl: https://github.com/BuildIso/BuildIso/blob/HEAD/LICENSE
+ShortDescription: Powerful ISO Builder for OSDev
+Tags:
+- bios
+- build
+- build-system
+- build-tool
+- buildiso
+- eltorito
+- iso
+ReleaseNotes: |-
+  BuildIso 2027.2 — Release Notes
+
+  Overview
+  BuildIso 2027.2 introduces a pipeline-driven ISO creation workflow with BIOS and UEFI boot support, file inventory and validation, SHA-256 integrity checks, ISO inspection and verification, optional QEMU boot testing, plugin management, and structured reporting.
+  This release also expands command-line controls, configuration profiles, preflight diagnostics, and output handling.
+
+  1. ISO Creation and Boot Support
+  - Added support for BIOS-only, UEFI-only, and hybrid BIOS + UEFI configurations.
+  - Added multi-entry El Torito boot catalog generation for hybrid BIOS/UEFI images.
+  - Added configurable El Torito boot entry priority through --boot-priority (bios, uefi, or auto).
+  - Added BIOS boot image validation and EFI System Partition image checks.
+  - Added checks for the presence of EFI/BOOT/BOOTX64.EFI in the ISO source directory.
+  - Added Secure Boot-related PE inspection, including Authenticode signature presence and target architecture checks.
+  - Added Joliet filesystem support for ISO creation and verification.
+
+  2. File Inventory and Scanning
+  - Added centralized file inventory management through FileInventory and FileTreeScanner.
+  - Added repeatable file inclusion and exclusion filters with --include and --exclude.
+  - Added glob pattern matching through GlobMatcher.
+  - Added symbolic-link and reparse-point handling during file scanning.
+  - Added ISO path sanitization and configurable name-collision handling through --collision-policy (rename, fail, or skip).
+  - Added configurable scanning and size limits:
+    - --max-files — maximum number of files to scan.
+    - --max-file-size — maximum permitted size for an individual file.
+    - --max-depth — maximum directory traversal depth.
+    - --max-size — maximum permitted ISO size.
+
+  3. SHA-256 Integrity and Hash Cache
+  - Added SHA-256 hashing for source files and generated ISO images.
+  - Added FileHasher and HashCache for file hashing and reuse of cached hashes.
+  - Added configurable hash cache location through --cache <file>, used by --deep-verify.
+  - Added --expect-sha256 <hex> to fail validation when the final ISO hash does not match the expected SHA-256 value.
+  - Added optional MANIFEST.SHA256SUMS generation, containing file paths, sizes, and SHA-256 hashes.
+
+  4. ISO Inspection and Verification
+  - Added IsoTools.Inspect for displaying ISO information, directory and file counts, volume details, and boot catalog entries.
+  - Added IsoTools.Verify and IsoVerifier for ISO structure and boot catalog verification, including manifest checks when a manifest is available.
+  - Added --inspect <iso> to inspect an existing ISO.
+  - Added --verify-iso <iso> to verify an existing ISO and its manifest, if present.
+  - Added --deep-verify to re-read files from the ISO and compare their contents with the corresponding source files.
+  - Added --check to run diagnostics without building an ISO.
+  - Added --dry-run to simulate the ISO layout without writing the final image.
+  - Added --strict to treat warnings as build failures.
+  - Added safe preflight remediation through --fix-safe. Its automatic fixes are limited to creating a missing output directory and removing a stale temporary ISO file.
+
+  5. QEMU and UEFI Boot Testing
+  - Added optional ISO boot smoke testing through QEMU with --boot-test.
+  - Added custom QEMU executable selection through --qemu <path>.
+  - Added OVMF firmware selection through --ovmf <path> for UEFI boot testing.
+  - Added a configurable virtual-machine test timeout through --boot-test-timeout.
+
+  6. Build Pipeline and Output Handling
+  - Added a structured BuildPipeline with the following stages:
+    1.  StepPreflight
+    2.  StepScanFiles
+    3.  StepValidateBoot
+    4.  StepPredictSize
+    5.  StepCheckDiskSpace
+    6.  StepBuildIso
+    7.  StepVerifyIso
+    8.  StepBootTest
+    9.  StepWriteManifest
+    10. StepWriteReadme
+    11. StepFinalize
+  - Added preflight diagnostics for output paths, directory permissions, temporary files, boot configuration, and other build requirements.
+  - Added output locking through OutputLockHandle.
+  - Added temporary ISO generation and output replacement handling.
+  - Added rollback support through IsoBuilderService.Rollback().
+  - Added --timeout <seconds> to limit the overall build duration.
+  - Added --no-overwrite to prevent replacement of an existing output ISO.
+  - Added --keep-backup to retain the previous ISO as a .bak file after a successful build.
+  - Added reproducible-build support through --reproducible, including ISO timestamp normalization.
+  - Added --source-date-epoch <seconds> to specify the timestamp used by reproducible-build mode.
+
+  7. Configuration and Build Profiles
+  - Added JSON configuration loading through ConfigFileLoader and --config <file>.
+  - Added named configuration profiles through --profile:
+    - development — enables verbose output.
+    - release — enables manifest generation, deep verification, strict mode, and required plugin hash pins.
+    - reproducible — enables reproducible-build mode, manifest generation, deep verification, and disables plugins.
+    - ci — disables interactive prompts, spinner, and progress indicators, and enables manifest generation and strict mode.
+  - Added option validation and merging across command-line arguments, JSON configuration, and profile defaults.
+
+  8. Plugin System
+  - Added the IBuildPlugin interface with build lifecycle and pipeline-step callbacks.
+  - Added plugin discovery, loading, and management through PluginManager.
+  - Added plugin selection through --plugin <name> and global plugin disabling through --plugins-off.
+  - Added SHA-256 plugin hash pinning through --plugin-hash <name>=<sha256>.
+  - Added --require-plugin-hash to refuse plugins without a configured hash pin.
+  - Added --plugin-strict to fail the build when a plugin callback fails.
+  - Added configurable per-callback timeouts through --plugin-timeout <seconds>.
+
+  9. Reports, Manifest, and Build Documentation
+  - Added build report output in JSON, JUnit, and SARIF formats through --report-format.
+  - Added report file path configuration through --json-report <file>.
+  - Added optional MANIFEST.SHA256SUMS generation through --manifest.
+  - Added automatic build documentation generation through ReadmeGenerator, producing README_BUILDISO.txt in the ISO output directory during the normal build pipeline.
+  - Added structured build reports through BuildReportWriter, including build status, timing, file counts, ISO size, SHA-256 information, profile, and configuration details.
+
+  10. Additional Command-Line Controls
+  - Added configurable hashing parallelism through --threads.
+  - Added custom log file selection through --log <file> and logging disablement through --no-log.
+  - Added output and interaction controls:
+    - --silent
+    - --verbose
+    - --no-prompt
+    - --no-spinner
+    - --no-progress
+  - Added dedicated exit codes for success, general errors, invalid arguments, preflight failures, validation failures, cancellation, and boot-test failures.
+  BuildIso 2027.2 brings ISO creation, boot configuration, file scanning, integrity verification, automation, plugin support, and reporting together in a single pipeline-driven command-line application.
+  Implementation note: Secure Boot-related checks inspect PE validity, Authenticode signature presence, and target architecture. They should not be interpreted as complete cryptographic certificate-chain or firmware trust validation.
+ReleaseNotesUrl: https://github.com/BuildIso/BuildIso/releases/tag/v2027.2
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/BuildIso/BuildIso/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

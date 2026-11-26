@@ -1,0 +1,43 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: HenryXiaoYang.realtime-tex
+PackageVersion: 0.0.7
+PackageLocale: en-US
+Publisher: Henry Yang
+PublisherUrl: https://henryyang.net/
+PublisherSupportUrl: https://github.com/HenryXiaoYang/realtime-tex/issues
+PackageName: realtime-tex
+PackageUrl: https://github.com/HenryXiaoYang/realtime-tex
+License: MIT
+LicenseUrl: https://github.com/HenryXiaoYang/realtime-tex/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Henry Yang and the realtime-tex contributors
+ShortDescription: Re-typesets only the LaTeX paragraph you are editing in about a millisecond with an unmodified LuaTeX.
+Description: 'rtex is a typesetting engine for editors. When you type, it re-typesets only the paragraph being edited through a LuaLaTeX process that has already loaded your preamble, and hands the editor the new lines to draw. A full background compile takes care of what really is global: page breaks, floats, the table of contents, references and bibliographies. The result is exactly what LuaLaTeX produces — the same line breaks and the same glyphs at the same positions to 1/65536 pt — because rtex uses an unmodified LuaTeX from TeX Live and exported PDFs are identical to a normal LuaLaTeX build. Time from keystroke to updated paragraph is about a millisecond and does not depend on document length. The archive contains the `rtex` command, the C library and header, and rtex TeX support files.'
+Tags:
+- latex
+- lualatex
+- luatex
+- tex
+- texlive
+- typesetting
+ReleaseNotes: |-
+  Thank you @ACG-j for the rtex serve timeout flags and the math ownership work!
+  Added
+  - Math source ownership (opt-in). Set math_owner_attribute and rtex reports which math source each glyph and math field comes from, in math_owners display-list metadata (binary record 0x29). Empty fields, including empty unicode-math radical degrees, get zero-size anchors. Off by default; PDF output is unchanged. (#30, #31, #32)
+  - rtex serve --compile-timeout-ms and --pass-timeout-ms set the live-compile and background-pass timeouts. Defaults are unchanged. (#36)
+  Fixed
+  - Build files no longer fill your disk. The build directory links to the project's files instead of copying the main file's folder three times; on Windows without Developer Mode it uses junctions and hard links. A snapshot from an earlier version is replaced on the first pass. (realtime-tex-vsc-plugin#13, realtime-tex-vsc-plugin#15)
+  - Title pages. Documents whose \maketitle makes its own page (report, book, article[titlepage]) no longer restart the engine about every 0.4 s. (#37)
+  - Faster first live update. set_document applies only the bytes that differ, so opening a file no longer counts as a preamble edit. On a 300-page book the first live update comes after 8.1 s instead of 24.2 s.
+  Faster
+  - Background passes on long documents: on a 300-page book a layout after a one-character edit takes 4.8 s instead of 7.6 s, and the first layout 10.1 s instead of 16.4 s. Per-keystroke bookkeeping is cheaper too, and Linux saves a thread wake-up per live update. (#38)
+ReleaseNotesUrl: https://github.com/HenryXiaoYang/realtime-tex/releases/tag/v0.0.7
+InstallationNotes: rtex needs a TeX Live installation that provides LuaLaTeX with a LaTeX kernel from 2021 or later; pdfLaTeX and XeLaTeX are not supported. Run `rtex doctor` to check that rtex finds its support files and your LuaLaTeX.
+Documentations:
+- DocumentLabel: Live Editing
+  DocumentUrl: https://github.com/HenryXiaoYang/realtime-tex/blob/HEAD/docs/live-editing.md
+- DocumentLabel: Benchmarks
+  DocumentUrl: https://github.com/HenryXiaoYang/realtime-tex/blob/HEAD/docs/benchmarks.md
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

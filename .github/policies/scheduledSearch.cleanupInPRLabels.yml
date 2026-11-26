@@ -1,0 +1,42 @@
+# Due to limitations in the policy service, it isn't possible to check on the state of the linked PRs because of this
+# the assumption is made that if a linked PR is merged, the issue will be closed automatically. If the issue doesn't
+# close, then the PR must not have been merged and is either stale or was closed. Since there is no way to check for
+# that state specifically, the policy checks to see if there has been any activity on the issue. Any comments, labels
+# or other actions on the issue will reset the 15 day period.
+
+id: scheduledSearch.cleanupInPRLabels
+name: GitOps.PullRequestIssueManagement
+description: Remove the In-PR label from issues where the PR has become stale
+owner:
+resource: repository
+disabled: false
+where:
+configuration:
+  resourceManagementConfiguration:
+    scheduledSearches:
+      - description: >-
+          Search for issues where -
+          * Issue is Open
+          * Issue has the label In-PR
+          * Has not had activity in the last 15 days
+
+          Then -
+          * Remove In-PR label
+          * Add Help-Wanted label
+        frequencies:
+          - hourly:
+              hour: 12
+        filters:
+          - isIssue
+          - isOpen
+          - hasLabel:
+              label: In-PR
+          - noActivitySince:
+              days: 15
+        actions:
+          - removeLabel:
+              label: In-PR
+          - addLabel:
+              label: Help-Wanted
+onFailure:
+onSuccess:

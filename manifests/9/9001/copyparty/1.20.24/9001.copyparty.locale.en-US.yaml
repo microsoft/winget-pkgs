@@ -1,0 +1,56 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: 9001.copyparty
+PackageVersion: 1.20.24
+PackageLocale: en-US
+Publisher: ocv.me
+PublisherUrl: https://github.com/9001/copyparty
+PublisherSupportUrl: https://github.com/9001/copyparty/issues
+Author: "9001"
+PackageName: copyparty
+PackageUrl: https://github.com/9001/copyparty/releases/tag/v1.19.17
+License: MIT
+LicenseUrl: https://github.com/9001/copyparty/blob/HEAD/LICENSE
+Copyright: 2026, ed
+ShortDescription: Portable file server with accelerated resumable uploads, dedup, WebDAV, FTP, TFTP, zeroconf, media indexer, thumbnails++ all in one file, no deps
+Description: Portable file server with accelerated resumable uploads, dedup, WebDAV, FTP, TFTP, zeroconf, media indexer, thumbnails++ all in one file, no deps
+Tags:
+- copyparty
+- file-server
+- file-sharing
+- file-upload-server
+- ftp-server
+- nas-frontend
+- tftp-server
+- webdav-server
+ReleaseNotes: |-
+  - v1.20.19 (2026-07-27) fixed an FTP-server vuln (upload outside defined volumes)
+  - v1.20.17 (2026-07-06) fixed a vuln when a volume has both filekeys and dirkeys enabled
+  - v1.20.17 (2026-07-06) introduced csp nonces, possibly breaking some javascript-based plugins
+  🧪 new features
+  - new option --redup (global or volflag) to convert local files between various dedup approaches fd4f4341 22915902 16a3f5d5
+    - turn full copies into reflinks/symlinks/hardlinks or convert between those
+    - run it with --redup-dry (dryrun) to check for unexpected consequences
+    - WARNING: maybe take a snapshot of your filesystem before enabling this; brand new code with little testing, read --help-redup and use with care
+      - the feature is currently being stress-tested; results on tuesday
+  - #1643 textfile-viewer can detect filetype from shebang (thx @botahamec!) 097b8305
+  - when dedup with reflink is enabled, then also dedup between volumes when possible (since reflink makes that safe) 735d6e00 5ddbce31
+  - option -i no to launch copyparty without the webserver, for indexing / testing / whatever c92435c2
+  🩹 bugfixes
+  - if --dedup was enabled, then copying a file from one volume to another could dedup (create a symlink/hardlink/reflink) instead of a full copy 947d73ee
+    - mainly an issue for portable storage such as flashdrives, and the main reason why --redup was added
+  - the list of filenames given as input to xiu hooks did not have a trailing newline c688bb2e
+  - #1611 volflag nosub would still result in empty folders from up2k ec4a95e1
+  - fix PRTY_NO_IFADDR 6867ccc5
+  🔧 other changes
+  - iOS: further improved upload-speeds on buggy iOS versions 971a62cc
+    - looks like apple is working on fixing this bug; iOS v27 made https way more stable but http is still just as broken, so improved the workaround a bit more
+  - added --help-dedup and --help-redup 22915902 16a3f5d5
+  - add a warning that the sourceforge project is not official and probably malware bfc3cff8
+  🌠 fun facts
+  - the railgun roulette vip-mix has the same bpm as the turn-signal on a honda jazz
+    - on that note, this fantasy-OPNA remake is too awesome to leave out
+ReleaseNotesUrl: https://github.com/9001/copyparty/releases/tag/v1.20.24
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

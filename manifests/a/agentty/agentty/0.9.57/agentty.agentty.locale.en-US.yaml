@@ -1,0 +1,61 @@
+# Created with WinGet Releaser using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: agentty.agentty
+PackageVersion: 0.9.57
+PackageLocale: en-US
+Publisher: agentty
+PublisherUrl: https://agentty.org/
+PublisherSupportUrl: https://github.com/1ay1/agentty/issues
+PackageName: agentty
+PackageUrl: https://agentty.org/
+License: MIT
+LicenseUrl: https://github.com/1ay1/agentty/blob/HEAD/LICENSE
+Copyright: Copyright (c) agentty contributors
+ShortDescription: Blazing-fast Claude in your terminal — a C++26 alternative to claude-code.
+Description: agentty is a native C++26 terminal coding agent and a drop-in alternative to claude-code. A single static binary with sub-millisecond cold start, sandboxed by default, and one-command SSH air-gap. No Node, Python, or Electron. Signs in with your Claude Pro/Max subscription or an ANTHROPIC_API_KEY.
+Moniker: agentty
+Tags:
+- ai
+- claude
+- cli
+- coding-agent
+- developer-tools
+- terminal
+ReleaseNotes: |-
+  Added
+  - Hooks speak Claude Code's protocol, so RTK works as is (#128). A
+    hooks.json can use Claude Code's shape (PreToolUse, PostToolUse,
+    PostToolUseFailure). Hooks get the event as JSON on stdin and can deny,
+    ask, allow, rewrite a call before it runs, or replace its output before the
+    model reads it. PreToolUse runs before the permission prompt, so the
+    prompt and the card show what will really run. Hooks now also run in
+    agentty run and in subagents. The old pre_tool / post_tool format
+    still works. See Hooks.
+  - Delete, Home and End work in the prompt, the login box and the settings
+    add field (#129). Thanks @sail3r.
+  - 32-bit programs run in the sandbox on x86_64 Linux with multilib (#130).
+    Thanks @lukerb52. They get their own syscall filter, which allows exactly
+    what the 64-bit one does by name; claybin's new x86_audit test keeps the
+    two equal.
+  Changed
+  - The ^U thinking reader ends like the transcript's block: Reasoned · 216 tokens · 4.3s · 50 tok/s, and a long block gets a scrollbar.
+  - Overlay scrollbars are a block thumb in the panel's colour, with no
+    track line beside the border, and move in half-cell steps.
+  - Stats columns are sized to their content. Text and donuts take what
+    they need, charts take the rest, so the gap beside Latency is gone.
+  Fixed
+  - Common tools no longer fail inside the sandbox. sqlite said "disk I/O
+    error", git with core.fsync died on fsync, and flock, file watchers
+    (tsc --watch, vite), Rust panic handlers and node timers all hit
+    "Operation not permitted". The sandbox now allows those calls (fsync,
+    flock, inotify, sigaltstack, umask and others); each one only acts on what
+    the program can already reach. nice works on the program itself.
+  - The ^U reader no longer cuts lines with … or draws empty rows after the
+    text.
+  - A sandboxed hook can read its input. It used to get a payload file in a
+    /tmp the sandbox couldn't see.
+  Full history: CHANGELOG.md
+ReleaseNotesUrl: https://github.com/agentty-org/agentty/releases/tag/v0.9.57
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

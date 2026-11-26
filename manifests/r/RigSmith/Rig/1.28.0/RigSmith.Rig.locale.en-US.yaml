@@ -1,0 +1,32 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: RigSmith.Rig
+PackageVersion: 1.28.0
+PackageLocale: en-US
+Publisher: RigSmith
+PublisherUrl: https://rigsmith.dev/
+PublisherSupportUrl: https://github.com/rigsmith/rigsmith/issues
+Author: John Campion Jr
+PackageName: Rig
+PackageUrl: https://rigsmith.dev/
+License: MIT
+LicenseUrl: https://github.com/rigsmith/rigsmith/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 John Campion Jr
+ShortDescription: Convention-first dev launcher across .NET, Node, Go, and Rust
+Moniker: rig
+Tags:
+- cli
+- developer-tools
+- dotnet
+- go
+- rust
+ReleaseNotes: |-
+  🚀 Enhancements
+  - shiprig: shiprig can sign and notarize a velopack macOS app from secrets alone, with nothing in the login keychain. Put the Developer ID .p12 (base64) and its password in the velopack signing env as MACOS_SIGN_P12 and MACOS_SIGN_PASSWORD, and optionally an App Store Connect API key as MACOS_NOTARY_KEY (the .p8 as PEM text or base64), MACOS_NOTARY_KEY_ID and MACOS_NOTARY_ISSUER_ID. Each can be a doppler: reference. A signed macOS build then creates a throwaway keychain, imports the cert, stores the notary key under macos.notaryProfile, points vpk pack --keychain and the DMG's codesign/notarytool at it, and deletes it when the build ends, whether it succeeded, failed or was interrupted with Ctrl-C; a keychain left by a build that was killed outright is removed by the next signed build. A cert that doesn't hold macos.signIdentity, a notary key without a cert, notaryProfile or key id, or a cert with notaryProfile but no notary key, fails before anything is built. Errors from these steps never show the passwords. Builds without these variables behave as before.
+  - shiprig: shiprig's velopack packaging takes a macos.entitlements setting: a repo-root-relative .entitlements plist the macOS app is signed with, passed to vpk pack as --signEntitlements. Without it vpk signs with its bundled default, which grants JIT, unsigned executable memory, Apple Events automation, DYLD environment variables and disabled library validation. Like notaryProfile, it needs macos.signIdentity (a config with entitlements and no identity is rejected rather than shipping without them) and is skipped on a snapshot build. A path that doesn't exist fails the build before any channel is built.
+  🩹 Fixes
+  - shiprig: shiprig titles each per-package forge release after its tag again, as changesets' own action does: a single-package repo's release on v1.2.3 is titled v1.2.3 rather than <package>@1.2.3, a monorepo's @scope/pkg@1.2.3 keeps that title, and a tagTemplate or Go dir/v1.2.3 tag is the title as it renders. This restores the tag-named titles single-package repos had before shiprig-action moved onto shiprig forge-release. It applies to the release step and shiprig forge-release on GitHub, GitLab and Gitea, and forge-release --json reports that title as name. Combined releases are unchanged and still take their title from forgeRelease.name.
+ReleaseNotesUrl: https://github.com/rigsmith/rigsmith/releases/tag/v1.28.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,100 @@
+# Created by Anthelion using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: OpenBao.OpenBao
+PackageVersion: 2.7.3
+PackageLocale: en-US
+Publisher: OpenBao
+PublisherUrl: https://openbao.org/
+PublisherSupportUrl: https://github.com/openbao/openbao/issues
+Author: OpenBao a Series of LF Projects, LLC
+PackageName: OpenBao
+PackageUrl: https://openbao.org/
+License: MPL-2.0
+LicenseUrl: https://github.com/openbao/openbao/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2015 HashiCorp, Inc.
+CopyrightUrl: https://github.com/openbao/openbao/blob/main/LICENSE
+ShortDescription: OpenBao is a software solution to manage, store, and distribute sensitive data.
+Description: |-
+  OpenBao exists to provide a software solution to manage, store, and distribute sensitive data including secrets, certificates, and keys.
+  The OpenBao community intends to provide this software under an OSI-approved open-source license, led by a community run under open governance principles.
+Moniker: openbao
+Tags:
+- certificates
+- credentials
+- encryption
+- keys
+- openbao
+- secrets
+- secrets-management
+- security
+- vault
+ReleaseNotes: |-
+  SECURITY
+  - core/auth: Entity and group aliases of newly created auth mounts are now case-sensitive by default. GHSA-fgmw-h9wp-wc7g. [GH-4550]
+  - core/auth: Alias case-sensitivity can now be configured per auth mount via case_sensitive_alias. [GH-4550]
+  - core/listeners: Correctly handle forwarded client cert headers on the active node when a request was forwarded from a standby. GHSA-h8fh-pmch-cjww. [GH-4550]
+  - core/listeners: Ensure disable_unauthed_rekey_endpoints and disable_unauthed_generate_root_endpoints are enforced before forwarding a request to the active node. GHSA-h8fh-pmch-cjww. [GH-4550]
+  - core/listeners: Ensure max_request_size, max_request_json_memory, max_request_json_strings and max_request_duration continue to be enforced at the configured limit after forwarding a request to the active node. GHSA-h8fh-pmch-cjww. [GH-4550]
+
+  IMPROVEMENTS
+  - secrets/transit: Support public key export for keys of type external-key. [GH-4272]
+
+  BUG FIXES
+  - command/operator/raft: Fix snapshot saving discarding output when redirected to the active node. [GH-4337]
+  - command/operator/raft: Fix snapshot restoration failing silently when redirected to the active node. [GH-4337]
+  - command/operator/diagnose: Fix panic when plugin_directory is set in the configuration but does not exist. [GH-4536]
+  - core: Fix router not setting logical.Request.MountAccessor. [GH-4434]
+  - core/auth: Ensure control group wrapping tokens are single-use. [GH-4510]
+  - core/mounts: Ensure mount invalidations triggered by namespace creation on the active node do not race on standby nodes and cause double-mount errors. [GH-4390]
+  - core/leases: Ensure revocation of leases in child namespaces when their parent-namespace attributed token is revoked. [GH-4373]
+  - core/policies: Accept empty or omitted controlled_capabilities in Control Group factors and treat either case as applying to all operations. [GH-4508]
+  - core/namespaces: Ensure mount creation cannot overlap with a sealed namespace. [GH-4376]
+  - core/namespaces: Ensure mount creation cannot overlap with namespaces due to race conditions. [GH-4376]
+  - core/identity: Fix changes to one namespace’s group data deleting the group data of other namespaces on standby nodes when using unsafe_cross_namespace_identity. [GH-4363]
+  - core/external-keys: Close race window where standby nodes would miss config updates and keep stale KMS clients. [GH-4400]
+  - http: Include PATCH, HEAD, and HELP in CORS preflight responses so cross-origin requests using these methods succeed. [GH-4412]
+  - sys/rotate: Fix /sys/rotate/(root|recovery)/verify accepting duplicate key shares. [GH-4495]
+  - sys/workflows: Fix LIST and SCAN operations when listing workflows with a prefix. [GH-4386]
+  - storage/raft: Ensure snapshot restore yields a redirect to the active node when attempting to restore on a read-enabled standby node. [GH-4534]
+  - auth/jwt: Fix CEL roles requiring that issue_time is set when setting lease_options. issue_time is not used for login requests and has no effect when set via CEL. [GH-4511]
+  - secrets/kv: Correctly apply key metadata precedence over the KV mount's global max_versions parameter. [GH-3998]
+  - secrets/transit: Ensure internal subdirectories in storage are ignored when listing keys. [GH-4397]
+  - api: Fix Raft snapshot saving discarding output when redirected to the active node. [GH-4337]
+  - api: Fix Raft snapshot restoration failing silently when redirected to the active node. [GH-4337]
+  - ui: Fix namespace selector not working when resizing browser window. Redirects now happen regardless of window size. [GH-4302]
+
+  What's Changed
+  - Fix stale APT cache (#4340 by @satoqz) backported by @satoqz in #4346
+  - Verify image signatures on creation (#4334 by @satoqz) backported by @phil9909 in #4392
+  - Fix: maxVersions logic (#3998 by @mase-informaticon) backported by @phil9909 in #4389
+  - Pass namespace of lease to revocation call (#4373 by @Luiggi33) backported by @phil9909 in #4391
+  - Update supported PKCS#11 algorithms (#4268 by @satoqz) backported by @satoqz in #4387
+  - docs: Add Securosys KMS plugin parameters (#4378 by @thgoebel) backported by @phil9909 in #4414
+  - Fix workflow manage list subpath (#4386 by @Luiggi33) backported by @phil9909 in #4415
+  - Fix missing lock when reloading mount (#4390 by @satoqz) backported by @phil9909 in #4413
+  - Fix lost invalidation (#4400 by @satoqz) backported by @phil9909 in #4416
+  - Fix snapshot incorrectly following redirect (#4337 by @satoqz) backported by @satoqz in #4424
+  - Fix Transit policy listing (#4397 by @satoqz) backported by @satoqz in #4425
+  - Support export of external public key in Transit (#4272 by @satoqz) backported by @satoqz in #4426
+  - fix logical.Request.MountAccessor is not set by the router (#4434 by @phil9909) backported by @phil9909 in #4454
+  - fix: namespace clearing another’s group data (#4363 by @krocky5) backported by @phil9909 in #4455
+  - http: allow PATCH, HEAD and HELP in CORS preflight (#4412 by @raus7n) backported by @satoqz in #4530
+  - Fix empty/omitted controlled capabilities (#4508 by @satoqz) backported by @satoqz in #4531
+  - ui: fix bug with namespace selector not redirecting (#4302 by @krocky5) backported by @satoqz in #4532
+  - Fix control group docs on self auth (#4500 by @satoqz) backported by @satoqz in #4533
+  - Reject snapshot restore on standby immediately (#4534 by @satoqz) backported by @satoqz in #4538
+  - Do not require JWT CEL programs setting IssueTime (#4511 by @C0ffeeCode) backported by @satoqz in #4539
+  - Fix control group token reuse (#4510 by @satoqz) backported by @satoqz in #4540
+  - Sync namespace tree with router (#4376 by @satoqz) backported by @satoqz in #4541
+  - Bump dependencies on 2.7.x by @satoqz in #4543
+  - Fix KMS plugin catalog creation error panicking instead of failing (#4536 by @C0ffeeCode) backported by @satoqz in #4547
+  - Fix verify rotation not identifying provision of duplicate key shares (#4495, #4545 by @wslabosz-reply) backported by @wslabosz-reply in #4548
+  - Security Patches - v2.7.3 - release/2.7.x (#4550 by @phil9909 & @satoqz) backported by @cipherboy in #4551
+  - Add release notes for v2.7.3 by @satoqz in #4552
+ReleaseNotesUrl: https://github.com/openbao/openbao/releases/tag/v2.7.3
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://openbao.org/docs/
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

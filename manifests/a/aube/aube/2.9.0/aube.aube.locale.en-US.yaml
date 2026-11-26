@@ -1,0 +1,48 @@
+# Created by Anthelion using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: aube.aube
+PackageVersion: 2.9.0
+PackageLocale: en-US
+Publisher: en.dev
+PublisherUrl: https://en.dev/
+PublisherSupportUrl: https://github.com/endevco/aube/discussions/categories/troubleshooting-and-bugs
+Author: en.dev
+PackageName: aube
+PackageUrl: https://aube.en.dev/
+License: MIT
+LicenseUrl: https://github.com/endevco/aube/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 en.dev inc
+CopyrightUrl: https://github.com/endevco/aube/blob/HEAD/LICENSE
+ShortDescription: A fast Node.js package manager
+Description: |-
+  aube is a package manager for Node.js projects. It uses pnpm-style isolated node_modules for fast, disk-efficient installs.
+
+  Existing projects keep their lockfile format. aube reads and writes pnpm-lock.yaml, package-lock.json, npm-shrinkwrap.json, yarn.lock, and bun.lock in place. New projects without a supported lockfile get aube-lock.yaml.
+
+  Why Try It
+  - Fast installs. Warm installs are about 8x faster than pnpm and about 5x faster than Bun in the current benchmarks. Repeat test commands run up to 35x faster than pnpm and up to 5x faster than Bun.
+  - Existing lockfiles. Reads and writes pnpm-lock.yaml, package-lock.json, npm-shrinkwrap.json, yarn.lock, and bun.lock in place.
+  - Cheap repeat commands. aubr test, aube test, and aube exec vitest auto-install when dependencies are stale, then skip that work when nothing changed. aubx uses a local binary when one is installed, or a throwaway environment for one-off tools.
+  - Less disk use. A global content-addressable store lets projects share package files instead of keeping a full copy of the same dependencies in every checkout.
+  - Secure defaults. Out of the box, exotic transitive deps are blocked, lifecycle scripts wait for approval, trust downgrades fail at resolve, and brand-new releases sit in a 24h cooling window. One paranoid: true line adds the build jail and turns the soft gates into hard fails.
+Moniker: aube
+ReleaseNotes: |-
+  Added
+  - Provenance verification for embedders (#1900, @jdx): programs that embed aube, such as mise, can register a verifier on the install control. aube then passes each registry package as (name, version, integrity) to the verifier before downloading or importing it. If the verifier returns an error, the install stops. While a verifier is registered, aube checks every tarball against its pinned integrity even when verifyStoreIntegrity=false. Standalone aube does not register a verifier, so its behavior is unchanged.
+    let control = InstallControl::silent()
+        .with_provenance_verifier(Arc::new(MyVerifier));
+
+  Changed
+  - trustPolicy now matches pnpm's evidence rules (#1899, @jdx): aube now reads staged-publish approval from npm's _npmUser.approver and ignores a top-level approver field. Before, aube never detected staged publishes. _npmUser.trustedPublisher now counts as evidence only when the version also has provenance. With no-downgrade, aube may now reject versions it previously accepted. trustPolicyExclude still applies. aube rebuilds cached resolution indexes automatically.
+
+  Fixed
+  - .modules.yaml with the global virtual store (#1902, @jdx): newly created node_modules/.modules.yaml files now include packageManager: aube@<version>. Without it, which-pm and the npm script detection in VS Code and Cursor crashed. Existing files are not updated. To pick up the fix, delete node_modules/.modules.yaml or reinstall from scratch.
+  - Yarn Classic #sha1 fragments (#1886, #1892, @jdx): aube update --lockfile-only no longer removes #<sha1> fragments from unchanged resolved URLs in yarn.lock. New entries now get the fragment too, including packages that resolve from the bundled metadata primer. Packuments cached by an older aube may lack the shasum until the package publishes a new version or you run aube cache delete <name>.
+  - npm hasInstallScript (#1894, @jdx): package-lock.json entries now set hasInstallScript when a package has a preinstall, install, or postinstall script. Before, npm ci could skip install scripts for packages added with aube add under default settings.
+  - Frozen installs with npm lockfiles (#1895, @jdx): aube install --frozen-lockfile now rejects lockfiles that npm ci also rejects. This covers a workspace member renamed in its package.json and a new workspace member missing from npm-shrinkwrap.json.
+  - Bun lockfile metadata (#1893, @jdx): bun.lock no longer includes aube's internal __aube_* metadata. Before, the lockfile changed each time aube and Bun took turns installing.
+  - Local tarball dependencies (#1896, @jdx): a clean aube install --frozen-lockfile now links a local tarball's absolute file: dependency. Before, the install reported success, but requiring the dependency failed.
+ReleaseNotesUrl: https://github.com/aubepkg/aube/releases/tag/v2.9.0
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

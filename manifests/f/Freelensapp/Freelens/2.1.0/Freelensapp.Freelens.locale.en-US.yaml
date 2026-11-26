@@ -1,0 +1,71 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: Freelensapp.Freelens
+PackageVersion: 2.1.0
+PackageLocale: en-US
+Publisher: Freelens Authors
+PublisherUrl: https://freelens.app/
+PublisherSupportUrl: https://github.com/freelensapp/freelens/issues
+PackageName: Freelens
+PackageUrl: https://github.com/freelensapp/freelens
+License: MIT
+LicenseUrl: https://github.com/freelensapp/freelens/blob/HEAD/LICENSE
+ShortDescription: FOSS IDE for Kubernetes
+Tags:
+- cloud-native
+- containers
+- devops
+- kubernetes
+- kubernetes-dashboard
+- kubernetes-ui
+ReleaseNotes: |-
+  The first feature release after v2.0.0, with the security fixes of Node v24.22.3.
+
+  It is a release full of fixes and new features made by the wonderful Freelens community, and special thanks go to everyone who contributed to it.
+
+  ## What's new:
+
+  v2.1.0 brings themes as files with eight built-in themes, a choice of accent color and zoom level, overviews as cards, combined logs for the pods of a workload, debugging a pod in an ephemeral container, copying the values of the details in one click, the certificate details of secrets, the mutating admission policies, metrics for GKE clusters from Google Managed Prometheus, and Helm releases read straight from the Kubernetes API. The extension API gains a credential store encrypted with the secret store of the system, the certificate view of secrets, the overview cards, the copy controls and the generic components the views of Freelens are built from. It also fixes the connection to clusters whose kubeconfig has a colon in its file name or is written in UTF-16, Windows shells given by name, custom extension registries served under a path, the metrics of several setups, and several issues of the logs, the sidebar and the details.
+
+  ### New Features
+
+  * Themes are YAML files with a dark and a light variant, chosen in Preferences → Personalization. Eight are built in: Freelens, Ayu, Ayu Mirage, Dracula, Graphite, Catppuccin, Solarized and High Contrast, whose text reaches a contrast of 7:1. A theme can be exported, and imported from a file or a URL. See [the theme format](https://github.com/freelensapp/freelens/blob/main/docs/themes.md). See #3029, #3035, #3036, #3037, #3038, #3040, #3041, #3043, #3045, #3049, #3046, #3052, #3047, #3054, #3053, #3055
+  * The accent color can be chosen for the dark and the light variant, from named swatches or as any color, with a palette and a field for its hex code. See #1280, #1431, #3032, #3033, #3034
+  * Preferences → Personalization sets the zoom level, from 67% to 200%, and keeps it across restarts. See #3044, #3050
+  * The cluster overview and the workloads overview can show cards that state the numbers, with line charts for the cluster metrics, instead of the ring and pie charts. Overview style in Preferences → Personalization chooses them. See #3042, #3051
+  * Combined logs for a workload: the Logs item of a Deployment, DaemonSet, StatefulSet, ReplicaSet or Job opens one tab with the logs of all its pods, interleaved by time, each pod in a colour of its own. A new preference under Kubernetes sets how many pods such a tab reads. See #687, #2418, #3004, #3006
+  * The details of a secret show the certificates it holds in PEM: subject, issuer, DNS names and IP addresses, serial number, validity, and the expiry, marked when it is near or past. The certificates are parsed in the main process. See #3002, #3003, #3008, #3010
+  * MutatingAdmissionPolicies and MutatingAdmissionPolicyBindings under Config, next to the validating ones, on clusters that serve them as v1, v1beta1 or v1alpha1. The details of the validating and mutating policies and bindings show their namespace and object selectors. See #2434, #2511
+  * The Google Managed Prometheus provider reads the GKE system metrics, which GKE collects for every cluster at no extra charge, through the query frontend of Google Cloud Managed Service for Prometheus. The cluster, nodes, pods, workloads and PVCs get their charts without node-exporter or kube-state-metrics. Auto Detect finds the frontend, and the Metrics settings of the cluster link to Google's instructions for deploying it. See #3097, #3099, #3107
+  * The ingresses list has a Class column, and the details of an ingress show its IngressClass, with a link when it comes from `spec.ingressClassName`. See #2936, #2945
+  * The General settings of a cluster set an Icon Label of up to four characters and an Icon Color, so that the clusters of one environment look alike in every region. See #1908, #2994
+  * The pods list and the pods of a workload have a Ports column, searchable, with the name and protocol of each port in its tooltip. See #2827
+  * The nodes list has a Kernel Version column, hidden until it is enabled in the column menu. See #2411
+  * The details of an object show its Last Applied Configuration, from the annotation of `kubectl apply`, as YAML. The default container of a pod, from the `kubectl.kubernetes.io/default-container` annotation, is marked in the pod details, the pod menu and the logs, and is the one Shell, Attach and Logs open. See #2988, #2989
+  * Debug... in the menu of a pod adds an ephemeral container to it with `kubectl debug`, from the image, profile, environment variables and custom container spec given in its dialog, and opens a terminal attached to it. Closing the terminal leaves the container running: Attach and Stop in the details of the pod connect to it again or stop it. The default image is a setting of the cluster, next to the image of the node shell. See #962, #2453, #3127
+  * The values in the details have a copy icon: the data of a ConfigMap, the values of a Helm release, the validation of a CustomResourceDefinition, the affinities of a pod, the managed fields and the last applied configuration of any object, and the keys of a Secret, whose value is copied decoded whether it is shown or not. See #2992, #3117
+  * The menu of a dock tab can close the tabs to the left of it. See #2508, #2995
+  * The YAML editor folds a key together with the list written at its indentation, such as `containers:` or `volumes:`, as well as each item of the list. See #2524, #2996
+  * The Help menu has a "What's new" item that opens the release notes of the running version. See #2909, #2910
+
+  ### Extensions API
+
+  * `Common.Credentials.forExtension(this)` keeps the tokens and passwords of an extension encrypted at rest with Electron `safeStorage`, in both processes, bound to the extension instance and removed when the extension is uninstalled. It promises encryption at rest only: it is not a boundary between extensions. On Linux it is available with libsecret or KWallet, and a desktop Electron does not recognise can name one with `--password-store`. See [the contract](https://github.com/freelensapp/freelens/blob/main/docs/extensions/api.md#credentials-keeps-an-extensions-values-encrypted-at-rest). See #2782, #3011, #3012
+  * `Renderer.Component.SecretCertificates` renders the certificate section of the secret details for the data of any secret, such as the `certSecretRef` of a Flux source, with the parsing done by the host. See #3008, #3010
+  * `Renderer.Component.CapacityCard` and `Renderer.Component.StatusCard` render the cards of the overviews from the data of an extension, and `Common.App.Preferences.getOverviewStyle()` tells whether the user chose Cards or Charts. See #3042, #3051
+  * `Renderer.Component.CopyToClipboardIcon`, `Renderer.Component.CopyableMonacoEditor` and `Renderer.Component.CopyableInput` copy a value as the details of Freelens do, the editor and the input with an unsaved edit included. See [the contract](https://github.com/freelensapp/freelens/blob/main/docs/extensions/api.md#the-copy-controls-copy-what-a-view-shows). See #2992, #3117
+  * `Renderer.Component` exports the generic components the views of Freelens are built from: `ErrorBoundary`, `Animate`, `ResizingAnchor`, `ColorSwatch`, `ColorSwatchGroup`, `CustomColorSwatch`, `OrderableList` and `OrderableItem`, and `VirtualList` again, whose `scrollToItem` takes a `VirtualListAlign` instead of a type of `react-window`. Their classes are global, so that an extension can restyle them. See #3121, #3123
+  * `Renderer.Component.ImageReference` shows an image as the details of a pod do: a badge with the image as the object names it, and the digest of the image the node pulled as its tooltip. `K8sApi` types `PodContainerStatus.volumeMounts`, which carries the digest of an image volume. See [the contract](https://github.com/freelensapp/freelens/blob/main/docs/extensions/api.md#an-image-shows-the-image-the-node-pulled-for-it). See #3130
+  * `Node.getWarningConditions()` reports only the conditions Kubernetes defines: `Ready` when it is not true, and the pressure conditions and `NetworkUnavailable` when they are. A condition such as `EtcdIsVoter` of k3s is no longer a warning. See #2924
+  * `Common.Types` names the helper types of the signatures of the API: `JsonValue`, `PartialDeep`, `ReadonlyDeep`, `RequireAtLeastOne`, `RequireExactlyOne`, `SetRequired` and `ValueOf`. `type-fest` is no longer a dependency of `@freelensapp/extensions`: an extension that imports it declares it in its own `devDependencies`. See #3064, #3065
+  * The declared `orderNumber` of `clusterPageMenus` orders the menus of an extension, and their children, in the sidebar again. See #2959, #2987
+  * `K8sApi` has the `MutatingAdmissionPolicy` and `MutatingAdmissionPolicyBinding` models, `Node.getKernelVersion()`, `Ingress.getIngressClassName()`, `PodSpec.os` typed with `OSName` and `PodOS`, `podsStore.getPodsByNamespace()` and `podsStore.getPodsByPersistentVolumeClaim()`, and the pod lookups of `podsStore`, `jobStore.getJobsByOwner()` and the `getById` and `getByPath` of every store read an index instead of scanning the store. `isAllowedResource` finds the admissionregistration resources, which it looked up under a wrong API group before. See #2411, #2453, #2511, #2945, #3066, #3067, #3069, #3072, #3074
+  * `Common.Util.sortCompare` and the stores sort names with numbers by the value of the number, and lowercase and uppercase letters together. See #2974
+  * `Renderer.Component.Chart`, `BarChart` and `PieChart` keep the datasets they draw across updates, so a chart no longer replays its opening animation when its data changes, and a field that the new data of a dataset lacks is no longer kept from the previous data. See #3128, #3129
+
+  ...
+
+  Full release notes: https://github.com/freelensapp/freelens/releases/tag/v2.1.0
+ReleaseNotesUrl: https://github.com/freelensapp/freelens/releases/tag/v2.1.0
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

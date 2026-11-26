@@ -1,0 +1,52 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: MiniZinc.MiniZincIDE
+PackageVersion: 2.10.1
+PackageLocale: en-US
+Publisher: Data61 and Monash University
+PublisherUrl: https://www.minizinc.org/
+PublisherSupportUrl: https://github.com/MiniZinc/MiniZincIDE/issues
+PackageName: MiniZinc IDE
+PackageUrl: https://www.minizinc.org/downloads/
+License: MPL-2.0
+LicenseUrl: https://github.com/MiniZinc/MiniZincIDE/blob/HEAD/LICENSE.txt
+Copyright: https://www.minizinc.org/license/
+ShortDescription: Integrated development environment for the high-level constraint modelling language MiniZinc.
+Tags:
+- constraint
+- constraint-programming
+- ide
+- language
+- minizinc
+- modeling
+- optimization
+- programming
+- programming-language
+- solver
+ReleaseNotes: |-
+  Changes:
+  - Add an experimental parser using the tree-sitter grammar shared with shackle, enabled by setting the MZN_TREE_SITTER_PARSER environment variable. Syntax that is not yet supported, such as class declarations and lambdas, is rejected by name rather than as a generic syntax error. Data files are read with a separate, stricter grammar that accepts data, not all MiniZinc expressions. A warning is issued for invalid data, but will not be accepted in the future.
+  - Harden how external FlatZinc solvers are launched. On POSIX, the solver is now started with posix_spawn in its own process group, using close-on-exec pipes and full error checking. On Windows, the solver inherits only the three standard I/O handles (instead of every inheritable handle) and is placed in a kill-on-close job object, so it is reliably terminated together with MiniZinc. Several descriptor and handle leaks were fixed in the process.
+  - Extend the Xpress solver interface with support for lazy constraints, lexicographic multiple objectives (via the goal_hierarchy annotation), and user cuts, and enable quadratic and bilinear constraints.
+  - Make built-in Gecode solver interface handle restart annotations and statistics output.
+  - Greatly reduce the memory used by two-pass compilation (--two-pass, -O2 and above). The paths that identify variables between passes were stored as one string per variable, each spelling out the file name of every frame on the flattening call stack, and held several times over. They are now an interned tree of shared frames, and the text is only built when --keep-paths or --output-paths asks for it. Where an expression has picked up more than one path, the deepest one is now kept. Previously the textually longest was kept, which could prefer a shallower path that happened to run through longer file or function names (issue 1029).
+  Bug fixes:
+  - Fix a crash when projecting a field that is itself a tuple or record out of an array of tuples or records (as in x.1 and x.1.1 for any: x = [((1, 2), 3)]). The projection gave the resulting array type the type id of the field instead of an array type id, which was then misinterpreted when the element type was looked up again.
+  - Fix a crash when indexing or slicing the result of a projection (as in x.1[1] and x.2[1..2] for any: x = [((1, 2), 3)]). Array access was the only context that did not coerce its object, so the projection was never rewritten into a comprehension and reached evaluation as a field access on an array. This affected fields of any type, not just structs.
+  - Fix projecting an array-valued field out of an array of tuples or records (as in x.1 for any: x = [([1, 2], 3)]). The result is an array of arrays, but the projection did not build the tuple wrapper that represents one, dropping the field’s own dimensions and producing an array of the element type instead. The model was then accepted with a wrong type and failed in evaluation with not an integer expression, or, for a var field, handed malformed FlatZinc to the solver.
+  - Fix possible process hanging after receiving IDE interrupts on Windows.
+  - Fix incorrect return type of select_from_index_X and concat_index_X functions.
+  - Fix incorrect index restriction for concat_index_6 function.
+  - Fix output reverse mapping for tuples/record function parameters which shadow top-level declarations of the same name.
+  - Fix element type of concatenated multi-dimensional par arrays
+  - Fix a crash in the Gecode presolver (-O3 and higher) when the flattened model contains a set_in constraint on an integer variable. The argument was tested for being a variable rather than for being a Boolean variable, so the integer variable was looked up in the space’s Boolean variable array (issue 1027).
+  - Fix in on records/tuples whose members are all fixed (issue 1027).
+  - Fix possible crashes while handling stack overflows on Windows which previously would have prevented the stack trace from being printed.
+  - Fix clearing of internal annotations from array declarations in FlatZinc.
+ReleaseNotesUrl: https://docs.minizinc.dev/en/2.10.1/changelog.html
+Documentations:
+- DocumentLabel: Handbook
+  DocumentUrl: https://docs.minizinc.dev/en/stable/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

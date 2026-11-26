@@ -1,0 +1,75 @@
+# Created with WinGet Updater using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: DoltHub.Dolt
+PackageVersion: 1.86.5
+PackageLocale: en-US
+Publisher: DoltHub
+PublisherUrl: https://github.com/dolthub/dolt
+PublisherSupportUrl: https://github.com/dolthub/dolt/issues
+Author: DoltHub
+PackageName: Dolt
+PackageUrl: https://www.dolthub.com/
+License: Apache-2.0
+LicenseUrl: https://github.com/dolthub/dolt/blob/HEAD/LICENSE
+CopyrightUrl: https://raw.githubusercontent.com/dolthub/dolt/master/LICENSE
+ShortDescription: Dolt is a SQL database that you can fork, clone, branch, merge, push and pull just like a git repository.
+Description: |-
+  Dolt is a SQL database that you can fork, clone, branch, merge, push and pull just like a git repository.
+  Connect to Dolt just like any MySQL database to run queries or update the data using SQL commands.
+  Use the command line interface to import CSV files, commit your changes, push them to a remote, or merge your teammate's changes.
+Moniker: dolt
+Tags:
+- cli
+- data
+- git-for-data
+- versioning
+ReleaseNotes: |-
+  Merged PRs
+  dolt
+  - 10937: go: remotestorage: Stamp our remotesapi ClientCapabilities on outgoing requests.
+    For now, we advertise that we handle HTTP/2 table file URL endpoints well.
+  - 10936: proto: Add client_capabilities URL-minting requests on remotesapi.
+    Some Dolt clients deal with certain URLs better than others. In particular, older Dolt clients can see bad fetch performance in some network contexts when they are hitting HTTP/2 endpoints.
+    Add a field, client_capabilities, on GetDownloadLocsRequest, StreamChunkLocationsRequest, RefreshTableFileUrl and ListTableFiles which allows a client to communicate its capabilities. For now, one capability exists: CLIENT_CAPABILITY_HTTP2_DOWNLOAD. Implementations of remotesapi can use the presence of the advertised capability to know it is safe to mint HTTP/2 capable URLs in a context where they previously would have minted only HTTP/1.1 URLs.
+  - 10935: key type conversion during foreign key checks
+    This PR adds key type conversion for native encodings (encodings that don't have a TupleTypeHandler) for foreign key enforcement during merge. Postgres, but not MySQL, allows different but compatible types for the columns in foreign key constraints, e.g TEXT and VARCHAR. This means that Doltgres, but not Dolt, needs to sometimes convert the bytes of a tuple value from one encoding to another before an index lookup to determine if a constraint violation exists. Previously all such logic happened with TupleTypeHandler (DoltgresType was the main implementor). But with dolthub/doltgresql#2559, Doltgres is now using Dolt's native encodings where possible, e.g. StringEnc, StringAdaptiveEnc. This means this same logic must now work for these native encodings.
+    Dolt continues to prevent foreign key constraints from being created between different types, following the MySQL behavior, but with this change we could choose to relax this limitation in the future.
+  - 10931: more adaptive encoding tests
+  - 10928: new compatibility testing
+    These tests verify that identical columns added by two different client versions can be pulled from remotes.
+    Also fixes an overflow bug in adaptive encoding (see Nick's commit) discovered during testing.
+  - 10927: [do not merge] New failing test for adaptive encoding
+  - 10925: go.mod: Bump to 1.26.2.
+  - 10920: Suppress S3 GetObject checksum WARN
+    Fix #10895
+  - 10918: go,proto: remotesapi: Add a more efficient RPC, StreamChunkLocations, to use for fetch and pull.
+    The current streaming RPC, StreamDownloadLocations, was a straight translation of the unary RPC GetDownloadLocations. We added streaming because it found it interacted much better with TCP and HTTP/2 window scaling. At the time, the RPCs were no reworked to take advantage of the stateful nature of the stream. Since then, the pipelined ChunkFetcher machinery has been added, which makes opportunities for reuse on the individual streaming RPC even better. We also added the RefreshTableFileUrl endpoint, which decouples a client's ability to continue using previously communicated table files from its need to see them in a GetDownloadLocsResponse in particular.
+    StreamChunkLocations is transiting the exact same semantic payloads as StreamDownloadLocations. It's just not re-transmitting a bunch of stuff it does not need to. In particular:
+    1. We transit table file URLs separately from the chunk locations. A table_file_id is assigned to a table file the first time the server tells the client about it. Then that same table_file_id is used to refer to that table file for all communicated chunk locations in all response messages on the same stream.
+    2. We do not re-transit chunk hashes. The responses refer to the chunk hashes which were provided in the corresponding request by index. The client already knows them.
+    3. We do not need to transit RefreshTableFileUrlRequest messages for the table files. The client can build these with its own knowledge.
+       Those are three major improvements for bandwidth utilization. There are also some smaller things, like sending chunk_hashes as bytes instead of repeated bytes.
+       This PR adds a features field in GetRepoMetadataResponse. That field lets a client know that it can call the new available endpoint. Otherwise the client continues calling StreamDownloadLocations.
+       This PR adds both server-side and client-side implementations for the new endpoint. The server-side implementation ends up looking a lot like the existing StreamDownloadLocations code. It keeps some local maps so it can include the appropriate reference ids in the outgoing messages. The client-side implementation intentionally remains about as minimal as possible. In particular, it does not touch range coalescing or most aspects of the fetch pipeline. It targets just generating the StreamChunkLocationsRequest and handling the StreamChunkLocationsResponse messages. It translates the responses back into what StreamDownloadLocations would have generated before handing those pieces off to the rest of the fetch pipeline.
+       In addition to unit tests, some machinery in remotesrv is updated so we can optionally disable advertising support for StreamChunkLocations. This allows us to update some integration tests so that they continue to exercise the StreamDownloadLocations code paths on both the client and the server.
+  - 10826: new interfaces to allow doltgres types to use standard encodings
+  go-mysql-server
+  - 3522: go.mod: Bump to golang 1.26.2.
+  - 3512: new signal error to skip modifying rows during DML operation
+    This behavior is supported by postgres but not MySQL. This is a cleaner way to express that a row edit should be ignored and the rest of the operation continued.
+  - 3491: Feature: Indexed functional expressions
+    Adds support for secondary indexes to contain functional expressions, which are then used to optimize queries with filters and join conditions that use that indexed functional expression.
+    Initial performance testing between Dolt and MySQL shows that Dolt matches, or in some cases beats, MySQL's performance when these indexes are used.
+    This initial implementation only supports a single expression in a functional index. Next steps for this work after this PR are:
+    1. adding support to Doltgres
+    2. extending support to multiple expressions in an index (functional expressions mixed with column names)
+    3. add a sysbench test to compare query performance with indexed expression for Dolt and MySQL
+  Closed Issues
+  - 10939: dolt fsck fails on Windows with malformed path (leading backslash before drive letter)
+  - 10922: Bump Go toolchain to 1.25.9 to address CVE-2026-27143 and CVE-2026-27144
+  - 10895: S3 remotes: thousands of "Response has no supported checksum" WARN lines on push/pull due to pinned aws-sdk-go-v2 s3 v1.78.0
+  - 10892: AUTO_INCREMENT value lost after dolt backup restore
+ReleaseNotesUrl: https://github.com/dolthub/dolt/releases/tag/v1.86.5
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

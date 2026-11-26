@@ -1,0 +1,129 @@
+# Created by Anthelion using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: libjxl.libjxl
+PackageVersion: 0.13.0
+PackageLocale: en-US
+Publisher: libjxl
+PublisherUrl: https://github.com/libjxl
+PublisherSupportUrl: https://github.com/libjxl/libjxl/issues
+PackageName: libjxl
+PackageUrl: https://github.com/libjxl/libjxl
+License: BSD-3-Clause
+LicenseUrl: https://github.com/libjxl/libjxl/blob/HEAD/LICENSE
+ShortDescription: JPEG XL image format reference implementation
+Description: A reference implementation of JPEG XL (encoder and decoder). This software library is used by many applications that support JPEG XL.
+Moniker: libjxl
+Tags:
+- cjxl
+- djxl
+- iec18181
+- iso18181
+- jpegxl
+- jpgxl
+- library
+- netpbm
+- openexr
+ReleaseNotes: |-
+  Important note: this release contains multiple security fixes, including fix for severe vulnerability in dependency; please consider updating to this version - there are no breaking API changes for most scenarios compared to versions v0.11.x, v0.12.0
+  Security
+  - bumped brotli to v1.2.1 (#5062) to mitigate CVE-2026-111497
+  - sized low-memory render pipeline ring buffers by simulating the actual stage
+    schedule, fixing use-of-uninitialized-memory bugs with vertically subsampled
+    stages (#5022)
+  - reset JPEG reconstruction state, fixing potential use-after-free writes across
+    decoder resets (#5029)
+  - security and hardening fixes across the core decoder/encoder,
+    JPEG reconstruction, splines, and codec plugins (EXR, APNG, PGX, PNM); this
+    includes fixes for integer overflows in JPEG coefficient buffer allocations
+    and spline area budgets, out-of-bounds read/write guards in chunked frame
+    adapters and truncated EXR scanline streams, bounds-checked Span::subspan
+    slicing, and null pointer guards (#4936, #4938, #5009, #5022, #5023,
+    #5026, #5029, #5030, #5076, #5091, #5096, #5100)
+  - decoder: more consistent image_out cleanup;
+    reported-by: Alejandro Pacheco (@alepacheco) and Eunji Ham
+  - harden patch rect calculations;
+    reported-by: Robert McConnell and freezagent
+  - make another decoding path aware of overflows (see #4808);
+    reported-by: Robert McConnell
+  - decoder: guard against using wrong out buffer;
+    reported-by: Lakshit Verma
+  - ensure CmsStage when converting CMYK has access to actual black channel;
+    reported-by: Marinko Ružić
+  - fix using wrong subsampling when reconstructing gray JPEGs;
+    reported-by: synawk dsx, ptrstr and Lakshit Verma
+
+  Added
+  - encoder API: added JXL_ENC_FRAME_SETTING_STRIP_ALPHA frame setting and
+    --strip_alpha CLI flag to control stripping of alpha channels on
+    single-frame images with a single extra channel (#4981, #4984)
+  - encoder API: added JXL_ENC_FRAME_SETTING_JPEG_RECON_LFS frame setting and
+    --jpeg_reconstruction_lfs CLI flag to control LF (adaptive DC) smoothing
+    during lossless JPEG recompression; allows non-444 transcoded JPEGs with
+    adaptive DC/LF smoothing to decode (#4932, #5031)
+  - release & CI: added native Linux AArch64 static release artifacts (#5039),
+    Windows ARM64 CI build and release support (#4997), and GitHub artifact
+    attestation for published release assets (#4982)
+
+  Changed
+  - rewrote LZ77 implementation for lossless image compression (#4928)
+  - compression density & encoder improvements:
+    - enabled LF smoothing by default for 4:4:4 lossless JPEG transcoding (#4932)
+    - re-enabled squeezed delta palette (#4930)
+    - signaled the default 39-entry block context map, saving 22-23 bytes per
+      frame when using the default block context map (#5001)
+    - improved histogram clustering with forced prefix codes (force_huffman) by
+      accounting for merges that turn a zero-cost single-symbol histogram into a
+      multi-symbol histogram (#5002)
+    - modular encoder: skipped EstimateWPCost weighted-predictor mode search
+      when a custom fixed tree is provided (#5003)
+  - performance & memory:
+    - optimized EstimateWPCost (#5093, #5120)
+    - allocated allowed_counts on the heap during initialization in to reduce
+      stack usage (#4918)
+  - tools: jxl_from_tree now automatically uses 16-bit buffers when bit depth is
+    12 or less (#4976)
+
+  Fixed
+  - disabled adaptive DC smoothing during lossless JPEG reconstruction (#4931)
+  - cleared all patch dictionary state, preventing patches from being blended
+    using a previous frame's blend modes (#4989)
+  - forgot extra channel output buffers in JxlDecoderSkipCurrentFrame() (#5026)
+  - reset prog_detail on JxlDecoderReset() and rewind (#5121)
+  - copied ANS lookup data from the containing entry in InitAliasDistribution
+    and added compile-time size verification (#4952, #5069)
+  - guarded PerformBlending against empty segments (#4992, #5068)
+  - fixed Forward/Meta and Inverse squeeze transform agreement on
+    hshift/vshift updates (#5116)
+  - fixed luminance calculation and multiplicative factor in photon noise
+    synthesis (enc_photon_noise) (#5053)
+  - scaled center_x and center_y coordinates by dc_scale for LF frames when
+    encoding with center-first group ordering (#4969)
+  - handled legacy non-conforming Display P3 v4 ICC profiles (#4965)
+  - fixed possible stream inconsistency in streaming encoding mode (#5115)
+  - fixed formal data races in enc_cache.cc and modular FillSigma
+    initialization (#5102, #5109)
+  - validated packed frame extra-channel counts before encoding (#5075)
+  - PNM/PAM decoder: rejected sample values exceeding MaxVal (#5064)
+  - PNG/APNG decoder: zeroed rows left undecoded by truncated PNGs (#5083)
+  - Gain Map API: avoided calling memcpy with a nullptr source (#5089)
+  - NumPy encoder: properly escaped frame names per RFC 8259 in --metadata_out
+    JSON output (#5088)
+  - extras: derived file extensions from the final path component only in
+    CodecFromPath. (#5081)
+  - build & platform fixes:
+    - fixed build with Highway 1.3+ (#4906)
+    - dropped -lm from libjxl_cms.pc and libjxl_threads.pc pkg-config files
+      on MSVC (#5061)
+    - fixed MSVC intrinsics include order so _sub_overflow_i32 is visible on
+      x86/x64 (#5071)
+    - enabled JXL_UNUSED macro under clang-cl (#5122)
+    - checked whether Qt has feature xcb before enabling xcb in tools/ CMake
+      build (#5019)
+    - fixed mingw32 build (#4940) and sequentialized CMake test discovery to avoid
+      build races on macOS/multi-core machines (#4939)
+  Note: This release is for evaluation purposes and may contain bugs, including security bugs, that may not be individually documented when fixed. See the SECURITY.md file for details. Always prefer to use the latest release.
+  Please provide feedback and report bugs here.
+ReleaseNotesUrl: https://github.com/libjxl/libjxl/releases/tag/v0.13.0
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

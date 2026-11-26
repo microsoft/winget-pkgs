@@ -1,0 +1,89 @@
+# Created with komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: jmrplens.gitlab-mcp-server
+PackageVersion: 3.7.0
+PackageLocale: en-US
+Publisher: José M. Requena Plens
+PublisherUrl: https://github.com/jmrplens
+PublisherSupportUrl: https://github.com/jmrplens/gitlab-mcp-server/issues
+PrivacyUrl: https://github.com/jmrplens/gitlab-mcp-server/blob/main/PRIVACY.md
+PackageName: GitLab MCP Server
+PackageUrl: https://github.com/jmrplens/gitlab-mcp-server
+License: MIT
+LicenseUrl: https://github.com/jmrplens/gitlab-mcp-server/blob/HEAD/LICENSE
+ShortDescription: GitLab MCP server exposing the REST v4 and GraphQL APIs as tools for AI assistants.
+Description: A Model Context Protocol (MCP) server that connects AI assistants (Claude, Cursor, VS Code + Copilot, and any MCP client) to GitLab.com or self-managed GitLab instances. Covers the full REST API v4 and GraphQL with automatic edition gating, roughly 850 to 1080 tools depending on the GitLab tier, plus 45 MCP resources, 37 prompts, argument completions, progress notifications and resource subscriptions. Single static binary, stdio and HTTP transports, read-only and safe (mutation-preview) modes, and per-client configuration examples in the documentation.
+Moniker: gitlab-mcp-server
+Tags:
+- ai
+- ci-cd
+- claude
+- devops
+- gitlab
+- graphql
+- llm
+- mcp
+- model-context-protocol
+- rest-api
+ReleaseNotes: |-
+  Summary
+  3.7.0 ships the image with zlib 1.4, which fixes CVE-2026-4738 (#1852), and moves to client-go v3.50.0, with which the user token actions create fine-grained tokens (#1849, #1850).
+  - The image's runtime stage takes zlib 1.4-r0 from Alpine's 3.24 repository, since the newest Alpine image, 3.24.4, still carries 1.3.2-r1. The server binary is built with CGO_ENABLED=0 and does not link zlib; the fix is for what the image ships beside it, which is what an image scanner reads (#1852).
+  - client-go v3.50.0 models granular_scopes on the token types and on the user token create options (#1849):
+    - user.create_current_user_pat creates a classic or a fine-grained token: it takes granular_scopes beside scopes, exactly one of the two, as GitLab declares for the route. Its schema lists k8s_proxy and self_rotate for scopes, the only classic scopes this route accepts, and any other access is a fine-grained grant.
+    - user.create_impersonation_token takes granular_scopes and description; scopes is no longer required when a grant is sent.
+    - A grant is checked before any request: each entry's access is one of GitLab's five (personal_projects, all_memberships, selected_memberships, user, instance), its permissions are not empty, and project_ids and group_ids go with selected_memberships, which needs at least one of them.
+    - Token outputs read granular_scopes, and the impersonation token's description, from client-go rather than from the captured response. The output schemas do not change.
+    - user.create_personal_access_token stays classic for now: its route accepts a grant only from GitLab 19.6, and the API record this release is checked against is GitLab 19.5.0's, where the route requires classic scopes.
+  - The fine-grained grant the server reads for its own token is taken from client-go's decode of the token, and the captured response is kept only for the granular flag, which no client-go type models. What the server decides from a grant is unchanged (#1850).
+  - Integer values checked against an access level table (role levels, environment and branch protection levels) are matched against the table without narrowing them to int first, and a whole number written as a float beyond the int64 range counts as an integer. Neither changes what the release binaries accept, since every one of them is 64-bit (#1847).
+  - The documentation site states each upstream limit a user meets, and what to do about it, on the page where it applies, rather than pointing at the contributor register (#1843). The contributor register, the 1:1 audit and the code no longer cite it by row (#1841, #1842, #1844, #1846).
+  Breaking changes
+  None. No action, parameter or response field is withdrawn, and no call that succeeded under 3.6.0 is refused under 3.7.0. client-go stays on its v3 major, so the server's major stays at 3.
+  Two schema changes a client that reads the schemas may notice (#1849):
+  - user.create_current_user_pat publishes its scopes as a list of k8s_proxy and self_rotate. GitLab refused any other classic scope on this route with 400 before this release as well. The refusal now names the two: on the individual surface the served schema refuses any other value before a request is sent, and where the value reaches GitLab, its 400 comes with a hint that names them and points to granular_scopes, where the 3.6.0 hint listed scopes the route does not accept.
+  - scopes is no longer required on user.create_current_user_pat and user.create_impersonation_token, because granular_scopes can take its place. A call that sends both, or neither, is refused before any request.
+  Upgrading
+  1. Pull the new image, or install the new release through any channel. The image's zlib is 1.4-r0, so a scanner that reported CVE-2026-4738 on the 3.6.0 image no longer does.
+  2. A client or script that asks user.create_current_user_pat for a token with access other than k8s_proxy or self_rotate sends that access as a granular_scopes grant, which creates a fine-grained token. GitLab creates one only from GitLab 19.2, where fine-grained tokens are generally available, and only while its granular_personal_access_tokens feature flag is on for the token's user, and answers 404 otherwise; the action's error then names the flag, which an administrator of the instance enables.
+  Security
+  - Fixes CVE-2026-4738 in zlib (medium), which the 3.6.0 image carries as zlib 1.3.2-r1: the image now takes zlib 1.4-r0 from Alpine's repository (#1852). The release binaries do not link zlib and are not affected. On 16 November Trivy reported no other finding in the image's Alpine packages with zlib 1.4-r0 (#1852), and the release workflow holds the 3.7.0 image's Alpine packages to Trivy's database again before it is pushed. The server binary is judged by a separate gate, against the Go vulnerability database, before anything is published; what Trivy prints about the binary in the image does not block the release.
+  - Dependencies: client-go v3.50.0 (#1849), which fixes no advisory. In the documentation site's build tooling, which ships in no artifact, minimatch 11.0.8 fixes GHSA-g3hv-75wg-m249 (#1847).
+  Changelog
+  ✨ Features
+  - f75ae59: feat(users): bump client-go to v3.50.0 and create fine-grained tokens (#1849) (@jmrplens)
+  🐛 Bug Fixes
+  - ce54566: fix(image): take zlib 1.4 for CVE-2026-4738 before alpine ships it (#1852) (@jmrplens)
+  - bbd1e1a: fix: clear the open CodeQL, Dependabot and SonarCloud findings on main (#1847) (@jmrplens)
+  📚 Documentation
+  - 909f538: docs(development): bring the upstream register's states up to date (#1846) (@jmrplens)
+  - 6fd1e98: docs(development): reduce the upstream register to one table per project (#1844) (@jmrplens)
+  - 19c8788: docs(site): explain upstream gaps without pointing at the contributor register (#1843) (@jmrplens)
+  🚧 Maintenance
+  - a785049: chore(release): move VERSION to 3.7.0, with its release notes (#1853) (@jmrplens)
+  - 99b305a: chore: update manifests for v3.6.0 (@jmrplens)
+  - c7a24aa: refactor(audit): stop the 1:1 audit reading the upstream register (#1841) (@jmrplens)
+  - 8851f50: refactor(gitlab): read the token grant's scopes from client-go (#1850) (@jmrplens)
+  - 0585cf5: refactor: drop upstream register citations from code, tests and contributor pages (#1842) (@jmrplens)
+  - ffd988c: test(e2e): confirm taking a work item out of its parent (#1855) (@jmrplens)
+  Full changelog: v3.6.0...v3.7.0
+  Verify the assets
+  All binaries, and the OpenVEX document gitlab-mcp-server.openvex.json, are listed in checksums.txt, signed keylessly with cosign:
+  cosign verify-blob \
+    --bundle checksums.txt.sigstore.json \
+    --certificate-identity "https://github.com/jmrplens/gitlab-mcp-server/.github/workflows/release.yml@refs/tags/v3.7.0" \
+    --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
+    checksums.txt
+  sha256sum --check --ignore-missing checksums.txt
+  Every file in checksums.txt and every Claude Desktop bundle also carries SLSA build provenance, attached as gitlab-mcp-server.intoto.jsonl. Verify a file against it, without signing in to GitHub:
+  gh attestation verify gitlab-mcp-server-linux-amd64 \
+    --bundle gitlab-mcp-server.intoto.jsonl \
+    --repo jmrplens/gitlab-mcp-server \
+    --cert-identity "https://github.com/jmrplens/gitlab-mcp-server/.github/workflows/release.yml@refs/tags/v3.7.0"
+ReleaseNotesUrl: https://github.com/jmrplens/gitlab-mcp-server/releases/tag/v3.7.0
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://jmrp.io/docs/gitlab-mcp-server/
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

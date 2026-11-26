@@ -1,0 +1,93 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: ESEngine.ReasonixDesktop
+PackageVersion: 1.37.0
+PackageLocale: en-US
+Publisher: reasonix
+PublisherUrl: https://esengine.cn/
+PublisherSupportUrl: https://github.com/esengine/DeepSeek-Reasonix/issues
+PackageName: Reasonix
+PackageUrl: https://esengine.github.io/DeepSeek-Reasonix/
+License: MIT
+LicenseUrl: https://github.com/esengine/DeepSeek-Reasonix/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Reasonix Contributors
+ShortDescription: A DeepSeek-native coding agent, for your terminal.
+Description: Reasonix talks straight to api.deepseek.com. The loop is append-only, engineered around DeepSeek's byte-stable prefix cache — long sessions hold 90%+ cache hit and input-token cost collapses to ~1/5. Terminal-first, leave it running.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- deepseek
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  此版本简化了 Agent 核心，改进了提供商能力处理，稳定了桌面滚动，并新增 ModelScope 提供商预设。
+  发布渠道：稳定版 · v1.37.0
+  English → · 网页版完整更新日志 →
+  使用攻略
+  - Agent 核心简化 — 了解简化的 Agent 循环、显式的 planner 和 continuation 策略，以及新的确定性完成流程。
+  - 模型能力 — 关于模型级视觉能力和新能力元数据契约的详细信息。
+  - 推理提供商 — 针对 OpenAI 兼容提供商的推理回放和恢复行为更新。
+  概览
+  Reasonix v1.37.0 — Reasonix 1.37.0
+  此版本简化了 Agent 核心，改进了提供商能力处理，稳定了桌面滚动，并新增 ModelScope 提供商预设。
+  发布日期：2026-09-04
+  Desktop 20 · CLI 6
+  桌面端更新
+  重点内容
+  - [Desktop · CLI] 简化 Agent 核心并采用确定性完成流程 — Agent 循环现在默认仅执行器，planner、continuation 和 compaction 需显式启用。完成不再使用第二个 LLM 验证器；空响应会重试相同的冻结请求。 (#9794, #9788)
+  - [Desktop] 模型级视觉能力 — 视觉支持现在由模型级能力元数据决定，而非手动 VisionModels 列表，并自动从提供商 /models 响应解析。 (#9787)
+  - [Desktop] ModelScope 提供商预设 — 新增 ModelScope 作为 OpenAI 兼容提供商预设，包含 7 个精选模型，如 Qwen3.5-397B 和 DeepSeek-V4。 (#8771)
+  - [Desktop] 稳定的会话滚动 — 修复了多个滚动跳动问题，包括减少动画叠加、块窗口前插和延迟范围提交。 (#9753, #9760, #9746)
+  - [Desktop] 管理命令不再需要回合 ID — /compact 和 /context 等斜杠命令现在无需创建 Agent 回合即可完成，避免虚假错误。 (#9774)
+  新增
+  - [Desktop] ModelScope 提供商预设 — 新增 ModelScope 作为 OpenAI 兼容提供商预设，包含 7 个精选模型。 (#8771)
+  - [Desktop] 模型级视觉能力 — 用模型级能力元数据取代手动 VisionModels，包括自动从提供商 /models 响应解析。 (#9787)
+  改进
+  - [Desktop · CLI] 确定性 Agent 完成 — 移除了完成验证器的第二次 LLM 请求；空响应重试相同的冻结请求，仅推理的响应可能在没有可见文本的情况下完成。 (#9788)
+  - [Desktop · CLI] 显式 planner 和 continuation — 普通请求仅执行器；planner 和 continuation 需显式启用。压力压缩为一次摘要加一次重试。 (#9794)
+  - [Desktop · CLI] OpenAI 推理回放对齐 — 当声明工具时回放历史 reasoning_content 回合，并自愈旧历史 400 错误。 (#9776)
+  - [Desktop · CLI] 子代理结果保留 — 使用新的 SubagentOutcome 封装和类型化错误保留并恢复子代理结果。 (#9775)
+  - [Desktop] 版本化会话上下文 — 通过将可变环境和技能目录移入确定性会话上下文快照来稳定提示词前缀。 (#9733)
+  - [Desktop] 本地化主机提示 — 将用户可见的 Agent 主机提示移入 i18n 目录，并实时同步语言更改。 (#9768)
+  - [Desktop] 下架经典桌面风格 — 从设置中移除经典布局，并将现有经典配置迁移到工作台。 (#9796)
+  修复
+  - [Desktop] 提供商能力兼容性 — 在模型级能力元数据成为权威后，恢复了旧版提供商级不支持视觉信号。 (#9800)
+  - [Desktop · CLI] 简化缺失推理恢复 — 移除了长期回退电路；现在在返回提供商特定错误前进行一次确定性协议重试。 (#9767)
+  - [Desktop] 管理命令分类 — 管理斜杠命令不再需要持久回合 ID，避免虚假错误。 (#9774)
+  - [Desktop] 滚动跳动修复 — 修复了减少动画叠加、块窗口前插吸收和延迟范围提交保护。 (#9753, #9760, #9746)
+  - [Desktop] 滚动条 generation 围栏 — 按 generation 围栏滚动条事务，防止旧几何导致跳动。 (#9759)
+  - [Desktop] 空代码围栏块 — 省略空代码围栏块以移除幻影卡片。 (#9757)
+  CLI 端更新
+  重点内容
+  - [Desktop · CLI] 简化 Agent 核心并采用确定性完成流程 — Agent 循环现在默认仅执行器，planner、continuation 和 compaction 需显式启用。完成不再使用第二个 LLM 验证器；空响应会重试相同的冻结请求。 (#9794, #9788)
+  改进
+  - [Desktop · CLI] 确定性 Agent 完成 — 移除了完成验证器的第二次 LLM 请求；空响应重试相同的冻结请求，仅推理的响应可能在没有可见文本的情况下完成。 (#9788)
+  - [Desktop · CLI] 显式 planner 和 continuation — 普通请求仅执行器；planner 和 continuation 需显式启用。压力压缩为一次摘要加一次重试。 (#9794)
+  - [Desktop · CLI] OpenAI 推理回放对齐 — 当声明工具时回放历史 reasoning_content 回合，并自愈旧历史 400 错误。 (#9776)
+  - [Desktop · CLI] 子代理结果保留 — 使用新的 SubagentOutcome 封装和类型化错误保留并恢复子代理结果。 (#9775)
+  修复
+  - [Desktop · CLI] 简化缺失推理恢复 — 移除了长期回退电路；现在在返回提供商特定错误前进行一次确定性协议重试。 (#9767)
+  其他项目更新
+  - [Service] 崩溃仪表板 1101 修复 — 限制 D1 分组详情读取并限制 facet 数量，防止 Worker 1101 错误。 (#9756)
+  - [Site · Service] 网站 D1 查询优化 — 为论坛和注册表查询添加性能索引和 keyset 分页。 (#9752)
+  升级提醒
+  本版本无需手动迁移。
+  风险提示
+  当前没有需要额外操作的已知风险。
+  致谢
+  感谢本版本的贡献者：@SivanCola、@yrk111222
+  下载与安装
+  - 官网按平台下载
+  - 查看完整差异
+ReleaseNotesUrl: https://github.com/esengine/DeepSeek-Reasonix/releases/tag/desktop-v1.37.0
+Documentations:
+- DocumentLabel: FAQ
+  DocumentUrl: https://esengine.github.io/DeepSeek-Reasonix/index.html#faq
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

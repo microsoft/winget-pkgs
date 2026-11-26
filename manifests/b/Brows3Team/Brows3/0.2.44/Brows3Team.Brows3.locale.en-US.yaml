@@ -1,0 +1,56 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Brows3Team.Brows3
+PackageVersion: 0.2.44
+PackageLocale: en-US
+Publisher: Brows3 Team
+PublisherUrl: https://github.com/rgcsekaraa
+PublisherSupportUrl: https://github.com/rgcsekaraa/brows3/issues
+PackageName: Brows3
+PackageUrl: https://github.com/rgcsekaraa/brows3
+License: MIT
+LicenseUrl: https://github.com/rgcsekaraa/brows3/blob/main/LICENSE
+ShortDescription: Fast, open-source desktop client for Amazon S3 and S3-compatible object storage.
+Description: Brows3 is a desktop S3 browser for AWS S3, MinIO, Cloudflare R2, Wasabi, DigitalOcean Spaces, and custom S3-compatible endpoints.
+Tags:
+- amazon-s3
+- aws-s3
+- cloudflare-r2
+- desktop-app
+- minio
+- object-storage
+- rust
+- s3-browser
+- s3-client
+- tauri
+- wasabi
+ReleaseNotes: |-
+  Brows3 0.2.44 release notes
+  Added
+  - Configurable Text Previews: Added a persisted 1–100 MB text/HTML/code preview limit in Settings. The backend enforces the selected byte limit while streaming, even when object metadata is missing or incorrect. (#21)
+  - Audio And Streamed Media Previews: Added in-app audio playback alongside presigned image, video, and PDF previews; streamed media does not consume the text-preview memory allowance. (#21)
+  - Content-Type Detection And Editing: Uploads infer MIME types from object names, edited text objects retain their existing type, and Properties provides a validated free-form Content-Type field with common suggestions. Metadata-only changes preserve tags, user metadata, cache headers, encryption settings, object-lock fields, and ACL grants; objects above 5 GiB use multipart copy. (#22)
+  - AWS IAM Identity Center Profiles: Discovered SSO profiles are identified in the profile picker, use the AWS SDK's cached IAM Identity Center credentials, and provide an AWS CLI v2 browser sign-in action with actionable expired-session errors. (#23)
+  Fixed
+  - Readable Command Errors: Tauri command failures now serialize as their human-readable messages instead of JavaScript displaying [object Object]. (#18)
+  - Large Multipart Uploads: Files at or above 100 MiB now use retryable, bounded-memory S3 multipart uploads with adaptive part sizing, per-part progress, clean cancellation/abort handling, and support for objects beyond the 5 GiB single-PUT limit. (#25)
+  - Persistent Linux Secrets: Linux now explicitly uses the freedesktop Secret Service backend (GNOME Keyring/KWallet) instead of the volatile kernel session keyring, migrates a still-live legacy keyutils secret when possible, and retains the documented local fallback when Secret Service is unavailable. (#24)
+  - Shared-Profile Custom Endpoints: AWS shared-config profiles that load endpoint_url now use path-style bucket addressing and compatibility checksum behavior, matching Custom Endpoint profiles on MinIO and similar providers. (#26)
+  - Profile Connection Tests: Test progress and results now remain visible until the form changes, and stale asynchronous responses cannot overwrite a newer test.
+  - Transfer Profile Isolation: Queued transfers retain the profile that created them instead of using whichever account is active when a worker starts.
+  - Safe Folder Downloads: Recursive download paths reject traversal, absolute, rooted, drive-prefixed, and null-containing object keys before joining them to the selected directory.
+  - Bounded Search And Sorting: Deep search is capped at 100 S3 LIST requests, 100,000 scanned objects, and 10,000 matches, while complete non-default folder sorts are capped at 100 requests and 100,000 entries.
+  - Cache Accuracy: Removed the unused full-bucket cache implementation, bounded the actual sorted-view cache, and invalidated it after object writes.
+  - Release Signing Workflow: macOS builds now receive configured Apple signing and notarization secrets, while [skip release] suppresses release jobs for maintenance pushes.
+  - Winget Package Continuity: Release manifests now update the established Brows3Team.Brows3 package identifier and include both MSI and NSIS installers when available instead of generating a disconnected package identity.
+  Changed
+  - Credential Documentation: Documented the plaintext secrets.json fallback used by portable mode or when native keychain storage fails.
+  - Release Quality Gate: Publishing now waits for frontend linting, TypeScript checks, production export, Rust formatting, Clippy, backend tests, release-script tests, native Windows validation, and a complete signed artifact audit. Updater signatures are fetched through the authenticated asset API, and updater/Winget manifests must use stable tag URLs and verified installer digests; incomplete builds remain unpublished drafts.
+  - Project Cleanup: Removed unused state, dependencies, starter assets, and historical build logs.
+ReleaseNotesUrl: https://github.com/rgcsekaraa/brows3/releases/tag/app-v0.2.44
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/rgcsekaraa/brows3/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

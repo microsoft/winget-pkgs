@@ -1,0 +1,67 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: max-sixty.worktrunk
+PackageVersion: v0.69.1
+PackageLocale: en-US
+Publisher: max-sixty
+PublisherUrl: https://github.com/max-sixty
+PublisherSupportUrl: https://github.com/max-sixty/worktrunk/issues
+PackageName: worktrunk
+PackageUrl: https://github.com/max-sixty/worktrunk
+License: MIT OR Apache-2.0
+LicenseUrl: https://github.com/max-sixty/worktrunk/blob/HEAD/LICENSE
+ShortDescription: A Git worktree manager for trunk-based development
+Description: |-
+  worktrunk (wt) is a Git worktree manager designed for trunk-based development workflows.
+  It simplifies creating, switching between, and managing Git worktrees, making it easy to
+  work on multiple features or branches simultaneously without the overhead of stashing
+  or switching branches in a single working directory.
+Tags:
+- cli
+- git
+- git-worktree
+- rust
+- terminal
+- worktree
+ReleaseNotes: |-
+  Release Notes
+  Improved
+  - wt switch statusline dims the dev-server URL until its port answers: The Claude Code statusline's dev-server URL now dims until something answers on its port, matching the wt list cell it already copied in every other respect. (#3561)
+  Fixed
+  - wt step rebase and wt merge refuse to run mid-operation: With a git operation already in progress (a conflicted rebase stop, or a killed git), wt step rebase <target> reported Already up to date and exited 0 over a conflicted, mid-replay tree — it asked "already rebased?" before consulting the worktree's operation state — and wt merge failed with a detached-HEAD error whose suggested git switch would have discarded the in-progress rebase. Both commit-replaying commands now detect an open operation up front and refuse with a clear message. (#3558)
+  - Shell-integration install/uninstall correctness: wt config shell now validates the integration command name and rejects malformed values (empty, leading -, or shell-unsafe characters) with a clear error rather than writing a broken rc line; recognizes manually-added or older-form integration lines on install, reporting already-configured instead of appending a duplicate; and, on uninstall, scans for worktrunk-managed wrapper files and rc lines by content marker, so integration installed under an alternate binary name (git-wt, …) is cleaned up regardless of the name it was installed under — while a user's own file that merely mentions wt config shell init is left untouched. (#2864)
+  - wt switch picker reflects a mid-session removal after a deleted-CWD recovery: When the picker recovered from a deleted working directory, accepting a row reused the startup-time repository snapshot — so an in-picker alt-x removal of a worktree or branch during that recovered session wasn't observed on accept. The accept path now rebuilds the repository. (#3557)
+  Internal
+  - Windows code-signing upload no longer double-zips: The unsigned Windows artifact was uploaded wrapped in an artifact-storage zip around the already-zipped binary, so SignPath couldn't locate wt.exe inside it and the (non-blocking) signing request failed. The upload now sets archive: false, submitting the real zip to SignPath. (#3566)
+  - crates.io publishing via trusted publishing (OIDC): The release workflow mints a short-lived crates.io credential per run via rust-lang/crates-io-auth-action instead of a stored CARGO_REGISTRY_TOKEN. (#3564)
+  Install worktrunk 0.69.1
+  Install prebuilt binaries via shell script
+  curl --proto '=https' --tlsv1.2 -LsSf https://github.com/max-sixty/worktrunk/releases/download/v0.69.1/worktrunk-installer.sh | sh && wt config shell install
+  Install prebuilt binaries via powershell script
+  powershell -ExecutionPolicy Bypass -c "irm https://github.com/max-sixty/worktrunk/releases/download/v0.69.1/worktrunk-installer.ps1 | iex"; git-wt config shell install
+  Install prebuilt binaries via Homebrew
+  brew install worktrunk && wt config shell install
+  Download worktrunk 0.69.1
+  ────────────────────────────────────────────────┬───────────────────┬─────────────
+  File                                            │Platform           │Checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-aarch64-apple-darwin.tar.xz           │Apple Silicon macOS│checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-x86_64-apple-darwin.tar.xz            │Intel macOS        │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-x86_64-pc-windows-msvc.zip            │x64 Windows        │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-aarch64-unknown-linux-musl.tar.xz     │ARM64 MUSL Linux   │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-x86_64-unknown-linux-musl.tar.xz      │x64 MUSL Linux     │checksum
+  ────────────────────────────────────────────────┴───────────────────┴─────────────
+  Install via Cargo
+  cargo install worktrunk && wt config shell install
+  Install via Winget (Windows)
+  winget install max-sixty.worktrunk && git-wt config shell install
+  Install via AUR (Arch Linux)
+  paru worktrunk-bin && wt config shell install
+ReleaseNotesUrl: https://github.com/max-sixty/worktrunk/releases/tag/v0.69.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

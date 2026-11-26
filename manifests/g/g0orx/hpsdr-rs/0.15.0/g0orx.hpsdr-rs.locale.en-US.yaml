@@ -1,0 +1,64 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: g0orx.hpsdr-rs
+PackageVersion: 0.15.0
+PackageLocale: en-US
+Publisher: John Melton
+PublisherUrl: https://github.com/g0orx
+PublisherSupportUrl: https://github.com/g0orx/hpsdr-rs/issues
+Author: John Melton
+PackageName: hpsdr-rs
+PackageUrl: https://github.com/g0orx/hpsdr-rs
+License: GPL-2.0-or-later
+LicenseUrl: https://github.com/g0orx/hpsdr-rs/blob/HEAD/LICENSE
+ShortDescription: Desktop client for openHPSDR Protocol 1/2 SDR radios.
+Description: |-
+  A Rust/egui desktop client for openHPSDR Protocol 1 and Protocol 2 radios (Metis/Ozy-style and Hermes/Orion-style boards), using WDSP for DSP.
+
+  - Protocol 1 (Metis/Ozy) and Protocol 2 (Hermes/Orion) support, with standard openHPSDR UDP discovery
+  - Multiple simultaneous receivers, each with its own VFO, mode, filter width, and band memory
+  - Spectrum/waterfall display with adjustable dB range, palette, and Click-to-Tune (CTUN)
+  - SSB/CW/AM/FM/digital modes, per-mode/per-band filter width and mode memory
+  - Noise blanker (NB/NB2), noise reduction (NR/NR2/NNR), and SNB, independently switchable
+  - AGC with selectable Off/Long/Slow/Medium/Fast modes
+  - TX: mic audio through WDSP's TXA chain, ALC, TX power/SWR meter with per-band PA calibration, and a Tune button
+  - PureSignal (PA linearization/predistortion), on both Protocol 1 and Protocol 2
+  - rigctl (Hamlib-compatible), TCI (WebSocket), and CAT (Kenwood TS-2000 emulation) control servers
+  - Dual VFO (VFO A/B) with Split -- transmit on VFO B while receiving on VFO A
+  - Selectable RX output / TX input audio devices, independent of the OS default
+  - Per-radio settings persistence, keyed by the radio's MAC address
+  - FPGA firmware upload and static IP configuration
+Tags:
+- amateur-radio
+- dsp
+- ham-radio
+- openhpsdr
+- sdr
+ReleaseNotes: |-
+  Changes since v0.14.0.
+  New
+  - Band stack: each band has three entries. Press the band's button again to step to the next one; VFO A's label shows which, e.g. 20m-1. Each entry keeps its frequency, mode, filter and squelch. Extra receivers have band stacks too.
+  - Compact layout for small screens, such as the Raspberry Pi 7" displays (800x480, and Touch Display 2 at 720x1280). Settings → Spectrum → Layout is Auto, Standard or Compact; Auto picks Compact on a small screen. Compact keeps the VFOs and spectrum and puts the controls behind a toolbar of large buttons under the spectrum: Band, Mode, Audio, DSP, TX, Menu and MOX. On a small screen hpsdr-rs opens maximized, and Settings fits the screen and scrolls.
+  -  --fullscreen fills the screen, with a Quit button; F11 toggles it. A long press on a VFO opens the keypad.
+  - Front-panel controllers on a Raspberry Pi, as piHPSDR's: Controller 1, Controller 2 V1 and V2, and the G2 V1 front panel. Encoders and switches go on the Pi's GPIO lines, and Controller 2's switches on an MCP23017 on I2C. Settings → Controller sets each knob, button and switch to any of the MIDI actions, starting from piHPSDR's defaults. See the manual.
+  - VFO step: a box next to VFO A sets the step for the controller's VFO knob, from 1 Hz to 1 MHz. New actions VFO Step Size +/- and Band Stack (next) for MIDI and the controller.
+  - When a controller or MIDI knob changes a setting, the new value shows over the spectrum for a moment in the compact layout.
+  hpsdr-remote
+  - The .deb now installs hpsdr-remote, the remote client, with its own menu entry.
+  - Compact layout, as hpsdr-rs's: in the program and the web client. Layout is next to the connection status. --fullscreen and F11 work natively.
+  - It remembers the last 3 servers it connected to.
+  - Front-panel controllers work in hpsdr-remote too: run it on the Pi the controller is wired to and click Controller.
+  - Fixed on a Raspberry Pi 4: hpsdr-remote failed to start (graphics), and then played no audio.
+  Changes
+  - CI now also tests installing the arm64 .deb on Debian 13 (Raspberry Pi OS Trixie).
+  Downloads
+  - Linux AppImage (x86_64 / aarch64): hpsdr-rs-0.15.0-x86_64.AppImage, hpsdr-rs-0.15.0-aarch64.AppImage. Run chmod +x on the file, then run it. USB radios still need the udev rules installed by hand; a copy is inside the AppImage under usr/share/doc/hpsdr-rs.
+  - Debian/Ubuntu (amd64): hpsdr-rs_0.15.0-1_amd64.deb. Install with sudo apt install ./hpsdr-rs_0.15.0-1_amd64.deb.
+  - Debian/Ubuntu/Raspberry Pi OS (arm64): hpsdr-rs_0.15.0-1_arm64.deb. Install with sudo apt install ./hpsdr-rs_0.15.0-1_arm64.deb.
+  - Fedora/openSUSE RPM (x86_64 / aarch64): hpsdr-rs-0.15.0-1.x86_64.rpm, hpsdr-rs-0.15.0-1.aarch64.rpm. Install with sudo dnf install ./hpsdr-rs-0.15.0-1.x86_64.rpm, or on openSUSE sudo zypper install --allow-unsigned-rpm ./hpsdr-rs-0.15.0-1.x86_64.rpm.
+  - macOS (Apple Silicon): hpsdr-rs-0.15.0-macos-arm64.tar.gz. It is built in CI, unsigned and not notarized, so Gatekeeper warns on first launch. Right-click the hpsdr-rs binary and choose Open, or run xattr -d com.apple.quarantine hpsdr-rs first.
+  - Windows (x86_64): hpsdr-rs-0.15.0-x86_64.msi
+ReleaseNotesUrl: https://github.com/g0orx/hpsdr-rs/releases/tag/v0.15.0
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

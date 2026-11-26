@@ -1,0 +1,73 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: contour-terminal.Contour
+PackageVersion: 0.7.0.8982
+PackageLocale: en-US
+Publisher: Contour Terminal Emulator
+PublisherUrl: https://github.com/contour-terminal
+PublisherSupportUrl: https://github.com/contour-terminal/contour/issues
+PackageName: Contour
+PackageUrl: https://github.com/contour-terminal/contour
+License: Apache-2.0
+LicenseUrl: https://github.com/contour-terminal/contour/blob/HEAD/LICENSE.txt
+CopyrightUrl: https://github.com/contour-terminal/contour/blob/master/LICENSE.txt
+ShortDescription: Modern C++ Terminal Emulator
+Description: |-
+  Contour is a modern and actually fast, modal, virtual terminal emulator, for everyday use. It is aiming for power
+  users with a modern feature mindset.
+Tags:
+- console
+- emoji
+- grapheme-cluster
+- hacktoberfest
+- library
+- linux
+- sixel-graphics
+- terminal
+- terminal-emulators
+- unicode
+- unicode-support
+- vte
+- windows-terminal
+- xterm
+ReleaseNotes: |-
+  A lot has happened since our last release, and that was already too long ago. So now, it is finally time to tag a release, with an already way too long list of great improvements as well as fixes.
+  Contour 0.7.0 makes the window a workspace: native GUI tabs in the title bar, split panes, saved layouts, and an optional terminal-styled UI that draws the application's own chrome on the character grid. It adds an experimental daemon mode for sessions that outlive the window showing them, accessibility support across the terminal and its chrome, the kitty graphics, text-sizing and clipboard protocols, ReGIS vector graphics, and a large round of VT conformance work.
+  Tabs, splits and layouts
+  - Adds first-class GUI tabs presented in a custom window title bar, replacing the status-line tab list (the {Tabs} status-line directive remains supported for existing configs)
+  - Adds split panes — split the active pane vertically (Ctrl+Shift+E) or horizontally (Ctrl+Shift+O), close a pane (Ctrl+Shift+X), and move pane focus with Alt+Shift+Arrow
+  - Adds pane management actions: swap the active pane with a neighbor (Ctrl+Alt+Arrow), resize it (Ctrl+Shift+Alt+Arrow), flip a split's orientation (Ctrl+Shift+Backslash), and move a pane to a new position in the split tree (unbound by default)
+  - Adds pane zoom (TogglePaneZoom, Ctrl+Shift+Z): gives the active pane the whole tab area, hiding its siblings, and toggles back to the tiled layout. Moving pane focus while zoomed keeps the zoom and shows the newly focused pane; splitting, closing or rearranging panes returns to the tiled view. A zoomed tab is titled after the pane on screen and wears a Z badge
+  - Adds dragging tabs: reorder a tab within its strip, drag it into another window, or tear it out into a new window, with a live drop-position indicator showing where it will land; the running terminal survives the move (within the same process)
+  - Adds renaming a tab by double-clicking it, and a color-swatch picker in its context menu. The picker is keyboard-driven — the cursor keys and the vim motions h/j/k/l walk the swatches, Enter or Space picks the highlighted one, Escape dismisses — and opens on the color the tab already wears
+  - Adds the actions SetTabColor and ResetTabColor, so coloring a tab is no longer mouse-only: both appear in the command palette, and either can be bound in input_mapping. SetTabColor opens the tab's color picker, or applies a color outright when given one (for example { mods: [Shift,Control], key: 'R', action: SetTabColor, color: '#ff0000' })
+  - Adds configurable layouts: named sets of tabs with per-tab command, working directory, name, color, profile, and split panes; open at startup via default_layout, via --layout NAME, or the LaunchLayout action. SaveLayout writes the current window's tabs back into layouts.yml, prompting for a name when none was given — and is reachable from the command palette, so saving a layout needs no keybinding
+  - Adds the dim_unfocused profile option: dims a pane while it is not the focused one (an inactive pane of a split, or any pane of an unfocused window) by blending it toward its background color; 0.0 (default) disables dimming
+  - Adds the top-level options tab_bar_position (Top/Bottom) and tab_bar_visibility (Always/Never/Multiple), to place the GUI tab bar at the top or bottom of the window and to hide it entirely or show it only when more than one tab is open
+  - BREAKING: tab_bar_position and tab_bar_visibility belong to the top level of contour.yml, not to a profile — a window shows one tab bar whichever profiles its tabs run. If you tried them in a 0.7.0 prerelease, move these two keys out of your profiles: block; a profile-scoped copy is no longer read
+  - Adds Ctrl+Tab / Ctrl+Shift+Tab and Ctrl+PageDown / Ctrl+PageUp as tab-switching shortcuts. They reach existing configurations too, and binding them yourself still wins. Note that Ctrl+Tab is now taken from applications that request it through the Kitty keyboard protocol
+  - Adds switching tabs with a horizontal mouse wheel tilt or a two-finger trackpad swipe, over the tab strip or the terminal, configurable via the new global tab_switch_on_horizontal_wheel option (default on); an application that requested mouse reporting keeps the horizontal wheel, and the bypass modifier (Shift) switches tabs even then. Also fixes a sideways swipe over the tab bar doing nothing at all on a trackpad
+  - Fixes the tab bar placement and visibility settings appearing to do nothing until Contour was restarted
+  Window and desktop integration
+  - Changes the window to use a custom client-side-decorated title bar (tab strip plus window controls) by default on all platforms; set show_title_bar: true to use the native server-side window decoration instead, in which case the tab strip is kept but its window controls defer to the OS frame
+  - Adds window_control_style, deciding how the window's minimize/maximize/close buttons are drawn and which side of the tab bar they sit on — until now always Windows-shaped and always on the right, which on macOS is the wrong corner. The default auto follows the host: macOS gets real traffic lights on the left, KDE Plasma gets Breeze's circular hover fills, everything else keeps today's buttons. Set windows, macos or plasma to pin one. Changing it from the settings page applies to every open window at once, without a restart
+  - Fixes the window losing its drop shadow on KDE Plasma. Contour's window is frameless by default so its own tab bar can be the title bar, and a frameless window gets no decoration from the system — which is what draws the shadow. The window now publishes a shadow of its own to KWin, on both X11 and Wayland, sized and shaped like Breeze's so it matches the rest of the desktop; window_shadow sets it to None, Small, Medium, Large or VeryLarge. Only KWin can act on this, so on other compositors and window managers it has no effect
+  - Fixes the same loss on Windows and macOS, where it also cost the window its rounded corners. Neither goes frameless any more: on Windows the frame is kept and made invisible, so the system draws the shadow and the rounded corners while the tab bar still covers the whole window; on macOS the window stays a normal one whose content simply extends into the title bar, so the shadow, the rounded corners, full-screen, window tabbing and double-click-to-zoom all keep working. On macOS the system's own traffic lights are now used instead of Contour's drawn copies
+  - Fixes background blur never turning off again on X11 once it had been switched on, and fixes the window border being drawn dark on Windows regardless of the theme setting
+  - Fixes multi-monitor handling: the window no longer re-pins itself to the widest screen on every frame, refresh-rate/DPI tracking follows the window's actual screen after a monitor move, and new windows open on the spawning window's screen
+  - Changes a display-scale change (moving to a monitor with a different scale, a late Wayland fractional-scale arrival) to preserve the terminal's columns and lines with a single corrective window resize
+  - Changes font zoom to keep the window and pane size fixed and adjust the terminal's columns and lines (and the child PTY size) instead of resizing the window
+  - Fixes window resize oscillation/flicker: the terminal no longer fights the window manager by resizing its own window from resize events; the grid floors to the given size (sub-cell remainder renders as padding) while X11/macOS keep WM-side cell snapping via size hints
+  - Fixes window spawn flicker: the window is sized from the real font metrics before it is first shown and opens directly in the profile's window state, instead of appearing at a default size and jumping
+  - Fixes window sizing on tiling Wayland compositors: a freshly-spawned terminal was mis-sized until a manual resize (#1955), and the window snapped back to the configured terminal_size after a screen or scale change (#1941)
+  - Fixes programmatic window resizes (CSI 8 t) shrinking the window by the title-bar height on every call, and CSI 4 t resizing the grid without the window; in split windows both now solve the pane layout so the requesting pane receives its exact grid
+  - Fixes the KDE forced-font-DPI override being read from the X11 key in Wayland sessions (now honors forceFontDPIWayland) and no longer re-reads the setting file on every frame
+  - Fixes the window padding being computed against the wrong scale when a forced font DPI is configured (KDE's "Force font DPI"), which fitted the grid to a width the window did not have and left the terminal's own idea of where the grid starts disagreeing with where it was drawn
+  Command palette, settings and menus
+  - Adds a command palette (Ctrl+Shift+P): a searchable popup listing every command with its documentation and key binding, making actions that have no binding reachable at all. Recently used commands are pinned on top and remembered across restarts; command_palette_recent_count sets how many (0 disables)
+  - Adds a GUI settings page for changing the configuration. Settings are grouped into collapsible sections with a search box over them, and the indicator status line is built visually — a preview of the finished line, one chip per placeholder, and a style sheet exposing every attribute a template can carry, with the raw template still editable as text
+  - Adds a right-click context menu to the terminal: copy, paste, select all, the hyperlink under the cursor, opening the current folder, splitting and closing panes, switching profile, and a soft or hard terminal reset. It opens exactly when a selection drag would have worked, so an application that asked for the mouse (vim, tmux) still receives its right-click; hold Shift to open the menu anyway. Bind OpenContextMenu in input_mapping to move it to another button
+ReleaseNotesUrl: https://github.com/contour-terminal/contour/releases/tag/v0.7.0.8982
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

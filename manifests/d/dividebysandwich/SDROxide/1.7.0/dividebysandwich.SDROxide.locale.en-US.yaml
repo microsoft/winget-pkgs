@@ -1,0 +1,113 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: dividebysandwich.SDROxide
+PackageVersion: 1.7.0
+PackageLocale: en-US
+Publisher: Josef Jahn
+PublisherUrl: https://github.com/dividebysandwich
+PublisherSupportUrl: https://github.com/dividebysandwich/sdroxide/issues
+PrivacyUrl: https://github.com/dividebysandwich/sdroxide/blob/HEAD/PRIVACY.md
+Author: Josef Jahn
+PackageName: sdroxide
+PackageUrl: https://sdroxide.com/
+License: GPL-3.0
+LicenseUrl: https://github.com/dividebysandwich/sdroxide/blob/HEAD/LICENSE
+ShortDescription: A native software-defined radio transceiver client.
+Description: |-
+  A PowerSDR/Thetis-style software-defined-radio transceiver client in Rust, with pluggable radio backends (SoapySDR, OpenHPSDR, TCI, SmartSDR, Icom LAN, ELAD, and CAT), an egui GUI, and a cyberpunk theme. It runs as a native desktop application and, from the same binary, as a server that streams the same UI to a web browser over WebSocket. It includes an integrated, persistent logbook, many digital modes like FT8/FT4/FT2 built-in, and TCI and Hamlib rigctld servers so third-party programs like WSJT-X can use it as their radio.
+
+  One binary, three ways to run it:
+  - Native — a local desktop transceiver against your SDR hardware.
+  - Server — sdroxide --server; the DSP runs on the machine with the radio and the full UI (plus audio and the waterfall) is served to a browser as WebAssembly. Every radio the station has is served, one client each: /ws and /ws/<id>, listed at /radios. Its roster is editable from a client too — a signed-in operator can add a radio to the station and close one again, without touching the machine or restarting it. On a phone or tablet it installs to the home screen and runs full screen, holding the screen awake while it is in front.
+  - Native remote — sdroxide --connect host:4950; the desktop UI driving a remote server instead of local hardware. A station with several radios comes up with all of them, one tab each.
+
+  Core features
+  - Radios - CAT/Audio, CAT/Stereo IQ, TCI (SunSDR), OpenHPSDR P1 and P2 (Hermes Lite 2, Apache Labs), SoapySDR (HackRF, etc.), RTL-SDR (native support, over USB or over the network via rtl_tcp), RX-888 (native support), SDRplay RSP (native, via the vendor API service), SmartSDR (FlexRadio - experimental!), PlutoSDR (native support, experimental!), Icom LAN / RS-BA1 protocol, HackRF (native support, RX verified / TX unmeasured), Airspy R2/Mini (native support, experimental!), HydraSDR RFOne (native support, experimental!), ELAD FDM-DUO / FDM-S1 / FDM-S2 (native support, experimental!), LimeSDR family + LimeRFE front end (via LimeSuite, experimental!), RigExpert Fobos SDR (native, via libfobos)
+  - Panadapter — GPU (wgpu) waterfall + spectrum line, wheel-zoom around the cursor, drag-to-pan, per-digit frequency readout, selectable colormaps, peak-hold, and auto-contrast ("FIT", on by default) that keeps the display floor/ceiling fitted to the signals currently on screen — refitting on a band change, after a pan or zoom, and when the levels drift, eased in rather than switched.
+  - Modes — SSB (USB/LSB), CW, AM, SAM, NFM (with CTCSS/DCS decoding and tone squelch), WFM (with broadcast pilot-tone stereo and RDS/RBDS), DSB, ISB (independent sideband — the two sidebands are two different transmissions, one to each ear), DIGU/DIGL, a spectrum-only mode, FT8/FT4/FT2, JS8 (all four speeds, with directed messaging, heartbeats and multi-frame free text), the keyboard modes PSK31, RTTY, Olivia, THOR and FSQ (with directed messaging + images), WSPR (transmit and receive, with WSPRnet reporting and optional band hopping), receive-only PI4 (the "Next Generation Beacon" propagation mode — 4-FSK, decoded from a rate-1/2 K=32 Fano search across every beacon variant and tone frequency the network uses), Hellschreiber (all seven Feld Hell / FSK Hell variants, on a scrolling raster), image SSTV (Scottie, Martin, Robot), image RIFP (draft-dulaunoy-rifp-00 — packetised, checksummed pictures over a 4800-baud CPFSK modem), receive-only weather fax (WEFAX/radiofax charts with a station picker, phasing and slant correction), transmit-only RF Paint (spectrum painting of text and images onto the waterfall), and receive-only ADS-B — the aircraft overhead on 1090 MHz, on a radar display with history dots, speed vectors and data blocks — and receive-only VDL2, the VHF datalink those same aircraft exchange ACARS over, on all seven channels around 136.8 MHz at once, with the messages and the stations sending them — and receive-only ACARS itself, the classic airband datalink, decoded from the AM carrier on the shared airline channels (131.550, 131.725 MHz and friends) — and receive-only HFDL, the shortwave ground network airliners use where no VHF receiver can hear them, one assigned channel at a time between 2.8 and 22 MHz, with a decode log and a map of the aircraft positions it carries.
+  - Receiver — hang AGC, draggable passband filter edges (on the spectrum and the waterfall), noise blanker, auto-notch, five noise-reduction engines (RNNoise, DeepFilterNet3, a libspecbleach port, a port of WDSP's NR2 and the built-in spectral NR, three strengths each), squelch, a second sub-receiver, RIT/XIT, VFO A/B with split, per-band band stacks, and memory channels.
+  - Winlink radio email — a built-in client for the amateur store-and-forward email network, speaking B2F/FBB, LZHUF and the secure login natively (no Pat, no external modem). Mailbox with inbox / outbox / sent / archive, compose and reply, attachments, and the session transcript when something goes wrong. Over the internet CMS today; AX.25 packet and ARDOP are the planned radio transports.
+  - Bandplan overlay — a colour-coded strip along the bottom of the waterfall that labels allocations (ham bands, broadcast, CB, AM); it shows coarse bands when zoomed out and CW/digital/SSB sub-segments when zoomed into a ham band.
+  - Scanner — work through the memory channels or a frequency range and stop where somebody is transmitting, with a configurable threshold (or the receiver's own squelch), dwell, skip list, and carrier / timed / manual resume. A range scan reads a whole span out of the panadapter's FFT rather than visiting channels one at a time, so sweeping 2 m takes well under a second instead of minutes.
+  - Transmit — PTT and tune carrier, drive/ALC metering, device-aware half-duplex sequencing (HackRF) or full-duplex (LimeSDR), and a ham-band / TX-range lockout so you can't key outside your allocation.
+  - Resizable layout — drag the frequency-scale strip to resize the spectrum vs. waterfall split; in FT8/FT4/FT2, drag the divider to resize the operating panel.
+  - Live spotting, awards & QSL — DX cluster / POTA / SOTA / PSK Reporter spots as clickable panadapter markers (click to tune + pre-fill a log entry), QRZ/HamQTH callsign lookup, one-click upload to LoTW / eQSL / Club Log / QRZ / HamQTH, and live DXCC / WAS / WAZ / grid award tracking (worked vs confirmed).
+  - Control inputs — every shortcut is rebindable, and any class-compliant MIDI controller can drive the radio: a jog wheel as the VFO knob, pads as PTT and band buttons, faders as gain controls, with LED/motor feedback. Mouse buttons take bindings too (a side button held for PTT works as a footswitch), and the panadapter wheel can zoom or tune.
+  - Spoken announcements — the radio reads itself out, for operating it without seeing it. A neural voice ships with the program and runs locally, so nothing is sent anywhere and no speech service has to be installed. It reads the frequency once the dial stops moving, folds a band change into one phrase, warns when you leave an amateur band, reads the SWR out while you tune up (with a warning above 3:1), and announces FT8/JS8 messages addressed to you. Announcements play on their own sound device, so they are never recorded and never sent to a remote listener. The window is also exposed to NVDA, Orca and VoiceOver.
+  - T/R switch — drives an external relay that disconnects and grounds the SDR's antenna input while the station transmits, and sequences an amplifier or an outboard T/R relay with it (per-contact lead and hold, so the antenna always throws before the amplifier is keyed and unkeys before it comes back). Works with the cheap USB relay boards (LCUS/CH340, KMtronic, Numato), USB HID relay boards, CM108/CM119 sound-card GPIO, a serial RTS/DTR line into any interface that wants a PTT closure, a Raspberry Pi GPIO line, or an external command. An optional transmit-sense input on the same port sees a rig keyed at its own microphone in milliseconds instead of the few hundred a CAT poll takes. A contact can also be given a band-decoder role instead, switched by which band the dial is on — a per-band RX/TX output table, the RX-to-TX move sequenced on the same lead and hold as every other contact. The same idea as the HPSDR filter board's open-collector band code (below), on a relay board, GPIO header or RTS/DTR pair, for driving an outboard band-pass/low-pass filter bank or a transverter selector on a PlutoSDR, a LibreSDR, or any other front end without HPSDR's own seven-pin bus. See "T/R switch" in the user manual for what this cannot do.
+  - Persistence — device, rates, gains, memories, band stacks, the FT8/FT4/FT2 operator profile, network/QSL credentials, control bindings, and the logbook are all stored under ~/.config/sdroxide/.
+Tags:
+- ham-radio
+- sdr
+- software-defined-radio
+- transceiver
+ReleaseNotes: |-
+  Highlights
+  VARA HF
+  SDROxide now speaks VARA HF, the connected-mode ARQ modem that most Winlink RMS gateways and VarAC stations run. The modem is xara, an open, MIT-licensed implementation of the VARA HF protocol by its author, built right into SDROxide - there is no separate modem program to install, no virtual audio cable and no extra PTT wiring. It works with any radio SDROxide can transmit on, SDR or sound-card rig.
+  Choose VARA HF from the DIGITAL row. Two stations make a link, then trade bursts and acknowledgements, and the speed climbs and falls with the path. It is always upper sideband, centred on 1500 Hz of audio, at one of three widths: 500, 2300 (what most gateways run) or 2750 Hz.
+  There are three ways to drive it, one at a time:
+  - The VARA panel: call a station and type to it, as in VarAC's chat. STATUS shows the session state (LISTENING, CALLING, CONNECTED), TX while keyed, BUSY while someone else is heard on the channel, and the peer, width, speed level and net bit rate, the far station's S/N and the bytes moved. TUNE sends a steady tone for an antenna tuner, ABORT drops a link at once.
+  - The MAIL window: forward Winlink mail through an RMS gateway over HF - set the route to Radio (VARA HF) and name the gateway.
+  - Your own software on VARA's TCP ports: turn on TCP host and SDROxide answers on 8300 (commands) and 8301 (data) the way VARA HF does, so Pat (vara:///CALL), Winlink Express or VarAC can use this radio as their VARA modem with no change on their side. The ports listen on localhost only. While an external program holds the modem, the panel's terminal shows its commands and the modem's replies, so you can watch the session go by.
+  ⚙ SETUP holds the station call (with optional SSID), the bandwidth, Registered (unlocks the speed levels above 4, for operators who own a VARA licence), retries, CW ID at the end of a link, the transmit latency the turnaround timing depends on (Auto picks a value for SDRs and sound-card rigs), and whether to answer incoming calls.
+  While VARA HF runs, SDROxide reads the receiver in small blocks so the modem hears the far end from the moment its own over ends, which an ARQ handshake depends on. The panel and setup page are translated into every language.
+  VARA HF support is experimental and brand new. Tests and bug reports with this mode are very welcome - links to gateways and VarAC stations, sessions driven from Pat or Winlink Express, and how it behaves on your radio. Please open an issue with the log and a description of what happened. See the manual, section 3.27, and chapter 11 for Winlink.
+  Window management: undocked modules, tool windows, workspaces
+  Parts of a radio's screen can now move into OS windows of their own, ported from madmedicnl's sdroxide-brown:
+  - Undocked modules (Settings > UI): the panadapter, a second spectrum (AUX SP, with its own zoom and layers), the operating panel, the control strip and the band/mode selector can each go to their own window. Whatever stays in the main window takes the space back, and closing a module's window docks it again.
+  - Tool windows (settings, logbook, scanner, memories, spots, satellites and more) get a ⇱ in their title bar that moves them into an OS window, and remember it.
+  - Floating operating panel: the panel can float over the main window, so a tiling window manager cannot lose it.
+  - ▣ chip: shows on the System row while something is out of the main window. Left-click brings everything home, right-click lists every module and where it is.
+  - Workspaces: save a window arrangement under a name and put it back later, also with Ctrl+Alt+1…9, 0. Ctrl+Alt+W opens the window list and Ctrl+Alt+F floats or docks the panel.
+  - Every window has a stable application id for compositor window rules; the manual lists them with niri and i3 examples.
+  Your own filter presets
+  Right-click a filter preset chip in the BW popup to make it your own: give it a label and its low and high edges, or take the receiver's current filter with Use current. Each mode keeps its own presets, and Reset brings back the built-in. (#761)
+  TCI Client follows the radio
+  The outbound TCI client now also listens: turning the knob on the far radio moves SDROxide's dial, with echoes of its own tuning filtered out. (#760)
+  Upgrading a client/server station
+  The remote protocol version moves from 189 to 190 (the VARA HF mode, commands and status). Update the server and every native remote client together; the browser client is served by the server and updates with it.
+  What's Changed
+  - VARA HF: new experimental mode on the vendored xara modem, with its own panel, setup page, a Winlink route in the MAIL window and a VARA-compatible TCP host on ports 8300/8301
+  - Window management: undocked modules, tool windows in OS windows, a floating operating panel, workspaces and window keys, ported from sdroxide-brown by @joscandreu in https://github.com/dividebysandwich/sdroxide/pull/766
+  - Window management: the window keys are not read while a text field has focus, so AltGr typing (Ctrl+Alt on Windows) no longer triggers them; tool windows remember whether they were in their own window
+  - Filter presets: right-click a chip to make it your own by @kingsqueak in https://github.com/dividebysandwich/sdroxide/pull/761
+  - Filter presets: an open editor holds the BW popup and closes with it; the editor is translated into every language
+  - TCI Client: follow the radio when it is tuned from its own side by @kingsqueak in https://github.com/dividebysandwich/sdroxide/pull/760
+  - TCI Client: a heard frequency the dial has already tuned past is dropped, and sent echoes are pruned on every send
+  - Audio, receive-only modes, network buffering: fixes backported from sdroxide-brown by @joscandreu in https://github.com/dividebysandwich/sdroxide/pull/765
+    - a renamed or missing sound card is reported instead of silently becoming the default
+    - the engine refuses to key the transmitter in a receive-only mode (WEFAX, NAVTEX, ACARS, ADS-B and others) by any route, and the TX controls are hidden there (#239)
+    - the web client no longer stutters on a healthy network, and HPSDR gets a receive socket sized for I/Q
+    - SSTV, WEFAX, Hell and RF Paint are excluded from the auto-notch, which was cancelling the picture
+    - zooming the panadapter out past the window no longer shakes it
+    - a logbook shared between tabs is kept when there is no store to re-read
+  - Audio device swap: an ambiguous match between two cards of the same model is refused, and a renamed card asks to be picked again
+  - Desktop: links in the app open in the system browser by @HDZucht in https://github.com/dividebysandwich/sdroxide/pull/780
+  - Waterfall: spot labels stack above the band-plan strip and the memory marks by @HDZucht in https://github.com/dividebysandwich/sdroxide/pull/781
+  - Full-band strip: the tuned frequency is marked in magenta, with triangles on the edges by @HDZucht in https://github.com/dividebysandwich/sdroxide/pull/782
+  - FT8: the action row (CALL CQ, STOP QSO, STOP TX) stays inside the window by @HDZucht in https://github.com/dividebysandwich/sdroxide/pull/788
+  - RTL-SDR: less CPU work converting samples, which helps on a Raspberry Pi by @0xPr0ton in https://github.com/dividebysandwich/sdroxide/pull/784
+  Bug Fixes
+  - SSB/CW passband: the filter length follows the bandwidth, so a narrow CW filter has narrow skirts (#758)
+  - Band stacks: a band left by a dial move (a digital mode's band chip, a typed frequency) is now recorded on its stack (#762)
+  - (tr)uSDX: key with TX0 when the audio rides the CAT link, so the host's audio goes out instead of the mic (#724)
+  - HPSDR: fall back to a broadcast discovery when a board ignores the directed probe (#744, #789)
+  - Radio tabs: ⊞ on the only pane opens a split with the next radio instead of doing nothing (#763)
+  - TX Audio: the pages scroll under a pinned meter strip, so the window fits the screen and can be dragged shorter (#790)
+  - Memories: CLEAR stays armed for five seconds instead of disarming when the pointer leaves it (#755)
+  Documentation
+  - VARA HF: a new manual section (3.27), the Winlink chapter's VARA route and the TCP host
+  - Window management: undocked windows, the floating panel, workspaces and window rules for tiling window managers
+  - Elecraft: RX SHFT is a menu entry on the KX3 itself, not a control in SDROxide and not on a K3 (#774)
+  New Contributors
+  - @HDZucht made their first contribution in https://github.com/dividebysandwich/sdroxide/pull/780
+  - @0xPr0ton made their first contribution in https://github.com/dividebysandwich/sdroxide/pull/784
+  Full Changelog: https://github.com/dividebysandwich/sdroxide/compare/v1.6.11...v1.7.0
+ReleaseNotesUrl: https://github.com/dividebysandwich/sdroxide/releases/tag/v1.7.0
+Documentations:
+- DocumentLabel: User Manual
+  DocumentUrl: https://github.com/dividebysandwich/sdroxide/blob/HEAD/docs/USER_MANUAL.md
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

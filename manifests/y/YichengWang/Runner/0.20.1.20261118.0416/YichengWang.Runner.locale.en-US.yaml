@@ -1,0 +1,41 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: YichengWang.Runner
+PackageVersion: 0.20.1.20261118.0416
+PackageLocale: en-US
+Publisher: wyc studios
+PublisherUrl: https://runnersh.dev/
+PublisherSupportUrl: https://github.com/yicheng47/runner/issues
+Author: Yicheng Wang
+PackageName: Runner
+PackageUrl: https://runnersh.dev/downloads/
+License: MIT
+LicenseUrl: https://github.com/yicheng47/runner/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Yicheng Wang (Jason Wang)
+ShortDescription: Runs Claude Code, Codex, Copilot CLI and other terminal coding agents together on one mission.
+Description: 'Runner is a native desktop application where terminal agents work together. Claude Code, Codex, OpenCode, Cursor CLI, Grok Build, Antigravity CLI, Copilot CLI and pi can take the same task in one mission, and each agent keeps its own TUI in a real terminal while the lead brings the decisions back to you. Everything in Runner is also a `runner` command: missions, crews, roles, projects, chats, sessions and messages are all addressable from the command line, with `runnerd` as the background service. Agents run natively on Windows without WSL, and PowerShell 7 is optional. Status: alpha, actively shipping. Native builds target macOS (Apple Silicon) and Windows (x64) on Windows 10 version 1809 or later; Intel Macs, Windows ARM64 and Linux are not supported. The installer, the application and the CLI sidecars are Authenticode-signed with a Certum open-source certificate issued to Open Source Developer Yicheng Wang.'
+Tags:
+- ai
+- claude-code
+- codex
+- command-line
+- console
+- terminal
+ReleaseNotes: |-
+  Runner 0.20.1 is a bug-fix release for macOS, Windows and Linux on top of 0.20.0. It delivers mission messages to more agents mid-turn, adds macOS line-editing keys in the terminal and git worktrees in the runner CLI, and fixes a crash and an app-wide hang.
+  New
+  - Mission messages reach more agents mid-turn. Messages from the mission inbox now reach a working Codex, pi, Antigravity or OpenCode member during its turn, as they already did for Claude Code, instead of waiting until the turn ends. GitHub Copilot CLI, Cursor and Grok still receive them when idle. (#1369)
+  - macOS line-editing keys in the terminal. ⌘← and ⌘→ move to the start and end of the line, and ⌘⌫ deletes to the start of the line, unless you have bound them in Settings → Keyboard shortcuts. Holding a key now repeats it instead of opening the accent picker. (#1366)
+  - Choose the checkout and the base in Changes. A Base row under the branch shows what Changes compares against (Auto by default); its Compare against picker lets you choose any local or remote branch instead, remembered per checkout and branch. When a repository has several worktrees, a checkout picker in Changes and Files switches between them. (#1345)
+  - Git worktrees in the runner CLI. runner worktree create <branch>, runner worktree list and runner worktree remove <branch> manage linked checkouts under .worktrees/, and runner chat start and runner mission start take --worktree <branch> (with optional --base) to start in one. Chats and missions in a linked worktree group under their repository's project. Restoring or resuming a chat whose worktree folder was removed recreates the worktree from its branch; if the branch has been deleted too, the restore stops with a message naming the main checkout. Worktree controls in the app come in a later release. (#1213)
+  Bug fixes
+  - One stuck agent no longer freezes Runner. When an agent stopped reading its input, typing or delivering a message to it could hang the whole app and remote control until it was force-quit. Input to each session is now written separately, so a stuck session no longer blocks the rest of the app. (#1377)
+  - Codex prompts no longer stay held as Drafting. Pasting or quickly typing a prompt into Codex while an earlier prompt was still visible above the composer could leave Runner holding mission messages until you used Submit / clear. (#1381)
+  - Linked-chat chip no longer crashes the app. Clicking a remote mission's linked to chip while viewing another computer's mission opened the chat instead of quitting Runner. (#1376)
+  - Terminal text stays on the grid. Text after a tab character could shift off the cell grid, doubling one gap and hiding another until the window was resized. (#1356)
+  - Remote terminals take control when free. A remote terminal that no one controls now takes control automatically, without a click, while still never taking one held by the host or another client. Opening the same remote chat in two windows is now detected like a local one. Remote control also notices a dropped connection or a wake from sleep within about 15 seconds and reconnects. (#1347, #1263)
+  - Windows: removed folders in Changes and Files. Deleting a checkout while Changes or Files showed it now falls back cleanly instead of showing a stale view. A selection in a Markdown file survives the file being rewritten with the same content. (#1357)
+ReleaseNotesUrl: https://github.com/yicheng47/runner/releases/tag/v0.20.1
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

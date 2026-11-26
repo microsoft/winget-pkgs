@@ -1,0 +1,50 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
+
+PackageIdentifier: poco-ai.Agentero
+PackageVersion: 0.11.8
+PackageLocale: en-US
+ShortDescription: Agent-friendly reference management.
+Description: 'Traditional reference managers are not agent-friendly: highlights and notes stay locked inside single files, making it hard for agents to reuse knowledge across papers; every conversation starts from scratch without a stable local knowledge map; PDFs are human-friendly but not the most comfortable reading material for agents. Agentero aims to build an agent-friendly, agent-native way to manage references, exploring how humans and agents collaborate on reference management. Connect your local agent via ACP (BYOA), select-text chat, import papers and Skills, stay compatible with the Zotero ecosystem, and get paper translation, bidirectional links with a knowledge graph, and deep PDF reading.'
+Tags:
+- academics
+- agent
+- article
+- literature
+- paper
+- pdf
+- reference
+- research
+- thesis
+- zotero
+ReleaseNotes: |-
+  0.11.8 places annotations, selections, and note blocks in the chat composer, and keeps LLM translation inside an engine prompt that returns only the translation. It also adds Windows desktop-app detection and Agent process cleanup, and fixes remote-library, sync, and Linux drag-and-drop data problems.
+  Features
+  - Inline references: Note blocks, selections, text annotations, and visual annotations can be inserted at the composer cursor and are sent as [Annotation N] in that order. The hover card can edit the note, show the highlight and translation, and enlarge a visual crop. (#767 by @ffy6511)
+  - Single-paper layout reanalysis: The figure sidebar can force a layout reanalysis of the current paper only. An open paper picks up the new result without a restart. (#728 by @ffy6511)
+  - Embed size and column width: Appearance can set the wiki-embed font size and the Markdown column max width on their own. The defaults remain 13px and full width. A document tab can copy its path on disk. (#745 by @ffy6511)
+  - Qoder CLI: Settings can install and uninstall the Qoder CLI. (46e9424c by @ffy6511)
+  - Windows desktop apps: On Windows, Agentero can detect and open ChatGPT, Qwen Work, WorkBuddy, and the Dsh desktop app. These apps are marked as not directly available as Agents. (468ad573 by @JiaheChen2002)
+  Improvements
+  - LLM translation: OpenAI-compatible and Agent translation use a fixed engine prompt. A short selection is glossed instead of answered with a question about whether to translate or explain. Settings split the prompt into a system field and a user template. An empty system field keeps the built-in academic style, and a one-line note is only an extra preference. The user template inserts the source at {{text}}. Agent translation picks the lowest reasoning effort the session advertises, and leaves the effort unchanged when none is advertised. The only placeholders are {{targetLang}}, {{sourceLang}}, and {{text}}. (#724 by @ffy6511)
+  Fixes
+  - Full-text translation and Quick Chat: Full-text translation keeps citations, cross-references, and URLs, and headings keep their original level. The Quick Chat highlight stays yellow after the card closes, and on a translated page it covers the region that was selected. (#751 by @ffy6511)
+  - Visual annotation zoom and clicks: Highlights stay on the glyphs when a rotated page is zoomed. Clicking a visual reference in the composer enlarges it and edits the note. A link scrolls to the crop and flashes a locator. The margin pin still opens the card. (#760 by @ffy6511)
+  - Hover cards and page tabs: Table and reference hover cards stay open when the pointer moves onto them, and external URLs are no longer cut off by the system tooltip. The per-page translation tab appears inside the page, on the right, while that page is hovered. (#745 by @ffy6511)
+  - Note selection and IME: The first select-all inside a block stays in that block. A standalone wiki embed fills its line. Text sent into chat can be typed into immediately. Code-block language search and renaming a session in Chinese are no longer interrupted by the wrong focus or an IME Enter. (#744 by @ffy6511)
+  - Quick setup: Reopening the quick setup wizard no longer replaces the saved theme, proxy, translation service, or API keys with defaults. (#731 by @Zhou-Ruichen)
+  - Remote library metadata: A remote Vault includes metadata already committed in the SQLite WAL. Refreshing the list reads a consistent server snapshot, and unpublished local edits are left in place. (#740 by @Winfred666)
+  - Linux PDF drops: The Linux main window can import a PDF dropped from the file manager. In-app file-tree drags and tab reordering still work. (#730 by @bet4it)
+  - Referenced crops: Sending a visual crop into chat no longer writes that turn's prompt and reply back into the annotation file. A session opened from that annotation still updates it. (34624811 by @ffy6511)
+  - Dsh history: After a restart, local Dsh can restore titles and transcript text from its session log. When the official API has no session-load method, titles no longer fall back to an ID. (bfea439a by @JiaheChen2002)
+  - Windows Dsh: On Windows, Dsh starts with a compatible Node so the ACP handshake does not exit silently on an older Node. Uninstall removes the copy at its actual install location. (725a077a by @JiaheChen2002)
+  - Windows Claude: Claude Code installed through npm resolves to the executable or cli.js inside the package, instead of handing claude.cmd to the bundled adapter to launch directly. (8135417f by @JiaheChen2002)
+  - Windows Agent processes: After the app exits, a connection is replaced, or warm setup times out, ACP child processes on Windows are reaped with the connection and do not stay in the background. (9d0d48a0 by @JiaheChen2002)
+  - Sync requests: An already-synced Vault costs one remote request while idle, and two devices no longer republish files just because the local modification time changed. Nutstore's per-account WebDAV quota is no longer spent on that idle loop. (3cc1a9dd by @qychen2001)
+  https://github.com/poco-ai/Agentero/compare/v0.11.7...v0.11.8
+ReleaseNotesUrl: https://github.com/poco-ai/Agentero/releases/tag/v0.11.8
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://agentero-docs.poco-ai.com/
+ManifestType: locale
+ManifestVersion: 1.12.0

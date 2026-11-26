@@ -1,0 +1,134 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: Tencent.COSCLI
+PackageVersion: 1.0.4
+PackageLocale: en-US
+Publisher: Tencent Cloud
+PublisherUrl: https://www.tencentcloud.com/
+PublisherSupportUrl: https://github.com/tencentyun/coscli/issues
+PrivacyUrl: https://www.tencentcloud.com/document/product/301/17345
+Author: Tencent Cloud Computing(Beijing) Company Limited
+PackageName: COSCLI
+PackageUrl: https://www.tencentcloud.com/document/product/436/43249
+License: Apache-2.0
+LicenseUrl: https://github.com/tencentyun/coscli/blob/master/LICENSE
+Copyright: Copyright © 2013-2024 Tencent Cloud. All Rights Reserved.
+CopyrightUrl: https://www.tencent.com/en-us/statement.html
+ShortDescription: COS provides the command-line client COSCLI to allow you to upload, download, delete, and perform other operations on COS objects by using simple commands.
+Tags:
+- cos
+- tencent-cloud
+ReleaseNotes: |-
+  修改命令：
+  1. ls
+  - 新增参数：--all-versions ，列举对象的所有版本，仅当 bucket 开启版本控制后可用。列出历史版本参数增加显示字段 VersionId, IsLatest, Delete Marker
+  - 限频重试策略优化，当触发限频时，默认进行重试，retry-num 参数不再生效
+  2. du
+  - 新增参数：--all-versions 统计对象的所有版本数据，仅当 bucket 开启版本控制后可用。统计信息增加显示 DeleteMarker 数量
+  3. lspart
+  - 新增参数：--upload-id
+  - 当传入 upload-id 时，需指定具体文件，仅展示 upload-id 对应的文件碎片信息
+  - 未传入 upload-id 时，展示指定 prefix 下正在进行中的分块上传任务
+  4. abort
+  - 增加参数：--fail-output 及--fail-output-path 错误日志相关参数，与 cp 及 sync 命令的相关参数作用相同，用来记录清理过程中失败的信息
+  - 性能优化
+  5. rb
+  - 增加参数：--fail-output 及--fail-output-path 错误日志相关参数，与 cp 及 sync 命令的相关参数作用相同，用来记录清理过程中失败的信息
+  - 输出信息优化
+  6. rm
+  - 批量删除每批次删除对象数改为 1000（之前是 100）
+  - 输出信息优化
+  - 新增参数：--all-versions
+  - 仅支持在已开启版本控制的 Bucket 内使用，且仅在传入--recursive（-r）参数时可用，遍历删除所有版本对象
+  - 新增参数：--version-id
+  - 仅支持在已开启版本控制的 Bucket 内使用，且仅在未传入--recursive（-r）参数时可用，删除指定 object 的指定版本
+  7. cp
+  - 新增参数：--version-id 下载指定版本的文件，仅支持在已开启版本控制的 Bucket 内使用
+  - 新增参数：--move 仅 COS 路径间拷贝可用（其他会报错），会在文件成功拷贝到目标路径后，删除源文件
+  - 上传筛选本地文件名逻辑修改，改为筛选命令传入的路径+文件名
+  - 错误重试策略优化，默认进行 5xx 错误重试，指定错误重试次数和间隔后，会进行部分 4xx 重试
+  - copy 时支持修改文件存储类型
+  - 增加传输开始控制台输出及传输结束输出，并记录至 coscli.log
+  - 使用参数--part-size=0 开启自适应分块大小
+  8. sync
+  - 上传筛选本地文件名逻辑修改，改为筛选命令传入的路径+文件名
+  - 错误重试策略优化，默认进行 5xx 错误重试，指定错误重试次数和间隔后，会进行部分 4xx 重试
+  - 增加传输开始控制台输出及传输结束输出，并记录至 coscli.log
+  -  --part-size=0 开启自适应分块大小
+  9. restore
+  - 增加支持 maz 归档存储类型取回和深度归档存储取回
+  - 输出提示信息优化
+  - 错误信息记录优化，调用 API 失败会记录错误日志到 coscli_output
+  - 可靠性优化，增加默认限频重试
+  - 可用性优化，增加 409 StatusCode（已触发回热）直接跳过
+  10. mb
+  - 新增参数：--maz（-m）默认为 false，为 true 时即为创建多 az 的存储桶
+  11. config set
+  - 新增参数：--disable_encryption 默认为 false，为 true 时即为不加密配置文件中的秘钥相关信息
+  12. config init
+  - 新增交互式配置 Input Disable Encryption 仅当传 true 时，取消加密配置文件中的秘钥相关信息
+  新增命令：
+  1. bucket-versioning
+  - 使用示例：./coscli bucket-versioning --method [method] cos://<bucket-name> versioning
+  - 开启版本控制：./coscli bucket-versioning --method put cos://examplebucket Enabled
+  - 暂停版本控制：./coscli bucket-versioning --method put cos://examplebucket Suspended
+  Command Modifications:
+  1. ls
+  - Added parameter: --all-versions, lists all versions of an object, available only when bucket versioning is enabled. Added fields for historical versions: VersionId, IsLatest, Delete Marker.
+  - Optimized rate limiting retry strategy, default retries when rate limit is triggered, retry-num parameter is no longer in effect.
+  2. du
+  - Added parameter: --all-versions, calculates data of all object versions, available only when bucket versioning is enabled. Added information to display the count of DeleteMarkers.
+  3. lspart
+  - Added parameter: --upload-id
+  - When upload-id is specified, the specific file must be indicated, and displays the parts information of the file corresponding to the upload-id.
+  - When upload-id is not specified, displays ongoing multipart upload tasks under the specified prefix.
+  4. abort
+  - Added parameters: --fail-output and --fail-output-path for error log, same function as related parameters in cp and sync commands, used to log failed information during cleanup.
+  - Performance optimization.
+  5. rb
+  - Added parameters: --fail-output and --fail-output-path for error log, same function as related parameters in cp and sync commands, used to log failed information during cleanup.
+  - Output information optimization.
+  6. rm
+  - Changed batch delete count to 1000 objects per batch (previously 100).
+  - Output information optimization.
+  - Added parameter: --all-versions
+  - Only works in versioning-enabled buckets and only available when --recursive (-r) parameter is passed, recursively deletes all versions of objects.
+  - Added parameter: --version-id
+  - Only works in versioning-enabled buckets and only available when --recursive (-r) parameter is not passed, deletes a specified version of the specified object.
+  7. cp
+  - Added parameter: --version-id, downloads the specified version of the file, only available in versioning-enabled buckets.
+  - Added parameter: --move, only available for copying between COS paths (otherwise will report an error), deletes the source file after successfully copying to the target path.
+  - Modified local filename filtering logic to filter based on the command-passed path + filename.
+  - Optimized error retry strategy, defaults to retrying on 5xx errors, optionally retries some 4xx errors if specified.
+  - Supports changing file storage types during copy.
+  - Added console output for transfer start and transfer end, and records to coscli.log.
+  - Use parameter --part-size=0 to enable adaptive part size.
+  8. sync
+  - Modified local filename filtering logic to filter based on the command-passed path + filename.
+  - Optimized error retry strategy, defaults to retrying on 5xx errors, optionally retries some 4xx errors if specified.
+  - Added console output for transfer start and transfer end, and records to coscli.log.
+  - Use --part-size=0 to enable adaptive part size.
+  9. restore
+  - Added support for maz archive storage retrieval and deep archive storage retrieval.
+  - Optimized output prompt information.
+  - Optimized error log, records error log to coscli_output on API call failure.
+  - Reliability optimization, added default rate limit retry.
+  - Availability optimization, directly skips 409 StatusCode (already heated).
+  10. mb
+  - Added parameter: --maz (-m), defaults to false, when true creates multi-az storage bucket.
+  11. config set
+  - Added parameter: --disable_encryption, defaults to false, when true disables encryption of key-related information in the configuration file.
+  12. config init
+  - Added interactive configuration Input Disable Encryption, only cancels encryption of key-related information in the configuration file when true is passed.
+  New Commands:
+  1. bucket-versioning
+  - Usage example: ./coscli bucket-versioning --method [method] cos://<bucket-name> versioning
+  - Enable versioning: ./coscli bucket-versioning --method put cos://examplebucket Enabled
+  - Suspend versioning: ./coscli bucket-versioning --method put cos://examplebucket Suspended
+ReleaseNotesUrl: https://github.com/tencentyun/coscli/releases/tag/v1.0.4
+Documentations:
+- DocumentLabel: FAQ
+  DocumentUrl: https://www.tencentcloud.com/document/product/436/43264
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0

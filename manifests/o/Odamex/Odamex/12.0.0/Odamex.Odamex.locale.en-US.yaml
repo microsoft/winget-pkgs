@@ -1,0 +1,109 @@
+# Created with WinGet Releaser using komac v2.14.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: Odamex.Odamex
+PackageVersion: 12.0.0
+PackageLocale: en-US
+Publisher: Odamex
+PublisherUrl: https://odamex.net/
+PublisherSupportUrl: https://github.com/odamex/odamex/issues
+PrivacyUrl: https://odamex.net/privacy
+PackageName: Odamex
+PackageUrl: https://odamex.net/
+License: GPL-2.0
+LicenseUrl: https://github.com/odamex/odamex/blob/HEAD/LICENSE
+ShortDescription: Multiplayer-oriented source port for Doom
+Tags:
+- doom
+- game
+- multiplayer
+ReleaseNotes: |-
+  Odamex 12.0.0 is out now!
+  This is the next major version of Odamex, featuring lots of bug fixes, quality of life changes, and new features. There is one major feature we know many of you have been waiting a long time for... DSDHacked support!!
+  DSDHacked Support is Here
+  The headlining feature of this release is support for DSDHacked. We would like to give a big thanks to @cmbernard333 who has contributed a huge amount of work over the past year and a half to help reach this milestone. As of this release, you can now use Odamex to play mods such as:
+  - Eviternity II
+  - Legacy of Rust
+  - Smooth Doom MBF21
+  - and many more!
+  First-time contributors
+  We would also like to thank our first-time contributors for:
+  - @ioan-chera for fixing file dialogs on macOS
+  - @CurrentResident for fixing incorrect level stats on singleplayer intermission screens
+  Added
+  - Modding features
+    - DSDHacked support
+    - MUSINFO support
+    - ZDoom 1.23 skyboxes support
+    - COMPLVL lumps are now recognized and automatically set many compatibility settings
+    - Friendly monsters are now supported. Their behavior is most similar to MBF's friendlies, rather than ZDoom's
+    - Support for the jumping, crouching, and freeaim keys from an upcoming revision to UMAPINFO
+    - Support for maps built with ZDoom extended GL nodes
+    - Support for [HELPER] in DeHackEd patches
+    - Support for sound replacements in Text blocks
+    - A_LineEffect is now fully implemented
+  - Horde mode
+    - HORDEDEF waves now supports a per-monster limit field that limits the number of that monster type allowed to be alive at once
+    - New g_horde_extralife cvar to enable spawning of 1UP powerups in horde mode
+    - New g_horde_resurrect cvar enable spawning of teammate resurrection powerups in horde mode
+  - IWAD support
+    - The following IWADs are now recognized by Odamex:
+      - Chex Quest 3 Vanilla Edition (chex3v.wad)
+      - Chex Quest 3 Vanilla Edition Modding Version (chex3d2.wad)
+      - Chex Quest 3 v2.0 Odamex/ZDaemon RC4 (chex3odx-rc4.wad)
+    - chex.deh is now included with Odamex and automatically loaded alongside the original Chex Quest (chex.wad)
+    - Support for Dropped item in DeHackEd patches is no longer disabled when the iwad is Chex Quest.
+  Changed
+  - UI and HUD
+    - The network menu has been simplified, with advanced options now only accessible through the console
+    - Horde bosses are now displayed on the automap
+    - The voting UI now displays the vote_yes and vote_no keybinds and has sound effects
+  - Platform support
+    - The ability to compile Odamex with support for SDL1.2 has been removed. This will allow us to make better use of SDL2-only features.
+    - Locale detection when language is auto now works on non-Windows system instead of acting as an alias for US English
+  - Miscellaneous
+    - Odamex is no longer forced to run on a single core on Windows. This was a workaround for an old SDL Mixer bug that is no longer needed. This improves performance, especially when using OPL emulation for music.
+    - Sample server configs now include a deathmath config for id Deathmatch Pack # 1
+    - All official wads coop sample config now includes Sigil 2 and Legacy of Rust
+    - Player gender options now include "Other". Messages refer to it using they/them/their
+  Fixed
+  - UI and HUD
+    - All supported locked door linedef types now pulse their color on the automap when am_showlocked is enabled. Previously many types showed the wrong color.
+    - Buttons that open file dialogs in the client frontend now work on recent versions of macOS
+    - Intermission stats in singleplayer now match vanilla behavior when the total is 0
+  - Multiplayer
+    - Avatar (Odamex's multiplayer voodoo dolls) fixes
+      - Avatars are now blocked by MBF21 block player lines
+      - Avatars are no longer killed in MBF21 kill monster sectors
+    - On respawn, when sv_sharekeys is enabled, players received keys picked up while they were dead
+    - Monsters revived by archviles no longer bounce/jitter
+    - Dormant monsters no longer wake up and desync
+    - Sector action thing actions are now predicted clientside
+      - Due to this, teleports triggered by sector action things now set the player direction correctly
+  - DeHackEd and MBF21
+    - Pointer blocks now parse the frame number and allow the pointer number to be 0, matching the behavior of most other ports
+    - BOSS, RIP, and LOGRAV flags are cleared when MBF21 Bits is specified without them
+    - All MBF21 thing flags are cleared when MBF21 Bits = 0
+    - The BOSS flag is set correctly when MBF21 Bits is a numeric value
+    - Weapon and frame MBF21 flags are set correctly when specified with mnemonics
+    - A_AddFlags and A_RemoveFlags now relink the actor to the world when NOSECTOR or NOBLOCKMAP is added/removed. This fixes various issues seen when removing/adding these flags
+    - A_AddFlags, A_RemoveFlags, and A_JumpIfFlagsSet add/remove/check the correct MBF21 flags. They previously acted upon the wrong set of flags.
+  - Maplist
+    - Current and next maplist indices are no longer displayed swapped on clients
+    - Servers with maplists defined in their configs now properly enter the maplist on startup
+  - Miscellaneous
+    - Disabling joy_freelook now centers the view
+    - Mouse sensitivity is no longer dependent on resolution on Windows
+    - -warp and +map work again when launching a server
+    - Macro definition warnings when compiling with Visual Studio 2026 have been addressed
+    - intertext = clear in UMAPINFO skips the text screen instead of displaying it with a message of "-"
+    - Server stdout output flushes after each message, fixing an issue since 11.0.0 where some messages failed to appear in logs.
+    - netplay searches the netdemos directory for the specified filename
+    - Maps with > 32767 segs are no longer broken due to an integer overflow
+    - The remnants of an earlier system for tracking destroyed objects has been removed, fixing frequent memory corruption errors
+    - DeHackEd things with ID #s in the range of built-in objects such as particle fountains are now spawned in place of the built-in objects when they are present
+    - Boom/MBF map thing flags are now cleared if the reserved bit is set
+  Download Odamex
+ReleaseNotesUrl: https://github.com/odamex/odamex/releases/tag/12.0.0
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

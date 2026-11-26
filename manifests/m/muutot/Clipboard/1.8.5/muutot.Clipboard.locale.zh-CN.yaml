@@ -1,0 +1,54 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: muutot.Clipboard
+PackageVersion: 1.8.5
+PackageLocale: zh-CN
+Publisher: muutot
+PublisherUrl: https://github.com/muutot
+PublisherSupportUrl: https://github.com/muutot/Clipboard/issues
+PackageName: Clipboard
+PackageUrl: https://github.com/muutot/Clipboard
+License: AGPL-3.0
+LicenseUrl: https://github.com/muutot/Clipboard/blob/HEAD/LICENSE
+ShortDescription: 高性能 · 本地优先 · 全平台剪贴板管理器。
+Description: Clipboard Desktop 是一款高性能、跨平台、本地优先的剪贴板管理工具。它在后台静默运行，持续记录剪贴板历史；通过全局热键（默认 Alt+V）一键唤起，支持全文搜索（含中文分词）、图片 OCR 文字识别、收藏、编辑、快速粘贴等操作。支持文本、链接、图片、文件四种内容类型，智能内容识别与富文本带格式粘贴，Tantivy 全文检索引擎与 N-gram 中文分词，PP-OCR 本地离线文字识别。所有数据存储在本地，不包含任何遥测或上传行为，OCR 完全离线运行，无需联网。
+Tags:
+- 剪贴板
+ReleaseNotes: |-
+  Clipboard Desktop v1.8.5
+  主窗口透明度彻底修复：浅色背景现在能真正透出桌面；浅色调色板改为象牙白 #f8f8f9，彩色图标默认开启
+  Released: 2026-11-19
+
+  新功能
+  设置
+  - 彩色图标默认开启 — 新配置默认以每个图标自带的彩色渲染，而不是单色；仍可在设置中关闭 | 0079f796
+  - 搜索防抖可调 — 防抖时长改为可配置项（0–1000ms），设为 0 时改为回车触发搜索 | 92f80fc8
+
+  透明度修复
+  这一版把主窗口透明度上三个互相独立的问题全部修掉了。
+  浅色背景现在真的能透出桌面
+  之前无论在设置里怎么拖动不透明度，浅色背景看起来都和完全不透明一样。根因在原生窗口层：tauri-runtime-wry 会给每个透明窗口创建一个 softbuffer 表面并填满整窗（丢弃 alpha），这层画在 WebView2 下方，于是 CSS 的透明度只能和它合成，永远到不了桌面。浅色 #f8f8f9 在白底上合成只差 3 个色阶，所以看起来毫无变化；暗色因为往白色方向变化跨了 91 个色阶，才「看起来能用」——那实际是变灰，不是透出桌面。
+  现在只在背景本该不透明时才填这层表面，半透明背景完全不填，CSS 透明度可以直接和桌面合成。 | fd340bf5
+  不透明度滑杆不再「调了没反应」
+  原实现只在保存值 ≥ 100 时才把窗口建成不透明，而 WebView2 的默认底色在控制器创建时就固定、且不可逆。一旦建成不透明，之后拉低不透明度只能在同一颜色上叠加，必须重启才「生效」。现在窗口始终以透明方式创建。 | 033ab1f5
+  背景色不再叠加两层
+  body 和 .app-shell 之前都在用同一个透明度系数涂背景色，两层半透明叠起来后实际是 1-(1-a)²：滑杆 60% 时桌面只透 16%。现在只由 .app-shell 一层负责，滑杆值就是实际值。 | 0ffbba09
+  其他
+  - 页面不再写主窗口原生底色 — 避免一次页面侧写入把主窗口永久冻成不透明白色 | 7c018ccf
+
+  视觉
+  - 浅色调色板改为象牙白 — 浅色背景由 #f5f5f5 调整为 #f8f8f9，不透明度 100% 时精确呈现该颜色 | 40318634
+
+  构建与依赖
+  - Rust 2024 edition — 全仓升级到 edition 2024 | 8f85f6d0
+  - SvelteKit 3 — 升级 SvelteKit 3 与 adapter-static 4 | 9a15bad2
+  - Windows CI 修复 — 链接前预创建 ort-sys 的 DLL 目录，修复 Windows 构建失败 | 3617d82f
+  - 依赖更新 — jsdom 31.0.0 及其余 npm 依赖对齐最新兼容版本 | bf768e85 ea22dd3a
+
+  内部整理
+  - clippy 收敛 — 三处 collapsible-if 与 macOS 采集器守卫按 clippy 建议重构 | 5a0f0ce1 f5cbebae 890021c1
+  - 测试稳定性 — 有界命令测试吸收夹具启动开销 | 82cc9f00
+ReleaseNotesUrl: https://github.com/muutot/Clipboard/releases/tag/v1.8.5
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

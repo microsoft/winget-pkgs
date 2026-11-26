@@ -1,0 +1,54 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Stack-Cairn.K-brain
+PackageVersion: 0.107.33
+PackageLocale: zh-CN
+Publisher: Stack-Cairn
+PublisherUrl: https://github.com/Stack-Cairn
+PublisherSupportUrl: https://github.com/Stack-Cairn/K-brain/issues
+PackageName: K-brain
+PackageUrl: https://github.com/Stack-Cairn/K-brain
+License: Apache-2.0
+LicenseUrl: https://github.com/Stack-Cairn/K-brain/blob/HEAD/LICENSE
+ShortDescription: 基于 Go 构建、运行在终端里的编程 Agent。
+Description: 氪脑（K-brain）是运行在终端里的编程 Agent，用 Go 构建，也可作为其他前端的后端底座。读代码、改文件、执行命令、验证结果，在同一会话中完成任务。运行 kn 开始使用，取自“氪脑”拼音 Ke Nao。
+Tags:
+- 人工智能
+- 代码
+- 大模型
+- 大语言模型
+- 智能体
+- 编程
+- 聊天机器人
+- 自主智能
+ReleaseNotes: |-
+  K-brain v0.107.33
+  本版从 main 的 2fe4405 构建，在 v0.107.32 的基础上新增第三方联网搜索回退，并修复子任务取消收尾。
+  联网搜索回退（#206）
+  OpenAI Chat Completions 兼容接口（DeepSeek、各类中转等）没有原生联网搜索，过去开启联网会直接报错。现在可以配置一个第三方搜索服务，由新的 web_search 工具代为搜索：
+  - 支持的服务：Tavily、Brave Search、SearXNG（自建，无需 key）、博查、Jina。
+  - 何时启用：开启联网、当前接口不支持原生搜索、且已配置搜索服务时，自动提供 web_search 工具。原生搜索可用时行为不变。
+  - 配置：在 config.json 中添加 webSearch: {provider, apiKey, baseUrl, maxResults}。
+    - apiKey 支持 $VAR、${VAR} 和 !command 写法。
+    - 也可以用环境变量设置：K_BRAIN_WEB_SEARCH_PROVIDER、K_BRAIN_WEB_SEARCH_API_KEY、K_BRAIN_WEB_SEARCH_BASE_URL，或各服务自己的变量，例如 TAVILY_API_KEY、BRAVE_SEARCH_API_KEY。
+  - 结果与错误：结果按编号列出标题、链接、摘要和日期。key 无效、额度不足、限流、超时都会给出明确提示；错误信息里不会出现密钥。
+  - 审批：和 web_fetch 一样，按会话的权限模式决定是否需要审批。
+  - LiveAgent 对接：
+    - /v1/health 增加 capabilities.web_search_fallback。
+    - /v1/settings 返回各提供方的 nativeWebSearchSupported 和 webSearch 状态（永不返回密钥），并支持写入搜索设置。
+  修复（#204）
+  - 取消运行时，先等已取消的子任务完成记录，再发布运行终态，客户端不会再漏掉子任务结果。
+  - 旧的子代理通知恢复正确来源，分支会话中也会保留，不再被当成用户发言。
+  兼容性
+  旧版本不认识 config.json 里的 webSearch 字段，会拒绝加载这个配置。降级前请先删掉该字段。
+  下载与校验
+  提供 macOS、Linux、Windows 的 x64/ARM64 CLI 与 computer helper；SHA256SUMS 用于校验下载文件。
+  完整变更：https://github.com/Stack-Cairn/K-brain/compare/v0.107.32...v0.107.33
+ReleaseNotesUrl: https://github.com/Stack-Cairn/K-brain/releases/tag/v0.107.33
+InstallationNotes: 在终端中运行 kn。首次使用前，请在 %USERPROFILE%\.k-brain\config.json 中配置模型提供商。
+Documentations:
+- DocumentLabel: 文档
+  DocumentUrl: https://github.com/Stack-Cairn/K-brain/blob/main/README.zh-CN.md
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

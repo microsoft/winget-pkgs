@@ -1,0 +1,39 @@
+# Created with WinGet Releaser using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: co2lab.Anchors
+PackageVersion: 0.1.419
+PackageLocale: en-US
+Publisher: co2lab
+PublisherUrl: https://github.com/co2-lab
+PublisherSupportUrl: https://github.com/co2-lab/anchors/issues
+PackageName: Anchors
+PackageUrl: https://github.com/co2-lab/anchors
+License: Elastic License 2.0
+LicenseUrl: https://github.com/co2-lab/anchors/blob/HEAD/LICENSE
+ShortDescription: Spec-first continuity framework for AI-assisted development
+Description: Anchors ties spec, feature and test together through a shared identity code, then confronts each artifact against the rules declared in anchors.yaml. It maps the project as a graph, propagates change from the anchor outward, and gates every step — so work guided by AI stays anchored to what was decided.
+Moniker: anchors
+Tags:
+- ai
+- ai-agents
+- cli
+- developer-tools
+- golang
+- spec-first
+ReleaseNotes: |-
+  v0.1.419
+  - env-declared can ask a unit's spec for what its dependencies read: follow_dependencies and provided. Where each deployed unit gets only the variables declared for it, such as a function per handler, a variable that a shared helper reads is part of that unit's deploy contract. Two new options on the gate entry control this. (ENVDC-B08)
+    - follow_dependencies: [<layer>…] names the layers of code where the gate also follows depends-on, transitively and past no import of types. In those layers, a variable the unit's dependencies read is asked of the unit's spec, as if the unit's own code read it.
+    - provided: [<glob>…] names the variables the platform gives every unit (AWS_*, NODE_ENV), which no spec is asked to declare.
+    - name: env-declared
+      check: env-declared
+      follow_dependencies: [handler, admin-handler]
+      provided: ["AWS_*", "NODE_ENV", "SENTRY_*", "APP_ENV"]
+    Off by default: without follow_dependencies, nothing changes. The options are scoped because of measurements in MIF. Switched on for every layer, 421 specs were charged, the app's build variables and the runtime's own among them. Scoped to the handlers, with the runtime's and the shared variables provided, 107 specs were charged, mostly with table names their helpers read.
+  Everything in the v0.1.351 notes still applies: run anchors migrate once, crossing format 8.
+  Changelog
+  - 8cb9626 feat(gate): env-declared follows the dependencies of the layers the project names
+ReleaseNotesUrl: https://github.com/co2-lab/anchors/releases/tag/v0.1.419
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

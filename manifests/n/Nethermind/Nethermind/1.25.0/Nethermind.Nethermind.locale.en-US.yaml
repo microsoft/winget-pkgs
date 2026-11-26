@@ -1,0 +1,92 @@
+# Created with Komac v1.11.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.5.0.schema.json
+
+PackageIdentifier: Nethermind.Nethermind
+PackageVersion: 1.25.0
+PackageLocale: en-US
+Publisher: Demerzel Solutions Limited
+PublisherUrl: https://nethermind.io
+PublisherSupportUrl: https://community.nethermind.io/c/nethermind-client
+PrivacyUrl: https://nethermind.io/legal
+Author: Demerzel Solutions Limited
+PackageName: Nethermind
+PackageUrl: https://nethermind.io/nethermind-client
+License: LGPL-3.0-only
+LicenseUrl: https://spdx.org/licenses/LGPL-3.0-only.html
+Copyright: 2023 Demerzel Solutions Limited
+ShortDescription: A robust execution client for Ethereum node operators.
+Description: |-
+  Nethermind is a high-performance, highly configurable full Ethereum protocol execution client built on .
+  NET that runs on Linux, Windows, and macOS and supports Clique, Aura, and Ethash.
+  Nethermind offers very fast sync speeds and support for external plugins.
+  Enjoy reliable access to rich on-chain data thanks to high-performance JSON-RPC based on the Kestrel web server.
+  Healthy node monitoring is secured with Grafana analytics and Seq logging.
+Moniker: nethermind
+Tags:
+- blockchain
+- ethereum
+- evm
+ReleaseNotes: |-
+  Improved concurrency and reduced lock contention
+  - Changed to more scalable locks for both the transaction pool and LRU caches, ensuring better scalability on systems with high core counts.
+  - Used more scalable priority locks where block production and other tasks cross to give precedence to block production, optimizing performance in critical areas.
+  - During signature recovery, it was changed to access the transactions from the pool serially to reduce lock contention on the transaction pool while maintaining parallel processing for ECDSA and Keccak calculations for faster throughput.
+  New JSON-RPC methods
+  - eth_getBlockReceipts that is based on the previous Parity implementation and gives an easier way to get all receipts for transactions within a specified block
+  - debug_getRawBlock debug_getRawReceipts debug_getRawHeader debug_getRawTransaction These methods have been added to have a possibility to analyze encoded block/receipt/header/transaction
+  - Healthier for the entire network
+  - Makes the database size bigger for freshly synced nodes (about 200 GB extra space will be needed)
+  - The change is made in a way that already synced nodes that are synced till the ancient barrier 11052984 will not sync anything in addition (to sync all of them, resync from scratch is required)
+  - This may be revisited as part of EIP-4444
+  - Implemented eth_getBlockReceipts by @Marchhill in #6281
+  - Feature/ratelimit discovery messages by @asdacap in #6265
+  - Feature/javascript tracers by @LukaszRozmej in #6217
+  - [Config] Change default barriers of mainnet to 0 by @smartprogrammer93 in #6225
+  - Improved Json Serialization by @benaadams in #6152
+  - Add new RPC methods debug_getRawBlock, debug_getRawReceipts, debug_getRawHeader, debug_getRawTransaction by @Demuirgos in #6368
+  - Feature/exit on blocknumber by @asdacap in #6428
+  - Change locks to reduce lock contention by @benaadams in #6417
+  - [Cancun]{Spec} Goerli config and fix for ChainSpecBasedSpecProvider by @smartprogrammer93 in #6409
+  - [cancun] fix BlobBaseFee not consistent with geth when ExcessBlobGas is null by @smartprogrammer93 in #6320
+  - Blob txs reorgs by @marcindsobczak in #6254
+  - Enable blob txs support in goerli configs by @marcindsobczak in #6430
+  - Optimism canyon by @deffrian in #6374
+  - Serialize Json direct to Http stream rather than through intermediary buffers; further increasing performance and reducing latency of Json RPC by @benaadams in #6369
+  - Fix double write during full pruning by @asdacap in #6415
+  - Return error codes in Evm rather than throwing more expensive exceptions by @benaadams in #6406
+  - Reduce memory for GetPayloadBodiesByRangeV1 and GetPayloadBodiesByHashV1 by streaming the results immediately rather than building up the total response and then sending it all at once by @benaadams in #6287
+  - Don’t throw exceptions for missing nodes when searching for them (missing nodes) during sync by @benaadams in #6425
+  - Remove duplicate calls to FindHeader in eth_getLogs by @benaadams in #6421
+  - Remove Duplicate call to TryGetPendingTransaction in RPC by @benaadams in #6420
+  - RateLimiter: Remove unneeded async statemachine by @benaadams in #6418
+  - Increase regex cache size; which reduces memory usage in logging by @benaadams in #6408
+  - Reduce dictionary lookups by @benaadams in #6373
+  - Fix excessive timer allocation in rate limiter by @benaadams in #6354
+  - Use TryGetValue to halve Dictionary lookups by @benaadams in #6352
+  - Use runtime throw helpers to increase hot code (reduce cold code) in processor cache by @benaadams in #6348
+  - Broadcast local txs only if MaxFeePerGas is equal at least 70% of current base fee by @marcindsobczak in #6350
+  - added metrics for bad blocks by @Marchhill in #6270
+  - Block production logging Sealed => Produced by @MarekM25 in #6325
+  - [Fix] Potential fix to missing tx index sometimes (related to reorgs) by @smartprogrammer93 in #6422
+  - fix(db, rocks): total table size should include blobs by @shekhirin in #6289
+  - Fix missed release span on column db by @asdacap in #6302
+  - Fixed FinalTotalDifficulty based on genesis by @MarekM25 in #6435
+  - Migrate to .
+    NET 8 by @rubo in #6150
+  - Unify reputation settings by @asdacap in #6242
+  - Update Gnosis bootnodes by @4rgon4ut in #6329
+  - Refactor/state cleanup by @asdacap in #6260
+  - Skip signature only for TxType.
+    DepositTx by @LukaszRozmej in #6349
+  - fix: typos in comment by @AdventureSeeker987 in #6360
+  - chore(src/Nethermind): typo fix by @dzizazda in #6363
+  New Contributors
+  - @Marchhill made their first contribution in #6281
+  - @shekhirin made their first contribution in #6289
+  - @4rgon4ut made their first contribution in #6329
+  - @shashankshampi made their first contribution in #6301
+  - @AdventureSeeker987 made their first contribution in #6360
+  - @dzizazda made their first contribution in #6363
+ReleaseNotesUrl: https://github.com/NethermindEth/nethermind/releases/tag/1.25.0
+ManifestType: defaultLocale
+ManifestVersion: 1.5.0

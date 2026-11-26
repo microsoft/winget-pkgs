@@ -1,0 +1,92 @@
+# Created with WinGet Tracker using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: AnalyseDeCircuit.OxideTerm
+PackageVersion: 2.1.0
+PackageLocale: en-US
+Publisher: AnalyseDeCircuit
+PublisherUrl: https://github.com/AnalyseDeCircuit
+PublisherSupportUrl: https://github.com/AnalyseDeCircuit/oxideterm/issues
+Author: AnalyseDeCircuit
+PackageName: OxideTerm
+PackageUrl: https://github.com/AnalyseDeCircuit/oxideterm
+License: GPL-3.0
+LicenseUrl: https://github.com/AnalyseDeCircuit/oxideterm/blob/HEAD/LICENSE
+ShortDescription: Local-first SSH workspace for local shells and remote machines.Zero Electron, zero OpenSSL, zero telemetry, and no app subscription for core SSH workflows.
+Tags:
+- agent
+- ai-terminal
+- bring-your-own-key
+- filemanager
+- mcp
+- rag
+- russh
+- rust
+- sftp
+- ssh-client
+- tauri
+- terminal
+- terminal-emulator
+- tool-calling
+- wslg
+- xterm-js
+ReleaseNotes: |-
+  English
+  OxideTerm 2.1.0 expands the workspace with mixed panes across hosts, reusable local terminal profiles, richer theme previews, and collapsible serial and tmux control bars. It also improves sustained terminal output processing, AI message editing, and native window behavior. Happy Mid-Autumn Festival! Thank you for making OxideTerm part of your everyday work.
+  🪟 Mixed Workspaces Across Hosts and Windows
+  - Added mixed workspaces with up to four panes in one tab. Local, SSH, and Mosh terminals can sit alongside SFTP, IDE, and port-forwarding pages, including pages connected to different hosts. A local development shell, a remote shell, remote files, and an editor can now share one working layout.
+  - Added edge-based tab placement. Drag a tab into another tab's content and drop it near the left, right, top, or bottom edge to place it beside the destination pane. A placement preview shows where it will land, and existing split dividers remain adjustable.
+  - Allowed a combined workspace to move into a separate native window and return to the main window while retaining its live sessions and split layout. Moving a page preserves its session and page identity rather than creating another connection.
+  - Kept file browsing, transfer dialogs, forwarding controls, keyboard focus, and input routing associated with their originating pane and window. Multiple SFTP or forwarding pages can retain their own working state, and a delayed action from a closed page does not fall through to another page.
+  - Updated pane-aware commands, file actions, and AI context to follow the focused content page within a mixed workspace. Multi-terminal context distinguishes each pane's session, target, and environment.
+  - Serial terminals remain separate tabs because their device access is exclusive. Mixed workspaces support the terminal and page types listed above; this release does not turn every application page into a splittable pane.
+  To try it: open the terminals or tool pages you need, drag one tab to an edge of another page, then repeat until the layout contains the desired panes. Move the combined tab to a new window when you want that workspace on another display.
+  💻 Reusable Local Terminal Profiles
+  - Added saved local terminal profiles alongside saved remote connections. Profiles retain a name, command-line environment, starting directory, group, icon, foreground color, and icon background, making frequently used projects easier to reopen.
+  - Added connect-only, save-only, and save-and-connect flows. Saving a profile does not require its selected environment or directory to exist on the current machine; opening it validates the launch target and reports an unavailable environment or directory before registering a failed session.
+  - Integrated local profiles with session-manager search, groups, editing, deletion, and batch group operations. Opening a saved profile also records its usage through the existing profile store.
+  - Included local profiles in cloud-sync selection and previews, including field-level changes, conflict merging, and deletion records. A synchronized profile remains a launch configuration; the required command-line environment and directory must be available on the machine that opens it.
+  - Made new local splits inherit the source terminal's launch environment and use its known current directory when available. WSL starting directories are passed through the WSL launch arguments, including paths containing spaces.
+  - Grouped running local terminals under one Local Terminal entry in the active-session sidebar. The count reflects running local sessions, each child keeps its own title and icon, and New Terminal appears below the existing terminals.
+  To create a reusable entry, choose Local Terminal in the connection form, select the environment and working directory, give it a name, and save it. Open it later from the session manager like other saved configurations.
+  🎨 Theme Discovery and Connection Icons
+  - Added palette swatches to the theme selector and a live terminal preview. Hovering a theme previews its colors without applying it to the workspace; clicking or confirming the selection applies it.
+  - Added keyboard preview navigation with Up, Down, Home, and End. Enter or Space confirms the previewed theme; Escape or Tab closes the selector without applying the preview. Opening the selector brings the current selection into view.
+  - Made custom-theme previews use their configured background, foreground, cursor, and displayed ANSI colors. Preview labels and guidance now follow the selected application language.
+  - Added color-preserving Linux distribution icons for Ubuntu, Debian, Arch Linux, Linux Mint, Gentoo, Rocky Linux, and NixOS. SSH sessions can select an icon from the detected remote distribution, while an explicitly chosen custom icon takes precedence.
+  - Clarified Automatic and Custom icon choices in SSH connection properties. Selecting either mode closes the icon picker, and the automatic mode explains how the remote system determines the icon. Distribution artwork attribution and licenses are included in packaged builds.
+  🎛️ Clearer Serial and tmux Control Bars
+  - Replaced the dense capsule-button presentation with lightweight text controls and short vertical separators, matching the terminal command bar's visual style. Active settings, sessions, and windows use the theme's accent color; unavailable operations remain visually disabled.
+  - Split each toolbar into two rows. Serial connection details, device parameters, connection state, and port presence appear above the send/display modes, line-ending settings, local echo, refresh, Break, DTR, and RTS controls. In tmux control mode, sessions, windows, and status appear above rename, command, navigation, creation, split, resize, close, and detach actions.
+  - Added a fixed disclosure arrow at the far left of the information row. It hides or restores the lower action row while keeping connection information visible. Each pane retains its own expanded state during its lifetime, and the terminal viewport grows or shrinks with the toolbar.
+  - Gave the two rows independent horizontal scrolling, with the disclosure arrow staying reachable. Updated the terminal's content bounds and tmux message placement to account for the current toolbar height.
+  - Aligned child-terminal selection and hover backgrounds with their parent row's right edge across connection types, retaining the left tree indentation at narrow and wide sidebar sizes.
+  ⚡ Terminal Output and Snapshot Performance
+  - Batched long CSI parameter sequences, DEC line-drawing character runs, and OSC payload collection to reduce repeated per-byte work. Protocol boundaries, cancellation controls, chunked input, and private OSC exclusion from recordings retain their existing behavior.
+  - Added bounded PTY read-ahead on macOS for sustained output. On an Apple M5, repeated approximately 16 MiB real-PTY workloads took 16.6% less time for plain text, 11.5% less for ANSI output, and 11.3% less for Unicode output. The measured process CPU-time cost rose by about 12%; this is a throughput improvement with a CPU tradeoff. Linux and Windows retain their existing PTY read path.
+  - Reused recent contrast-adjusted styles and equal hyperlink/combining-character metadata while building snapshot rows. Exact application-chosen colors and line-drawing contrast behavior remain intact, and subsequent terminal changes do not mutate older snapshots.
+  - Fixed an SSH rendering stall where drawing a retained frame could still wait for the busy parser while reading tmux state. Deferred output remains scheduled for another frame so the final received output can appear without waiting for another packet.
+  Targeted same-machine before/after measurements used a 120 × 40 terminal. The pipeline cases processed approximately 256 KiB of synthetic input; snapshot cases measured visible-grid conversion:
+  ──────────────────────────────────────────────────────┬──────────────────────
+  Workload                                              │Elapsed-time reduction
+  ──────────────────────────────────────────────────────┼──────────────────────
+  Long CSI, complete recording-playback pipeline        │23.8%
+  ──────────────────────────────────────────────────────┼──────────────────────
+  DEC line drawing, complete recording-playback pipeline│33.9%
+  ──────────────────────────────────────────────────────┼──────────────────────
+  OSC hyperlinks, complete recording-playback pipeline  │17.0%
+  ──────────────────────────────────────────────────────┼──────────────────────
+  Long OSC titles, complete recording-playback pipeline │21.8%
+  ──────────────────────────────────────────────────────┼──────────────────────
+  Snapshot with ANSI style runs                         │51.5%
+  ──────────────────────────────────────────────────────┼──────────────────────
+  Snapshot with dense hyperlinks                        │61.4%
+  ──────────────────────────────────────────────────────┼──────────────────────
+  Snapshot with alternating ANSI styles                 │57.6%
+  ──────────────────────────────────────────────────────┴──────────────────────
+  These are measurements of the individual optimizations, with their corresponding before/after baselines. They do not measure application-wide frame rate, completed GPU presentation, or network throughput. The low-contrast stress fixture improved by 97.0%, while the mostly exact-color full-grid snapshot was approximately unchanged (+1.1% elapsed time). Ordinary text and ANSI pipeline controls varied by about 1% in the final OSC comparison.
+  🤖 AI Message Editing and Input
+  - Added multiline editing for historical messages, including explicit newlines, visual wrapping, and a bounded vertical editing area. Long edits keep the caret visible instead of being squeezed into a single-line field.
+ReleaseNotesUrl: https://github.com/AnalyseDeCircuit/oxideterm/releases/tag/v2.1.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

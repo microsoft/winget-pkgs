@@ -1,0 +1,85 @@
+# Created with winget-pkgs-updater using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: martinrotter.RSSGuard5
+PackageVersion: 5.3.0
+PackageLocale: en-US
+Publisher: martinrotter
+PublisherUrl: https://github.com/martinrotter
+PublisherSupportUrl: https://github.com/martinrotter/rssguard/issues
+Author: Martin Rotter
+PackageName: RSS Guard 5
+PackageUrl: https://github.com/martinrotter/rssguard
+License: GPL-3.0
+LicenseUrl: https://github.com/martinrotter/rssguard/blob/HEAD/LICENSE.md
+ShortDescription: Feed reader (podcast player and also Gemini protocol client) which supports RSS/ATOM/JSON and many web-based feed services.
+Moniker: rssguard5
+Tags:
+- aggregator
+- atom
+- bazqux
+- c-plus-plus
+- feedly
+- freshrss
+- gmail
+- inoreader
+- nextcloud
+- qt
+- rdf
+- rss
+- rss-guard
+- rss-reader
+- theoldreader
+- tiny-tiny-rss
+ReleaseNotes: |-
+  Article filtering now supports explicit full-article overwrites with msg.overwrite = true. Use this opt-in flag when filter changes must be saved even if an existing article would otherwise be skipped; it also allows replacing stored read and starred states. Regular fetching and "Process checked feeds" now share the same saving policy: manual processing no longer implicitly forces updates or bypasses read-state preservation. The new "Force overwrite of accepted articles" checkbox lets you preview or apply full overwrites in the filter dialog without editing the script. Test previews the local saving decision and expected stored values, while processing reports actual outcomes. Overwrites save the complete writable article, so scripts must preserve any stored values they need. Permanently deleted records remain protected. See the updated article-filter documentation for examples and the clarified settings. (#2490)
+  Added:
+  - Database cleanup can now run automatically on application startup or exit using the remembered cleanup choices, including the age limit and database optimization. Automatic cleanup is disabled by default. (#2464)
+  - Added CACHEDIR.TAG files to HTTP and image cache directories so compatible backup tools can exclude cached content. (#2482)
+  - Feed and article list filters can now match any selected condition (OR) or all selected conditions (AND). Each dropdown remembers its own mode, with OR remaining the default.
+  - Added a "Show enabled feeds" option to the feed list filter menu. (#2477)
+  - Added "Show feeds" and "Show folders" options to the feed list filter menu. (#2476)
+  - External tools can now use custom icons, with image selection and an option to restore automatic icons beside "Edit tool path". Icons are saved in settings and shown in all "Open with external tool" menus. (#2492)
+  - Article-filter testing now separates the script decision from the expected database outcome, including skipped updates and preserved states. Manual processing retains per-article results, reports completion or partial failure, and displays script logs. Label-only changes and later feed cleanup are reported separately. (#2490)
+  - Added the transient msg.overwrite article-filter property, also available in the visual generator, with one saving policy for fetching and manual processing. Reorganized the filtering documentation with overwrite, deletion, settings, and API guidance. (#2490)
+  - Documented the StartAllBack incompatibility with Windows taskbar thumbnail buttons, including a settings tooltip and instructions to disable the buttons to avoid crashes. (#2462)
+  - Batch feed editing can now fetch a separate icon for each feed in the background, with progress and cancellation. Failed fetches preserve existing icons, and fetched icons are applied only when the dialog is saved.
+  - Confirmations for assigning or removing article filters for folders or all feeds can now be disabled separately using "Do not show again". (#2457)
+  - Read and unread fonts can now be configured separately for the feed and article lists. Resetting the unread font restores the normal font in bold. (#2443)
+  - Default keyboard shortcuts now provide modified reading commands, standard tab controls and Ctrl+K command groups. Saved assignments, including cleared shortcuts, continue to override defaults.
+  - Feed/article pane and search focus commands now activate the Feeds tab when invoked from a browser or media-player tab.
+  - Preview scrolling now moves by 80% of the viewport in the active web/text browser instead of a fixed 50-pixel step, leaving 20% overlap for easier reading. (#2514)
+  - Configured keyboard shortcuts now take precedence in the main window and embedded media player. Editable inputs retain typing and standard editing operations; unrelated application commands remain available. Dialogs, popup menus and shortcut recording retain normal handling.
+  - Article data can now be copied immediately using the previously selected format.
+  - RSS Guard now asks for confirmation before rearranging feeds or subfolders alphabetically. (#2430)
+  - Discovered feeds can now be sorted by title or type from the column headers. (#2435)
+  - WordPress posts and pages can now be discovered and read through the WordPress REST JSON API. Thanks to @darcosion. (#2433)
+  - MediaWiki category and search pages can now be added as feeds, with full article HTML loaded through the MediaWiki API at a paced request rate. Each refresh fetches five newest results plus up to five older entries, with backfill progress saved across restarts after successful article storage.
+  Fixed:
+  - Fixed missing notification translations and incorrect translation contexts in the visual filter generator, feed dialogs, and Windows taskbar tooltips. Translation updates now exclude third-party build files, retain disabled-feature coverage regardless of checkout location, and reject extraction warnings without changing the catalog while supporting Qt 6.5.
+  - Fixed article-list sorting losing saved sort columns on startup or when switching column profiles. Profile changes now refresh sorting consistently from both settings and the column menu, preserve multicolumn priority, and keep sorting independent of column visibility.
+  - Fixed a crash when deleting multiple selected feeds, including feeds inside folders. (#2507)
+  - Fixed Windows installer packaging rejecting MSVC import libraries installed alongside service-plugin DLLs. Import libraries remain in the portable archive and are omitted from the installer.
+  - Hardened Windows installation and upgrades: failed uninstallers stop upgrades, unsafe legacy upgrades and unsuitable target folders are rejected, and removal preserves files outside the packaged payload. Local ownership records and early recovery uninstallers allow failed installations, upgrades, and partial removals to be retried, including when another copy owns the Installed Apps entry. Added versioned shared shortcuts, installer metadata, staged-payload checks, reliable template rebuilds, and isolated regression tests using the actual previous installer. Silent installation no longer opens documentation; debug symbols remain in portable archives.
+  - Updated the article extractor's Go dependencies and pinned the CI compiler. Added Go regression tests, vulnerability checks, and reliable rebuilds after source, dependency, or compiler changes. Windows packages now consistently use rssguard-article-extractor.exe, and extractor sources use LF endings for consistent CI checks on Windows.
+  - Article extraction now resolves links after redirects, shares page cookies with image downloads, honors cookie expiry and deletion, and keeps private headers on their configured origin. Embedded images are cached and no longer overridden by responsive alternatives. Fixed special characters in proxy credentials, malformed-input and empty-result errors, and combined plain-text/image flags. Added download, input, output, and network-time limits, including bounds for compressed and non-UTF-8 pages.
+  - Opening articles in background tabs no longer briefly draws their toolbars and loading indicators over the Feeds tab.
+  - Database cleanup now checkpoints SQLite after optimization and reports blocked checkpoints. Added help explaining why SQLite database files on Windows can remain larger than the displayed data size. (#2504)
+  - Feed refreshes now retry articles after parsing or storage fails, even when the server uses ETags. A 304 response without an ETag keeps the last successful validator.
+  - Article inserts now preserve literal text such as :score and use the actual database IDs for notifications and labels. Large refreshes batch database writes and find articles without feed-supplied IDs faster. SQLite reuses reader connections for article lookups and live feed counts. MariaDB 10.6.1 or newer groups inserts within the server's packet limit.
+  - Standard RSS feeds release their parsed documents before saving articles. The downloader also releases unread articles after delivering the refresh notification.
+  - Article-filter test snapshots now isolate mutable attachments, and tests spanning multiple feeds use each article's actual feed context. (#2490)
+  - Permanently deleted article records and their label associations can no longer be modified by article updates, including explicit filter overwrites. Trashed and permanently deleted articles no longer generate normal unread-fetch notifications. (#2490)
+  - Clarified the article-update settings as "Ignore body-only changes from feeds" and "Preserve read state on feed updates", with explanatory tooltips and existing preferences preserved. (#2490)
+  - Debug and informational logging is now disabled by default, including early startup. Saved logging preferences and explicit debug or memory diagnostics options still enable it. (#2496)
+  - Feed discovery now uses the same icon candidates and fallback as metadata fetching, so feeds hosted by services such as FeedBurner use the publisher's icon. (#2480)
+  - Fixed discovery reusing the wrong icon for different feeds hosted on the same domain. Failed or invalid icon downloads are no longer cached. (#2480)
+  - Fixed feeds failing to update despite successful metadata retrieval by improving default HTTP Accept headers and making discovery requests consistent.
+  - Improved feed discovery by skipping guessed endpoints once the supplied URL is recognized as a feed.
+  - Improved URL-based deduplication of discovered feeds and fixed a memory leak when discarding duplicates.
+  - Fixed query-string handling in RSS/RDF, WordPress and sitemap discovery probes.
+  - Label assignment and removal now work after paging in the article-list "Labels" and preview "Show all labels" menus, including preview sidebar buttons. Preview label menus reset correctly for accounts without labels, and refreshing them no longer leaks label actions. (#2469)
+  - Failed article storage is now reported as a feed update failure instead of appearing successful. (32a0010)
+ReleaseNotesUrl: https://github.com/martinrotter/rssguard/releases/tag/5.3.0
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

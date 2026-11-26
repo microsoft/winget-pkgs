@@ -1,0 +1,55 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: juejijianghuaa.CoDock
+PackageVersion: 0.6.9
+PackageLocale: zh-CN
+Publisher: CoDock
+PublisherUrl: https://github.com/juejijianghuaa
+PublisherSupportUrl: https://github.com/juejijianghuaa/CoDock-Release/issues
+PackageName: CoDock
+PackageUrl: https://codock.pages.dev/
+License: MIT
+LicenseUrl: https://github.com/juejijianghuaa/CoDock-Release/blob/HEAD/LICENSE
+ShortDescription: 本地 Coding Agent 桌面工作台与终端集成中心。
+Description: |-
+  CoDock 是一个面向专业开发者的本地 Coding Agent 桌面工作台与终端控制台：
+  - 多 Agent 并行执行：支持在一个窗口内多 Tab 运行 Claude Code、Codex、Gemini CLI、Antigravity、Grok Build、Pi、Opencode 等，告别杂乱的独立黑窗口。
+  - 全历史与用量看板：本地直接解析各 Agent 的原生日志与 SQLite/JSONL 数据，聚合按项目、模型、日期的 Token 用量与成本统计。
+  - 专为 Coding 打造的终端增强：基于 xterm.js 与原生 ConPTY 封装，支持滚轮穿透、图片快速粘贴、拖拽文件注入绝对路径、全局快捷键呼出。
+  - Markdown Composer 独立浮窗：专为长提示词编写设计的全功能 Markdown 输入层，支持模板复用、提示词优化与一键投递。
+  - 手机/平板与局域网协同：自适应移动端 Web 交互、配对令牌安全门禁与受控只读/可写会话分享。
+Tags:
+- claude-code
+- codex
+- gemini-cli
+- 人工智能
+- 终端
+ReleaseNotes: |-
+  v0.6.9 (2026-11-13)
+  这一版围绕分享与多窗口：分享链接能写备注，会话列表和 Tab 上直接看得见；同一个会话在多处打开时不再
+  互相打乱尺寸；终端隐藏时让出显存。设置里另加了一个「调试」页签。
+  新功能
+  - 分享可以写备注，列表与 Tab 显示分享标记：创建链接时写一句「分享给了谁」（≤40 字，只有主人
+    看得到），分享弹窗与设置页列表里可就地修改；会话列表、Tab 与悬浮卡按当前有效的分享显示标记，
+    可操作的分享用琥珀色；历史筛选新增「只看已分享」，会话右键可「取消全部分享」。到期时间先显示
+    「N 天后过期」，再给具体时刻。
+  - 设置页新增「调试」页签：Web Inspector 开关（桌面窗口，下次启动生效，主窗口与输入窗口同一个
+    值）与终端诊断——渲染方式、canvas 像素、列 × 行、缓冲行数、是否可见，面板打开时每秒刷新一次，
+    可复制成制表符分隔的纯文本。
+  调整
+  - 隐藏的终端让出显存：不再为了省显存卸掉 WebGL（退回 DOM 渲染后，后台还在重绘的会话每帧都在
+    造 DOM 节点，CPU 翻几倍），改成把 canvas 缩到 1×1 并重画一帧，切回来在绘制前恢复原尺寸；同时
+    去掉隐藏 pane 残留的整屏合成层。实测 5 个会话：WebContent 约 745MB → 600–660MB，整屏缓冲
+    8–9 块 → 4 块。
+  修复
+  - 多窗口同开一个会话不再错乱：一边上报尺寸后，另一边跟着 pty 尺寸走，不再拿自己的尺寸接住 CLI
+    的整屏重绘；在哪个窗口按键或点击，尺寸就归哪个窗口。提示改为「正跟随其他窗口的尺寸」，按钮
+    「用本窗口尺寸」。
+  - 分享访客实时收到尺寸变化：主人切 Tab 或重启后，访客不再等 3 秒轮询才改 xterm 尺寸，切 Tab
+    与断线重连后画面不再错乱。
+  - 用量价目表补上 Fable 5.2 / Mythos 5.2：这两个模型此前查不到价、按不估价处理，模型行显示
+    --，项目与总计金额偏低。
+ReleaseNotesUrl: https://github.com/juejijianghuaa/CoDock-Release/releases/tag/v0.6.9
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

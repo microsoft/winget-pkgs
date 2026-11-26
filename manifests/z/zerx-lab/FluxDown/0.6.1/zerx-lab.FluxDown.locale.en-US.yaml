@@ -1,0 +1,128 @@
+# Created with WinGet Tracker using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: zerx-lab.FluxDown
+PackageVersion: 0.6.1
+PackageLocale: en-US
+Publisher: FluxDown
+PublisherUrl: https://github.com/zerx-lab
+PublisherSupportUrl: https://github.com/zerx-lab/FluxDown/issues
+Author: zerx-lab
+PackageName: FluxDown
+PackageUrl: https://github.com/zerx-lab/FluxDown
+License: AGPL-3.0
+LicenseUrl: https://github.com/zerx-lab/FluxDown/blob/HEAD/LICENSE
+ShortDescription: Rust 驱动的多协议下载管理器，支持 HTTP/FTP/BitTorrent 磁力链接及 HLS/DASH 流媒体，智能多线程加速与浏览器无缝集成。精美界面，极致性能，永久免费，零广告。
+ReleaseNotes: |-
+  📦 下载与安装说明（服务器 / CLI / Android）· 文件校验见 SHA256SUMS.txt
+  📦 Headless 服务器：直接下载运行（免 Docker）
+  ──────────────────────────────────────────────────────────────┬─────────────────────────────────────────────────────────────────
+  平台                                                          │资产
+  ──────────────────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────
+  Windows x64 / ARM64                                           │FluxDown-Server-0.6.1-windows-{x64,arm64}.zip
+  ──────────────────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────
+  macOS Intel / Apple Silicon                                   │FluxDown-Server-0.6.1-macos-{x64,arm64}.tar.gz
+  ──────────────────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────
+  Linux x64 / ARM64（musl 静态链接，任意发行版可用）            │FluxDown-Server-0.6.1-linux-{x64,arm64}.tar.gz
+  ──────────────────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────
+  OpenWrt 软路由 24.10 及更早（opkg，x86_64 / aarch64 各子架构）│fluxdown-server_0.6.1_<arch>.ipk +
+                                                                │luci-app-fluxdown_0.6.1_all.ipk
+  ──────────────────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────
+  OpenWrt 软路由 25.12 起（apk，x86_64 / aarch64 各子架构）     │fluxdown-server_0.6.1_<arch>.apk +
+                                                                │luci-app-fluxdown_0.6.1_all.apk
+  ──────────────────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────
+  QNAP NAS（QTS x86_64 / ARM64）                                │FluxDown-Server-0.6.1-qnap-{x64,arm64}.qpkg
+  ──────────────────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────
+  群晖 NAS（DSM 7 / DSM 6，x86_64 / ARM64）                     │FluxDown-Server-0.6.1-synology-{dsm7,dsm6}-{x64,arm64}.spk
+  ──────────────────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────
+  飞牛 fnOS NAS（x86 / ARM）                                    │FluxDown-Server-0.6.1-fnos-{x64,arm64}.fpk
+  ──────────────────────────────────────────────────────────────┴─────────────────────────────────────────────────────────────────
+  解压后运行 fluxdown-agent --server（Windows 为 fluxdown-agent.exe --server），浏览器访问 http://127.0.0.1:17800。
+  包内两个可执行文件必须放在同一目录：fluxdown-agent（含 Web 控制台，已编译进二进制）与 fluxdownd（下载 daemon，由 agent 自动拉起、退出时一并关停），无需附带任何静态资源目录。
+  首次启动请在浏览器里完成「初始化 FluxDown Server」向导设置访问密钥（无人值守部署可用 FLUXDOWN_TOKEN 预置）。
+  OpenWrt：24.10 及更早用 opkg install fluxdown-server_*.ipk luci-app-fluxdown_*.ipk；25.12 起用 apk add --allow-untrusted fluxdown-server_*.apk luci-app-fluxdown_*.apk（包未用 OpenWrt 官方密钥签名）。<arch> 取路由器 /etc/apk/arch（或 opkg print-architecture）中的架构名。LuCI「服务 → FluxDown」页管理，Web 界面在 http://路由器IP:17800。agent 二进制含完整 Web UI，另附 fluxdownd，需 overlay 空间充足的软路由设备。
+  QNAP：App Center → 手动安装 .qpkg（需在设置中允许安装未经验证的应用），装完点应用图标直达 Web 界面。
+  群晖：套件中心 → 手动安装 .spk（需在「设置 → 信任来源」允许任何发行者）。DSM 7.x 装 dsm7 包（以套件专属用户运行），DSM 6.x 装 dsm6 包；Intel/AMD 机型选 x64，ARM 机型（rtd1296/rtd1619b 等）选 arm64。装完在套件中心点「打开」直达 Web 界面（端口 17800）。
+  飞牛 fnOS：应用中心 → 手动安装 .fpk；x86 机型选 x64，ARM 机型选 arm64。以专用应用用户 fluxdown 运行，默认保存到安装时创建的 fluxdown 共享文件夹，其他目录在应用设置「授权目录」中添加。装完点桌面图标直达 Web 界面（端口 17800）。
+  🐳 Headless 服务器：Docker（linux/amd64 · linux/arm64）
+  docker pull ghcr.io/zerx-lab/fluxdown-server:0.6.1
+  docker run -d -p 17800:17800 -v fluxdown-data:/data \
+    ghcr.io/zerx-lab/fluxdown-server:0.6.1
+  Compose 部署见仓库 docker/docker-compose.yml。首次打开 Web 界面时按向导设置访问密钥，或用 -e FLUXDOWN_TOKEN=... 预置。
+  📦 命令行 CLI
+  ──────────────────────────────────────────────────┬───────────────────────────────────────────
+  平台                                              │资产
+  ──────────────────────────────────────────────────┼───────────────────────────────────────────
+  Windows x64 / ARM64                               │FluxDown-CLI-0.6.1-windows-{x64,arm64}.zip
+  ──────────────────────────────────────────────────┼───────────────────────────────────────────
+  macOS Intel / Apple Silicon                       │FluxDown-CLI-0.6.1-macos-{x64,arm64}.tar.gz
+  ──────────────────────────────────────────────────┼───────────────────────────────────────────
+  Linux x64 / ARM64（musl 静态链接，任意发行版可用）│FluxDown-CLI-0.6.1-linux-{x64,arm64}.tar.gz
+  ──────────────────────────────────────────────────┴───────────────────────────────────────────
+  解压后得到 fluxdown（Windows 为 fluxdown.exe），放入 PATH 即可使用；也可从源码安装：
+  cargo install --git https://github.com/zerx-lab/FluxDown fluxdown_cli。
+  fluxdown ping                         # 探活（需 FluxDown App / server 运行中）
+  fluxdown add https://example.com/f.zip
+  fluxdown ls
+  服务地址经 --url 或 FLUXDOWN_URL（默认 http://127.0.0.1:17800），管理 token 经 --token 或 FLUXDOWN_TOKEN。
+  📱 Android
+  ─────────────────────────────┬──────────────────────────────────────
+  设备                         │资产
+  ─────────────────────────────┼──────────────────────────────────────
+  不确定架构（通用包）         │FluxDown-0.6.1-android-universal.apk
+  ─────────────────────────────┼──────────────────────────────────────
+  64 位 ARM（绝大多数手机）    │FluxDown-0.6.1-android-arm64-v8a.apk
+  ─────────────────────────────┼──────────────────────────────────────
+  32 位 ARM                    │FluxDown-0.6.1-android-armeabi-v7a.apk
+  ─────────────────────────────┼──────────────────────────────────────
+  x86_64（模拟器 / Chromebook）│FluxDown-0.6.1-android-x86_64.apk
+  ─────────────────────────────┴──────────────────────────────────────
+  ⚠️ 从旧版（Flutter 版）升级：新版 Android 客户端换用了新的签名证书，不能直接覆盖安装旧版（系统可能提示「应用未安装」「软件包无效」「无法降级」或签名冲突）。
+  请先在旧版中记下需要保留的下载任务与设置，卸载旧版后再安装新版；卸载会清除旧版的本地数据，已下载到公共目录的文件不受影响。
+  0.6.1 - 2026-10-23
+  🚀 新功能
+  - 下载事件提示音：任务开始 / 完成 / 失败以及队列开始 / 完成可分别设为关闭、系统音或自定义音频文件，支持试听；启用完成提示音后完成通知自动静音，避免重复发声
+  - 分类保存目录路由：新建下载（含浏览器扩展捕获）会按文件名自动落入对应分类目录；HTTP 任务启动时只发一次普通 GET 请求，不再先 HEAD / Range 探测，避免消耗一次性签名链接
+  - 自动清理已完成任务记录：可在下载设置中选择保留天数，超期记录只删记录、不删文件，做种中的任务不受影响（桌面 / Web / Android / iOS）
+  - 桌面与 Web 的顶栏、状态栏控件支持在自定义布局时手动隐藏，下载页搜索框与视图菜单也成为可移动、可隐藏的条目；搜索框隐藏时可用 Ctrl/Cmd+F 临时唤出
+  - 侧栏设备区列出独立直连设备，可直接「下载到此设备」，并支持重命名、解除配对；Android 设备页同样可向已配对设备下发下载
+  - 支持在应用内注销云账号（iOS 账户页提供入口，支持密码或邮箱验证码确认）
+  - 新增 Webhook 事件 queue.started（队列由空闲转为开始下载时触发）
+  - 状态栏限速菜单记住下载 / 上传各最近 3 个自定义值，并可清除
+  - 新建下载的链接输入框默认一行，随内容自动增高（最多 10 行），文件名与线程数各占一行
+  - 完成窗口点击「打开文件 / 所在文件夹」时按钮显示进行中状态
+  - 新增 OpenWrt apk 格式软件包，支持 OpenWrt 25.12
+  - 自定义分类管理移至下载设置页底部；设置页中数字输入框与下拉框同宽
+  🐛 问题修复
+  - 可直接暂停失败任务以撤销其自动重试
+  - 新建下载解析现在容忍链接前的空白缩进以及零宽字符 / BOM，不再误丢弃链接
+  - 修复浏览器扩展在桌面端响应卡住时，侧边栏 / 弹窗一直显示「未连接」或「当前页面没有可用的资源数据」的问题；弹窗与侧边栏的连接状态现在保持一致
+  - 修复 macOS 27 上状态栏托盘提示常驻不消失的问题（关机倒计时改显示在「取消关机」菜单项）
+  - 修复 Linux 托盘项在重启后被重命名的问题，GNOME 顶栏整理扩展可记住其位置
+  - 修复插件在内存紧贴上限时的内存超限未被正确识别的问题
+  - iOS 商店版不再显示「做种中」文件夹
+  0.6.1 - 2026-10-23
+  🚀 Features
+  - Download event sounds: task start / complete / fail and queue start / finish can each be set to off, a system sound, or a custom audio file, with preview; enabling the completion sound mutes the completion notification to avoid double sounds
+  - Category save-directory routing: new downloads (including browser extension captures) are placed into the matching category folder by file name; HTTP tasks now start with a single plain GET instead of HEAD / Range probing, so one-time signed URLs are no longer consumed
+  - Auto-clean completed task records: choose a retention period in download settings; expired records are removed without deleting files, and seeding tasks are skipped (desktop / Web / Android / iOS)
+  - Desktop and Web title bar and status bar controls can be manually hidden in custom layout mode; the downloads page search box and view menu are now movable, hideable items, and Ctrl/Cmd+F temporarily reveals a hidden search box
+  - The sidebar device section lists standalone direct-connect devices with "Download to this device", rename and unpair; the Android Devices page can also send downloads to paired devices
+  - Cloud accounts can now be deleted from within the app (entry on the iOS account page, confirmed by password or email code)
+  - New Webhook event queue.started (fires when a queue goes from idle to downloading)
+  - The status bar speed-limit menu remembers the 3 most recent custom download / upload values and lets you clear them
+  - The New Download link box is one line by default and grows with content (up to 10 lines); file name and thread count each get their own row
+  - The completion window shows a busy state on the button when opening a file or its folder
+  - New OpenWrt apk package for OpenWrt 25.12
+  - Custom category management moved to the bottom of the download settings page; number inputs and dropdowns in settings now share the same width
+  🐛 Bug Fixes
+  - Failed tasks can now be paused directly to cancel their automatic retry
+  - New Download parsing now tolerates leading whitespace before links as well as zero-width characters / BOM, so links are no longer dropped
+  - Fixed the browser extension sidebar / popup staying "disconnected" or showing "no resource data for the current page" when the desktop app was unresponsive; popup and sidebar connection status are now consistent
+  - Fixed the status bar tooltip getting stuck on macOS 27 (the shutdown countdown now appears on the "Cancel shutdown" menu item)
+  - Fixed the Linux tray item being renamed after restart, so GNOME top bar extensions can remember its position
+  - Fixed plugin out-of-memory errors not being recognized correctly when memory sits right at the limit
+  - The iOS store edition no longer shows the "Seeding" folder
+ReleaseNotesUrl: https://github.com/zerx-lab/FluxDown/releases/tag/v0.6.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

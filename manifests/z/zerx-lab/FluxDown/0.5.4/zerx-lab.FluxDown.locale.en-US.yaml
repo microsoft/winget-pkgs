@@ -1,0 +1,90 @@
+# Created with WinGet Tracker using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: zerx-lab.FluxDown
+PackageVersion: 0.5.4
+PackageLocale: en-US
+Publisher: FluxDown
+PublisherUrl: https://github.com/zerx-lab
+PublisherSupportUrl: https://github.com/zerx-lab/FluxDown/issues
+Author: zerx-lab
+PackageName: FluxDown
+PackageUrl: https://github.com/zerx-lab/FluxDown
+License: AGPL-3.0
+LicenseUrl: https://github.com/zerx-lab/FluxDown/blob/HEAD/LICENSE
+ShortDescription: Rust 驱动的多协议下载管理器，支持 HTTP/FTP/BitTorrent 磁力链接及 HLS/DASH 流媒体，智能多线程加速与浏览器无缝集成。精美界面，极致性能，永久免费，零广告。
+ReleaseNotes: |-
+  📦 下载与安装说明（服务器 / CLI）· 文件校验见 SHA256SUMS.txt
+  📦 Headless 服务器：直接下载运行（免 Docker）
+  ──────────────────────────────────────────────────┬─────────────────────────────────────────────────────────────────
+  平台                                              │资产
+  ──────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────
+  Windows x64 / ARM64                               │FluxDown-Server-0.5.4-windows-{x64,arm64}.zip
+  ──────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────
+  macOS Intel / Apple Silicon                       │FluxDown-Server-0.5.4-macos-{x64,arm64}.tar.gz
+  ──────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────
+  Linux x64 / ARM64（musl 静态链接，任意发行版可用）│FluxDown-Server-0.5.4-linux-{x64,arm64}.tar.gz
+  ──────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────
+  OpenWrt 软路由（x86_64 / aarch64 各子架构）       │fluxdown-server_0.5.4_<arch>.ipk +
+                                                    │luci-app-fluxdown_0.5.4_all.ipk
+  ──────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────
+  QNAP NAS（QTS x86_64 / ARM64）                    │FluxDown-Server-0.5.4-qnap-{x64,arm64}.qpkg
+  ──────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────
+  群晖 NAS（DSM 7 / DSM 6，x86_64 / ARM64）         │FluxDown-Server-0.5.4-synology-{dsm7,dsm6}-{x64,arm64}.spk
+  ──────────────────────────────────────────────────┴─────────────────────────────────────────────────────────────────
+  解压后运行 fluxdown-agent --server（Windows 为 fluxdown-agent.exe --server），浏览器访问 http://127.0.0.1:17800。
+  包内两个可执行文件必须放在同一目录：fluxdown-agent（含 Web 控制台，已编译进二进制）与 fluxdownd（下载 daemon，由 agent 自动拉起、退出时一并关停），无需附带任何静态资源目录。
+  首次启动请在浏览器里完成「初始化 FluxDown Server」向导设置访问密钥（无人值守部署可用 FLUXDOWN_TOKEN 预置）。
+  OpenWrt：opkg install fluxdown-server_*.ipk luci-app-fluxdown_*.ipk，LuCI「服务 → FluxDown」页管理，Web 界面在 http://路由器IP:17800。agent 二进制含完整 Web UI，另附 fluxdownd，需 overlay 空间充足的软路由设备。
+  QNAP：App Center → 手动安装 .qpkg（需在设置中允许安装未经验证的应用），装完点应用图标直达 Web 界面。
+  群晖：套件中心 → 手动安装 .spk（需在「设置 → 信任来源」允许任何发行者）。DSM 7.x 装 dsm7 包（以套件专属用户运行），DSM 6.x 装 dsm6 包；Intel/AMD 机型选 x64，ARM 机型（rtd1296/rtd1619b 等）选 arm64。装完在套件中心点「打开」直达 Web 界面（端口 17800）。
+  🐳 Headless 服务器：Docker（linux/amd64 · linux/arm64）
+  docker pull ghcr.io/zerx-lab/fluxdown-server:0.5.4
+  docker run -d -p 17800:17800 -v fluxdown-data:/data \
+    ghcr.io/zerx-lab/fluxdown-server:0.5.4
+  Compose 部署见仓库 docker/docker-compose.yml。首次打开 Web 界面时按向导设置访问密钥，或用 -e FLUXDOWN_TOKEN=... 预置。
+  📦 命令行 CLI
+  ──────────────────────────────────────────────────┬───────────────────────────────────────────
+  平台                                              │资产
+  ──────────────────────────────────────────────────┼───────────────────────────────────────────
+  Windows x64 / ARM64                               │FluxDown-CLI-0.5.4-windows-{x64,arm64}.zip
+  ──────────────────────────────────────────────────┼───────────────────────────────────────────
+  macOS Intel / Apple Silicon                       │FluxDown-CLI-0.5.4-macos-{x64,arm64}.tar.gz
+  ──────────────────────────────────────────────────┼───────────────────────────────────────────
+  Linux x64 / ARM64（musl 静态链接，任意发行版可用）│FluxDown-CLI-0.5.4-linux-{x64,arm64}.tar.gz
+  ──────────────────────────────────────────────────┴───────────────────────────────────────────
+  解压后得到 fluxdown（Windows 为 fluxdown.exe），放入 PATH 即可使用；也可从源码安装：
+  cargo install --git https://github.com/zerx-lab/FluxDown fluxdown_cli。
+  fluxdown ping                         # 探活（需 FluxDown App / server 运行中）
+  fluxdown add https://example.com/f.zip
+  fluxdown ls
+  服务地址经 --url 或 FLUXDOWN_URL（默认 http://127.0.0.1:17800），管理 token 经 --token 或 FLUXDOWN_TOKEN。
+  0.5.4 - 2026-10-06
+  🚀 新功能
+  - 桌面客户端支持调整界面字体大小（10~24 px），设置页「外观」中可选择，也可选「跟随主题」；与界面缩放叠加生效，文字不会被裁切
+  - 账户新增密码管理：可修改密码、设置密码（通过当前密码或邮箱验证码验证），登录框内提供「忘记密码」重置流程，安全页面新增对应入口；验证码发送后重开对话框会继续倒计时
+  - 自定义主题库现在随账户同步，在多台设备间共享；旧版本地主题文件会自动迁移
+  - Web 控制台：当服务器与浏览器在同一台机器上（本机回环访问）时，任务右键菜单提供「打开文件」「打开所在文件夹」，进行中的任务也可打开所在文件夹；远程或经反向代理访问时不会出现该菜单。如需在服务器模式下显式放行，可设置 FLUXDOWN_ALLOW_LOCAL_PLATFORM
+  - yt-dlp 插件升级：优先选择 H.264，下载后检测实际文件编码，对 AV1/VP9/HEVC 等系统播放器（如 QuickTime）无法解码的视频自动转码为 H.264/AAC/MP4（受 preferMp4 开关控制，兼容的 H.264 仅重封装不重编码）；选择器优先考虑分辨率，并扩充了 Instagram、Twitter(X)、TikTok、Reddit、Facebook 的接管支持
+  - yt-dlp 输出上限可通过配置调整（默认 16 MiB），超限时给出明确错误提示而不是「Unexpected end of JSON input」
+  🐛 问题修复
+  - 修复启用 CORS 时被强制生成访问令牌的问题：现在仅在局域网监听且开启接管或 aria2 接口时才要求令牌，单独开启 CORS 可以保持令牌为空
+  - 修复 YouTube 等站点因 yt-dlp 返回的元数据过大（单个视频超过 4 MiB）而解析失败的问题
+  - 修复 HLS 流中 #EXT-X-KEY:METHOD=NONE 之后的明文分片仍沿用上一段 AES-128 密钥解密、导致下载失败的问题
+  - 优化设置页 User-Agent 一行的布局：说明与预设下拉按卡片宽度自动换行，自定义输入框占满整行
+  0.5.4 - 2026-10-06
+  🚀 Features
+  - Desktop client: adjustable UI font size (10–24 px) under Settings → Appearance, with a "Follow theme" option; it stacks with UI scaling and text is no longer clipped
+  - Account password management: change or set a password (verified by current password or email code), a "Forgot password" reset flow in the login dialog, and a new entry on the security page; reopened dialogs resume the verification-code countdown
+  - The custom theme library now syncs with your account across devices; old local theme files are migrated automatically
+  - Web console: when the server and browser are on the same machine (loopback access), the task context menu offers "Open file" and "Open folder", and in-progress tasks can also reveal their folder; the menu does not appear for remote or reverse-proxied access. Set FLUXDOWN_ALLOW_LOCAL_PLATFORM to opt in explicitly in server mode
+  - yt-dlp plugin upgrade: prefers H.264, inspects the actually downloaded file, and automatically transcodes AV1/VP9/HEVC videos that system players (e.g. QuickTime) can't decode to H.264/AAC/MP4 (gated by preferMp4; compatible H.264 is only remuxed, not re-encoded); the format selector now prioritizes resolution, and Instagram, Twitter(X), TikTok, Reddit and Facebook are supported for takeover
+  - The yt-dlp output cap is now configurable (default 16 MiB), and an over-cap result reports a clear error instead of "Unexpected end of JSON input"
+  🐛 Bug Fixes
+  - Fixed an access token being force-generated when CORS is enabled: a token is now required only when listening on the LAN with takeover or the aria2 endpoint enabled, so enabling CORS alone may keep an empty token
+  - Fixed yt-dlp resolution failing on sites such as YouTube because the returned metadata was too large (over 4 MiB for a single video)
+  - Fixed HLS streams where plaintext segments following #EXT-X-KEY:METHOD=NONE were still decrypted with the previous AES-128 key, causing the download to fail
+  - Improved the User-Agent row layout in Settings: the description and preset dropdown wrap to the card width, and the custom input fills the full row
+ReleaseNotesUrl: https://github.com/zerx-lab/FluxDown/releases/tag/v0.5.4
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

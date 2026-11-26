@@ -1,0 +1,50 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.28.0.schema.json
+
+PackageIdentifier: Victor-Quqi.Axiopera
+PackageVersion: 0.3.2
+PackageLocale: zh-CN
+ShortDescription: 把 Claude Code、Codex 和 Grok Build 互相编排成子 agent 的协作工具，一个可执行文件加一个 skill 即可接入。
+Description: |-
+  Axiopera 打通 Claude Code、Codex 与 Grok Build，让主 agent 把它们派生为子 agent 并接收结果。更轻量、更高效、更易用的 agent 协作，对现有配置的改动很小：一个可执行文件加一个 skill，沿用你已有的 agent 登录态和用量额度，默认不改动 agent 配置。
+  主 agent 可以请其他 agent 审阅或干活，运行中随时追加指令、改变方向，也可以在另一个终端用 axiopera top 实时查看所有子任务。任务默认共用当前工作目录，`--cwd` 可另行指定，并行写入的任务应各用一个 git worktree。后台守护进程负责协调各个会话。
+  同一个程序也是命令行：axiopera create、send、reply、watch、top、daemon、status 等子命令负责派发任务、审批和进度上报，已取消的任务还能续接。
+Tags:
+- claude-code
+- codex
+- grok
+- 人工智能
+- 代码
+- 任务编排
+- 多智能体
+- 大模型
+- 大语言模型
+- 子智能体
+- 智能体
+- 智能体协作
+- 智能体团队
+- 编程
+- 聊天机器人
+- 自主智能
+ReleaseNotes: |-
+  agent 沙箱在 macOS 上不能再启动 daemon，在 Windows 上不能再冒充 daemon，子 agent 也不能再停止 daemon。
+  修复
+  - macOS：在 agent 的沙箱中（例如 Claude Code 的命令沙箱），axiopera 不再启动 daemon，而是提示到沙箱外重新运行。此前在沙箱中启动的 daemon 会一直留在沙箱里，它启动的每个子 agent 也都受沙箱限制，并沿用沙箱的网络代理设置。
+  - Windows：Codex 沙箱中的进程不能再为 daemon 的命名管道另建实例、接收其他客户端的请求，包括 spawn 携带的环境变量。客户端也会拒绝由沙箱进程提供的管道。
+  - 数据目录只读或无权写入时，提示到 agent 沙箱外重新运行，不再只报系统错误。
+  - Linux：daemon 在几毫秒内连续两次更新同一任务时，axiopera top 不再漏掉后一次更新。
+  其它说明
+  - 子 agent 不能再执行 axiopera daemon stop、skill install 和 plugin cleanup，请在主会话或终端中运行。子 agent 遇到版本不一致时，报错不再建议 daemon stop --force。
+  - Linux 客户端不检查自身是否在沙箱中。使用 Grok 的 --sandbox workspace 且沙箱可写数据目录时，仍可能在沙箱中启动 daemon。
+  - 替换程序前先执行 axiopera daemon stop。
+  - 更新 Codex 插件后可能需要重新信任插件。
+ReleaseNotesUrl: https://github.com/Victor-Quqi/Axiopera/releases/tag/v0.3.1
+Documentations:
+- DocumentLabel: 使用说明
+  DocumentUrl: https://github.com/Victor-Quqi/Axiopera/blob/HEAD/docs/usage.md
+- DocumentLabel: 后端支持
+  DocumentUrl: https://github.com/Victor-Quqi/Axiopera/blob/HEAD/docs/backends.md
+- DocumentLabel: 设计说明
+  DocumentUrl: https://github.com/Victor-Quqi/Axiopera/blob/HEAD/docs/design.md
+ManifestType: locale
+ManifestVersion: 1.28.0

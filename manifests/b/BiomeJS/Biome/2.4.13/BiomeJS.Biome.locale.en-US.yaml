@@ -1,0 +1,167 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: BiomeJS.Biome
+PackageVersion: 2.4.13
+PackageLocale: en-US
+Publisher: BiomeJS
+PublisherUrl: https://biomejs.dev/
+PublisherSupportUrl: https://github.com/biomejs/biome/issues
+Author: Biome Developers and Contributors
+PackageName: Biome
+PackageUrl: https://biomejs.dev/
+License: Apache-2.0
+Copyright: Copyright (c) 2023-present Biome Developers and Contributors
+ShortDescription: Biome is a toolchain for web projects, aimed at providing functionalities to maintain them. It offers a formatter and linter, usable via CLI and LSP.
+Moniker: biome
+Tags:
+- css
+- formatter
+- javascript
+- json
+- jsx
+- linter
+- static-code-analysis
+- typescript
+- web
+ReleaseNotes: |-
+  2.4.13
+
+  Patch Changes
+  - #9969 c5eb92b Thanks @officialasishkumar! - Added the nursery rule noUnnecessaryTemplateExpression, which disallows template literals that only contain string literal expressions. These can be replaced with a simpler string literal.
+    For example, the following code triggers the rule:
+    const a = `${"hello"}`; // can be 'hello'
+    const b = `${"prefix"}_suffix`; // can be 'prefix_suffix'
+    const c = `${"a"}${"b"}`; // can be 'ab'
+  - #10037 f785e8c Thanks @minseong0324! - Fixed #9810: noMisleadingReturnType no longer reports false positives on a getter with a matching setter in the same namespace.
+    class Store {
+      get status(): string {
+        if (Math.random() > 0.5) return "loading";
+        return "idle";
+      }
+      set status(v: string) {}
+    }
+  - #10084 5e2f90c Thanks @jiwon79! - Fixed #10034: noUselessEscapeInRegex no longer flags escapes of ClassSetReservedPunctuator characters (&, !, #, %, ,, :, ;, <, =, >, @, `, ~) inside v-flag character classes as useless. These characters are reserved as individual code points in v-mode, so the escape is required.
+    The following pattern is now considered valid:
+    /[a-z\&]/v;
+  - #10063 c9ffa16 Thanks @Netail! - Added extra rule sources from ESLint CSS. biome migrate eslint should do a bit better detecting rules in your eslint configurations.
+  - #10035 946b50e Thanks @Netail! - Fixed #10032: useIframeSandbox now flags if there's no initializer value.
+  - #9865 68fb8d4 Thanks @dyc3! - Added the new nursery rule useDomNodeTextContent, which prefers textContent over innerText for DOM node text access and destructuring.
+    For example, the following snippet triggers the rule:
+    const foo = node.innerText;
+  - #10023 bd1e74f Thanks @ematipico! - Added a new nursery rule noReactNativeDeepImports that disallows deep imports from the react-native package. Internal paths like react-native/Libraries/... are not part of the public API and may change between versions.
+    For example, the following code triggers the rule:
+    import View from "react-native/Libraries/Components/View/View";
+  - #9885 3dce737 Thanks @dyc3! - Added a new nursery rule useDomQuerySelector that prefers querySelector() and querySelectorAll() over older DOM query methods such as getElementById() and getElementsByClassName().
+  - #9995 4da9caf Thanks @siketyan! - Fixed #9994: Biome now parses nested CSS rules correctly when declarations follow them inside embedded snippets.
+  - #10009 b41cc5a Thanks @Jayllyz! - Fixed #10004: noComponentHookFactories no longer reports false positives for object methods and class methods.
+  - #9988 eabf54a Thanks @Netail! - Tweaked the diagnostics range for useAltText, useButtonType, useHtmlLang, useIframeTitle, useValidAriaRole & useIfameSandbox to report on the opening tag instead of the full tag.
+  - #10043 fc65902 Thanks @mujpao! - Fixed #10003: Biome no longer panics when parsing Svelte files containing {#}.
+  - #9815 5cc83b1 Thanks @dyc3! - Added the new nursery rule noLoopFunc. When enabled, it warns when a function declared inside a loop captures outer variables that can change across iterations.
+  - #9702 ef470ba Thanks @ryan-m-walker! - Added the nursery rule useRegexpTest that enforces RegExp.prototype.test() over String.prototype.match() and RegExp.prototype.exec() in boolean contexts. test() returns a boolean directly, avoiding unnecessary computation of match results.
+    Invalid
+    if ("hello world".match(/hello/)) {
+    }
+    Valid
+    if (/hello/.test("hello world")) {
+    }
+  - #9743 245307d Thanks @leetdavid! - Fixed #2245: Svelte <script> tag language detection when the generics attribute contains > characters (e.g., <script lang="ts" generics="T extends Record<string, unknown>">). Biome now correctly recognizes TypeScript in such script blocks.
+  - #10046 0707de7 Thanks @Conaclos! - Fixed #10038: organizeImports now sorts imports in TypeScript modules and declaration files.
+      declare module "mymodule" {
+    -       import type { B } from "b";
+            import type { A } from "a";
+    +       import type { B } from "b";
+      }
+  - #10012 94ccca9 Thanks @ematipico! - Added the nursery rule noReactNativeLiteralColors, which disallows color literals inside React Native styles.
+    The rule belongs to the reactNative domain. It reports properties whose name contains color and whose value is a string literal when they appear inside a StyleSheet.create(...) call or inside a JSX attribute whose name contains style.
+    // Invalid
+    const Hello = () => <Text style={{ backgroundColor: "#FFFFFF" }}>hi</Text>;
+    const styles = StyleSheet.create({
+      text: { color: "red" },
+    });
+    // Valid
+    const red = "#f00";
+    const styles = StyleSheet.create({
+      text: { color: red },
+    });
+  - #10005 131019e Thanks @ematipico! - Added the nursery rule noReactNativeRawText, which disallows raw text outside of <Text> components in React Native.
+    The rule belongs to the new reactNative domain.
+    // Invalid
+    <View>some text</View>
+    <View>{'some text'}</View>
+    // Valid
+    <View>
+      <Text>some text</Text>
+    </View>
+    Additional components can be allowlisted through the skip option:
+    {
+      "options": {
+        "skip": ["Title"]
+      }
+    }
+  - #9911 1603f78 Thanks @Netail! - Added the nursery rule noJsxLeakedDollar, which flags text nodes with a trailing $ if the next sibling node is a JSX expression. This could be an unintentional mistake, resulting in a '$' being rendered as text in the output.
+    Invalid:
+    function MyComponent({ user }) {
+      return <div>Hello ${user.name}</div>;
+    }
+  - #9999 f42405f Thanks @minseong0324! - Fixed noMisleadingReturnType incorrectly flagging functions with reassigned let variables.
+  - #10075 295f97f Thanks @ematipico! - Fixed #9983: Biome now parses functions declared inside Svelte #snippet blocks without throwing errors.
+  - #10006 cf4c1c9 Thanks @minseong0324! - Fixed #9810: noMisleadingReturnType incorrectly flagging nested object literals with widened properties.
+  - #10033 11ddc05 Thanks @ematipico! - Added the nursery rule useReactNativePlatformComponents that ensures platform-specific React Native components (e.g. ProgressBarAndroid, ActivityIndicatorIOS) are only imported in files with a matching platform suffix. It also reports when Android and iOS components are mixed in the same file.
+    The following code triggers the rule when the file does not have an .android.js suffix:
+    // file.js
+    import { ProgressBarAndroid } from "react-native";
+
+  What's Changed
+  - docs(orgnizeImports): revamp user-facing docs by @Conaclos in #9987
+  - fix(md): code info string, and fmt advancement by @ematipico in #9979
+  - fix(service): detect script language in Svelte files with generics attribute by @leetdavid in #9743
+  - chore: abstract html tag matcher by @Netail in #9988
+  - chore(deps): update rustls-webpki to 0.103.12 by @siketyan in #9996
+  - fix(parser/css): handle nested rules in embedded snippets by @siketyan in #9995
+  - chore: fix some node vulnerabilities by @Netail in #10001
+  - chore: fix more node vulnerabilities by @Netail in #10002
+  - feat(lint): implement use useRegexpTest nursery rule by @ryan-m-walker in #9702
+  - feat(css): implement shared CSS scanner for parsing SCSS interpolations and URL bodies by @denbezrukov in #9948
+  - feat(fmt/md): ordered lists and space normalization by @ematipico in #9998
+  - chore: update rand & thin-vec by @Netail in #10008
+  - fix(lint/js): false positives in noComponentHookFactories by @Jayllyz in #10009
+  - feat(lint): add noReactNativeRawText by @ematipico in #10005
+  - refactor(css): rename scss declaration and module access syntax by @denbezrukov in #10014
+  - fix(markdown_parser): handle tab-separated container markers by @jfmcdowell in #9965
+  - chore: cleanup tests by @Netail in #10016
+  - feat(lint/js): add useDomQuerySelector by @dyc3 in #9885
+  - test(formatter): retain formatter failures in prettier snapshots by @denbezrukov in #10018
+  - feat(css): support unquoted concatenation in SCSS interpolation expressions by @denbezrukov in #10020
+  - test(css_formatter): import prettier scss mirror by @denbezrukov in #10025
+  - refactor(tests): reorganize SCSS test specs into standalone scss module by @denbezrukov in #10030
+  - test(prettier-compare): add scss compare support by @denbezrukov in #10031
+  - fix(lint): fix false positive in noMisleadingReturnType for mutable bindings by @minseong0324 in #9999
+  - feat(lint): add noReactNativeLiteralColors by @ematipico in #10012
+  - fix(lint): fix false positive in noMisleadingReturnType for nested object widening by @minseong0324 in #10006
+  - feat(lint/js): add useDomNodeTextContent by @dyc3 in #9865
+  - feat(lint): add react native deep import rule by @ematipico in #10023
+  - feat(lint/js): add noLoopFunc by @dyc3 in #9815
+  - fix(organizeImports): sorts imports in ts modules and declaration files by @Conaclos in #10046
+  - feat(linter): add nursery rule noUnnecessaryTemplateExpression by @officialasishkumar in #9969
+  - chore: delete old unused options files by @Netail in #10047
+  - fix(js_analyze): flag useIframeSandbox non initializer value by @Netail in #10035
+  - feat(js_analyze): implement noJsxLeakedDollar by @Netail in #9911
+  - fix(markdown_parser): trim trailing newline in tight lists inside blockquotes by @jfmcdowell in #9976
+  - chore: some improvements by @Netail in #10050
+  - chore(deps): update rust:1.94.1-trixie docker digest to 652612f by @renovate[bot] in #10055
+  - chore(deps): update dependency tombi to v0.9.18 by @renovate[bot] in #10056
+  - chore(deps): update github-actions by @renovate[bot] in #10057
+  - chore(deps): update rust crate bpaf to 0.9.25 by @renovate[bot] in #10058
+  - chore(deps): update rust crate libc to 0.2.185 by @renovate[bot] in #10059
+  - fix(parser): fix crash when parsing Svelte templates by @mujpao in #10043
+  - chore: extra @eslint/css rule sources by @Netail in #10063
+  - fix(lint): fix false positive in noMisleadingReturnType for getter with matching setter by @minseong0324 in #10037
+  - fix(core): parsing of svelte snippets by @ematipico in #10075
+  - test(fmt): improve ignored files by @ematipico in #10068
+ReleaseNotesUrl: https://github.com/biomejs/biome/releases/tag/@biomejs/biome@2.4.13
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://biomejs.dev/guides/getting-started/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

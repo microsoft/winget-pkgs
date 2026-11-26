@@ -1,0 +1,38 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Sakana-yuyu.cursor-byok
+PackageVersion: 1.0.22
+PackageLocale: zh-CN
+Publisher: Sakana
+PublisherUrl: https://github.com/Sakana-yuyu
+PublisherSupportUrl: https://github.com/Sakana-yuyu/cursor-byok/issues
+PackageName: Cursor助手
+PackageUrl: https://github.com/Sakana-yuyu/cursor-byok
+License: MIT
+LicenseUrl: https://github.com/Sakana-yuyu/cursor-byok/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 leookun
+ShortDescription: 面向 Cursor 的本地模型适配、代理网关、用量统计与 Agent 工作台。
+Description: 把自己的模型 API 接入 Cursor，在本地完成供应商管理、协议适配、模型路由、用量统计、自动委派和问题排查。Cursor 本身负责优秀的编辑器与 Agent 体验，Cursor助手负责把模型连接与本地运行链路整理好：你可以继续使用 Cursor 的工具调用和任务工作流，同时自由选择官方 API、兼容网关或自建服务。
+Tags:
+- byok
+- cursor
+- 代理
+ReleaseNotes: |-
+  v1.0.22
+  修复
+  - 对话经常显示「上游对话被截断」：中转站在回复中途断流时，之前直接判定本轮失败。现在会保留已输出的内容，提示模型从断点继续，按 2/5/10 秒退避自动续写，最多 3 次；本轮已执行过工具时不续写，避免重复执行。
+  - 长回复被输出上限截断：回复因 max_tokens 截断且已有正文时，自动续写（最多 3 次），用尽后才提示截断。
+  - Claude 拒绝回答时可能反复请求、工具照样执行：Anthropic 返回 refusal（Gemini 安全拦截同理）时不再续写和缓存；被拒回合里流出的工具调用一律丢弃，不会执行。
+  - 中途发新消息后，后台子代理的结果要再等一轮才看得到：子代理在新一轮进行中跑完时，结果会在下一次请求模型前补进当前回合。
+  - 上下文用量一直显示 0：部分中转站/本地模型不返回 usage，现在用请求前的估算值兜底，自动压缩也能正常触发。
+  - ReadLints 传多个文件只检查了第一个：结果里会注明哪些文件没有检查，避免模型误以为它们没有报错。
+  - 思考强度在模型名和菜单里显示不一致：参数 ID 与新版 Cursor 保存的键对齐。
+  兼容
+  - 适配 Cursor 3.27.22：协议提取工具适配新版打包格式，并按新版安装包重新生成协议；旧版 Cursor 客户端仍兼容。
+  - MCP 工具报错更可读：附带 HTTP 状态、建议重试间隔，以及工具定义变化（新的参数格式 / 可用工具列表），模型可以自行纠正调用。
+  - 命令因内存不足被终止时会注明原因，不再只看到截断输出和退出码。
+  Windows 用户注意：安装时若被 SmartScreen 拦截，点击「更多信息」->「仍要运行」即可。
+ReleaseNotesUrl: https://github.com/Sakana-yuyu/cursor-byok/releases/tag/v1.0.22
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

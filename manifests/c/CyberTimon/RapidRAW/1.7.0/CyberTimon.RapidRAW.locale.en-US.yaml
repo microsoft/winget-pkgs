@@ -1,0 +1,135 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: CyberTimon.RapidRAW
+PackageVersion: 1.7.0
+PackageLocale: en-US
+Publisher: Timon Käch
+PublisherUrl: https://github.com/CyberTimon
+PublisherSupportUrl: https://github.com/CyberTimon/RapidRAW/issues
+Author: Timon Käch
+PackageName: RapidRAW
+PackageUrl: https://github.com/CyberTimon/RapidRAW
+License: AGPL-3.0
+LicenseUrl: https://github.com/CyberTimon/RapidRAW/blob/HEAD/LICENSE
+ShortDescription: A beautiful, non-destructive, and GPU-accelerated RAW image editor built with performance in mind.
+Description: |-
+  RapidRAW is a modern, high-performance alternative to Adobe Lightroom®. It delivers a simple, beautiful editing experience in a lightweight package (under 20MB) for Windows, macOS, and Linux.
+
+  RapidRAW is for photographers who love to edit their photos in a clean, fast, and simple workflow. It prioritizes speed, a beautiful user interface, and powerful tools that let you achieve your creative color vision quickly.
+
+  It is not for users who seek absolute, perfect color accuracy. While the results are great for most purposes, the focus is on a fluid, creative process rather than perfect color precision.
+
+  RapidRAW is still in active development and isn't yet as polished as mature tools like Darktable, RawTherapee, or Adobe Lightroom®. Right now, the focus is on building a fast, enjoyable core editing experience. You may encounter bugs - if you do, please report them so I can fix them :) Your feedback really helps!
+Moniker: rapidraw
+Tags:
+- color-grading
+- editing
+- image-processing
+- masks
+- raw
+- react
+- rust
+- tauri
+ReleaseNotes: |-
+  I'm really excited to share this release, as it changes how every photo in RapidRAW looks. At its heart is Furka, a new rendering engine that reworks how RapidRAW turns a RAW file into a photo, from demosaicing all the way to the tone sliders. Your photos get cleaner fine detail, tone sliders that feel natural, and much more room to bring back bright skies and dark shadows. Next to it comes RapidRes, a 2x AI upscaler trained on RapidRAW's own RAW pipeline, which adds real detail to your photos. On top of that, you can now dock the filmstrip into the side panels, give each of your cameras its own default look, rotate a crop just by dragging around the frame, and enjoy many more improvements across the whole app.
+  New Features
+  Furka Rendering Engine
+  Furka is RapidRAW's new rendering engine. RAW files are now demosaiced on the GPU with RCD for Bayer sensors and Markesteijn for Fujifilm X-Trans, which removes most of the false color, maze patterns and moiré in fine detail. Highlights, Shadows, Whites, Blacks, Clarity and Structure were rebuilt on a new, edge-aware base, so they no longer create halos around mountains, trees and buildings. Highlight and shadow recovery are much stronger, Contrast now works around each photo's own midtones, sharpening is halo-free and the color grading wheels now work in OKLab.
+  You can read everything about Furka, with lots of comparisons, in the blog post: Introducing the Furka Rendering Engine
+  furka-blog-title
+  RapidRes AI Super Resolution
+  RapidRes is a new 2x AI upscaler that sits right next to AI Denoise in the Details panel. It is fine-tuned on RapidRAW's own Bayer and X-Trans pipeline, so it adds real detail without the plastic look of generic upscalers. A Detail slider controls how much fine detail it adds, and it works together with AI Denoise. Like AI Denoise, it is fully non-destructive and cached, so it only needs to run once per photo.
+  You can read more about how RapidRes was made, with comparisons, in the blog post: Introducing RapidRes
+  image
+  Docked Filmstrip
+  The filmstrip can now be docked into the left or right side panel as a vertical grid. This gives you much more room to see your photos on wide screens. The docked filmstrip has its own header, a quick filter, a toggle to show file names, and you can change the thumbnail size with Ctrl + mouse wheel.
+  Dragging panels between the side panels was also reworked. You can now drop a panel at the top or bottom of a side to split it, with a live preview of where it will land.
+  image
+  Default Adjustments
+  You can now choose what unedited photos start with in the new Default Adjustments settings.
+  - Default Preset: Pick a preset that is applied to every unedited photo. Masks, crops and transforms are skipped, since they only fit the photo they were made on.
+  - Per-Camera Defaults: Give photos from specific cameras their own preset. You can also right-click a preset while editing a photo and set it as the default for that camera.
+  - Automatic Lens Correction: Turn on lens correction for all photos, using the lens profile found in each photo's metadata.
+  - RAW Only: By default, the defaults only apply to RAW files, as JPEGs from your camera are usually already processed. You can turn this on for other files too.
+  - Slider Reset: Choose whether double-clicking a slider resets it to your default or to the neutral value.
+  image
+  Better Generative Fill & Cloud Inpainting
+  Generative fill now blends much better into the photo. Fills use a hard mask with a soft blend at the edge, and cloud inpainting sends more of the surrounding image at up to 2048 px and matches the tone and grain of your photo. The feather sliders are gone, as they are no longer needed.
+  image
+  With RapidRAW Cloud, you can remove objects, fill in empty areas and replace parts of your photo with high-quality AI, right inside RapidRAW. No powerful GPU or extra setup is needed if you don't want to self-host via ComfyUI.
+  RapidRAW is free and open source, and I work on it in my free time. Subscribing to RapidRAW Cloud is also the best way to support its development and keep new updates like this one coming. Thank you to everyone who already does!
+  Rotate Crop By Dragging
+  In crop mode, you can now rotate the image by dragging anywhere around the crop frame or outside the image. The cursor turns into a curved arrow that faces your pointer. Hold Shift or Alt while rotating for fine adjustments. The crop handles also have bigger hit areas now, which makes them easier to grab, especially on touch screens.
+  image
+  Library Improvements
+  - Six Thumbnail Sizes: The library now has six thumbnail sizes instead of three.
+  - Natural Sorting: File names are now sorted in natural number order, so frame_2 comes before frame_10.
+  - Camera Make & Model: The metadata panel now shows the camera make next to the model.
+  Core Improvements
+  - Smooth Zooming While Loading: RAW files are now decoded on their own GPU queue, so zooming and panning stay smooth while a photo is loading.
+  - Smaller AI Cache: The AI Denoise and RapidRes cache now takes about a third of the space. Old cache files still work. Both cache limits were raised to 25 GB.
+  - Metadata in JPEG XL & TIFF: JPEG XL exports now keep the RAW EXIF and XMP metadata, and the metadata export options are now shown for JPEG XL and TIFF.
+  - Exporting With AI: Exporting the open photo now waits for RapidRes and AI Denoise to finish, so they are always included.
+  - Virtual Copy Exports: Exported virtual copies are now numbered one after another.
+  - Copy & Paste: Motion Blur is now included when you copy and paste adjustments.
+  - Embedded Preview Notice: If a RAW file can't be decoded and RapidRAW falls back to the camera's embedded JPEG, a message now tells you, so its lower quality isn't mistaken for RapidRAW's processing.
+  - Opening From Your OS: Opening a photo from your file manager now loads its folder into the filmstrip without adding it to your library folders.
+  - AI Masks on Linux: Fixed AI sky, subject, face and text masks on Linux systems that use a decimal comma.
+  - Renaming: Fixed renames that left sidecar files behind, and renames that only change upper and lower case now work.
+  - Mask Drawing: Fixed the mask overlay jumping while drawing at high zoom.
+  - Stability & Bug Fixes: Resolved various issues and refined overall application performance.
+  Note for Upgrading Users
+  This is a significant rendering update. The Furka engine changes how every photo is rendered, so your existing edits will look different after updating. If you are in the middle of a project, I recommend finishing and exporting it before you upgrade.
+  - Color Grading: The color wheels now work in OKLab and will look the most different. Edits that use color grading will likely need to be adjusted again.
+  - Tone Sliders: Highlights, Shadows, Whites, Blacks, Contrast, Clarity and Structure were rebuilt and have different strengths. Edits with strong values may need a small touch-up.
+  - Sharpening: Sharpening is now halo-free and may look softer on edges where it used to create halos.
+  - Demosaicing: Fine detail will look cleaner, with less false color and moiré.
+  Your edits and slider values are not changed. Only the way they are rendered has changed.
+  What to Download
+  ─────────────────────┬────────────┬──────┬──────────────────────────────
+  OS                   │Architecture│Format│Download Link
+  ─────────────────────┼────────────┼──────┼──────────────────────────────
+  Windows              │x64         │.exe  │RapidRAW for Windows
+  ─────────────────────┼────────────┼──────┼──────────────────────────────
+  macOS (Apple Silicon)│ARM64       │.dmg  │RapidRAW for macOS ARM
+  ─────────────────────┼────────────┼──────┼──────────────────────────────
+  macOS (Intel)        │x64         │.dmg  │RapidRAW for macOS x64
+  ─────────────────────┼────────────┼──────┼──────────────────────────────
+  Ubuntu 22.04         │x86_64      │.deb  │RapidRAW for Ubuntu 22.04
+  ─────────────────────┼────────────┼──────┼──────────────────────────────
+  Ubuntu 24.04         │x86_64      │.deb  │RapidRAW for Ubuntu 24.04
+  ─────────────────────┼────────────┼──────┼──────────────────────────────
+  Android              │ARM64       │.apk  │RapidRAW for Android
+  ─────────────────────┴────────────┴──────┴──────────────────────────────
+  Download Tethering Builds & Setup Guide (macOS & Linux)
+  1. Install libgphoto2 on your machine
+  RapidRAW uses libgphoto2 to communicate directly with connected cameras over USB. Because the tethering binary links dynamically against this library to stream live view and control camera settings, the driver must be present on your system for the app to detect and control your camera.
+  - macOS (via Homebrew):
+    brew install libgphoto2 pkg-config
+  - Ubuntu / Debian:
+    sudo apt update && sudo apt install -y libgphoto2-dev pkg-config
+  - Arch Linux:
+    sudo pacman -S libgphoto2 pkgconf
+  - Fedora:
+    sudo dnf install libgphoto2-devel pkgconf-pkg-config
+  2. Download Tethering Build
+  ─────────────────────┬────────────┬──────┬──────────────────────────────────────────
+  OS                   │Architecture│Format│Download Link
+  ─────────────────────┼────────────┼──────┼──────────────────────────────────────────
+  macOS (Apple Silicon)│ARM64       │.dmg  │RapidRAW for macOS ARM (Tethering)
+  ─────────────────────┼────────────┼──────┼──────────────────────────────────────────
+  macOS (Intel)        │x64         │.dmg  │RapidRAW for macOS x64 (Tethering)
+  ─────────────────────┼────────────┼──────┼──────────────────────────────────────────
+  Ubuntu 22.04         │x86_64      │.deb  │RapidRAW for Ubuntu 22.04 (Tethering)
+  ─────────────────────┼────────────┼──────┼──────────────────────────────────────────
+  Ubuntu 24.04         │x86_64      │.deb  │RapidRAW for Ubuntu 24.04 (Tethering)
+  ─────────────────────┴────────────┴──────┴──────────────────────────────────────────
+  (Note: Windows and Android are not supported for camera tethering due to OS driver limitations).
+  For other platforms and formats (ARM builds, RPM, AppImage, etc.), check the full asset list below.
+ReleaseNotesUrl: https://github.com/CyberTimon/RapidRAW/releases/tag/v1.7.0
+Documentations:
+- DocumentLabel: Documentation & Tutorials
+  DocumentUrl: https://github.com/CyberTimon/RapidRAW-Docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

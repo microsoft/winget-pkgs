@@ -1,0 +1,66 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: QuantumNous.NewAPI
+PackageVersion: 1.0.0-rc.49
+PackageLocale: zh-CN
+Publisher: Quantum Nous
+PublisherUrl: https://www.newapi.ai/
+PublisherSupportUrl: https://www.newapi.ai/support/
+Author: 锟腾科技（杭州）有限公司
+PackageName: New API
+PackageUrl: https://www.newapi.ai/
+License: AGPL-3.0
+LicenseUrl: https://github.com/QuantumNous/new-api/blob/HEAD/LICENSE
+Copyright: Copyright © 2026 Quantum Nous. All Rights Reserved.
+ShortDescription: 新一代大模型网关与 AI 资产管理系统
+Description: New API 是一个新一代大模型网关与 AI 资产管理系统，基于 One API 进行二次开发。该项目旨在提供一个统一的接口来管理和使用各种 AI 模型服务，包括但不限于 OpenAI、Anthropic、Gemini和 Midjourney 等。
+Tags:
+- anthropic-api
+- openai-api
+- openai-response
+- 人工智能
+- 大语言模型
+- 聊天机器人
+ReleaseNotes: |-
+  Important
+  修复了 Redis 集群和分片 Redis 上修改用户或令牌时报 keys must in same slot 的问题。多节点部署请把所有节点一起升级，新旧版本混跑时，一个节点上的用户和令牌变更不一定能及时同步到另一个版本的节点。
+  SQLITE_PATH 只写文件路径时，现在和默认配置一样开启 WAL 和写入等待。数据库旁边会多出 -wal 和 -shm 文件，备份时要一起复制。
+  模型定价保存时会逐个模型列出当前价格和新价格，确认后才保存。删掉的价格在保存前可以撤销。
+  Fixed the problem of keys must in same slot errors when editing users or tokens on Redis Cluster or sharded Redis. Upgrade every node of a multi-node deployment together. While old and new versions run side by side, a user or token change on one node may not reach nodes on the other version in time.
+  A SQLITE_PATH that is only a file path now gets WAL and the busy timeout, the same as the default setting. -wal and -shm files appear next to the database. Copy them together with it when you back up.
+  Saving Model Pricing now lists the current and new price of each model and saves only after you confirm. A deleted price can be undone until you save.
+  中文
+  - 任务插件：增加了 Vertex AI 渠道的 Gemini Omni 1.2 Flash，视频最长 15 秒。修复了 Gemini Omni 只把第一张输入图片发给 Vertex 的问题。Gemini Omni 生成失败时会返回失败原因。从插件市场安装或上传的插件也能用顶层的 /v1 地址调用了，比如 TypeSafe 的 POST /v1/systemone。
+  - 计费：模型定价会列出价格需要处理的模型，选中模型能看到原因和处理方法。只统计启用的渠道实际提供的模型，内置价格只在已保存或有渠道提供时才列出。删掉的价格在保存前只是草稿，可以撤销。改过的行会显示新旧价格，保存时逐个模型列出当前价格和新价格，确认后才保存。在手机上，标签页单独占一行可以滑动，次要操作收进了菜单。
+  - 渠道：gpt-image-2.6 的 complexity、markup、svg、frame_count 和 frame_duration_ms 参数会转发给上游，可以生成 SVG 和 GIF，编辑图片时可以带 markup 标注图层。DeepSeek 官方 Responses 接口的工具调用历史缺少 reasoning 时会自动补上，避免 DeepSeek 因此返回 400。高级自定义渠道的入口路径增加了 /v1/tools/search 和 /v1/tools/fetch。修复了 Vertex AI 服务账号每个请求都重新换取访问令牌的问题，令牌现在缓存到过期前 5 分钟。修复了多密钥渠道的密钥全部失败后，重新启用其中一个密钥，渠道仍然处于自动禁用的问题。修复了手动禁用的渠道在请求失败后变成自动禁用、又被自动测试重新启用的问题。渠道亲和性里的会话规则可以单独清空自己的缓存，刷新统计和清空缓存的说明也写清楚了。
+  - 其他：修复了 Redis 集群和分片 Redis 上修改用户或令牌时报错的问题。修复了 SQLITE_PATH 只写文件路径时丢掉 WAL 和写入等待设置，并发写入报 "database is locked" 的问题。修复了用邀请码通过 OAuth 注册的新用户没有记录邀请人的问题。
+  English
+  - Task plugins: Added Gemini Omni 1.2 Flash on Vertex AI channels, with videos up to 15 seconds. Fixed the problem of Gemini Omni sending only the first input image to Vertex. A failed Gemini Omni generation now returns the reason. Plugins installed from the marketplace or uploaded can now be called at their top-level /v1 paths too, such as TypeSafe's POST /v1/systemone.
+  - Billing: Model Pricing lists the models whose prices need attention. Select a model to see the reason and what to change. Only models an enabled channel serves are counted, and built-in prices are listed only when saved or served by a channel. A deleted price stays a draft until you save, and you can undo it. Changed rows show the old and new prices. Every save lists the current and new price of each model and saves only after you confirm. On phones, the tabs have their own scrollable row and secondary actions are in a menu.
+  - Channels: gpt-image-2.6 requests now forward complexity, markup, svg, frame_count, and frame_duration_ms, so SVG and GIF output and markup layers in edits work. When tool call history sent to DeepSeek's official Responses API lacks reasoning, it is filled in, so DeepSeek does not reject the request with a 400. Advanced Custom channels can use the incoming paths /v1/tools/search and /v1/tools/fetch. Fixed the problem of Vertex AI service accounts requesting a new access token for every request. Tokens are now cached until 5 minutes before they expire. Fixed the problem of a multi-key channel staying auto-disabled when one key was enabled again after all keys failed. Fixed the problem of a manually disabled channel becoming auto-disabled after a failed request, which let automatic tests enable it again. Session rules in Channel Affinity can clear their own cache, and the refresh and clear actions are explained more clearly.
+  - Also: Fixed the problem of errors when editing users or tokens on Redis Cluster or sharded Redis. Fixed the problem of a SQLITE_PATH with only a file path dropping the WAL and busy timeout settings, which made concurrent writes fail with "database is locked". Fixed the problem of new OAuth users who signed up with an invite code not recording the inviter.
+
+  What's Changed
+  - feat: forward image complexity and markup for gpt-image-2.6 by @feitianbubu in https://github.com/QuantumNous/new-api/pull/8208
+  - fix(cache): 修复用户和令牌缓存的 Redis 跨槽错误 by @wang48 in https://github.com/QuantumNous/new-api/pull/8218
+  - fix(plugins): serve uploaded plugins at top-level /v1 paths by @Calcium-Ion in https://github.com/QuantumNous/new-api/pull/8241
+  - feat(deepseek): 补全 Responses 工具历史缺失的 reasoning by @markcheney1 in https://github.com/QuantumNous/new-api/pull/8162
+  - feat(plugins): add gemini omni 1.2 flash and send every input image to vertex by @feitianbubu in https://github.com/QuantumNous/new-api/pull/8228
+  - feat(channels): 高级自定义渠道增加 DeepSeek 搜索与抓取路径选项 by @longtsing in https://github.com/QuantumNous/new-api/pull/8250
+  - fix(oauth): persist inviter when creating OAuth users by @Yorick-Ryu in https://github.com/QuantumNous/new-api/pull/8247
+  New Contributors
+  - @wang48 made their first contribution in https://github.com/QuantumNous/new-api/pull/8218
+  - @markcheney1 made their first contribution in https://github.com/QuantumNous/new-api/pull/8162
+  - @longtsing made their first contribution in https://github.com/QuantumNous/new-api/pull/8250
+  Full Changelog: https://github.com/QuantumNous/new-api/compare/v1.0.0-rc.48...v1.0.0-rc.49
+ReleaseNotesUrl: https://github.com/QuantumNous/new-api/releases/tag/v1.0.0-rc.49
+Documentations:
+- DocumentLabel: 使用指南
+  DocumentUrl: https://www.newapi.ai/guide/
+- DocumentLabel: 维基百科
+  DocumentUrl: https://www.newapi.ai/wiki/
+- DocumentLabel: 接口文档
+  DocumentUrl: https://www.newapi.ai/api/
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

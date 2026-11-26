@@ -1,0 +1,126 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Vitals.Vitals
+PackageVersion: 1.3.0
+PackageLocale: en-US
+Publisher: Vitals contributors
+PublisherUrl: https://github.com/dragoscv
+PublisherSupportUrl: https://github.com/dragoscv/vitals/issues
+PrivacyUrl: https://github.com/dragoscv/vitals/blob/main/PRIVACY.md
+Author: Dragos Catalin Vladulescu
+PackageName: Vitals
+PackageUrl: https://github.com/dragoscv/vitals
+License: MIT
+LicenseUrl: https://github.com/dragoscv/vitals/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Vitals contributors
+ShortDescription: Lightweight, private Windows system monitor.
+Description: |-
+  Vitals shows what is slowing your computer down, in plain language: CPU, GPU, memory, disks,
+  network, temperatures and per-process usage, with history, alerts and a compact overlay.
+  Optional read-only access from your phone on the local network. No account, no telemetry.
+Moniker: vitals
+Tags:
+- cpu
+- gpu
+- hardware-monitor
+- performance
+- system-monitor
+- task-manager
+ReleaseNotes: |-
+  Added
+  - AI page: a session now shows what it actually used — input, output, cached
+    and reasoning tokens, the number of requests, the output speed in tokens per
+    second, the time to the first token and the cost — wherever the client
+    records them. Copilot CLI sessions stop reading as an em dash; VS Code
+    Copilot Chat sessions say the client records no usage instead. The Insights
+    tab gains the same numbers as a page total (ADR 0043).
+  - Alerts you write yourself: pick a reading (CPU, CPU temperature, memory, disk
+    activity, battery, dropped packets), a side of a threshold and how long it
+    has to hold, and Vitals watches it. The window and the cooldown are per
+    rule, so "CPU above 90% for 30 seconds" means that at every sampling rate.
+  - Alert destinations: a webhook, an ntfy topic, a Discord webhook or a Home
+    Assistant instance, each alert routed to the ones you choose, with a Test
+    button per destination. A webhook is signed with HMAC so your endpoint can
+    verify the sender. Nothing is sent until you add an address.
+  - "Is it my PC, my router or my internet?" — a probe in the diagnosis dialog,
+    on a button, that sends four echo requests to the router and to two public
+    addresses and says which of the three is at fault. Also available to a paired
+    phone over the LAN (GET /api/v1/connectivity) so the answer is on the phone
+    too.
+  - A service that was running and stopped is now an alert, and one you stopped
+    yourself in Vitals is not.
+  - The watchdog checks GitHub once a day and says so when a newer Vitals exists,
+    which covers the machine where the app itself is not running. It only looks:
+    nothing is downloaded and nothing is installed from there.
+  - The tray icon can carry a reading — CPU, CPU temperature, memory or network
+    traffic — instead of the plain mark. Off by default, and free when off: no
+    value is computed and no bitmap drawn.
+  - Health: connect Vitals to your vmui account and see your own health and
+    nutrition summary on the desktop, iPhone and Android. Held in memory only,
+    never written to disk; the page stays hidden until you connect.
+  - Apple Watch: a companion inside the iPhone app shows the PC you are
+    watching on your wrist, fed by the phone.
+  - Mac App Store edition ("Vitals Monitor"): sandboxed and built without the
+    self-updater, so updates come from the App Store. It cannot see other
+    apps' processes or the temperature sensors, and says so.
+  Changed
+  - The controls that only exist on Windows are hidden elsewhere rather than
+    shown and failing: the navigation, the command palette, the process menu and
+    the Settings rows all ask the backend what this machine can do.
+  - Dialogs, menus, tooltips and sheets animate in and out. They did not before:
+    the overlay style was a CSS transition while the layer that unmounts them
+    waits for an animation, so every overlay was removed in the same tick it
+    was closed.
+  - The AI agents page now names the service Kodwen, its new name after the
+    November 2026 rebrand, and speaks to ai.kodwen.com and auth.kodwen.com
+    instead of ai.codai.ro and auth.codai.ro. A key stored by an earlier
+    version is moved to the new Credential Manager entry on first use, so
+    nobody is signed out by the update. The old hosts still work, so an
+    un-updated build keeps signing in during the changeover (ADR 0042).
+  Downloads
+  ──────────────────────────────────┬───────────────────────────────
+  Platform                          │Download
+  ──────────────────────────────────┼───────────────────────────────
+  Windows, Intel / AMD (x64)        │Vitals_x64-setup.exe
+  ──────────────────────────────────┼───────────────────────────────
+  Windows, ARM64 (Snapdragon)       │Vitals_arm64-setup.exe
+  ──────────────────────────────────┼───────────────────────────────
+  macOS 13+, Apple silicon and Intel│Vitals_universal.dmg
+  ──────────────────────────────────┼───────────────────────────────
+  Android phone (APK)               │Vitals_1.3.0_android.apk
+  ──────────────────────────────────┼───────────────────────────────
+  Android watch, Wear OS (APK)      │Vitals_1.3.0_wear.apk
+  ──────────────────────────────────┼───────────────────────────────
+  Android TV (APK)                  │Vitals_1.3.0_tv.apk
+  ──────────────────────────────────┼───────────────────────────────
+  Windows command line (x64)        │vitals-cli_1.3.0_x64.zip
+  ──────────────────────────────────┼───────────────────────────────
+  Windows command line (ARM64)      │vitals-cli_1.3.0_arm64.zip
+  ──────────────────────────────────┴───────────────────────────────
+  The Android downloads are the github flavour — the one allowed to scan
+  folders; the Play builds have no all-files access.
+  Verifying this download
+  Windows may show a SmartScreen warning on first run (Windows protected your
+  PC) because the installer is not yet signed with a commercial certificate.
+  Choose More info → Run anyway. That is expected — see
+  docs/distribution.md.
+  You do not have to take our word for what is in the binary. With the
+  GitHub CLI:
+  gh attestation verify .\Vitals_x64-setup.exe --repo dragoscv/vitals
+  This proves the file was built by this repository's release workflow from the
+  tagged commit, and nowhere else. Checksums for every file are in
+  SHA256SUMS.txt:
+  (Get-FileHash .\Vitals_x64-setup.exe -Algorithm SHA256).Hash.ToLower()
+  Software bills of materials (CycloneDX) for the Rust and JavaScript
+  dependencies are attached as sbom-rust.cdx.json and sbom-js.cdx.json,
+  and one for the command-line tool as sbom-cli.cdx.json.
+  What's Changed
+  Other
+  - docs(tracker): v1.2.0 macOS release + iOS submission evidence by @dragoscv in #31
+  - feat(apple): Health page, watchOS companion, Mac App Store build (S23-07/13/14/15) by @dragoscv in #32
+  - docs(tracker): close S23-07/13/14/15 by @dragoscv in #33
+  Full Changelog: v1.2.0...v1.3.0
+ReleaseNotesUrl: https://github.com/dragoscv/vitals/releases/tag/v1.3.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

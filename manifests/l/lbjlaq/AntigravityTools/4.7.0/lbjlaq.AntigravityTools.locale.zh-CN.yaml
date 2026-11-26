@@ -1,0 +1,36 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: lbjlaq.AntigravityTools
+PackageVersion: 4.7.0
+PackageLocale: zh-CN
+Publisher: lbjlaq
+PublisherUrl: https://github.com/lbjlaq
+PublisherSupportUrl: https://github.com/lbjlaq/Antigravity-Manager/issues
+PackageName: Antigravity Tools
+PackageUrl: https://github.com/lbjlaq/Antigravity-Manager
+License: CC-BY-NC-SA-4.0
+LicenseUrl: https://github.com/lbjlaq/Antigravity-Manager/blob/HEAD/LICENSE
+ShortDescription: 专业的 Antigravity 账号管理与切换工具。为 Antigravity 提供一键无缝账号切换功能。
+Description: |-
+  Antigravity Tools 是一个专为开发者和 AI 爱好者设计的全功能桌面应用。它将多账号管理、协议转换和智能请求调度完美结合，为您提供一个稳定、极速且成本低廉的 本地 AI 中转站。
+  通过本应用，您可以将常见的 Web 端 Session (Google/Anthropic) 转化为标准化的 API 接口，彻底消除不同厂商间的协议鸿沟。
+Tags:
+- account-manager
+- antigravity
+ReleaseNotes: |-
+  - [会话与代理修复] 修复会话级累计 Token 突破 100 万上限导致账号瘫痪与 400 报错 (PR #3415, Issue #3411, refs #3325):
+    - 对话级隔离与作用域 Session ID: 改变此前上游 sessionId 纯由账号 ID/邮箱哈希生成的机制（导致同账号下所有对话在服务端共享单一 Session 并在长工具调用中累计输入 Token 突破 1,048,576 限制报 400）。现将 account_id、对话指纹（fingerprint）与代数计数器（generation）组合派生，同一对话内保持稳定（保留上游 Prompt Cache 缓存命中收益），不同对话间相互隔离。
+    - 1M 上限溢出自动升代无感自愈：在 OpenAI 重试循环中捕获 400 "The input token count exceeds the maximum number of tokens allowed" 错误时，自动递增该会话的生成代数并以全新 sessionId 立即重试，在上游透明开启全新会话，客户端彻底无感恢复。
+  - [自适应熔断器] 新增零配额持续熔断锁定与动态退避上限 (PR #3413):
+    - 零配额持续熔断开关 (lock_on_zero_quota): 在自适应熔断器中新增可选开关。开启后，当检测到账号的 5 小时滚动窗口配额或周配额耗尽（0%）时，直接将该账号锁定至上游官方准确的刷新时间点 reset_time，跳过短阶梯退避，彻底杜绝死账号无效调用；配额恢复后自动清除熔断记录。
+    - 解除 300s 退避硬上限截断：限流重试锁定时长动态尊重配置中的最大退避等级（backoff_steps 最大值，如 1800s / 7200s），使高级别退避真正生效。
+    - 全局关闭配额保护时清理残留保护锁：当用户在设置中全局停用配额保护时，自动清除账号中残留的受保护模型列表，避免遗留锁定阻断调度。
+  - [代理协议标准] 临时限流 503 响应暴露标准 Retry-After 标头 (Issue #3414):
+    - 暴露重试等待秒数：当所有可用账号因临时并发速率限制（All accounts limited. Wait Ns.）导致代理抛出 503 Service Unavailable 时，解析等待秒数并在响应头中返回标准的 Retry-After: <seconds> 标头（覆盖 OpenAI、Claude、Gemini 各协议处理器）。
+    - 提升客户端退避友好度：方便下游客户端（如 Cursor、Cline、Aider、OpenCode 等）直接按照官方标准间隔精确退避重试，避免盲目重试加剧拥塞。
+  - [国际化体验] 新建配置自动识别操作系统语言 (PR #3412):
+    - 系统语言自适应：引入轻量级系统区域感知依赖，首次运行与新建配置时自动探测操作系统语言并适配为支持的语言（精准区分 zh 简体与 zh-TW / zh-HK 繁体，支持 en、ja、ru、pt 等，未知语言回退至 en），不再一律硬编码为中文。已有配置在读取时保持用户原有选择。
+ReleaseNotesUrl: https://github.com/lbjlaq/Antigravity-Manager/releases/tag/v4.7.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

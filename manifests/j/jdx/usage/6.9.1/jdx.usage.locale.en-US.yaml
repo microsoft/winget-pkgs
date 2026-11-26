@@ -1,0 +1,53 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: jdx.usage
+PackageVersion: 6.9.1
+PackageLocale: en-US
+Publisher: jdx
+PublisherUrl: https://jdx.dev/
+PublisherSupportUrl: https://github.com/jdx/usage/issues
+Author: Jeff Dickey
+PackageName: usage
+PackageUrl: https://usage.jdx.dev/
+License: MIT
+LicenseUrl: https://github.com/jdx/usage/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2025 Jeff Dickey
+CopyrightUrl: https://github.com/jdx/usage/blob/HEAD/LICENSE
+ShortDescription: A specification for CLIs
+Description: |-
+  Usage is a spec and CLI for defining CLI tools. Arguments, flags, environment variables, and config files can all be defined in a Usage spec. It can be thought of like OpenAPI (swagger) for CLIs. Here are some potential reasons for defining your CLI with a Usage spec:
+
+  - Generate autocompletion scripts
+  - Generate markdown documentation
+  - Generate man pages
+  - Generate type-safe SDK client libraries for TypeScript, Python, and Rust
+  - Use an advanced arg parser in any language
+  - Scaffold one spec into different CLI frameworks-even different languages
+  - [coming soon] Host your CLI documentation on usage.sh
+Moniker: usage
+Tags:
+- cli
+- spec
+ReleaseNotes: |-
+  A default-only flag now commits the rest of the line to the default subcommand even when a later word spells a sibling command, and the KDL parser scans strings in chunks so large generated specs load several times faster. The Go modules now require Go 1.26.
+  Fixed
+  - (parse) Keep the implicit default after a default-only flag (#1418, @lu-zero). With default_subcommand_flags, the lookahead cancelled default routing whenever any later word matched a sibling command or alias, so em -u pkg failed with UnknownFlag -u just because pkg is also a command. Once a default-only flag has been seen, later words are now the default command's arguments: em -u query parses as em install -u query, as do em -X foo query, em -pu query, and --output query search. A sibling name before any default-only flag still selects it (em query, em -p query), and parent-only flags, --help, and bare invocations stay on the parent. Applied consistently to the Rust library, usage-argv, and the Go runtime; fixes #1417.
+
+  Changed
+  - (parse) Faster KDL parsing for large specs (#1426, @jdx). Identifier, quoted-string, and raw-string runs are scanned as contiguous slices instead of one Unicode scalar at a time, with escapes, delimiters, newlines, and dedent handling preserved at the boundaries. Parsing the checked-in mise spec drops from 66.9 ms to 16.2 ms in an optimized build, and from roughly 800 ms to 250 ms in a debug build of mise's 321 KB generated spec. Parsed output is unchanged; a regression test covers embedded quotes in multiline raw strings.
+  - (go) The github.com/jdx/usage/go and integrations/cobra modules now declare go 1.26.0 (#1421, @sahidvelji). Projects importing the Go runtime or the Cobra integration need Go 1.26 or newer; expr-lang/expr is now listed as a direct dependency of the runtime module. No behavior changes.
+  - (go) usage generate go emits type X struct{} for a command with no flags, arguments, or subcommands instead of an empty two-line struct body, matching gofumpt output (#1425, @sahidvelji). Regenerating existing code will show this whitespace-only diff.
+
+  New Contributors
+  - @sahidvelji made their first contribution in #1421
+
+  💚 Sponsor usage
+  usage is built and maintained by @jdx, an open source developer at entire.io, the title sponsor of his open source work.
+  If usage powers CLI specs, docs, or completions for a tool you maintain or use, please consider becoming an individual or company sponsor. Your support funds ongoing development and helps keep usage fast, free, and independent.
+ReleaseNotesUrl: https://github.com/jdx/usage/releases/tag/v6.9.1
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://usage.jdx.dev/cli/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

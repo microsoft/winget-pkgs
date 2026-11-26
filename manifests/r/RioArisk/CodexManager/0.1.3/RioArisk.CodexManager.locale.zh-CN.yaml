@@ -1,0 +1,48 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: RioArisk.CodexManager
+PackageVersion: 0.1.3
+PackageLocale: zh-CN
+Publisher: codex-manager
+PublisherUrl: https://github.com/RioArisk
+PublisherSupportUrl: https://github.com/RioArisk/codex-auth-manager/issues
+Author: Qi Zhang
+PackageName: Codex Manager
+PackageUrl: https://github.com/RioArisk/codex-auth-manager
+License: 免费软件
+ShortDescription: 一个用于管理多个 OpenAI Codex 账号的 Windows 桌面应用（Tauri + React）。
+Description: |-
+  本项目是一个本地 Codex 账号管理工具，支持多账号统一管理、快速切换当前使用账号，并可查询各账号的额度使用情况。目前仅支持官方渠道的 Codex 账号。
+
+  功能特点
+  - 🔄 一键切换账号：在多个 Codex 账号之间快速切换，自动写入 .codex/auth.json
+  - 📊 用量监控：从本地 ~/.codex/sessions 解析 5 小时 / 周限额信息
+  - 🎯 智能推荐：基于周限额剩余量自动推荐最充足账号
+  - ⏰ 自动刷新：可设置自动刷新间隔（分钟）
+  - 🧩 本地存储：账号与配置均保存到本地文件
+Tags:
+- codex
+ReleaseNotes: |-
+  🐛 Bug 修复
+  Team / 多工作空间账号覆盖问题
+  - 修复同一用户的不同工作空间（个人 / Plus / Team）账号互相覆盖的问题
+  - 此前同一邮箱导入第二个工作空间时，会覆盖第一个，现在正确识别为独立账号
+  - 同邮箱的不同空间自动添加计划类型后缀区分，如 username (Team)、username (Plus)
+  刷新全部账号中断问题
+  - 修复刷新所有账号时，某个账号请求失败会跳过后续所有账号的问题
+  - 现在每个账号独立请求，失败不影响其他账号刷新
+  同步账号延迟问题
+  - 修复点击「同步当前账号」后需等待约 30 秒才能更新激活状态的问题
+  - 现在同步完成后立即切换为当前账号并自动刷新用量
+  ✨ 改进
+  账号异常状态可视化
+  -（Token 过期）：卡片显示红色背景 + 已过期 标识
+  -（封号/无权限）：卡片显示红色背景 + 已封号 标识
+  - 其他请求错误：卡片显示红色背景 + 异常 标识
+  网络请求自动重试
+  - API 请求遇到网络异常（无状态码，如超时、连接拒绝）时，自动等待 1 秒后重试一次
+  - 有明确状态码的响应（401/403/200 等）不会重试
+ReleaseNotesUrl: https://github.com/RioArisk/codex-auth-manager/releases/tag/v0.1.3
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

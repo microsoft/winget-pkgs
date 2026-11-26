@@ -1,0 +1,43 @@
+# Created with WinGet Releaser using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: co2lab.Anchors
+PackageVersion: 0.1.361
+PackageLocale: en-US
+Publisher: co2lab
+PublisherUrl: https://github.com/co2-lab
+PublisherSupportUrl: https://github.com/co2-lab/anchors/issues
+PackageName: Anchors
+PackageUrl: https://github.com/co2-lab/anchors
+License: Elastic License 2.0
+LicenseUrl: https://github.com/co2-lab/anchors/blob/HEAD/LICENSE
+ShortDescription: Spec-first continuity framework for AI-assisted development
+Description: Anchors ties spec, feature and test together through a shared identity code, then confronts each artifact against the rules declared in anchors.yaml. It maps the project as a graph, propagates change from the anchor outward, and gates every step — so work guided by AI stays anchored to what was decided.
+Moniker: anchors
+Tags:
+- ai
+- ai-agents
+- cli
+- developer-tools
+- golang
+- spec-first
+ReleaseNotes: |-
+  Fix: a broken anchors.yaml is an error, never an absent one
+  The commands that read the project's configuration loaded it and ignored the error.
+  An anchors.yaml that does not load, for example one holding a field this binary does not
+  know, was treated as if there were no configuration. anchors touch then found no comment
+  syntax and said every file had no header. It dated nothing and still exited 0. Measured at
+  MIF, a chain left 16 headers with their old date.
+  These commands now fail with the load error:
+  - touch, verify, stamp --refresh, new, deliver, next, progress;
+  - map nav, guide gates, report, monitor.
+  A project with no anchors.yaml still runs those that work without one. anchors migrate
+  is the exception: it has already rewritten files when it reads the configuration, so if it
+  still does not load it reports so, skips the steps that need it, and asks you to fix it and
+  run migrate again.
+  Everything in the v0.1.351 notes still applies: run anchors migrate once, crossing format 8.
+  Changelog
+  - 1858f30 fix(cmd): a broken anchors.yaml is an error, never read as an absent one
+ReleaseNotesUrl: https://github.com/co2-lab/anchors/releases/tag/v0.1.361
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

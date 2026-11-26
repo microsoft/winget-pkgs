@@ -1,0 +1,61 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: BrunoVolpato.ivygrep
+PackageVersion: 1.3.1
+PackageLocale: en-US
+Publisher: Bruno Volpato
+PublisherUrl: https://github.com/bvolpato
+PublisherSupportUrl: https://github.com/bvolpato/ivygrep/issues
+Author: Bruno Volpato
+PackageName: ivygrep
+PackageUrl: https://bvolpato.github.io/ivygrep/
+License: MIT
+LicenseUrl: https://github.com/bvolpato/ivygrep/blob/v1.2.6/LICENSE
+ShortDescription: Local code search and relationship-aware context packs for coding agents
+Description: Search source by intent or exact identifiers and build bounded task packs from Git changes, definitions, callers, dependents, tests, configuration, and documentation. Source, queries, embeddings, and indexes stay local.
+Moniker: ig
+Tags:
+- cli
+- code-search
+- coding-agents
+- context
+- developer-tools
+- local-first
+- mcp
+- search
+ReleaseNotes: |-
+  ### Changed
+
+  • Release retrieval checks audit candidate coverage consistently across search modes and retain per-query metrics when a validation gate fails. Final top-20 recall remains a separate metric.
+  • `ig --status` no longer reads every page of a large SQLite store. It measured the store tiers (stored chunks, graph, auxiliary) with three full `dbstat` passes, which took 450 seconds for an index with an 8.3 GB store. The MCP status tool, the web UI, and the progress display of a first index ran the same passes. A status listing now measures the tiers in one pass, and only for a store up to 256 MiB. For a larger store, `index_components` has no `stored_chunks_bytes`, `graph_bytes`, or `sqlite_auxiliary_bytes`, and the text output shows the size of the whole store. `ig --doctor` always measures the tiers. The legacy call graph check reads only the legacy tables, so a current store costs no pass.
+  • A search, `ig --interactive`, or `ig --add` that would index your home directory, a directory that contains it, or the filesystem root now asks for confirmation first. A search in the wrong directory could start hours of indexing and use many gigabytes. Without a terminal, `ig` does not build that index and reports the reason. Pass `--yes` (`-y`) to build it without the question. An index of such a directory that already exists is used as before, unless the command rebuilds it (`--add --force`) or adds the ignored files to it (`--skip-gitignore`).
+  • An index run of a clean Git checkout starts 6 Git processes instead of 16. One `git status` gives the commit and the state of the worktree, one `git rev-parse` gives both Git paths, and one `git config` gives `core.excludesFile` and the sparse-checkout settings. Before the clean-checkout shortcut returns, and after an index update, ivygrep no longer reads the complete state a second time. It runs one `git status` and reads the Git index and the ignore files again.
+  • On macOS, a lexical index commit waits for fewer drive cache flushes. Tantivy ended every segment file and metadata write with `F_FULLFSYNC`. Those writes now end with `F_BARRIERFSYNC`, which keeps their order on the drive. The full flush before `meta.json` names a new segment remains. On an Apple M5 Max, a one-file update of a 200-file workspace issued 28 full flushes and now issues 1 full flush and 29 barriers. The time in durability calls fell from 119 ms to 40 ms on a loaded host. Other platforms do not change.
+  • The daemon soak, the MCP session soak, the resource-load benchmark, and the million-chunk benchmark sample processes on macOS through libproc. The soaks and the resource-load benchmark required Linux `/proc`, and the million-chunk benchmark recorded no CPU, memory, or I/O on macOS. macOS reports state how each metric is derived. They have no PSS, file-backed RSS, or watcher counts, and the MCP session soak does not gate memory under load there.
+  • The daemon rejects cache writes from searches that started before cache invalidation.
+  • Background indexing has a separate admission limit and uses fewer parser threads by default. MCP readiness polling starts at 20 ms and increases to 500 ms. Context packs reuse search readers and parsed input. Content digests prevent reuse after input changes.
+  • Result caches, neural query caches, and idle search contexts now have byte budgets. Indexing batches use source-byte targets and estimated payload reservations. These limits control retained data, not total process RSS. One oversized indexing payload can proceed alone.
+  • Semantic search retries ANN with bounded adaptive overfetch when rejected candidates leave too few visible results. Exact scoring remains available when retries underfill. Debug diagnostics record stage timings, recovery frequency, and scanned-key counts.
+  • The documentation and website explain search, context packs, memory limits, and model behavior in simpler language. A new resource report includes repeated released-binary measurements and a separate source comparison. It reports regressions, shared-host limits, and differences from historical model screening.
+  • Literal search, regex search, result previews, symbol reference lookup, and indexing batches validate the workspace root once for each request or batch, not once for each file. Reads beneath the root keep the same symlink and regular-file checks. For a 200-file workspace whose root path has five directory names, one literal query makes 656 `open` and `openat` calls instead of 1,850. A first index of that workspace makes 1,320 calls instead of 3,696.
+
+  ### Fixed
+
+  • Model downloads use TLS verifier and root certificate versions that exclude the keys and root affected by the emSign distrust advisories. The vendored Hub client requires the patched versions even when a consumer resolves dependencies without the ivygrep lockfile.
+  • Model downloads reject Hub ETags and commit IDs that are not 40- or 64-character hexadecimal hashes. A crafted response could previously direct a cache write outside the cache. Invalid cached references are ignored. This change does not verify model file digests or protect a cache directory that another local user can modify.
+  • Failed `--skip-gitignore` reindexes report their errors and retry on the next query. Local `--all-indices` searches prepare each selected workspace, and daemon failures cannot silently return results from an incomplete index.
+  • Literal search limits files instead of matching chunks, counts matching lines exactly, bounds previews, and preserves Unicode matches when the trigram index cannot safely narrow candidates. Files are ranked by match count and path, including unlimited output. Selected files that change during a search trigger candidate reconsideration. The daemon protocol advances to version 10 while retaining legacy limits for version 8 and 9 clients.
+  • E2E daemon checks choose socket-safe temporary paths on Unix, including long or multibyte `TMPDIR` values. Standalone daemon equivalence retains its requested artifacts while using a private shorter socket alias when necessary.
+  • Daemon index rebuilds release cached readers before replacing SQLite, Tantivy, or vector stores, including readers inherited by linked worktrees. Watcher updates take exclusive workspace and base leases because even a targeted update can discover stores that need rebuilding. Unchanged scans retain their caches. This fixes Windows watcher reconciliation failing with `failed to preserve live index ... metadata.sqlite3` and `os error 32`.
+  • Background hash and neural enhancement close SQLite readers before model inference or resource pauses. Text is read in bounded batches under the index lock, so a rebuild can replace the database on Windows while enhancement is computing or paused. Incarnation checks still prevent an older worker from publishing into replacement stores.
+  • Watcher event filtering and status polling coordinate their SQLite reads with index replacement. Status keeps workspace identity and job progress when statistics cannot be read, and the CLI, MCP tool, and Web UI report statistics as unavailable. CLI JSON omits unavailable statistics, and MCP count and readiness fields are `null` instead of placeholder values.
+  • Deleted source files no longer remain searchable through the clean-checkout shortcut. Its reuse marker now certifies the indexed source paths, and older markers are reconciled once before reuse. Watcher events bypass that shortcut. Hybrid search, symbol definitions, context relationships, and cached daemon results exclude files confirmed missing while indexing catches up; other read errors keep the existing indexed-text fallback.
+  • Worktree deletion coverage now checks inherited-file tombstones, deletion of overlay-only additions, divergent replacements, base-identical restores, and preservation of the base index. A deleted inherited path stays hidden in that worktree without removing it from other checkouts.
+  • The required CI gate now includes a bounded daemon mutation check for base checkouts and linked-worktree overlays. It checks uncached and cached searches together with SQLite, Merkle snapshots, and tombstones, and retains diagnostics when they do not converge.
+  • An index update no longer fails when a file is deleted between the scan that lists it and the read of its content. In a large repository, a `git checkout`, a rebase, or a build tool often deletes a file in that interval. The daemon then logged `watch update failed for <workspace>：failed reading source file <path>: No such file or directory (os error 2)` and queued a full reconciliation of the workspace. The update now treats that file as removed, and the scan skips a file or a directory that vanishes during the walk. The saved snapshot does not record such a file as indexed: the next update removes its entry, or indexes the file again if it returned. A permission error, any other I/O error, a file replaced by a symlink, and a missing workspace root still fail the update.
+  • The check that refuses to index a directory above an indexed workspace now follows the file walker, and a first search through the daemon applies it. The walker keeps a linked worktree or a nested clone out of the index of the Git repository above it. The check ignored that, so `ig --add . --force` failed with `contains already indexed sub-workspaces` for a repository with an indexed agent worktree under `.claude/worktrees/`. That command now builds the index. With a daemon running, a first search in a plain directory skipped the check and indexed the workspaces below it a second time. That search now stops with the same error as without a daemon, and the error adds that the search can run in a sub-workspace. `ig --interactive` and the MCP server send their own index requests and do not apply the check.
+  • ivygrep no longer rewrites the Git index of a repository. Its `git status` calls refreshed `.git/index` and held `index.lock` while they did, after each watched change and for each context pack.
+ReleaseNotesUrl: https://github.com/bvolpato/ivygrep/releases/tag/v1.3.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,82 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: ByteNess.AWSVault
+PackageVersion: 7.17.0
+PackageLocale: en-US
+Publisher: ByteNess Solutions
+PublisherUrl: https://github.com/ByteNess
+PublisherSupportUrl: https://github.com/ByteNess/aws-vault/issues
+PackageName: AWS Vault
+PackageUrl: https://github.com/ByteNess/aws-vault
+License: MIT
+LicenseUrl: https://github.com/ByteNess/aws-vault/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2015 ByteNess
+CopyrightUrl: https://github.com/ByteNess/aws-vault/blob/main/LICENSE
+ShortDescription: A vault for securely storing and accessing AWS credentials in development environments
+Description: |-
+  AWS Vault is a tool to securely store and access AWS credentials in a development environment.
+
+  AWS Vault stores IAM credentials in your operating system's secure keystore and then generates
+  temporary credentials from those to expose to your shell and applications. It's designed to be
+  complementary to the AWS CLI tools, and is aware of your profiles and configuration in
+  ~/.aws/config.
+Tags:
+- aws
+- aws-vault
+- cli
+- credentials
+- iam
+- keychain
+- mfa
+- temporary-credentials
+ReleaseNotes: |-
+  ## Highlights
+
+  ### Parallel-safe mode (opt-in)
+
+  A new `--parallel-safe` flag (or `AWS_VAULT_PARALLEL_SAFE=true`) makes it safe to run many aws-vault processes at once, such as hundreds of `credential_process` calls from Terraform. It adds cross-process locks so that:
+
+  • only one process per SSO start URL refreshes the token or opens a browser sign-in, while the others wait for the cached token
+  • only one process at a time writes a given cached session
+  • keyring access is serialized, with one lock per store
+  • SSO `GetRoleCredentials` rate limits (HTTP 429) are retried with jittered backoff, honouring `Retry-After`
+
+  It's off by default, and without it nothing changes. Every process running at the same time needs it, so setting the environment variable is the easiest way. Lock files live in `aws-vault/locks` under your user cache directory. See [Parallel-safe mode](https://byteness.github.io/aws-vault/docs/parallel-safe/).
+
+  Thanks to @timvisher-dd, who wrote the original in #337, and to @posquit0 for rebasing it in #476.
+
+  ### Touch ID only when the keychain is locked (macOS)
+
+  With `--biometrics`, every aws-vault process asked for Touch ID, including every `credential_process` call. keyring v1.14.0 checks whether the keychain is locked and only prompts then, so how often you see it now follows your keychain's lock settings. See [Touch ID](https://byteness.github.io/aws-vault/docs/backends/#touch-id). Fixes #421.
+
+  ### Behaviour change
+
+  • `aws-vault exec --json` with `--server`, `--ecs-server` or `--ec2-server` now fails with an error (exit code 1). Before, it printed credentials, ignored the server flag and exited 0. (#492)
+
+  <!-- Release notes generated using configuration in .github/release.yml at v7.17.0 -->
+
+  ## What's Changed
+  ### Exciting New Features 🎉
+  • feat：bump keyring to v1.14.0 so Touch ID only prompts when locked by @mbevc1 in https://github.com/ByteNess/aws-vault/pull/493
+  • feat：allow aws-vault to safely be run in parallel (rebase of #337 onto main) by @posquit0 in https://github.com/ByteNess/aws-vault/pull/476
+  ### Bug fixes 🐛
+  • fix(exec)：validate flags on the --json path too by @mbevc1 in https://github.com/ByteNess/aws-vault/pull/492
+  • fix(sso)：tighten the --parallel-safe token cache and 429 retry by @mbevc1 in https://github.com/ByteNess/aws-vault/pull/494
+  • fix(lock)：open keyrings under the keyring lock by @mbevc1 in https://github.com/ByteNess/aws-vault/pull/495
+  • fix(lock)：key keyring locks by the store, not its spelling by @mbevc1 in https://github.com/ByteNess/aws-vault/pull/496
+  ### Dependencies 👒
+  • chore(deps)：Bump github.com/byteness/keyring from 1.13.2 to 1.13.3 in the go-dependencies group across 1 directory by @dependabot[bot] in https://github.com/ByteNess/aws-vault/pull/490
+
+  ## New Contributors
+  • @posquit0 made their first contribution in https://github.com/ByteNess/aws-vault/pull/476
+
+  **Full Changelog**：https://github.com/ByteNess/aws-vault/compare/v7.16.3...v7.17.0
+ReleaseNotesUrl: https://github.com/ByteNess/aws-vault/releases/tag/v7.17.0
+InstallationNotes: |-
+  [!NOTE]
+
+  This is a maintained fork of https://github.com/99designs/aws-vault which seems to be an abandoned
+  project. Contributions are welcome and preferably please open an issue first.
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

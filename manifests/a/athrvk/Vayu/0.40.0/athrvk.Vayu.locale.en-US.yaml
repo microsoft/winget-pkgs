@@ -1,0 +1,89 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: athrvk.Vayu
+PackageVersion: 0.40.0
+PackageLocale: en-US
+Publisher: Atharva Kusumbia
+PublisherUrl: https://github.com/athrvk
+PublisherSupportUrl: https://github.com/athrvk/vayu/issues
+Author: Atharva Kusumbia
+PackageName: Vayu
+PackageUrl: https://github.com/athrvk/vayu
+License: AGPL-3.0
+LicenseUrl: https://github.com/athrvk/vayu/blob/HEAD/LICENSE
+Copyright: Copyright © 2026 Atharva Kusumbia
+ShortDescription: Open-source API client with a native C++ load-testing engine - Postman-style requests and k6-level load tests in one local app.
+Description: Vayu is a free, open-source desktop app for Windows, macOS, and Linux that combines a full REST and GraphQL request builder - with collections, environments, and scripting - and a high-throughput load tester powered by a C++20 engine, with all data staying on your machine.
+Moniker: vayu
+Tags:
+- api
+- api-client
+- api-testing
+- benchmark
+- developer-tools
+- graphql
+- http
+- insomnia
+- load-testing
+- performance
+- postman
+- rest
+ReleaseNotes: |-
+  0.40.0 - 2026-10-05
+  Read Security and Changed before updating. This version closes a
+  hole that let a web page open in your browser drive the engine, restricts
+  what a request may send and read on your machine, and upgrades the workspace
+  database again. It is also the first release that no longer migrates a data
+  directory left by 0.36 or earlier. The rest is hardening of the app window
+  and the release pipeline, and a handful of UI fixes.
+  Security
+  - A web page in your browser can no longer reach the engine. Vayu's local
+    API answered any website, so a page you visited while Vayu was running could
+    read every stored variable, including secrets, and change settings. The
+    engine now refuses browser requests outright; Vayu's own window is the only
+    one it serves. (GHSA-4mxh-5785-5q32)
+  - Only http and https URLs are sent, in a request, a run, a redirect
+    and pm.sendRequest. A file:/// URL used to return the file's contents
+    as the response.
+  - A file a request names is sent only if you chose it in this app or it lies
+    under a folder you allowed. Earlier versions could be told the file was
+    chosen by whoever wrote the collection.
+  - Settings > Files refuses /, a drive root, your home folder and any
+    folder that contains it. An existing entry of that kind is removed on
+    upgrade and the engine log says which.
+  - The HTML Preview runs no script and loads nothing from the network. A
+    page that drew its styles or images from a CDN now renders plain. Links in
+    it stay inert, and the "links are disabled" tooltip is gone.
+  - The app window carries a Content Security Policy and refuses every device
+    permission request, and the chart tooltip renders metric names as text.
+  - Release installers are built with provenance attestations, every GitHub
+    Actions step is pinned to a commit, and install.sh verifies what it
+    downloads and stops if it cannot.
+  Changed
+  - The workspace database moves to schema version 4. Once 0.40.0 opens a
+    workspace, earlier versions refuse it, so going back to 0.39 means restoring
+    a backup. The upgrade writes a copy of the database beside it first.
+  - The data directory is no longer migrated from vayu-client. 0.37
+    through 0.39 renamed the directory left by 0.36 and earlier. Upgrading from
+    0.36 or earlier straight to this version starts with an empty workspace;
+    install any 0.37 to 0.39 release first, or rename vayu-client to Vayu
+    in your app data directory yourself.
+  - A request that cannot be sent because of its URL reports Couldn't send to
+    this URL and names the reason.
+  Fixed
+  - Typing in the Params table re-rendered every row on each keystroke.
+  - Holding a keyboard shortcut to resize a pane saved the layout on every key
+    repeat.
+  - The dashboard header redrew on every metrics tick.
+  - Menus, dialogs and the markdown editor reserved a dead strip on their right
+    edge for a scrollbar that never appears there.
+  - A few icon buttons and compact controls were smaller than every other
+    control; they match now.
+  - The macOS update command Vayu prints matches the documented one.
+  - Internal: documentation kept in step with all of the above, and the
+    repository gained role definitions for the agents that help maintain it.
+  Every asset carries a build-provenance attestation: gh attestation verify <asset> --repo athrvk/vayu.
+ReleaseNotesUrl: https://github.com/athrvk/vayu/releases/tag/v0.40.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

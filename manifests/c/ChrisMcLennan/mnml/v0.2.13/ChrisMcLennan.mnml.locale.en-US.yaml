@@ -1,0 +1,162 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: ChrisMcLennan.mnml
+PackageVersion: v0.2.13
+PackageLocale: en-US
+Publisher: Chris McLennan
+PublisherUrl: https://github.com/chris-mclennan
+PublisherSupportUrl: https://github.com/chris-mclennan/mnml/issues
+Author: Chris McLennan
+PackageName: mnml
+PackageUrl: https://mnml.sh/
+License: Apache-2.0
+LicenseUrl: https://github.com/chris-mclennan/mnml/blob/main/LICENSE-MIT
+ShortDescription: A NvChad-style terminal IDE in Rust.
+Description: 'mnml is a terminal IDE: vim or standard editing, LSP, git, embedded HTTP/CDP/DAP, AI panes, headless test harness.'
+Tags:
+- editor
+- ide
+- rust
+- terminal
+- tui
+- vim
+ReleaseNotes: |-
+  Release Notes
+  Marketplace + auto-update polish release. 52 commits over ~10 days
+  of live-user feedback. Headline: integrations can now self-update
+  on your schedule, with a per-integration opt-in toggle surfaced in
+  the right-click menu AND on the integration detail page, plus a
+  (Current) marker so the Installed tab tells you at a glance
+  whether you're on the latest.
+  Added
+  - Per-integration Auto-update toggle (#993 / #1088) — right-click
+    any integration chip → "Auto-update: ● on / ○ off", or click the
+    same toggle on the integration detail page's button strip. Fires
+    via integrations.fire_auto_updates_now (or the periodic
+    planner). Config resolution: per-integration override wins over
+    the global [integrations] auto_update flag. Each planned update
+    opens a visible Pty pane running cargo install … + <name> --install so you can watch the build.
+  - (Current) version marker (#1088 addendum) — Installed rows
+    render <version> (Current) when up-to-date, <version> → <latest> [ Update ] when behind. Integration detail page's
+    byline gets the same treatment: v0.3.17 · by <author> (Current) or → v0.3.18 available.
+  - Version + inline Update chip on Installed + Marketplace rows
+    (#1086) — no more hunting for the right-click menu just to see
+    which version you have or whether one's out.
+  - In-Development marketplace tab (#1056 / #1087) — config-gated
+    [marketplace] show_dev_tab opens a fourth tab (glyph U+EEF4
+    nf-fa-dev) for authors + testers to see unready siblings without
+    polluting the default Marketplace view.
+  - Marketplace "Ready" gate (#1055) — sibling authors declare
+    ready = true in their manifest to appear in the default
+    Marketplace tab. Non-ready siblings only show on the In-Development
+    tab, so users never install a WIP integration by accident.
+  - ⛶ maximize button on pane strips (#1018) — click to zoom the
+    focused pane; click again to restore. Palette: view.toggle_zoom.
+  - Claude chip sparkline + urgency signal (#1043) — 8-cell
+    spark of usage history + "use this account next" underline
+    when quota is imbalanced across multi-account setups.
+  - Configurable AI-review templates (#997) —
+    [ai.review_templates] config block. Per-user prompts for the
+    "Review with Claude / Review with Codex" chips on PR panes so
+    you can standardize your team's review rubric.
+  - Right-click context menus on integration chips (#992) —
+    "Update to X" / "Show in marketplace" contextual to the
+    chip's current state. Editor right-click gains "Explain with
+    Claude" / "Ask Claude…" (#980) on any selection.
+  - Jira Work Resolved / Unresolved / All scope dropdown
+    (#1084) — top-of-tab chip filters Ticket rows by resolution
+    state; auto-expand for unresolved tickets fixed at the same time.
+  - Jira Work refresh button (#1053) near the top of the pane.
+  - Jira PR row enrichment (#1051) — merged/open PRs inline with
+    action chips (approve / merge / open in browser).
+  - Bitbucket PRs + Pipelines lazy fetch (#1079) — only fetches
+    repos with activity in the last 2 weeks by default; "See more"
+    link at the bottom pulls the next batch. Cuts 429 pressure on
+    workspaces with hundreds of stale repos.
+  - MNML_DATA_ROOT env override (#1041) — hermetic sandbox
+    for tests + one-off runs. Points every state-file writer at the
+    given root instead of ~/Library/Application Support/mnml/.
+  - MNML_E2E_NETWORK gate (#1042) — network-dependent e2e
+    tests now opt-in via env var; CI runs without them by default.
+  - Timestamped-backup helper (#1039) — every programmatic TOML
+    write (5 sites) now stashes the prior version at <path>.bak- <YYYYMMDD-HHMMSS> before overwriting. Recovery is a mv.
+  - Startup layout schema (#878 step 1+2) — [[startup.layout]]
+    entries declare panes to open at boot. Foundation for the
+    broader programmatic-layout track; the resolver is wired but
+    the surface is still small.
+  Changed
+  - Ready badge dropped from Marketplace rows — every row is
+    Ready by definition (unready ones show on In-Development tab
+    only), so the badge became redundant noise.
+  - Hover-help drag grip (═════) above the panel bottom
+    removed (#1089) — was mistaken for a resize handle it wasn't.
+  - mnml-forge-github moved to In-Development (#1090) —
+    install works but the pane is still Bitbucket-styled port work.
+  Fixed
+  - LSP completion popup lingering after Tab-accept (SEV-1
+    #1070) — the popup used to hang for 15+ seconds after you
+    accepted a ghost-text suggestion. Two-part fix: ghost-accept
+    paths clear app.completion, and the LSP Completion reply
+    handler drops the reply outright if a ghost is currently
+    showing.
+  - Ctrl+W not closing tabs (#1037 / #1076 reopen) — the prior
+    fix was scoped to Focus::Pane only, so Claude Usage and
+    Coverage panes still ignored it. Now: global top-level intercept
+    in Standard input mode.
+  - Right-click Uninstall no-op on manifest-only chips (#1085)
+    — ghost slack.toml couldn't be removed because the uninstall
+    path only walked integration_icons, not integration_manifests.
+  - Coverage delta ±0.0 unreadable on blue chip (#1080) — grey
+    fg on blue bg is invisible; now uses percent-color when delta
+    is zero.
+  - Stress meter default flipped to off + persist toggle (#1081)
+    — was: reappeared on every restart because toggle didn't hit
+    disk.
+  - Claude chip reset visibility at 0% (#1077) — chip showed ⟳Xh
+    reset display only above 0; users tracking "get to 99% by reset"
+    couldn't see the target.
+  - Slack Channels + Canvases installed without user consent
+    (#1083) — investigated + gated behind explicit install (was
+    auto-added by an over-eager first-run path).
+  - Slack marked "verified" in Marketplace demo (#1062) — it's
+    WIP, shouldn't have been in the default Ready list.
+  - Icon-id → crate-id translation (#1054) for right-click
+    routing — right-click "Update to X" was looking up
+    bitbucket_pull_requests as a crate name instead of
+    mnml-forge-bitbucket.
+  - Ctrl+K Keychain subprocess threaded out (#913 followup)
+    — no more UI freeze on macOS Keychain unlock prompts.
+  - CI green on Ubuntu — preserves_prior_assignment_across_calls
+    flake fixed; ghost-text.gif was missing from git.
+  Merged
+  - Various sibling repos across the marketplace: Jira 0.2.4 →
+    0.2.12 (unified assigned view, unresolved filter, actionable
+    count chip, QA queue pane), Bitbucket 0.3.7 → 0.3.17 (early-exit
+    pagination, --values per-repo fix, HTTP-date Retry-After,
+    api_token auth, workspace tabs + repos scoping), Slack "Boards" →
+    "Canvases" rename.
+  Install mnml-rs 0.2.13
+  Install prebuilt binaries via shell script
+  curl --proto '=https' --tlsv1.2 -LsSf https://github.com/chris-mclennan/mnml/releases/download/v0.2.13/mnml-rs-installer.sh | sh
+  Install prebuilt binaries via powershell script
+  powershell -ExecutionPolicy Bypass -c "irm https://github.com/chris-mclennan/mnml/releases/download/v0.2.13/mnml-rs-installer.ps1 | iex"
+  Download mnml-rs 0.2.13
+  ─────────────────────────────────────────────┬───────────────────┬─────────────
+  File                                         │Platform           │Checksum
+  ─────────────────────────────────────────────┼───────────────────┼─────────────
+  mnml-rs-aarch64-apple-darwin.tar.xz          │Apple Silicon macOS│checksum
+  ─────────────────────────────────────────────┼───────────────────┼─────────────
+  mnml-rs-x86_64-apple-darwin.tar.xz           │Intel macOS        │checksum
+  ─────────────────────────────────────────────┼───────────────────┼─────────────
+  mnml-rs-x86_64-pc-windows-gnu.zip            │x64 MinGW          │checksum
+  ─────────────────────────────────────────────┼───────────────────┼─────────────
+  mnml-rs-x86_64-pc-windows-gnu.msi            │x64 MinGW          │checksum
+  ─────────────────────────────────────────────┼───────────────────┼─────────────
+  mnml-rs-aarch64-unknown-linux-gnu.tar.xz     │ARM64 Linux        │checksum
+  ─────────────────────────────────────────────┼───────────────────┼─────────────
+  mnml-rs-x86_64-unknown-linux-gnu.tar.xz      │x64 Linux          │checksum
+  ─────────────────────────────────────────────┴───────────────────┴─────────────
+ReleaseNotesUrl: https://github.com/chris-mclennan/mnml/releases/tag/v0.2.13
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

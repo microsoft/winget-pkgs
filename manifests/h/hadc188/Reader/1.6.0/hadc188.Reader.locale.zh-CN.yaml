@@ -1,0 +1,54 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: hadc188.Reader
+PackageVersion: 1.6.0
+PackageLocale: zh-CN
+Publisher: hadc188
+PublisherUrl: https://github.com/hadc188
+PublisherSupportUrl: https://github.com/hadc188/reader/issues
+Author: hadc188
+PackageName: Reader
+PackageUrl: https://github.com/hadc188/reader
+License: MIT
+LicenseUrl: https://github.com/hadc188/reader/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 adc
+ShortDescription: 「阅读3.0」（Legado）的跨平台桌面移植版。
+Description: Reader 是一个面向桌面端的本地阅读器：管理自己的书源与书架，也能阅读本地书籍、订阅 RSS，并按喜欢的方式定制阅读界面。它是「阅读3.0」（Legado）的跨平台桌面移植版，支持 Windows、macOS 和 Linux，使用 Rust、Tauri v2 与 Vue 3 构建。
+Tags:
+- epub
+- rss
+- 电子书
+- 笔记
+- 阅读
+- 阅读器
+ReleaseNotes: |-
+  新增
+  朗读引擎体系
+  - 在线朗读引擎（httpTTS）：支持模型、直链与本地 JSON 导入，模板求值复用 rquickjs 沙盒；修复在线集合里多数引擎因 URL 重复 query 参数被网关回 400 的问题。
+  - Edge 朗读：WebSocket + Sec-MS-GEC v2 令牌，可选音色、音调、音量与音质（48k / 96k）。
+  - 微软朗读（演示接口）：HMAC 签名换取 token 后调用 Azure Speech，支持 style / styledegree / role，提供 48k / 96k / 192k 三档音质与 958 个音色。
+  - 旁白 / 对话双音色：按中文引号切分段落，各用一套音色与风格。
+  - 字符配额缓冲流：始终保有 N 个字符的已合成音频，边播边补、双 audio 无缝切换，支持跨段落与跨章节预取。
+  - 语音试听；纯标点片段不再发起合成请求，单块失败重试一次后跳过，连续 5 块失败才终止。
+  净化规则
+  - 支持直链与本地 JSON 导入，并统计跳过的条目。
+  - Java 正则到 JavaScript 的降级：内联旗标、\h、\R、占有量词、Unicode \w / \W。
+  - @js: 脚本替换改在 Rust rquickjs 沙盒执行（等价 Rhino 的 eval 语义），无法执行的规则会在管理面板标出。
+  一键导入
+  - 安装器注册 legado:// 协议；冷启动与运行中唤起均可接收，并分发到书源 / RSS / 净化规则 / 朗读引擎。
+  阅读设置、缓存与净化面板重构
+  - 阅读设置按「主题与外观 / 排版 / 翻页方式 / 自动阅读 / 交互 / 朗读通道 / 音色与声音 / 试听 / 鼠标与工具栏 / 快捷键 / 数据与内容」分组，改为统一的栅格布局，标签左对齐，滑块不再独占一行。
+  优化
+  - 简繁转换词表：改用手机端 legado 同款词表。
+  - 左右分页的合成层：整章所有页不再排成一条超宽横带整体平移，改为每页各自定位、仅相邻页提升为合成层，消除长章节下的显存压力与换章后的文字残影。
+  修复
+  - 阅读进度回退：重新打开书籍时不再退回上一次 / 上上次读到的段落。进度恢复改为以本机最后一次阅读位置为准 —— 同章采信逐页快照（含段落锚点），跨章才采信书架记录；往回重读后退出再打开也不会被拉回之前更远的位置。
+  - 进度写入静默丢失：退出时的服务端写入改为 IPC 成功后才标记已保存，一次失败不会让后续自动保存全部被跳过。
+  其它
+  - 版本号 1.5.9 → 1.6.0。
+
+  完整变更：https://github.com/hadc188/reader/compare/v1.5.9...v1.6.0
+ReleaseNotesUrl: https://github.com/hadc188/reader/releases/tag/v1.6.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

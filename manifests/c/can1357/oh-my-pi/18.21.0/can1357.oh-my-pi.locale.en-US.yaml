@@ -1,0 +1,111 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: can1357.oh-my-pi
+PackageVersion: 18.21.0
+PackageLocale: en-US
+Publisher: Can Bölük
+PublisherUrl: https://can.ac/
+PublisherSupportUrl: https://github.com/can1357/oh-my-pi/issues
+Author: Can Bölük
+PackageName: oh-my-pi
+PackageUrl: https://omp.sh/
+License: MIT
+LicenseUrl: https://github.com/can1357/oh-my-pi/blob/HEAD/LICENSE
+Copyright: |-
+  Copyright (c) 2025 Mario Zechner
+  Copyright (c) 2025-2026 Can Bölük
+ShortDescription: ⌥ AI Coding agent for the terminal — hash-anchored edits, optimized tool harness, LSP, Python, browser, subagents, and more
+Description: |-
+  omp is a terminal-first coding agent that runs on your machine, talks to any provider, and treats sessions like git branches.
+  omp (pronounced “oh-em-pi”, binary omp) is a fork of Mario Zechner’s Pi. It runs as a single Bun process, drives any model provider you have credentials for, and ships a flat tool surface the model uses to read code, run commands, edit files, drive a debugger, and spawn subagents that coordinate over an in-process IRC bus.
+  Sessions persist as JSONL under ~/.omp/agent/sessions/. You resume, fork, branch, and share them. Settings, credentials, plugins, and caches all live under ~/.omp/agent/. Nothing leaves the machine unless you call a tool that does.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  @oh-my-pi/pi-ai
+  Added
+  - Added automatic detection of thinking capabilities for previously unknown models, with persistent results and support for alternate effort and token-budget request formats.
+  @oh-my-pi/pi-catalog
+  Added
+  - Added Modal as a hosted inference provider.
+  Changed
+  - Changed the local speech model from Kokoro to Phonon 31M.
+  - Improved reasoning capability detection by preserving unverified thinking-level support and using endpoint-specific probe results when available.
+  Fixed
+  - Fixed xAI Grok OAuth model grok-composer-2.5-fast being incorrectly identified as non-reasoning; it now supports thinking levels from minimal through xhigh.
+  @oh-my-pi/pi-coding-agent
+  Breaking Changes
+  - Updated the AgentSession run lifecycle API: agent_end is emitted once when a run can no longer resume, and agent_pause reports runs that stop while awaiting work. Replaced hasPendingAsyncWork(), settleAsyncWork(), and suppressAutoResumeUntilPrompt() with isRunActive, wakeSources, and waitForRunEnd(). Calling abort() now also ends runs paused on background work; RPC, JSON print, collaboration, and extension streams retain their existing per-loop agent_end behavior.
+  Added
+  - Added configurable automatic subagent prewalk through task.agentPrewalkAuto, allowing per-agent on/off settings or model patterns while preserving unconditional subagent prewalk.
+  - Unknown custom and discovered models now automatically detect reasoning support and remember supported reasoning effort levels for future sessions.
+  - Added inline image and web-page replies: supported terminals can display local, data, and HTTP(S) images and embedded pages, while other terminals receive linked fallbacks. Added tui.renderEmbeds to disable this rendering.
+  - Added interactive embedded pages in Tern replies, including click-to-visit and Escape-to-return navigation; common host, path, and file: URL forms are accepted.
+  - Bash redirects can now write to all writable internal URLs, including job cancellation endpoints and handler-backed agent://, cfg://, ssh://, and xd:// URLs.
+  - Added image pasting to ask form notes and ui.formDialog options via acceptImages; pasted images are returned with [Image #N] markers and described for text-only models. Unsupported prompts now clearly reject image pastes.
+  Changed
+  - Changed the default local text-to-speech model to Phonon 31M for faster synthesis, smaller downloads, and additional voices. Existing Kokoro voice settings migrate automatically; speaking rates now range from 0.8× to 1.3×.
+  - Tern /btw responses now appear as folded, interactive notes at the point where they were requested, with follow-up, copy, branch, inject, and stop actions; /btw without a prompt still opens the history view.
+  - Overlapping Bash calls now share shell state, including variables, functions, aliases, options, and traps, and background jobs started by those calls continue running independently.
+  - Extensions enabled or reconfigured through extensions or disabledExtensions now load into the active session without requiring a restart.
+  - Rich-text pastes made during approval steering or in dialogs now preserve Markdown formatting and images when inserted into the chat editor.
+  - Moving a task or resuming a session in another project now switches its agents, extensions, custom tools, and MCP servers to match the destination project without a restart.
+  Fixed
+  - Fixed status indicators incorrectly showing the agent as idle while subagents or background work could still resume the run.
+  - Fixed subagents and security scans completing while child agents were still running or queued peer messages remained.
+  - Fixed conflict-region resolution when a selected side is empty or shares edge lines with surrounding code.
+  - MCP stdio server failures before a response now report the process exit code or terminating signal instead of only reporting closed stdout.
+  - Fixed prewalk handoffs so model and reasoning-effort changes are preserved, and automatic handoffs return to the planning model when automatic prewalk is changed or disabled.
+  @oh-my-pi/pi-mnemopi
+  Changed
+  - Improved file memory bank performance by reducing unnecessary disk synchronization during checkpointing, lowering per-turn I/O overhead for banks shared across multiple processes.
+  @oh-my-pi/pi-natives
+  Added
+  - Added the PhononTts binding for on-device Phonon text-to-speech.
+  - Added Shell.adopt(fork) to apply variables, functions, aliases, options, and traps from a completed fork back to its parent shell. When both shells set a name, the value from the command that finished last is retained.
+  Fixed
+  - Fixed concurrent commitCreate() calls incorrectly overwriting each other’s commit subject and body.
+  @oh-my-pi/pi-tui
+  Added
+  - Added support for pasting images into HtmlFormDialog option notes when opened with acceptImages, including image attachment, removal, and access to retained images through OptionNote.images.
+  - Added live web-page and image rendering in assistant replies for supported terminals, including inline images and embedded page previews. Added the /btw transcript note for sharing side topics without interrupting the main conversation.
+  Changed
+  - Improved reasoning-capability discovery so models awaiting discovery follow the session's thinking default and offer automatic thinking in addition to disabled and effort-level settings.
+  - Renamed the public html-form/media APIs to media, including loadMedia, Media, and MAX_MEDIA_BYTES.
+  Fixed
+  - Fixed fallback model selection so roles are offered only models they can use, excluding incompatible image and speech models.
+  - Fixed macOS spelling assistance, autocorrect, replacements, and word completion for shell (!) and Python ($) drafts.
+  @oh-my-pi/pi-utils
+  Fixed
+  - Fixed bare URLs swallowing the following word when Korean, Japanese, or Chinese text follows a parenthesized URL without a space.
+  What's Changed
+  - add modal as a hosted inference provider by @andrewhinh in https://github.com/can1357/oh-my-pi/pull/18785
+  - feat(task): add task.agentPrewalkAuto to judge subagent prewalk per assignment by @1vivy in https://github.com/can1357/oh-my-pi/pull/18913
+  - fix(coding-agent): rescope agents, extensions, custom tools and MCP servers on /move by @yuzu-octopus in https://github.com/can1357/oh-my-pi/pull/19416
+  - fix(tui): disable macOS spelling assistance for local-execution drafts by @aleister1102 in https://github.com/can1357/oh-my-pi/pull/12474
+  - fix(mcp): report the stdio subprocess exit status on EOF by @adi-IL in https://github.com/can1357/oh-my-pi/pull/16482
+  - fix(utils): end bare URLs at an unbalanced ) before CJK text by @nnnnoel in https://github.com/can1357/oh-my-pi/pull/19336
+  - fix(vcs): isolate commit message files between concurrent commits by @eggpeat in https://github.com/can1357/oh-my-pi/pull/19345
+  - fix(tui): filter model hub fallback picks by the role's accepted kinds by @Xytronix in https://github.com/can1357/oh-my-pi/pull/19371
+  - fix(coding-agent): keep image pastes in dialogs out of the hidden chat editor by @Dangerboi in https://github.com/can1357/oh-my-pi/pull/19374
+  - feat(coding-agent): let ask option notes take pasted screenshots again by @Dangerboi in https://github.com/can1357/oh-my-pi/pull/19376
+  - fix(coding-agent): honor explicit choices during prewalk handoff by @taibenvenuti in https://github.com/can1357/oh-my-pi/pull/17292
+  New Contributors
+  - @andrewhinh made their first contribution in https://github.com/can1357/oh-my-pi/pull/18785
+  - @nnnnoel made their first contribution in https://github.com/can1357/oh-my-pi/pull/19336
+  Full Changelog: https://github.com/can1357/oh-my-pi/compare/v18.20.3...v18.21.0
+ReleaseNotesUrl: https://github.com/can1357/oh-my-pi/releases/tag/v18.21.0
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://omp.sh/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

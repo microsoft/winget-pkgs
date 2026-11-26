@@ -1,0 +1,60 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: poco-ai.Agentero
+PackageVersion: 0.16.1
+PackageLocale: zh-CN
+Publisher: poco-ai
+PublisherUrl: https://github.com/poco-ai
+PublisherSupportUrl: https://github.com/poco-ai/Agentero/issues
+PackageName: Agentero
+PackageUrl: https://github.com/poco-ai/Agentero
+License: MIT
+LicenseUrl: https://github.com/poco-ai/Agentero/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 poco-ai
+ShortDescription: Agent 友好的文献管理方式。
+Description: 传统文献管理器对 Agent 并不友好：阅读高亮和笔记被锁在单篇文件里，Agent 很难跨论文复用；每次对话都要重新提供上下文，缺少稳定的本地知识地图；PDF 对人友好，但对 Agent 来讲不是最舒服的阅读材料。Agentero 旨在构建 Agent 友好、Agent 原生的文献管理方式，探索人与 Agent 在文献管理中的协作方式。通过 ACP 连接本机 Agent（BYOA），支持划词对话、论文导入与 Skill 导入，兼容 Zotero 生态，提供论文翻译、双链与知识图谱、PDF 深度阅读等功能。
+Tags:
+- agent
+- pdf
+- zotero
+- 学术
+- 引用
+- 文献
+- 文献管理
+- 研究
+- 论文
+ReleaseNotes: |-
+  本次更新加入 Zen 多会话工作区、PDF 下划线和划词词典模式，并新增 Index-Translate 免费翻译，以及 Git 的 HTTP / 自签证书同步。启动时会自动安装同版本 CLI，翻译前会检查版面是否完整，目录、公式和摘要的排版也更稳定。Google 翻译和 DeepLX 已移除。
+  新功能
+  - Zen 多会话工作区：从 Agent 节点打开 Zen 后，可以按助手并行保留多个会话。侧栏按助手分组，当前会话与历史列在一起；后台会话会继续输出，互不影响。（65f6ae873 by @Phil-Fan；5b2a16685 by @Phil-Fan；958a0258a by @Phil-Fan）
+  - PDF 下划线标注：下划线与高亮共用五色色板，右键色块即可为该颜色在高亮和下划线之间切换。导出保留原生下划线类型；在划词色板上可用 Option+数字强制下划线。（#1083 by @Phil-Fan）
+  - 划词词典模式：选中 1 到 3 个词时，可以切换为词典释义，而不再按整句翻译。（ee86d15a7 by @Phil-Fan；71af8635e by @Phil-Fan）
+  - Index-Translate 免费翻译：新增无需密钥的 Index-Translate 公共接口；Bilibili 翻译结果会流式写入划词卡片。（2023b03f7 by @Phil-Fan；4e724d1a2 by @Phil-Fan）
+  - Git HTTP 与自签证书：设置和 CLI 支持显式启用明文 HTTP 远端，以及为自签 HTTPS 指定 PEM 证书。同步失败会保留 git 错误，并提示先保存凭证或证书。（#1057 by @JiaheChen2002）
+  - 启动时自动安装 CLI: 主窗口启动时会下载并安装同版本 agentero 命令。若你曾主动卸载，启动不会再装回去，可在设置中重新安装；失败时会说明是安装还是更新失败。（#976 by @JiaheChen2002）
+  - 翻译前检查版面完整性：版面缺页或文本层不可信时，会先提示受影响页码，并可选择重新解析后再翻译。若开启了自动翻译，重新解析完成后会接着翻译。（#1105 by @ffy6511）
+  - 智能高亮并发与超时：设置中可调整智能高亮的并发数和超时。单次请求会拆到 64 个问题以内，避免 Decision API 因超限失败。（#1101 by @JiaheChen2002）
+  改进
+  - 后台任务保留：已完成、失败或取消的后台任务会留在列表中，直到你清除。列表仍只显示最近六条，重启后不会恢复。（aa39a6aae by @ffy6511）
+  - 补全翻译任务名：从缺失片段发起的新任务会标为「补全翻译」，避免和正在进行的全文翻译混淆。（b6727ff85 by @ffy6511）
+  - Zen 历史加载：复用已初始化的助手连接，并缓存侧栏会话列表，避免每次打开历史都冷启动助手进程。（6e3dae68d by @Phil-Fan；64beb4bee by @Phil-Fan）
+  修复
+  - 目录排版：重排时保留目录行，章节页码右对齐，并只给下级条目加引导线。（c73996148 by @ffy6511）
+  - 行内公式位置：公式按完整边界锚定，括号、根号和分式不再把公式挤出原来的行。（024ed930e by @ffy6511；20834d7c6 by @ffy6511）
+  - 译文预览内存：大页预览会受 wasm 堆预算限制，必要时降低缩放，避免长文翻译因分配失败中断。（4837320b5 by @ffy6511）
+  - 嵌套公式保护：公式、LaTeX、引用和链接会一次性替换，避免标记互相包裹导致恢复失败。（#1111 by @ffy6511）
+  - 低置信度版面跳过正文：不再因低置信度的算法或脚注框把正文排除在翻译之外。（#1110 by @ffy6511）
+  - 摘要与后续页翻译：摘要和后续页的正文不再被误判为首页元数据而漏译。（#1114 by @ffy6511）
+  - Windows 论文解析：CLI 和发行包会附带匹配的 PDFium，Windows 上解析 PDF 不再因找不到库而失败。（#1025 by @JiaheChen2002）
+  - Connector 端口占用：监听端口被占用时每五秒自动重试，并在设置中显示可手动重试的持久错误状态。（#959 by @Phil-Fan）
+  - 历史会话打开为空：打开 Zen 历史会话时不再先进入空对话；加载完成前会显示恢复骨架。（43f20879f by @Phil-Fan；44ce1bb8a by @Phil-Fan）
+  - 划词工具栏跳动：悬停划词色板时，工具栏不再左右移动或跳动。（63c520236 by @Phil-Fan；7f5974268 by @Phil-Fan）
+  破坏性变更
+  - 移除 Google 翻译和 DeepLX: 这两个翻译源已从应用中移除。若你之前使用它们，请改用其他已配置的翻译服务，或新增的 Index-Translate。（4bd955a76 by @Phil-Fan）
+ReleaseNotesUrl: https://github.com/poco-ai/Agentero/releases/tag/v0.16.1
+Documentations:
+- DocumentLabel: 文档
+  DocumentUrl: https://agentero-docs.poco-ai.com/
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

@@ -1,0 +1,54 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.28.0.schema.json
+
+PackageIdentifier: poco-ai.Agentero
+PackageVersion: 0.16.1
+PackageLocale: en-US
+ShortDescription: Agent-friendly reference management.
+Description: 'Traditional reference managers are not agent-friendly: highlights and notes stay locked inside single files, making it hard for agents to reuse knowledge across papers; every conversation starts from scratch without a stable local knowledge map; PDFs are human-friendly but not the most comfortable reading material for agents. Agentero aims to build an agent-friendly, agent-native way to manage references, exploring how humans and agents collaborate on reference management. Connect your local agent via ACP (BYOA), select-text chat, import papers and Skills, stay compatible with the Zotero ecosystem, and get paper translation, bidirectional links with a knowledge graph, and deep PDF reading.'
+Tags:
+- academics
+- agent
+- article
+- literature
+- paper
+- pdf
+- reference
+- research
+- thesis
+- zotero
+ReleaseNotes: |-
+  This release adds the Zen multi-conversation workspace, PDF underlines, and a dictionary mode for short selections, along with the keyless Index-Translate service and Git HTTP / custom-certificate sync. The matching CLI is installed at startup, translation checks layout completeness first, and tables of contents, formulas, and abstracts reflow more reliably. Google Translate and DeepLX have been removed.
+  Features
+  - Zen multi-conversation workspace: Opening Zen from the Agent node keeps multiple conversations in parallel, grouped by harness. Open sessions and history share one list, and background sessions keep streaming independently. (65f6ae873 by @Phil-Fan; 5b2a16685 by @Phil-Fan; 958a0258a by @Phil-Fan)
+  - PDF underline annotations: Underline shares the five-color palette with highlight, and a right-click on a swatch flips that color between the two shapes. Exported PDFs keep the native underline type, and Option+digit forces underline from the selection palette. (#1083 by @Phil-Fan)
+  - Selection dictionary mode: Selections of one to three words can switch to a dictionary definition instead of a full-sentence translation. (ee86d15a7 by @Phil-Fan; 71af8635e by @Phil-Fan)
+  - Index-Translate free translation: A keyless Index-Translate public API is now available, and Bilibili translation streams into the selection card. (2023b03f7 by @Phil-Fan; 4e724d1a2 by @Phil-Fan)
+  - Git HTTP and custom certificates: Settings and the CLI can opt in to a plain HTTP remote or trust a PEM certificate for self-signed HTTPS. Sync failures keep the git error and tell you to store credentials or a certificate first. (#1057 by @JiaheChen2002)
+  - Automatic CLI install at startup: Opening the main window downloads and installs the matching agentero command. An explicit uninstall is remembered until you install it again from Settings, and failure toasts distinguish install from update failures. (#976 by @JiaheChen2002)
+  - Layout completeness before translation: Missing layout pages or an untrusted text layer produce a warning with the affected page ranges, and you can reparse before translating. When auto-translate is on, a reparse is followed by translation. (#1105 by @ffy6511)
+  - Smart-highlight concurrency and timeout: Settings now expose smart-highlight concurrency and timeout. Each request stays within 64 questions so the Decision API does not fail over the limit. (#1101 by @JiaheChen2002)
+  Improvements
+  - Kept background tasks: Completed, failed, and cancelled background tasks stay in the list until you clear them. The list still shows the latest six entries and is not restored after a restart. (aa39a6aae by @ffy6511)
+  - Complete-translation job name: A new job started from missing segments is labeled "Complete translation", so it is not confused with an in-flight full translation. (b6727ff85 by @ffy6511)
+  - Faster Zen history loading: Initialized agent connections are reused and the rail session list is cached, so opening history no longer cold-starts a process every time. (6e3dae68d by @Phil-Fan; 64beb4bee by @Phil-Fan)
+  Fixes
+  - Table-of-contents layout: Reflow keeps table-of-contents rows, right-aligns chapter page numbers, and adds leaders only to sub-entries. (c73996148 by @ffy6511)
+  - Inline formula placement: Formulas are anchored by their full bounds, so brackets, radicals, and fractions stay on their source line. (024ed930e by @ffy6511; 20834d7c6 by @ffy6511)
+  - Translation preview memory: Large-page previews stay within the wasm heap budget and retry at a lower scale, so long translations are not cut off by allocation failures. (4837320b5 by @ffy6511)
+  - Nested formula protection: Formulas, LaTeX, citations, and links are replaced in one pass, so markers no longer wrap each other and fail to restore. (#1111 by @ffy6511)
+  - Low-confidence layout skipping body text: Low-confidence algorithm or footnote boxes no longer exclude body text from translation. (#1110 by @ffy6511)
+  - Abstract and later-page translation: Abstracts and later-page body text are no longer mistaken for first-page metadata and left untranslated. (#1114 by @ffy6511)
+  - Windows paper parse: Release CLI archives ship the matching PDFium library, so paper parse on Windows no longer fails because the library cannot be loaded. (#1025 by @JiaheChen2002)
+  - Connector port recovery: An occupied listen port is retried every five seconds, and Settings shows a persistent, localized error with a manual retry. (#959 by @Phil-Fan)
+  - Empty history sessions: Opening a Zen history session no longer lands on an empty chat; the restore skeleton is shown until the transcript loads. (43f20879f by @Phil-Fan; 44ce1bb8a by @Phil-Fan)
+  - Selection toolbar jump: Hovering the selection palette no longer shifts or jitters the toolbar actions. (63c520236 by @Phil-Fan; 7f5974268 by @Phil-Fan)
+  Breaking Changes
+  - Google Translate and DeepLX removed: These translation providers have been removed from the app. If you used them, switch to another configured service or to the new Index-Translate provider. (4bd955a76 by @Phil-Fan)
+  Full Changelog: https://github.com/poco-ai/Agentero/compare/v0.16.0...v0.16.1
+ReleaseNotesUrl: https://github.com/poco-ai/Agentero/releases/tag/v0.16.1
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://agentero-docs.poco-ai.com/
+ManifestType: locale
+ManifestVersion: 1.28.0

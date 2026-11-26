@@ -1,0 +1,129 @@
+# Created with WinGet Updater using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: DoltHub.Dolt
+PackageVersion: 2.7.4
+PackageLocale: en-US
+Publisher: DoltHub
+PublisherUrl: https://github.com/dolthub/dolt
+PublisherSupportUrl: https://github.com/dolthub/dolt/issues
+Author: DoltHub
+PackageName: Dolt
+PackageUrl: https://www.dolthub.com/
+License: Apache-2.0
+LicenseUrl: https://github.com/dolthub/dolt/blob/HEAD/LICENSE
+CopyrightUrl: https://raw.githubusercontent.com/dolthub/dolt/master/LICENSE
+ShortDescription: Dolt is a SQL database that you can fork, clone, branch, merge, push and pull just like a git repository.
+Description: |-
+  Dolt is a SQL database that you can fork, clone, branch, merge, push and pull just like a git repository.
+  Connect to Dolt just like any MySQL database to run queries or update the data using SQL commands.
+  Use the command line interface to import CSV files, commit your changes, push them to a remote, or merge your teammate's changes.
+Moniker: dolt
+Tags:
+- cli
+- data
+- git-for-data
+- versioning
+ReleaseNotes: |-
+  Merged PRs
+  dolt
+  - 12497: Avoid panicking when a tree is more than 16 levels deep
+  - 12495: add DumboRootValueFileID for dumbo databases
+  - 12490: /go/store/blobstore: disable auto-maintenance on fetch
+    Fixes #12488
+    git fetch into the git remote cache ends by starting git's automatic maintenance, which detaches and can repack and delete packs after the fetch has returned. A later read could then get a warning on stderr from a git cat-file -s that still succeeded, and Dolt parsed the warning as the size.
+    This PR updates Runner.Run to return only stdout on success, so stderr warnings can't corrupt parsed output. Failures still carry both streams. It also changes FetchRef to disable auto-maintenance (maintenance.auto=false, gc.auto=0). Dolt's own periodic git gc and the end of the process already compacts the cache.
+  - 12489: Add DOLT_DISABLE_VERSION_CHECKS to disable release checks via the environment
+    Fix #12479
+  - 12470: Plan fewer foreign keys for UPDATE and DELETE
+    Bumps go-mysql-server to plan fewer foreign keys for UPDATE and DELETE.
+    Companion PRs: dolthub/go-mysql-server#4151, dolthub/doltgresql#3841
+  - 12469: Fix merges that combine a column drop and row deletion
+    When one branch drops a column and the other deletes a row, compare the surviving row with the ancestor using the surviving branch’s schema. Use stored column positions for type lookups and name-based column matches so virtual columns cannot shift those lookups.
+    Adds regression coverage for merge and preview in both directions, including a table with a virtual column.
+    Fixes #12274
+  - 12468: Make ForeignKeyCollection copy-on-write and share each root's collection
+    Fixes super-linear UPDATE planning cost as foreign keys referencing a table increase.
+    Companion PR: dolthub/doltgresql#3840
+  - 12467: Respect partial index predicates when merging secondary indexes
+    Fixes merges and index rebuilds adding rows that don't satisfy a partial index predicate to the index.
+    Companion PR: dolthub/doltgresql#3839
+  - 12466: go: sql: Visit a pending writer's root's children for GC, not the root, which is stored inline.
+    A table's primary index root is stored inline in the table's chunk, so asking session-aware GC to keep it by address failed the GC with dangling references requested during GC. This was the recent TestConcurrentGC failure on macOS CI. TestGCWithPendingEdits reproduces it deterministically.
+    Also, disables auto GC in TestConcurrentGC's KillConnections subtests, since it forces session-aware GC.
+  - 12463: Answer view lookups for names that aren't views from the session cache instead of rescanning dolt_schemas, and key the view cache by schema.
+    Answer view lookups for names that aren't views from the session cache instead of rescanning dolt_schemas, and key the view cache by schema.
+  - 12443: Fix repeated recursive CTE rows with a schema override
+    A schema override can expose a join that reuses stale recursive CTE rows. Pin the GMS fix so recursive joins return the same rows with the override enabled or cleared.
+    Fixes #12309
+    Depends on: GMS #4148
+  - 12433: sqle, dsess: key database and revision maps with typed names
+    Adds doltdb.QualifiedDbName and the case-normalized DbKey, RevisionKey and QualifiedDbKey, and uses them for the provider, session, transaction and cache maps instead of ad hoc split-and-lowercase strings. This fixes the revision database cache, which never hit for mixed-case revisions because it stored lower-cased keys but looked them up with the revision's original case.
+  - 12427: store/types: prevent lost GC admission cancellation wakeups
+    Fix a dropped cancellation signal in GC, because the broadcast could land before the listener registration. Guard the broadcast with gcMu as well.
+  - 12424: Reduce the per-foreign-key cost of commits and transaction merges
+    Bundle of performance fixes to dramatically speed up hot path database operations when there are a large number of foreign keys. Foreign keys were being iterated on every merge regardless of whether they had changed, which happens on every concurrent transaction. Lookups by name were quadratic time. And we were copying a collection N times during a diff operation.
+    Also fixes unrelated bugs discovered during testing:
+    - Fixes ALTER TABLE ... DROP CONSTRAINT sometimes dropping another table's foreign key with the same name in Doltgres.
+    - Fixes merges dropping foreign keys whose parent table doesn't exist yet.
+      Companion PRs:
+      dolthub/go-mysql-server#4140
+      dolthub/doltgresql#3820
+  - 12418: Add option and context parameters to store and database creation
+    Lets Dolt Enterprise implement encryption at rest with fewer edits to Dolt's files, so its merges of Dolt conflict less. Replaces #12350, #12351 and #12352. It includes #12429, merged into this branch, which replaced #12419.
+    What changes
+    - nbs:
+    - Every store constructor takes a trailing ...StoreOption. A StoreOption fills the store's options, kept in a new opts field, as the store is created.
+    - store_options.go has a no-op method for each place in store.go where a store's options take effect, and store.go calls them:
+    - manifest checks in rebase and updateManifest, and a check before writes in addChunk;
+    - a check of added files in updateManifestAddFiles, plus the open of added files;
+    - the journaling store's format and table persister;
+    - the GC check and GC copier;
+    - the table file split offsets in WriteTableFile and newTableFile, and whether addTableFilesToManifest can read added chunks to check their refs.
+      Enterprise replaces store_options.go with its own version.
+    - The persister literals in store.go are keyed.
+    - Archive getRecordRanges names its context.
+    - remotestorage: NewDoltChunkStoreFromPath takes a trailing ...ChunkStoreOption.
+    - env/actions: EnvForCloneOf takes the source database and configure steps that run on the new environment before its database is created. A configure step's error fails the clone, and the clone cleans up as for any other failure. EnvForClone calls it.
+    - sqle: internally, the provider's getRemoteDB takes the dialer and createDatabase takes load params.
+    - CLI:
+    - dolt clone and dolt read-tables use EnvForCloneOf.
+    - dolt transfer's resolveDatabaseChunkStore returns the DBCache it serves.
+      Dolt defines no StoreOption or ChunkStoreOption, every store hook does nothing, and getRemoteDB and createDatabase get only today's values. Existing exported signatures are kept, so other callers compile unchanged.
+    Changes for Dolt users
+    - dolt_clone gives the new database the provider's load params before creating it, as CREATE DATABASE already does, rather than after.
+    Size
+    176 changed lines in 8 existing non-test files (40 of them in store.go for the hooks), and 80 lines in two new files.
+    Dolt Enterprise built on this passes its encryption tests. Weighting each hunk by how often Dolt changed its file in the past year, its risk of a merge conflict falls by 54%.
+    Testing
+    - New tests in env/actions check that configure steps run before the database is created, and that a failing step leaves no directory behind.
+    - Existing tests pass, with keyed literals in one test.
+      🤖 Generated with Claude Code
+  go-mysql-server
+  - 4149: Fix two event executor timing races
+    - Fixes the event executor going idle without loading an event change that was made through the EventScheduler but not yet committed.
+    - Fixes recurring events being skipped when the executor woke just over a polling period after they were due; the executor now wakes when the next event is due.
+      These made the dolt events.bats tests "out-of-band event changes are detected" and "recurring event with ENDS defined" flaky.
+  - 4148: Prevent joins from caching recursive CTE working rows
+    Joins can repeat or omit rows when they cache inputs that read a recursive CTE’s working table. Skip hash join build plans and derived-table result caches that depend on those changing rows.
+    Part of Dolt issue #12309.
+  - 4146: sql: Remove ContextAwareSystemVariableRegistry and AssignValuesWithContext.
+    SystemVariableRegistry.AssignValues replaces both; no callers remain.
+  - 4145: sql/analyzer: Build only the triggers of the tables a statement writes
+    Build only triggers that match the tables being mutated, instead of building all triggers in the schema.
+  - 4144: Prevent columns in top-most node from getting pruned
+    Fixes #12366
+    #3250 replaced SQAs that referenced entire tables with a TableAlias node, removing redundant SQA and Project nodes; it added guards to prevent TableAlias and ResolvedTable nodes from getting pruned. However, it did not consider when those TableAlias nodes were wrapped inside Limit, Distinct, or Offset nodes.
+    This PR makes sure that the columns in the schema of the top-most node are not pruned by adding them to the parent columns set.
+  - 4141: Fix StoredProcParam referencing stale values
+    Stored Procedure parameters were incorrectly getting preserved across CALLs.
+    This PR makes it so new parameters properly override any existing values in the session.
+  - 4140: Don't use partial indexes for lookup joins or sort replacement unless the query implies the predicate
+    Fixes lookup joins and ORDER BY index scans that returned too few rows by using a partial index the query does not imply.
+    Tests are in the linked Doltgres PR, since partial indexes can't be declared in the MySQL dialect, except for the right semi lookup join case, which those queries don't reach.
+    Companion PRs: #12424 dolthub/doltgresql#3820
+  - 4139: Fix JSON string datetime conversion
+    Fix the NULL results when casting JSON date strings to DATETIME or passing them to DAY(). Apply JSON-specific suffix validation, fractional-second truncation, and timezone-offset handling while preserving ordinary SQL-string conversion.
+ReleaseNotesUrl: https://github.com/dolthub/dolt/releases/tag/v2.7.4
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

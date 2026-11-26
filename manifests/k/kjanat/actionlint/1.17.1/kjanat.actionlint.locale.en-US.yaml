@@ -1,0 +1,79 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: kjanat.actionlint
+PackageVersion: 1.17.1
+PackageLocale: en-US
+Publisher: kjanat
+PublisherUrl: https://github.com/kjanat
+PublisherSupportUrl: https://github.com/kjanat/actionlint/issues
+Author: Kaj Kowalski
+PackageName: actionlint
+PackageUrl: https://actionlint.kjanat.dev
+License: MIT
+LicenseUrl: https://github.com/kjanat/actionlint/blob/v1.17.1/LICENSE.txt
+Copyright: Copyright (c) 2026 Kaj Kowalski, Copyright (c) 2021 rhysd
+CopyrightUrl: https://github.com/kjanat/actionlint/blob/v1.17.1/LICENSE.txt
+ShortDescription: Static checker for GitHub Actions workflow files
+Description: "actionlint is a static checker for GitHub Actions workflow files. It checks the workflow syntax, expression placeholders, the shell scripts in run: steps, and many other mistakes that only surface once a workflow runs. This is the kjanat fork, published separately from rhysd.actionlint."
+Tags:
+- actionlint
+- ci
+- github-actions
+- linter
+- pyflakes
+- shellcheck
+- static-analysis
+- workflow
+- yaml
+ReleaseNotes: |-
+  actionlint 1.17.1 updates the Go toolchain and container packages to address the vulnerabilities reported in #356. It also fixes validation of actions at the repository root. This is a small maintenance release for v1; configuration and check defaults are unchanged.
+
+  Upgrade to patched binaries and images
+
+  The release binaries, Docker images, and Nix package now build with Go 1.27.3, including its standard-library security fixes. Docker images also update their installed Alpine packages.
+
+  The release workflow now checks Go packages with govulncheck and scans the Docker smoke-test images with OSV Scanner before publication. Thanks @konard for reporting the vulnerable packages in the 1.17.0 image. Related: #356.
+
+  Call an action at the repository root
+
+  A step using uses: $/ now resolves to the repository's root action instead of producing an invalid-format error. For a repository with an action.yml or action.yaml at its root:
+
+  steps:
+    - uses: $/
+      with:
+        message: hello
+
+  actionlint reads that action's metadata and validates its inputs and outputs. Unknown input names and references to undeclared outputs still produce diagnostics. Thanks @mattdowdell for reporting the problem and identifying its cause in #199. Fixed in #200.
+
+  Upgrade
+
+  npm install --save-dev @kjanat/actionlint@1.17.1
+
+  For a one-off run:
+
+  npx @kjanat/actionlint@1.17.1 -version
+
+  For Docker:
+
+  docker pull ghcr.io/kjanat/actionlint:1.17.1
+
+  For the GitHub Action:
+
+  - uses: kjanat/actionlint@v1.17.1
+
+  Release archives, SHA-256 checksums, and SBOMs are attached below. See the installation guide for other installation methods.
+
+  Full changelog
+ReleaseNotesUrl: https://github.com/kjanat/actionlint/releases/tag/v1.17.1
+InstallationNotes: ShellCheck and pyflakes are optional. When installed, actionlint uses them to check shell and Python scripts in run steps.
+Documentations:
+- DocumentLabel: Usage
+  DocumentUrl: https://github.com/kjanat/actionlint/blob/v1.17.1/docs/usage.md
+- DocumentLabel: Configuration
+  DocumentUrl: https://github.com/kjanat/actionlint/blob/v1.17.1/docs/config.md
+- DocumentLabel: Checks
+  DocumentUrl: https://github.com/kjanat/actionlint/blob/v1.17.1/docs/checks.md
+- DocumentLabel: Installation
+  DocumentUrl: https://github.com/kjanat/actionlint/blob/v1.17.1/docs/install.md
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

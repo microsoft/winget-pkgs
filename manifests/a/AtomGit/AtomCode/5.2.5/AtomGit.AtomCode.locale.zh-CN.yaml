@@ -1,0 +1,94 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: AtomGit.AtomCode
+PackageVersion: 5.2.5
+PackageLocale: zh-CN
+Publisher: 重庆开源共创科技有限公司
+PublisherUrl: https://atomgit.com/
+PublisherSupportUrl: https://atomgit.com/atomgit_atomcode/atomcode/issues
+PrivacyUrl: https://docs.gitcode.com/docs/help/home/protocol/privacy-policy
+Author: 重庆开源共创科技有限公司
+PackageName: AtomCode
+PackageUrl: https://atomcode.atomgit.com/
+License: MIT
+LicenseUrl: https://atomgit.com/atomgit_atomcode/atomcode/blob/main/LICENSE
+Copyright: Copyright (c) 2026 Yubang Xu
+CopyrightUrl: https://docs.gitcode.com/docs/help/home/protocol/ai-privacy-policy
+ShortDescription: AI 编程助手 在你的终端中运行
+Description: Claude Code / Cursor Agent 的开源平替，住在你的终端里。连接任意 OpenAI 兼容大模型，自主读文件、改代码、跑测试、自我验证 —— 用 Rust 构建。
+Tags:
+- 人工智能
+- 代码
+- 大语言模型
+- 智能体
+- 编程
+- 聊天机器人
+- 自主智能
+ReleaseNotes: |-
+  AtomCode v5.2.5 Release Notes
+  发布日期：2026-10-28
+  v5.2.5 聚焦于长任务上下文管理与执行可靠性：修复长回合自动压缩及摘要失败后的有损降级，增强后台任务完成通知与会话恢复；新增 TUI 与 WebUI 共享的自动化任务管理、可配置默认执行模式、Windows PowerShell 工具与 LSP 只读诊断，并完善模型接入、历史导航、手机远程访问及终端交互。
+
+  ✨ 新增功能（Features）
+  自动化任务管理
+  - 统一任务服务：TUI 与 WebUI 共享自动化任务管理，支持创建、编辑、启用/停用定时任务，查看执行计划与运行历史，并统一任务操作与结果查看入口
+  - atomcode schedule 增强：新增 Edit（保留未指定字段）与 History（查看含失败与执行会话 ID 的运行记录）子命令，任务编辑支持乐观并发校验（--expected 修订检查）
+  - Agent 定时任务工具：新增 schedule_create / schedule_list / schedule_update / schedule_delete 工具，支持 daily / weekly / hourly / interval 调度规则，持久化变更需用户逐条显式审批
+  执行模式与权限
+  - 默认执行模式可配置：新增 [permissions].default_mode，支持 build、plan、accept-edits、auto，也可从 /config 调整；新会话按配置起步，会话内仍可随时切换，显式跳过审批的启动参数优先
+  Windows PowerShell 支持
+  - 新增 pwsh / pwsh_start 工具：Windows 上提供独立 PowerShell 方言执行通道，探测真实 pwsh 安装与版本，统一 UTF-8 输出编码与原生退出状态；严格凭证防护策略下保持保守禁用并给出明确提示
+  语言服务（LSP）
+  - 可配置初始化参数：支持为本地 LSP 配置 initializationOptions，并可整体关闭或按探针跳过
+  - lsp probe 命令：新增一次性诊断命令，可初始化已配置的 LSP 服务器并可选执行 definition / references / hover 只读查询，支持协议 trace 输出便于自排查
+  模型接入与 Provider
+  - 简化连接配置：预设供应商按常用顺序排列并显示实际 API 域名，支持按域名搜索；粘贴 API Key 后自动获取模型列表，视觉、推理档位、上下文与输出上限等能力自动发现填入
+  - 批量模型管理：支持批量添加模型、逐个编辑模型，并明确批量确认与当前模型选择的区别
+  会话与上下文管理
+  - 会话有界引用与查询：新增有界引用与作用域历史查询，跨会话读取有大小上限，避免超大文件导致内存膨胀
+  - 上下文预算与诊断：新增上下文预算管理与后台任务完成通知；补充工具 schema 大小、后台任务时序及流式响应停滞阶段的诊断信息
+  WebUI 与远程访问
+  - 手机中继访问：支持从浏览器启用手机 relay 访问，改善配对链接（紧凑且不降低熵）、远程分享明确化、手机恢复及兼容链接保留
+  - 回合导航轨：WebUI 新增右侧对话节点导航轨（Turn navigation rail），支持按回合快速定位；归档回合可在对话内按原始助手/工具顺序内联加载
+  自定义指令参数
+  - 指令参数声明与校验：支持为自定义指令声明 args 参数，并在不同用户技能调用入口统一校验，避免遗漏必填参数或传入不符合声明的参数
+  🛠 修复（Fixes）
+  长任务压缩与摘要
+  - 长回合自动压缩更可靠：修复单个回合持续执行时旧内容未进入自动摘要的问题；压缩后用量回落、再次升高时同一回合可再次触发压缩
+  - 摘要失败保护已确认的对话：配置摘要模型后，摘要报错、为空、截断、断流、超长或超时不再直接裁掉旧对话；应急恢复保留用户输入和助手结论；安全精简后仍超限时明确报错停止，服务恢复后可从原会话继续
+  - 压缩切断时的会话完整性：被切断的中断保持其回合可见，跨压缩切断保留记忆与保留回合；刷新后的记忆注入替换旧注入而非叠加，压缩重建快照记忆而非对其二次摘要
+  上下文体积
+  - 减少工具上下文死重：减少重复工具输出与工具 schema 的上下文占用，AtomGit 工具支持按需发现 schema（修复 41 个工具全量加载约 15K token 的问题）
+  - 有界文件读取：指令文件与 memory 文件超限时先做大小检查再截断读取，避免 OOM
+  - 请求体防护：AtomGit 请求体超限前在发送前主动拒绝，并提供明确的错误反馈，替代静默失败
+  终端输入与渲染
+  - SSH/PuTTY 兼容：恢复 SSH 下配置的原生鼠标默认值，PuTTY 等未识别 SSH 客户端使用保守字符渲染，方向键历史导航在原生鼠标模式下不再被误判为滚轮滚动
+  - 剪贴板与粘贴：修复浏览器终端与 SSH 下原生剪贴板手势/输入丢失，明确 SSH 粘贴行为与限色环境下的选区显示
+  - 提示精简：待办全部可见时不再提示展开，精简常规 Grep/Glob 扫描与工具输出清理提示，重启提醒移至输入框上方，二维码白边收窄
+  会话与导航
+  - 完整历史读取：从原生事件日志读取完整历史，修复历史被截断的问题
+  - 项目内恢复：交互式 resume 限定在当前项目内，隐藏不可用工作区；共享会话期间 TUI / WebUI 切换规则保持一致
+  - 后台切换显示：切换后台会话后正确展示最新内容，WebUI 移除重复历史条目并修正导航头部留白
+  Provider / 网络
+  - 连接恢复：本地 VPN 代理关闭后可自动恢复连接；流式响应结束/停滞时保留可用的用量与错误信息，空闲超时错误标明内容阶段与预算
+  - 登录指引：登录过期的错误摘要保留重新登录指引
+  - OpenRouter：连接进度消息增加间隔展示
+  Agent / 工具
+  - 工具审批边界：PowerShell 工具按保守策略登记并纳入审批；对未能解析的 bash 操作数默认 fail-closed，>&2notes.txt 正确识别为文件重定向而非 fd 2，仅将输入重定向目标归为读路径
+  - 敏感路径解析：对敏感 shell 路径基底采用保守解析，避免绕过敏感目录防护
+  - 退出状态与后台任务：修复后台构建等待被误判为循环停止的问题，原生尾部预览保留进程状态，包裹的退出状态给出明确提示
+  - 其他：修复禁用工具后仍可能发布工具目录的问题；团队去重时保留角色优先级；需求复核与未知工具提示更严谨；待办收尾不再重复触发完成提醒
+  🔧 重构（Refactoring）
+  - 共享调度服务：调度逻辑抽为独立的 atomcode-schedule crate，TUI / WebUI / CLI 共用同一任务存储与运行台账（本地执行使用宿主机时区）
+  📚 文档（Docs）
+  - 新增自动化任务、PowerShell 工具、LSP 配置、权限模型补充说明；relay 自建服务端的前提条件与访问控制说明更清晰
+  - README 补充 Provider 连接与模型能力自动发现的配置指引；站点文档同步更新
+  🧹 工程 / 构建
+  - 事件日志在 Windows 上改为读写方式打开，修复运行日志无法加锁的问题；长驻窗口在安装变更时收到升级通知
+ReleaseNotesUrl: https://atomgit.com/atomgit_atomcode/atomcode/releases/v5.2.5
+Documentations:
+- DocumentLabel: 文档
+  DocumentUrl: https://atomcode.atomgit.com/docs/zh/index.html
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

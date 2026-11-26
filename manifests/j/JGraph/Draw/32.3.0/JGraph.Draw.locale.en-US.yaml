@@ -1,0 +1,82 @@
+# Created with WinGet Updater using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: JGraph.Draw
+PackageVersion: 32.3.0
+PackageLocale: en-US
+Publisher: JGraph
+PublisherUrl: https://www.drawio.com/
+PublisherSupportUrl: https://github.com/jgraph/drawio-desktop/issues
+PrivacyUrl: https://www.diagrams.net/trust
+Author: JGraph Limited
+PackageName: draw.io
+PackageUrl: https://github.com/jgraph/drawio-desktop
+License: GPL-3.0
+LicenseUrl: https://github.com/jgraph/drawio-desktop/blob/HEAD/LICENSE
+Copyright: © 2005-2026 JGraph Ltd, Artisans' House, 7 Queensbridge, NN4 7BF, Northampton, England. Company
+CopyrightUrl: https://www.diagrams.net/trust
+ShortDescription: A diagramming desktop app based on Electron that wraps the core draw.io editor.
+Tags:
+- chart
+- design
+- diagram
+- draw
+- gantt
+- graph
+- graphics
+- mind-map
+- mind-mapping
+- mindmap
+- uml
+ReleaseNotes: |-
+  ChangeLog:
+  - Uses electron 44.6.0
+  - Updates each install type the way it was installed. The Windows installer, macOS and AppImage download updates in the background and show a notice and Help > Restart to Update when one is ready, or install it when you quit. MSI, zip, portable, deb and rpm installs show a notice with a link to the release page instead of running the Windows installer over themselves. Extras > Automatic Updates turns the background checks on and off. Coming from 31.7.0, this update still arrives the previous way [#2569]
+  - Prints on the printer's own paper size and orientation on macOS, so landscape pages print in landscape on A4 or Letter [#2568]
+  - Prints pages with a page scale above 100% at full size, they were shrunk a second time since 30.3.11 [jgraph/drawio#5540]
+  - Adds --embed-svg-metadata to the command line, which adds the properties of shapes and connectors to SVG exports as data-meta-* attributes [#1805]
+  - Opens the window with the background of the loading screen, which avoids a white flash in dark mode
+  - Updates to draw.io core 32.3.0. All changes from 31.7.0 to 32.3.0 are added in this build.
+  Testing:
+  Verified against the packaged, signed macOS build. Windows and Linux packages were verified from the produced release artifacts, their sizes and update manifests, rather than by running them.
+  Base checks
+  - Launch, open a file passed on the command line, add and edit shapes, change styles, undo and redo, copy and paste, save, insert, rename and delete pages, and zoom
+  - Export to PNG, JPEG, SVG, PDF, XML and HTML from the command line, covering scale, border, transparency, cropping, page selection with -p and --size page, and PNG and PDF export from the app
+  - Diagram round trip in an exported PDF, including reopening the exported PDF and recovering both pages and their contents
+  - Mermaid and CSV import and the --layout and --normalize options from the command line
+  - Shape search, stencils and shape libraries, the export dialog and the print dialog
+  - Settings survive a restart
+  - The macOS bundle is signed with a Developer ID certificate under the hardened runtime, is notarised and stapled, and the Quick Look app extension is sandboxed, separately signed and registered for this build
+  - The Electron security fuses are applied, so RunAsNode, the NODE_OPTIONS variable and the node inspect arguments are disabled and the app only loads from the asar
+  - 259 unit tests pass
+  Updates
+  - A new install reports no pending update, shows Check for Updates in the Help menu and Automatic Updates switched on in the Extras menu
+  - When the editor is told that an update has been downloaded it shows the restart notice and the Help menu offers Restart to Update instead of Check for Updates, and an available update for installs that do not update themselves shows the download notice
+  - Clicking the notice while no update is pending leaves the app and the open diagram as they are
+  - Switching Automatic Updates off and on again survives a restart each way
+  - The rules for which install type downloads, links to the release page or never checks are covered by unit tests [#2569]
+  Printing
+  - The paper sent to the print dialog is the page format in portrait order with landscape set for landscape pages, and pages are printed at 100% for every page scale, covered by unit tests [#2568] [jgraph/drawio#5540]
+  Command line
+  - --embed-svg-metadata adds the properties of a shape as data-meta-* attributes to the SVG, and the same export without the option adds none [#1805]
+  Core changes checked in the desktop app
+  - Exports with a scale and a border have the same border on all four sides from the command line, where the right and bottom border were narrower in 31.7.0, and exports at scale 1 or fitted to a width are unchanged [jgraph/drawio#5559]
+  - Drafts of unsaved changes are saved as plain diagram data, also for .drawio.svg files, and reopening the file offers the draft and restores the unsaved change
+  - Tall diagrams and Mermaid files open fitted to the window with every shape in view
+  - Changes made to an open file by another program are detected while the window is in the background
+  - The image export dialog shows the new presets
+  - Mermaid files converted from the command line keep the same layout as in 31.7.0, and an empty Mermaid file still ends with an error instead of writing a file
+  Checks around the changes
+  - The window background colour in dark mode matches the editor's background
+  - The functions the app exposes to the editor page are unchanged and give it no access to Node
+  - Reads, stats and writes of paths the user has not authorised are still refused, while an authorised file still reads and saves
+  - File and javascript links are still refused rather than opened externally
+  - Every update manifest names 32.3.0, and the Windows x64 and arm64 manifests each list only their own installer
+ReleaseNotesUrl: https://github.com/jgraph/drawio-desktop/releases/tag/v32.3.0
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://www.drawio.com/docs/
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/jgraph/drawio-desktop/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

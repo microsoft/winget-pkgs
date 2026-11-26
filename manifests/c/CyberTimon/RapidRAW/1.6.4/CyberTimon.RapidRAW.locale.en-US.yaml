@@ -1,0 +1,136 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: CyberTimon.RapidRAW
+PackageVersion: 1.6.4
+PackageLocale: en-US
+Publisher: Timon Käch
+PublisherUrl: https://github.com/CyberTimon
+PublisherSupportUrl: https://github.com/CyberTimon/RapidRAW/issues
+Author: Timon Käch
+PackageName: RapidRAW
+PackageUrl: https://github.com/CyberTimon/RapidRAW
+License: AGPL-3.0
+LicenseUrl: https://github.com/CyberTimon/RapidRAW/blob/HEAD/LICENSE
+ShortDescription: A beautiful, non-destructive, and GPU-accelerated RAW image editor built with performance in mind.
+Description: |-
+  RapidRAW is a modern, high-performance alternative to Adobe Lightroom®. It delivers a simple, beautiful editing experience in a lightweight package (under 20MB) for Windows, macOS, and Linux.
+
+  RapidRAW is for photographers who love to edit their photos in a clean, fast, and simple workflow. It prioritizes speed, a beautiful user interface, and powerful tools that let you achieve your creative color vision quickly.
+
+  It is not for users who seek absolute, perfect color accuracy. While the results are great for most purposes, the focus is on a fluid, creative process rather than perfect color precision.
+
+  RapidRAW is still in active development and isn't yet as polished as mature tools like Darktable, RawTherapee, or Adobe Lightroom®. Right now, the focus is on building a fast, enjoyable core editing experience. You may encounter bugs - if you do, please report them so I can fix them :) Your feedback really helps!
+Moniker: rapidraw
+Tags:
+- color-grading
+- editing
+- image-processing
+- masks
+- raw
+- react
+- rust
+- tauri
+ReleaseNotes: |-
+  RapidRAW has officially crossed 10,000 GitHub stars and over 610,000 downloads. What started as an empty project folder on my laptop has grown into an incredible global community of photographers and open-source contributors. To celebrate this milestone, I wrote a deep-dive reflection on the entire journey, covering the early prototypes, the late-night shader experiments, and the path forward. You can read the full retrospective on the blog.
+  Alongside this milestone, version 1.6.4 delivers one of the most technically challenging updates yet: rebuilt highlight recovery capable of reconstructing clipped color channels. This release also reworks the shader pipeline to introduce true exposure adjustments, adds a responsive masonry grid layout to the library, includes faster crop and pan canvas shortcuts, offers a neutral grey canvas mode, and squashes several backend bugs across export and EXIF handling.
+  New Features
+  Highlight Recovery
+  To be 100% honest with you: highlight recovery was always one of the weaker spots in RapidRAW. I spent so many hours trying to get it right in the past that I started telling myself it was just "too hard" to solve nicely. But over the last few days, I had a strong urge to finally crack it, and I'm honestly blown away by how well it works now. RapidRAW can now reconstruct clipped highlights (> 1.0) using the remaining color channel information.
+  The results speak for themselves:
+  Example 1 (Shot by Wojciech Wolas):
+  ─────────────────────┬─────────────────────
+  Before               │After
+  ─────────────────────┼─────────────────────
+  highlights_old       │highlights_new
+  ─────────────────────┴─────────────────────
+  Example 2:
+  ───────────────────────┬───────────────────────
+  Before                 │After
+  ───────────────────────┼───────────────────────
+  highlights_old_2       │highlights_new_2
+  ───────────────────────┴───────────────────────
+  Example 3:
+  ───────────────────────┬───────────────────────
+  Before                 │After
+  ───────────────────────┼───────────────────────
+  highlights_old_3       │highlights_new_3
+  ───────────────────────┴───────────────────────
+  Alongside this, I reworked parts of the shader pipeline. To reflect how the math actually works now:
+  - The Exposure slider (previously EV Shift) is now a true Exposure slider that cleanly pulls down overexposed highlights.
+  - The old exposure slider has been renamed to Brightness. It runs after the tonemapper, letting you tweak perceived image brightness without introducing clipping.
+  New Crop, Pan & Zoom Shortcuts
+  It might seem like a small detail, but this is a massive workflow improvement. You no longer have to open the crop tool and drag the corner handles every single time:
+  - Ctrl + Mouse Wheel: Quick crop in/out
+  - Ctrl + Drag: Pan inside the crop frame
+  - Shift + Drag: Straighten / rotate (as before)
+  This makes reframing and checking compositions super fast and intuitive.
+  Library Navigation
+  The Sources panel now includes an active folder navigation header, letting you quickly move back and forth between directories.
+  image
+  Masonry Library Grid
+  Added a new thumbnail view mode that arranges photos into a clean masonry layout, utilizing all available screen space.
+  image
+  Alongside this change, the Original Ratio thumbnail mode is now enabled by default.
+  Neutral Grey Canvas
+  You can now toggle the canvas background to a neutral middle-grey in the settings. This helps avoid optical contrast illusions and color bias while editing.
+  image Core Improvements
+  - Export Subfolders: Added support for exporting to the original folder with a custom subfolder.
+  - Smoother Vibrance: Rewrote the vibrance algorithm to behave much more smoothly and predictably.
+  - 16-Bit TIFF Export: Added support for exporting images in 16-bit TIFF format.
+  - Quick Filter State: The expanded/collapsed state is now remembered across sessions.
+  - EXIF & Metadata Fixes: Fixed several bugs that caused EXIF data to go missing & metadata now shows up properly inside the Albums view.
+  - Under-the-Hood: Squashed a bunch of bugs for better overall stability.
+  What to Download
+  ─────────────────────┬────────────┬──────┬──────────────────────────────
+  OS                   │Architecture│Format│Download Link
+  ─────────────────────┼────────────┼──────┼──────────────────────────────
+  Windows              │x64         │.exe  │RapidRAW for Windows
+  ─────────────────────┼────────────┼──────┼──────────────────────────────
+  macOS (Apple Silicon)│ARM64       │.dmg  │RapidRAW for macOS ARM
+  ─────────────────────┼────────────┼──────┼──────────────────────────────
+  macOS (Intel)        │x64         │.dmg  │RapidRAW for macOS x64
+  ─────────────────────┼────────────┼──────┼──────────────────────────────
+  Ubuntu 22.04         │x86_64      │.deb  │RapidRAW for Ubuntu 22.04
+  ─────────────────────┼────────────┼──────┼──────────────────────────────
+  Ubuntu 24.04         │x86_64      │.deb  │RapidRAW for Ubuntu 24.04
+  ─────────────────────┼────────────┼──────┼──────────────────────────────
+  Android              │ARM64       │.apk  │RapidRAW for Android
+  ─────────────────────┴────────────┴──────┴──────────────────────────────
+  Download Tethering Builds & Setup Guide (macOS & Linux)
+  1. Install libgphoto2 on your machine
+  RapidRAW uses libgphoto2 to communicate directly with connected cameras over USB. Because the tethering binary links dynamically against this library to stream live view and control camera settings, the driver must be present on your system for the app to detect and control your camera.
+  - macOS (via Homebrew):
+    brew install libgphoto2 pkg-config
+  - Ubuntu / Debian:
+    sudo apt update && sudo apt install -y libgphoto2-dev pkg-config
+  - Arch Linux:
+    sudo pacman -S libgphoto2 pkgconf
+  - Fedora:
+    sudo dnf install libgphoto2-devel pkgconf-pkg-config
+  2. Download Tethering Build
+  ─────────────────────┬────────────┬──────┬──────────────────────────────────────────
+  OS                   │Architecture│Format│Download Link
+  ─────────────────────┼────────────┼──────┼──────────────────────────────────────────
+  macOS (Apple Silicon)│ARM64       │.dmg  │RapidRAW for macOS ARM (Tethering)
+  ─────────────────────┼────────────┼──────┼──────────────────────────────────────────
+  macOS (Intel)        │x64         │.dmg  │RapidRAW for macOS x64 (Tethering)
+  ─────────────────────┼────────────┼──────┼──────────────────────────────────────────
+  Ubuntu 22.04         │x86_64      │.deb  │RapidRAW for Ubuntu 22.04 (Tethering)
+  ─────────────────────┼────────────┼──────┼──────────────────────────────────────────
+  Ubuntu 24.04         │x86_64      │.deb  │RapidRAW for Ubuntu 24.04 (Tethering)
+  ─────────────────────┴────────────┴──────┴──────────────────────────────────────────
+  (Note: Windows and Android are not supported for camera tethering due to OS driver limitations).
+  For other platforms and formats (ARM builds, RPM, AppImage, etc.), check the full asset list below.
+  Running on Windows and macOS
+  RapidRAW is not yet code-signed, so Windows and macOS may show warnings when launching the app.
+  - Windows: When launching the app, you may see a Windows Defender SmartScreen warning.
+    - Click "More info" → "Run anyway" to proceed.
+  - macOS: You'll need to remove the quarantine flag after installation, otherwise macOS may report the app as corrupted:
+  xattr -dr com.apple.quarantine /Applications/RapidRAW.app
+ReleaseNotesUrl: https://github.com/CyberTimon/RapidRAW/releases/tag/v1.6.4
+Documentations:
+- DocumentLabel: Documentation & Tutorials
+  DocumentUrl: https://github.com/CyberTimon/RapidRAW-Docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

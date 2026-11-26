@@ -1,0 +1,75 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: LunarWerxs.SageThumbs2K
+PackageVersion: 1.3.6
+PackageLocale: en-US
+Publisher: LunarWerx
+PublisherUrl: https://github.com/LunarWerxs
+PublisherSupportUrl: https://github.com/LunarWerxs/SageThumbs-2k/issues
+PackageName: SageThumbs 2K
+PackageUrl: https://github.com/LunarWerxs/SageThumbs-2k
+License: PolyForm Noncommercial License 1.0.0
+LicenseUrl: https://github.com/LunarWerxs/SageThumbs-2k/blob/HEAD/LICENSE.md
+Copyright: Copyright (c) 2026 LunarWerx
+ShortDescription: Explorer thumbnails for 326 file types Windows can't read, plus a right-click image toolkit.
+Description: SageThumbs 2K is a modern, crash-isolated Windows 11 shell extension written in Rust that rebuilds the classic SageThumbs. It gives File Explorer thumbnails for 326 file types Windows can't preview on its own — camera RAW, HEIC/AVIF, Photoshop, DjVu, ebooks and comics, video frames, 3D-print files and a long tail of obscure formats — plus a right-click image toolkit (convert, resize, rotate, OCR, color picker, metadata strip, combine-to-PDF/CBZ) and a console/AI CLI. Free for personal use.
+Moniker: sagethumbs2k
+Tags:
+- converter
+- explorer
+- heic
+- image
+- raw
+- shell-extension
+- thumbnails
+ReleaseNotes: |-
+  What's changed
+  - Explorer stays responsive when menus and metadata appear. Right-click construction no longer
+    decodes the selected file just to prepare a preview; the image is generated only if the
+    SageThumbs submenu actually opens. Details-pane metadata probes are header-only, capped at
+    250 ms, and limited to two detached workers so slow files or providers cannot accumulate work in
+    Explorer or SearchIndexer.
+  - Large camera RAW and OS-codec thumbnails use bounded memory. Shell streams can take an early,
+    structurally validated embedded JPEG without reading the sensor-data tail, while WIC scales
+    HEIC, AVIF, RAW, and JPEG 2000 frames before copying RGBA pixels into SageThumbs. Ordinary TIFF
+    files remain on the normal path, and the configured maximum file size still applies.
+  - Pathological Windows metafiles fail quickly. WMF and EMF decoding now has a dedicated
+    three-second/96 MiB ImageMagick budget instead of consuming the broader raster allowance.
+  - The optional uninstall note can include reply details. People who want an answer can leave an
+    email or other contact beside their feedback; skipping the survey still never delays removal.
+  - Connections sync is safer across devices and accounts. Nested preference changes preserve
+    unrelated remote edits, cache validators cannot cross account boundaries, shutdown flushes
+    pending settings, and retry timing honors server throttling.
+  - Release packaging is self-contained and icon-verified. Public artifacts contain the
+    installable application without development folders, and release validation checks the visible
+    executable and installer branding before publication.
+  - Huge archives now return immediately instead of tying up Explorer. The archive limit
+    is enforced before 7z parsing on every shell-stream path—even when Max file size is set
+    to Unlimited or a provider omits the filename or length. The reported 909,208,825-byte
+    project archive was tested directly and rejected before parsing; network-share timing
+    is allowed to vary.
+  - Conversions are exact, atomic and memory-bounded. EXR, HDR, Farbfeld, PAM and PPM
+    use native streaming writers with high-bit-depth data preserved where the format allows.
+    Every other advertised target uses an explicit bundled writer; unsupported targets fail
+    before reading the source, and a failed conversion cannot replace an existing file or
+    leave PNG data under the wrong extension.
+  - AVIF and JPEG XL export now include their real writer engines. Earlier Full
+    packages advertised these conversions but removed load-bearing ImageMagick
+    delegates, which could leave PNG bytes under the requested extension on a clean PC.
+    This build retains the required writers, runtimes and legal files, independently
+    verifies all 14 Magick-backed output signatures, and rejects incomplete bundles.
+  - Screenshot and Quick preview background handling is down to one resident helper.
+    The removed watchdog stays removed, and install/verification restarts the shared daemon
+    directly instead of leaving a second command-shell process behind. Full-screen editor
+    automation now also exercises Shift-snapped line drawing through the real window.
+  - Release builds now fail closed. Staged contents, exact upgrade-cleanup rules, package
+    signatures, source inputs, version, artifact digest, size budget and reviewed release
+    notes are all verified before a build can be published.
+  Verified installer
+  - File: SageThumbs2K-Setup-1.3.6.exe
+  - Size: 13127776 bytes
+  - SHA-256: 5a99d4d451acf3fe2693daf7686a75ca8de577ae1a1b48a5cb98ad2271504823
+ReleaseNotesUrl: https://github.com/LunarWerxs/SageThumbs-2k/releases/tag/v1.3.6
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,73 @@
+# Created by Anthelion using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: jdx.mise
+PackageVersion: 2026.11.7
+PackageLocale: en-US
+Publisher: jdx
+PublisherUrl: https://en.dev/
+PublisherSupportUrl: https://github.com/jdx/mise
+Author: jdx
+PackageName: mise-en-place
+PackageUrl: https://mise.en.dev/
+License: MIT
+LicenseUrl: https://github.com/jdx/mise/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Jeff Dickey
+CopyrightUrl: https://github.com/jdx/mise/blob/HEAD/LICENSE
+ShortDescription: Your dev env, already prepped.
+Description: Your dev env, already prepped. One tool to manage languages, env vars, and tasks per project, reproducibly.
+Moniker: mise
+Tags:
+- cli
+- dev-tool
+- env
+- environment
+- task
+ReleaseNotes: |-
+  Added
+  - Shorter shim errors and `shims.fallback_to_installed`. When no config selects a shim’s tool, the error names the latest installed version and two ways to use it. Add `--verbose` to list all installed versions. The new setting (default `false`) runs the latest installed version instead. It only applies when no config mentions the tool; Windows `.exe` shims still show an error.
+  - Task run history in JSON output. `mise tasks info <task> --json` and `mise tasks ls --json` now include a `history` field with run and failure counts, median duration, and the last run’s duration, status, and start time. It is `null` when no runs are recorded. Text output is unchanged.
+  - Locked installs for vfox plugins that download nothing. Plugins can set `downloads = false` in `metadata.lua`; locked installs then need no lockfile URL, and `mise lock` records only the version. An unexpected URL from `PreInstall` causes an error.
+
+  Changed
+  - Less noise for coding agents. When mise detects an agent, it hides new version notices, self update instructions, and hints. `mise version --json` and `mise doctor` still report newer versions. Set `AI_AGENT=0` to show notices again.
+
+  Fixed
+
+  Config and upgrades
+  - `mise upgrade --bump` and `mise use` no longer write registry default options into `mise.toml`; options already in the file are kept.
+  - Boolean and numeric options stay unquoted when mise rewrites a tool entry.
+  - When `packageManager` pins pnpm with a checksum, mise runs pnpm’s install script, allowing pnpm 12 to use its native binary while still verifying the checksum.
+  - `mise doctor` now warns when a `package.json` read as a version file cannot be parsed.
+
+  Install, lock and exec
+  - A plain `mise install` or `mise lock` now installs missing `[plugins]` entries first, so idiomatic version files from those plugins are read on the first run.
+  - A non root `mise install` no longer fails rebuilding runtime symlinks when the user’s global config selects a different version from the administrator’s system config. It leaves the global link in a read only shared install directory unchanged.
+  - `mise lock` now sends forge tokens when downloading release assets to compute checksums, fixing authorization errors for private and self managed GitLab, GitHub, GitHub Enterprise, and Forgejo releases without published digests.
+  - With `mise x -- <cmd>`, directories from `env._.path` now come before tool bin directories even when already present in the caller’s `PATH`.
+  - On Windows, `mise x` and shims no longer keep the caller’s stdout pipe open while a detached child runs.
+
+  Tasks and daemons
+  - Tasks can use templates defined in their own project’s `mise.toml` when run from a sibling project in a monorepo.
+  - `mise run <task> -h` now follows the task’s usage spec. Tasks that disable help, declare their own `-h` flag, or accept `-h` as a flag value receive it as an argument.
+  - File tasks in task directory subdirectories now resolve `{{config_root}}` and relative `_.file` paths against the project root.
+  - `mise run --quiet` and `--silent` now hide startup log lines for daemons started by a task.
+  - Named daemon port collision errors now identify the daemon and checkout. Mise also warns when a worktree’s automatic port overlaps a port used by the primary checkout.
+
+  Bootstrap packages
+  - `mise bootstrap` now runs `snap list` with English messages to avoid reinstalling snaps already installed.
+  - Casks that generate completions through a wrapper command, such as ngrok, now install.
+  - Casks whose installers create their own Caskroom directory, such as miniconda, no longer fail with “multiple Caskroom versions.”
+  - Third party tap formulae using `require_relative`, such as `brew:gromgit/fuse/sshfs-mac`, can now be evaluated and built from source from a checkout pinned to the tap’s commit. Only GitHub taps are supported.
+
+  Dotfiles and skills
+  - Without a terminal and without `--yes`, `mise dot apply` now refuses to overwrite locally edited copy targets that are not saved in history. The error points to `mise dot diff` and `--yes`.
+  - Applying a directory copy no longer rewrites files that already match their source. Only changed files’ `[history.reload]` commands run.
+  - Dotfiles history no longer gets stuck after a very large `mise dot apply`. Machines already stuck finish the pending operation on their next save.
+  - A leading `~` in `skills.dir` or `MISE_SKILLS_DIR` now expands to the home directory.
+
+  Documentation
+  - A new “Coding agents” docs page explains how to put project tools and `[env]` on an agent’s `PATH`, with a Claude Code SessionStart hook and notes on Codex and Git worktrees.
+ReleaseNotesUrl: https://github.com/jdx/mise/releases/tag/v2026.11.7
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

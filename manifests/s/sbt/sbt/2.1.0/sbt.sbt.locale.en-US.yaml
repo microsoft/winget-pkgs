@@ -1,0 +1,181 @@
+# Created with WinGet Updater using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: sbt.sbt
+PackageVersion: 2.1.0
+PackageLocale: en-US
+Publisher: Lightbend, Inc.
+PublisherUrl: https://www.lightbend.com/
+PublisherSupportUrl: https://www.scala-sbt.org/support.html
+PrivacyUrl: https://www.lightbend.com/legal/privacy?_ga=2.106952203.969622968.1639120972-1490489665.1639120972
+PackageName: sbt
+PackageUrl: https://www.scala-sbt.org/
+License: Apache-2.0
+LicenseUrl: https://github.com/sbt/sbt/blob/HEAD/LICENSE
+ShortDescription: A build tool for Scala, Java, and more
+Moniker: sbt
+Tags:
+- admin
+- functional
+- java
+- language
+- programming
+- sbt
+- scala
+ReleaseNotes: |-
+  Changes with compatibility implications
+  - Metabuild is updated to Scala 3.9.
+  - Apache Ivy is removed from the dependency.
+  Scala 3.9
+  sbt 2.1.0 updates the Scala version used by the metabuild to Scala 3.9.0 LTS.
+  Since both sbt 2.x and Scala 3.x are only backward compatible across minor versions, appropriate Scala version must be used for building sbt plugins:
+  ───────┬─────────┬─────────────────────────┬──────────────────
+  sbt 2.x│Scala 3.x│Plugin works on sbt 2.0.x│Works on sbt 2.1.x
+  ───────┼─────────┼─────────────────────────┼──────────────────
+  2.0.x  │3.8.x    │✅                       │✅
+  ───────┼─────────┼─────────────────────────┼──────────────────
+  2.1.0  │3.9.x    │❌                       │✅
+  ───────┴─────────┴─────────────────────────┴──────────────────
+  While publishing plugins using sbt 2.1.0 would mean that it would no longer be compatible with sbt 2.0.x, given that Scala 3.9 is an LTS that will be supported for the next 3 years, we should use it as a new baseline. Here's how to set the minimal sbt version for your plugin:
+  pluginCrossBuild / sbtVersion := {
+    scalaBinaryVersion.value match {
+      case "2.12" => "1.9.9"
+      case _      => "2.1.0"
+    }
+  }
+  Publishing
+  sbt 2.1.0 removes Apache Ivy from its transitive dependency, and implements Ivyless publishing.
+  This was contributed by @bitloi, @fury0928, @BrianHotopp, @mkurz, @stasimus, @jozanek, and @eed3si9n in #8686, #8866, #8894, #8975, #8988, #8996, #9069, #9463, and #9533, #9615, #9756, #9804, #9806, #9811, #9814 etc.
+  Test summary
+  When tests are executed, sbt 2.1.0 displays a test summary at the end, listing the failed test suites as follows:
+  [error] Test summary (2 test tasks failed):
+  [error]   a / Test / testQuick
+  [error]         com.example.a.TestA     FAIL
+  [error]   b / Test / testQuick
+  [error]         com.example.b.TestB     FAIL
+  [error]
+  [error] failed: total 4, failed 2, errors 0, passed 2, cached 2
+  Successful tests will display only a terse summary by default:
+  [info] passed: total 4, failed 0, errors 0, passed 4, cached 4
+  --test_summary=success can override the behavior to list the successful test as well. Test summary was contributed by @eed3si9n and @BrianHotopp in #9602 + #9214.
+  Test cache opt-out
+  sbt 2.1.0 can let you opt out of test result caching:
+  $ sbt test --cache_test_result=false
+  This was contributed by @anatoliykmetyuk in #9675.
+  workerMaxInstances and testTopology
+  sbt 2.1.0 adds new settings workerMaxInstances and testTopology to control test scheduling,
+  especially of the forked tests. Use Global / workerMaxInstances to change the number of worker instances. The default is set to 2:
+  // or sbt -Dsbt.worker_max_instances=2
+  Global / workerMaxInstances := 2
+  Use the testTopology setting to control whether you want to split the test classes into multiple workers or keep them together. The default was changed to split to 2 groups:
+  Test / testTopology := TestTopology.subprojectSplit(2)
+  To keep all classes in a subproject on one worker instead, use:
+  Test / testTopology := TestTopology.subprojectExclusive
+  This was contributed by @eed3si9n in #9665
+  clean task
+  sbt 2.1.0 updates the clean task to act as a cache invalidator. Regardless of the cache state, running clean would invalidate the cache for the next command execution. This can be scoped to subproject or configuration:
+  $ sbt foo/clean
+  $ sbt foo/compile
+  This was contributed by @eed3si9n in #9752
+  Source dependency update
+  sbt 2.1.0 provides better control to handle source dependencies.
+  This was contributed by @seroperson in #8880.
+  Identity map optimization
+  In sbt 2.1.0, a key assignment (:=) whose right-hand side is expr.value short-circuits to x.set(expr).
+  This is helpful in avoiding JsonFormat[A] when expr is an uncached task.
+  This was contributed by @eed3si9n in #9831
+  Task-level caching opt-out
+  // opt out of compilation cache
+  Compile / compile / cacheStores := Nil
+  Test / compile / cacheStores := Nil
+  // opt out of test cache
+  Test / test / cacheStores := Nil
+  This was contributed by @eed3si9n in #9874
+  Input-only cache
+  sbt 2.1.0 introduces a new cache level CacheLevelTag.InputOnly:
+  @cacheLevel(include = Array(CacheLevelTag.InputOnly))
+  val scalacOptions = taskKey[Seq[String]]("Options for the Scala compiler.")
+  Similar to Def.uncached(...), scalacOptions will evaluate each time, but scalacOptions.value will participate as an input to other cached task.
+  This was contributed by @eed3si9n in #9953
+  HTTP Bazel cache
+  sbt 2.1.0 adds support for HTTP Bazel cache, in addition to gPRC.
+  Global / remoteCache := Some(uri("http://127.0.0.1:8000"))
+  This was contributed by @eed3si9n in #9880
+  🚀 Other updates
+  - Adds project id to Zinc debug log by @Achieve3318 in #8750
+  - feat: Support doc / skip := true by @fury0928 in #8824
+  - feat: case-insensitive tab completion by @bitloi in #8827
+  - dependencyTree: add --append for file output in multi-module builds by @oolokioo7 in #8878
+  - feat: Eviction error for downgrade of Scala 3.x by @bitloi in #8912
+  - feat: Add English aliases cross and switch for + / ++ by @jonathanchang31 in #9051
+  - feat: BSP buildTarget/dependencyModules by @jsdevninja in #9085
+  - feat: Forward test events to listeners as they are emitted by @claytonlin1110 in #9087
+  - feat: Adds ModuleID#exclude that accepts a %% b by @seroperson in #8756
+  - Specific error message for defining types in build.sbt by @xuwei-k in #9579
+  - Use JDK's Unix domain socket for bootserver by @eed3si9n in #9427
+  - feat: Adds Seq[Initialize[Task[T]]]#join extension method by @jozanek in #9347
+  - feat: Adds LoggerContext.removeAppender for single appender removal by @stasimus in #9740
+  - feat: Adds ProjectMatrix#configureRows and configurePlatforms methods by @kitbellew in #9765
+  - Custom user agent by @eed3si9n in #9786
+  - feat: Persistent worker for tests by @eed3si9n in #9678
+  - remoteCacheRequestTimeout setting by @eed3si9n in #9829
+  - Use JDK 17 UNIX domain socket by @eed3si9n in #9846
+  - CrossVersion: make parser public by @kitbellew in #9864
+  - feat: Support platform in sbt query by @eed3si9n in #9876
+  - feat: Adds Terminal.withRawInput for reading single keys by @mkurz in #9948
+  - feat: Adds origin to the execution log by @eed3si9n in #9944
+  - feat: Adds sbt/execs to list running and waiting commands by @eed3si9n in #9984
+  - feat: Adds sbt/shutdown request with a force option by @azdrojowa123 in #9952
+  - feat: Adds sbt/execsChanged notification by @eed3si9n in #10001
+  - feat: Adds remoteCacheUploadResults (read-only support) by @ghostbuster91 in #10027
+  🐛 Bug fixes
+  - fix: Fixes duplicate compiler bridge JAR in ZincComponentManager by @since-2017-hub in #8800
+  - fix: Fixes backtick-quote project IDs in classloader error messages by @fury0928 in #8830
+  - fix: Fixes non-deterministic ScopeFilter ordering by @bitloi in #8861
+  - fix: Fixes continuous build watcher not respecting the log level by @fury0928 in #8864
+  - fix: Fixes UpdateReport losing classifier information by @fury0928 in #8874
+  - fix: Fixes .sbtopts not handling -sbt-dir with spaces by @Eruis2579 in #8875
+  - fix: Fixes crash when .sbtopts has errors by @oolokioo7 in #8883
+  - fix: Fixes sbt new scala/toolkit.local support by @mohamed0803 in #8887
+  - fix: Fixes TaskConvert.appExpr by @xuwei-k in #8899
+  - fix: Fixes script mode using Scala 3.x by @bitloi in #8900
+  - fix: Fixes set every command with configuration scoping by @bittoby in #8916
+  - fix: Fixes scripted test loading build definition twice on first test in batch by @bittoby in #8946
+  - fix: Fixes misleading error message when .evaluated is used outside macro context by @BrianHotopp in #8951
+  - fix: Fixes libraryDependencySchemes on cross-platform dependencies by @ckstck in #8957
+  - fix: Fixes matrix base directory resolution for source dependencies by @bittoby in #8983
+  - fix: Fixes unsorted progress indicator by @bittoby in #8984
+  - fix: Fixes scritped test cleanup deleting symlinked directories by @fury0928 in #8985
+  - fix: Fixes old shell syntax warning by @xuwei-k in #8998
+  - fix: Fixes -sbt-dir / sbt.global.base not resolving relative paths by @BrianHotopp in #9001
+  - fix: Fixes sbt server not returning a JSON-RPC error for unknown methods by @BrianHotopp in #9002
+  - fix: Fixes failed curl leaving in the runner script corrupt JARs by @BrianHotopp in #9003
+  - fix: Fixes derivedProjects not invoked when no explicit root project is defined by @bitcompass in #9012
+  - fix: Fixes sbt.Tests.Group#hashCode by @xuwei-k in #9065
+  - fix: Removes unused src/main/resources/log4j2.xml by @xuwei-k in #9071
+  - fix: Fixes consoleProject for Scala 3 by @fury0928 in #9073
+  - fix: Fixes Ctrl-c handling by @eed3si9n in #9130
+  - fix: Fixes dependencyTree browse crashes on Linux by @jimcody1995 in #9147
+  - fix: Fixes cache restoration of incremental compilation state (Analysis) by @eed3si9n in #9207
+  - fix: Fixes dependencyTree rendering duplicate subtree by @BrianHotopp in #9226
+  - fix: Fixes explicit equals and hashCode in LabeledFunctions by @xuwei-k in #9228
+  - fix: Fixes sbtn throwing on exit by @eed3si9n in #9239
+  - fix: Fixes sbt server refusing to start by @BrianHotopp in #9337
+  - fix: Fixes resolver pattern resolution of [organisation] by @jozanek in #9344
+  - fix: Fixes bgStop job id parser by @merlinorg in #9353
+  - fix: Fixes multiple main classes warning showing up during tests by @merlinorg in #9372
+  - fix: Fixes auto import of givens by @xuwei-k in #9409
+  - fix: Fixes Windows runner not honoring -java-home by @jozanek in #9434
+  - fix: Fixes dependency parsing for BSP by @anatoliykmetyuk in #9450
+  - fix: Fixes gRPC channels recreated on reload by @eed3si9n in #9502
+  - fix: Fixes sbtn stdin race condition by @eed3si9n in #9521
+  - fix: Fixes sbt server freezing when a terminal-properties response is malformed or slow by @BrianHotopp in #9526 / #9527
+  - fix: Fixes unbound client boot waiting by @BrianHotopp in #9549
+  - fix: Fixes Java artifacts not getting exposed during a pipelined build by @anatoliykmetyuk in #9574
+  - fix: Fixes build.sbt compilation errors not forwarded to the logger by @eed3si9n in #9599
+ReleaseNotesUrl: https://github.com/sbt/sbt/releases/tag/v2.1.0
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/sbt/sbt/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
