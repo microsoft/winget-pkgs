@@ -1,0 +1,86 @@
+# Created by Anthelion using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: EclipseCommunity.r3dfox
+PackageVersion: 153.7.0
+PackageLocale: en-US
+Publisher: Eclipse Community
+PublisherUrl: https://github.com/Eclipse-Community
+PublisherSupportUrl: https://github.com/Eclipse-Community/r3dfox/issues
+PackageName: r3dfox
+PackageUrl: https://eclipse.cx/projects/r3dfox
+License: Unclear, likely MPL-2.0
+LicenseUrl: https://github.com/Eclipse-Community/r3dfox/blob/HEAD/LICENSE
+Copyright: Mozilla
+ShortDescription: A fork of the open source web browser Mozilla Firefox made specifically for Windows Vista, 7, and 8 compatibility.
+Tags:
+- eclipse-community
+- firefox-fork
+- firefoxfork
+- gecko
+- jpeg-xl
+- jpegxl
+- r3dactedfox
+- web-browser
+- webbrowser
+ReleaseNotes: |-
+  A few minutes after the previous release, I got the patches I need for 32 bit build, and so I got to work. Now we got stable r3dfox XP! readme.md and sourceforge and co will be updated to reflect XP+ once the browser gets caught up to a more recent version.
+  This is the third release of r3dfox for XP, based off of @e3kskoy7wqk's Firefox rework that now has compatibility down to Windows XP, and working sandbox on 32 bit XP and Vista. I've tested it on XP SP2 and beyond and it launches and works. However like previous builds I have not extensively stability tested.
+  Likely to be the last multi release as now there is stable XP+ baseline for all three brandings. This is ESR 153.7.0 built under regular, ESR, and Plasmafox branding for users who want to use all three brandings of browser at the same time, like me.
+  The rest of these blurbs are likely to remain until r3dfox gets caught up closer to upstream.
+  Some major changes from previous r3dfox releases are that native controls are dropped. e3k dropped native controls from his fork, and his reasoning made sense, them being too hard to maintain. They barely work in 153 and it's just too much. Also since native controls have been dropped, the Security Sandbox Content Level setting has been removed as it has no more use here.
+  Also related to being broken, GDI, all support for attempts to get it working being Cairo or Skia GDI have been removed. This is because DWrite on XP has been accomplished with a patched DWriteCore (by @mjd7989) that works on XP. Modern Firefox GDI is awful and has been fully broken in the most recent r3dfox releases, so another thing dropped that will make it easier. Even if I wanted to though WebRender is too closely linked to DWrite for me to untangle it and get GDI only (no DWrite.dll) working. Also related to this, variation font support works with DWriteCore (thanks to @i486), so every supported operating system has variation font support. I don't think this is possible in GDI either. From my understanding the benefits Cairo (GDI) had over Skia (DWrite) was that Cairo snaps the fonts to the pixels directly which results in them being sharper with Cairo, while Skia spaces fonts more accurately but results in them being not so crisp. If someone can figure out a modification for Skia that introduces this alternative rendering mode, and can pass https://fontgammatest.replit.app/ (font smoothing enabled but cleartype disabled), I will add it to the browser and appreciate it very much.
+  Accessibility support is disabled at compile time again due to being incompatible with XP. Therefore the option to enable or disable accessibility in the browser has been removed.
+  Also I've dropped the e10s disable setting from options on account of it being very broken anyways. To have a browser with working single process, Cairo, and native controls, we would just be better off forking an older Firefox release and rebuilding from there. Mypal68 is a good example here.
+  Please read
+  Hello, one of my friends, known as Tech Stuff or teknixstuff has had financial troubles recently, and unfortunately has become homeless. If you have any spare money, please donate it to him, he would appreciate it. Click this paragraph to see the methods to donate.
+  Paypal - https://www.paypal.com/donate/?hosted_button_id=E7S454HQTGRR8
+  Arrives instantly, generally the best and most available option.
+  Buy me a coffee - https://buymeacoffee.com/teknixstuff
+  Takes days to arrive, uses stripe as their payment processor.
+  GoCardless - https://teknixstuff.com/Network/GoCardless/
+  Shouldn't require a debit/credit card to use. limited country support.
+  Bank transfer or Western Union/Remitly - (Contact him on Discord @tek.stuff or by email hello@teknixstuff.com for more details)
+  Actual like bank transfer so arrives within two hours, but isn't a good idea to have public, contact him for the info. Remitly arrives in up to six hours, and has small fees.
+  Crypto - Well, it's crypto, see below for wallets.
+  BNB/BSC, Polygon, and Ethereum Mainnet:
+  0x1A7417e0d34d8f1e82f1Ff26C316a29E6D943087
+  BTC:
+  bc1qyw7tshddklznjav60wnjzuaf824galxfuul2l8
+  Tron:
+  TSqkUJTfjjufLsvJ3tTCtFzH1nKo9j3ti9
+  XMR:
+  8AQg36Zmk5t2B27N2NsMAiV37M6YUvfzmG7DDnoU9a4LFHJGkeMgaeoc7SkcEtf6h2BM3EPx4YexLMgC8HeFeZYRNy88wrN
+  Bitcoin Lightning:
+  teknixstuff@cake.cash
+  Ads - https://teknixstuff.com
+  There are ads on the website, if you cannot afford to donate at this time, you can help out simply by just disabling your adblocker.
+
+  Release notes
+  New r3dfox specific changes in this build:
+  Fixed the top titlebar border being applied twice.
+  Fixed default darker background colors for urlbar background and menu bg being overridden with stock lighter background colors. Now it's all dark.
+  Fixed incorrect XP CSS defines making tab counter background an incorrect size.
+  Cleartype is no longer default enabled for downloadable fonts on XP. (This option feels stupid like if the user wants cleartype they will enable it, why enable it only for downloadable fonts? If it's that they look poor with standard font smoothing, why is that this pref only applies to XP and not also Vista+ with cleartype disabled? I don't get it so I disabled it.
+  Added ability to unload all tabs at a user set time (no user facing option for this yet though, gotta use about:config for now)
+  Previous v153.7.0-multi=XP release notes as it was only out for a few hours or something
+  This was compiled before the three most recent commits to the 153.7.0 branch
+  Added darker background colors option for the r3dfox colors, based off of the darker color scheme from Eclipse Purple. These darker background colors are enabled by default as well.
+  Since the native controls portion of r3dfox no longer exists, the OS faking code no longer has native controls in the pref name. This means you will need to reset any the Windows version override you had previously set.
+  WebGL is now enabled by default again. The ability to full disable WebGL is also brought back. To bring back WebGL prompting, untick Always allow WebGL under Extra Configurations.
+  Added useragent stealth mode. When enabled, it makes the browser identify as normal Firefox on Windows 10.
+  This also includes an option to disable site specific UA overrides as they are no longer required with the stock Firefox useragent. (This will disable the anubis bypass though.)
+  Removed %OSSLICE% from useragents due to it being not accurate to stock Firefox useragents for compatibility, and it required undoing an optimization done to the browser.
+  uBlock Origin should* be uninstallable now.
+  Disabled splitview by default for being broken, also removes the new badge on it if enabled.
+  Darkened release version fancy about background to make it a bit more readable
+  Added exclusive mode audio support for audiophiles, thx @savemyram
+  Added custom domain immediate tab unload, for now only manually configurable in about:config though. Also thank @savemyram
+  Added options to unload left, right, and other tabs when right clicking a tab. Also thank @savemyram
+  Added option to bring back legacy double click behavior for Han/Hiragana/Katakana
+  Please let me know what bugs or issues you encounter with it.
+  Join the Eclipse Community Discord server!
+  https://discord.gg/ecx
+ReleaseNotesUrl: https://github.com/Eclipse-Community/r3dfox/releases/tag/v153.7.0-2-multi-XP
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
