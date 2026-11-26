@@ -1,0 +1,32 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.28.0.schema.json
+
+PackageIdentifier: mateo-ki.VProxy
+PackageVersion: 1.17.4
+PackageLocale: zh-CN
+ShortDescription: Windows 桌面程序：采集订阅、解析成节点、跑代理，并把代理质量实测出来。
+Description: VProxy 是用 Rust + egui 编写的 Windows 桌面程序，负责采集免费或自建订阅、解析成节点、跑代理，并把代理质量实测出来。订阅入口包括带 `YYYY-MM-DD` 日期占位符的订阅 URL、Gist 搜索页发现，以及 Telegram 频道预览（裸节点链接和订阅链接两类都取，节点只增不删）。解析支持 `ss` `vmess` `vless` `trojan` `hysteria2/hy2` `socks5` `http(s)` 分享链接，以及 Clash / Clash Meta YAML、Base64 与混合文本。延迟以经内核访问 Google `generate_204` 的真实握手为准，24 小时出口健康条按实测绘制，而不是看内核上报的状态。Windows 上它同时管理系统代理、TUN（提权交接后只保留一个实例）和终端 `HTTP_PROXY` 环境变量，按 exe 路径添加防火墙允许规则，支持单实例互斥与托盘，记录出口切换历史并按天统计规则命中，同时提供强制 bearer 鉴权的本地 HTTP API 与 mihomo / sing-box / xray 配置导出。安装包不含内核，内核缺失时由程序按需下载。
+Tags:
+- clash
+- sing-box
+- 代理
+- 出口健康
+- 测速
+- 节点解析
+- 订阅
+ReleaseNotes: |-
+  🚀 VProxy v1.17.4 发布说明 / Release Notes
+  🎉 VProxy v1.17.4 正式发布！本版本重点新增 当前使用节点完整快照持久化与防误删保护、外部代理软件共存与防打断守护，并对 「系统设置」、「关于」页面及全界面文案/布局 进行了统一极简重构：
+  📌 当前使用节点持久化与防误删保护
+  - 完整快照兜底：在 MihomoConfigOptions 中持久化 selected_node_snapshot，Database 新增 persist_selected_node / clear_selected_node_if / resolve_selected_node（按 ID → 跨分片指纹 → 已保存快照顺序恢复），应用重启、开机自启与切换回连不再因节点库变化而退回误选其它节点；
+  - 订阅刷新与清理保护：write_source_nodes（覆盖与累计写入）按节点指纹继承既有节点 ID，并在上游刷新批次回传暂缺时保留当前激活节点；delete_dead_nodes、prune_stale_dead_nodes、delete_invalid_hosts、dedupe_nodes 与 deduplicate_physical 均自动跳过 pinned_selection 保护中的当前使用节点（仅在用户主动删除节点/所属订阅源或清空节点库时清除）；新增回归测试 pinned_active_node_survives_source_refresh_speedtest_failure_and_cleanup。
+  🛡️ 外部代理防打断守护与端口碰撞自愈
+  - 系统代理防篡改守护：auto_rearm_system_proxy 默认开启并将 maybe_check_proxy_drift 巡检周期缩短至 5 秒，降低其他代理工具启停改写系统代理对当前连接的影响；
+  - 内部直连/本地请求隔离：无代理订阅拉取、Geo 规则库下载、本地控制端口检查与 API 推送等内部请求统一启用 .no_proxy()，不随系统代理变更受阻；
+  - 控制器端口自动避让：默认控制器端口被外部进程占用时通过 allocate_fallback_controller_port 自动改绑空闲回环端口并同步运行时状态。
+  🎨 系统设置、关于页面与全局 UI 极简重构
+  - 共享极简列表组件体系：抽离 settings_list（settings_group / settings_divider / settings_row / pill_toggle / segmented_pills / stepper_u32），修复 segmented_pills 在右对齐行中的选项顺序与紧凑尺寸计算；
+  - 系统设置重构：六分页（常规 / 外观 / 订阅测速 / 代理守护 / 接口 / 清理）清晰重组与去重，精简冗余提示与对比文案；
+  - 关于页面重构：品牌卡新增点击版本胶囊复制与一键 复制环境信息；主更新流与历史版本切换状态解耦（切换/下载历史版本不再覆盖顶部更新检测结果），支持 稳定版 | 预发版 胶囊切换、展开历史版本列表自动加载与行内原位操作；独立出默认折叠的「本机目录」卡片（含 复制/打开）并修复垂直滚动裁剪穿透底部状态栏的问题；精简免责声明与更新日志弹窗。
+ManifestType: locale
+ManifestVersion: 1.28.0
