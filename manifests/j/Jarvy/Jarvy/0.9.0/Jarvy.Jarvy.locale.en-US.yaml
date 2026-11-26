@@ -1,0 +1,123 @@
+# Created with WinGet Releaser using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Jarvy.Jarvy
+PackageVersion: 0.9.0
+PackageLocale: en-US
+Publisher: Jarvy
+PublisherUrl: https://github.com/Cliftonz/jarvy
+PublisherSupportUrl: https://github.com/Cliftonz/jarvy/issues
+PrivacyUrl: https://github.com/Cliftonz/jarvy/blob/v0.8.4/PRIVACY.md
+PackageName: Jarvy
+PackageUrl: https://github.com/Cliftonz/jarvy
+License: MIT OR Apache-2.0
+LicenseUrl: https://github.com/Cliftonz/jarvy/blob/main/LICENSE
+ShortDescription: Fast, cross-platform CLI that installs and manages developer tools
+Description: |-
+  Jarvy provisions development environments from a jarvy.toml config file.
+  It installs tools via native package managers (brew, apt, dnf, winget).
+Moniker: jarvy
+Tags:
+- cli
+- developer-tools
+- devtools
+- provisioning
+- setup
+ReleaseNotes: |-
+  Added:
+  - Add six tools: mkcert and nss (locally trusted dev certificates; mkcert
+    pulls in nss on macOS and Linux), t3code (T3 Code CLI), t3code-desktop
+    (T3 Code desktop app), deepseek-harness (dsh), and herdr.
+  Fixes:
+  - Reinstall or update jarvy while it is running on Windows. install.ps1
+    and jarvy update move the running jarvy.exe aside to jarvy.exe.old
+    before copying the new binary, so a jarvy mcp server held open by an
+    editor or agent no longer blocks the upgrade. Running sessions keep the
+    old version until restarted, and the installer warns when it finds one.
+    install.sh also reinstalls cleanly over a running jarvy.
+  - Run Windows hooks under Git for Windows bash by absolute path. Bare bash
+    resolved to C:\Windows\System32\bash.exe, the WSL launcher, so hooks ran
+    inside a Linux distro without the host's tools and failed with exit 127.
+    With no Git Bash install, hooks run under PowerShell.
+  - Stop the MCP server from replying to JSON-RPC notifications. Clients such
+    as RustRover reported the reply to notifications/initialized as a
+    protocol error.
+  - Keep the hook.failed telemetry line off the console. It is now emitted at
+    info level, so the terminal shows only the "Hook ... failed" message; the
+    log file and OTLP still receive the event, and -v shows it.
+  - Authenticate install.ps1's GitHub API version lookup with GITHUB_TOKEN
+    (or GH_TOKEN) when set, avoiding the anonymous 60 requests/hour limit on
+    shared CI runners. Release downloads stay unauthenticated.
+  Security:
+  - The Jarvy GitHub Action's args input no longer evaluates shell syntax.
+    It is split on whitespace with globbing disabled, so $(...), backticks
+    and variables in args are passed through literally. Quoted multi-word
+    arguments (e.g. --filter "a b") are no longer supported.
+  - Mask the whole userinfo of a registry URL, username as well as password,
+    in registry.* telemetry events and fetch error messages.
+  - Emit wizard session ids in telemetry as a 16-hex sha256 prefix instead of
+    the raw UUID, which names the MCP-bypass marker file.
+  - Replace the archived serde_yaml crate with serde-saphyr. serde_yaml
+    pulled in unsafe-libyaml, flagged by RUSTSEC-2024-0449.
+  - Harden CI: actions pinned to commit SHAs, least-privilege workflow tokens,
+    no untrusted expressions interpolated into run scripts, Semgrep blocking
+    on ERROR.
+  Changes:
+  - Minimum supported Rust version is now 1.89 (was 1.88), as required by
+    serde-saphyr.
+  - --format yaml output may differ cosmetically (quoting, indentation).
+    The data it carries is unchanged.
+  - Commit Cargo.lock; release builds and the Docker image now build with
+    --locked.
+  - Bump OpenTelemetry crates to 0.33, zip to 9.0, and dirs to 7.0.
+  Known issues:
+  - On Windows, if the installed jarvy is v0.6.0 through v0.8.2 and
+    came from install.ps1 or a raw binary, jarvy update cannot
+    upgrade it to this release: it always fails with Access is denied,
+    retrying cannot help, and the old binary stays in place. Reinstall
+    with install.ps1 (or switch to winget / choco / scoop); updating
+    via v0.8.0 to v0.8.2 first does not help. Installs managed by winget,
+    choco or scoop update through their package manager and are not
+    affected (#206).
+  Full Changelog: v0.9.0-rc.4...v0.9.0
+  Installation
+  Quick Install (Unix)
+  curl -fsSL https://raw.githubusercontent.com/Cliftonz/jarvy/main/dist/scripts/install.sh | bash
+  Quick Install (Windows PowerShell)
+  irm https://raw.githubusercontent.com/Cliftonz/jarvy/main/dist/scripts/install.ps1 | iex
+  Homebrew
+  brew install Cliftonz/tap/jarvy
+  Cargo
+  cargo install jarvy
+  Early-Release Channel
+  Pre-release tags (-rc.N, -beta.N) are routed through the beta channel.
+  Opt in: JARVY_CHANNEL=beta on the install script, or jarvy update --channel beta.
+  See docs/release-testing.md.
+  See installation docs for more options.
+  Security
+  Verify Signatures
+  All release artifacts are signed with Sigstore keyless OIDC. Verify any artifact:
+  # Substitute a triple that matches your platform, e.g.
+  # aarch64-apple-darwin, x86_64-unknown-linux-musl,
+  # aarch64-unknown-linux-gnu, x86_64-pc-windows-msvc (.zip).
+  ARTIFACT=jarvy-v0.9.0-x86_64-unknown-linux-musl.tar.gz
+  BASE=https://github.com/Cliftonz/jarvy/releases/download/v0.9.0
+  curl -LO $BASE/$ARTIFACT
+  curl -LO $BASE/$ARTIFACT.sig
+  curl -LO $BASE/$ARTIFACT.pem
+  cosign verify-blob \
+    --signature $ARTIFACT.sig \
+    --certificate $ARTIFACT.pem \
+    --certificate-identity-regexp '^https://github\.com/Cliftonz/jarvy/\.github/workflows/release\.yml@refs/tags/v[0-9.]+(-[A-Za-z0-9.]+)?$' \
+    --certificate-oidc-issuer 'https://token.actions.githubusercontent.com' \
+    $ARTIFACT
+  Tag Signature
+  This release was cut from a signed git tag. Verify with:
+  git -c gpg.ssh.allowedSignersFile=.github/allowed_signers tag --verify v0.9.0
+  SBOM
+  Software Bill of Materials in SPDX 2.3 (sbom.spdx.json) and CycloneDX 1.4 (sbom.cdx.json).
+  Checksums
+  SHA256 checksums for all artifacts are in SHA256SUMS.txt.
+ReleaseNotesUrl: https://github.com/Cliftonz/jarvy/releases/tag/v0.9.0
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
