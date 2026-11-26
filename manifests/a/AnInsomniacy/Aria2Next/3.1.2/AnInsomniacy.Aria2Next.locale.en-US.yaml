@@ -1,0 +1,63 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: AnInsomniacy.Aria2Next
+PackageVersion: 3.1.2
+PackageLocale: en-US
+Publisher: AnInsomniacy
+PublisherUrl: https://github.com/AnInsomniacy
+PublisherSupportUrl: https://github.com/AnInsomniacy/aria2-next/issues
+Author: AnInsomniac
+PackageName: Aria2 Next
+PackageUrl: https://github.com/AnInsomniacy/aria2-next
+License: GPL-2.0
+LicenseUrl: https://github.com/AnInsomniacy/aria2-next/blob/main/COPYING
+ShortDescription: Maintained aria2 fork with extensive bug fixes and modernized architecture
+Description: |-
+  aria2 is remarkable open source software. For over a decade it has been one of the most capable
+  download engines available, trusted by countless tools and users worldwide. We are deeply grateful
+  to the original authors and contributors of the aria2 project. They built something that has stood
+  the test of time, and that enduring quality is the best testament to their vision and craftsmanship.
+
+  But upstream development has slowed dramatically in recent years. Dependencies grew stale, builds
+  broke on modern platforms, and a backlog of bugs went unaddressed. We picked up the baton: migrated
+  the codebase to a modern build framework, triaged and fixed a substantial number of upstream issues,
+  and introduced ED2K protocol support for the first time. A full audit trail is preserved in
+  docs/maintenance/upstream-issue-review/matrix.csv.
+
+  Aria2 Next is an actively maintained aria2-compatible engine for everyone, and it is also the embedded
+  engine used by Motrix Next. Original interfaces, including options, configuration, sessions, JSON-RPC,
+  and libaria2, remain intact so downstream projects get a seamless upgrade. The focus is straightforward:
+  release reliability, current dependency baselines, and ongoing compatibility fixes. Same engine, renewed
+  foundation.
+ReleaseNotes: |-
+  ## Summary
+
+  Aria2 Next 3.1.2 fixes downloads that could stay in the stopping state after a pause or removal, picks up its own unfinished files again when the same URL is added without `--continue`, and expands `${HOME}` in path options. Release assets cover the same seven platforms.
+
+  ### Fixed
+
+  • A download whose disk write fails while it is being paused or removed now finishes stopping instead of waiting forever. Repeated stop requests no longer complete a task twice; a later request can only strengthen the outcome, so a removal wins over a pause and a pause over a requeue ([rayburst#832](https://github.com/AnInsomniacy/rayburst/issues/832)).
+  • On Linux, `--file-allocation=falloc` and `prealloc` reserve space in 256 MiB steps, so pausing or removing a large download no longer waits for the whole file to be reserved ([rayburst#832](https://github.com/AnInsomniacy/rayburst/issues/832)).
+  • Adding a URL again after its unfinished download was removed continues the file this engine left behind, even without `--continue`, when the server shows the same file：the same length, range support, and a matching strong ETag or Last-Modified. Otherwise the download gets a new numbered name as before, and a file that still belongs to a paused download is never taken over ([rayburst#842](https://github.com/AnInsomniacy/rayburst/issues/842)).
+  • Path options such as `--dir`, `--save-session` and `--log` expand `${HOME}`, on the command line and in the configuration file, as aria2 does ([#94](https://github.com/AnInsomniacy/aria2-next/issues/94)).
+
+  ### Changed
+
+  • A stop that takes longer than two seconds is logged with what it is waiting for, and a disk operation that takes longer than one second is logged at most once every ten seconds per file.
+
+  ### Downloads
+
+  | Platform | Download |
+  | --- | --- |
+  | Linux x86_64 | `aria2-next-3.1.2-linux-x86_64` |
+  | Linux ARM64 | `aria2-next-3.1.2-linux-aarch64` |
+  | macOS Apple Silicon | `aria2-next-3.1.2-macos-arm64` |
+  | macOS Intel | `aria2-next-3.1.2-macos-x86_64` |
+  | Windows x86_64 | `aria2-next-3.1.2-windows-x86_64.exe` |
+  | Windows ARM64 | `aria2-next-3.1.2-windows-arm64.exe` |
+  | Android ARM64 | `aria2-next-3.1.2-android-arm64` |
+  | Checksums | `aria2-next-3.1.2-checksums.sha256` |
+ReleaseNotesUrl: https://github.com/AnInsomniacy/aria2-next/releases/tag/v3.1.2
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
