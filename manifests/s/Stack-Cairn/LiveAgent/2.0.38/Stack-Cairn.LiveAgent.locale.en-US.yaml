@@ -1,0 +1,60 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Stack-Cairn.LiveAgent
+PackageVersion: 2.0.38
+PackageLocale: en-US
+Publisher: Stack-Cairn
+PublisherUrl: https://github.com/Stack-Cairn
+PublisherSupportUrl: https://github.com/Stack-Cairn/LiveAgent/issues
+PackageName: LiveAgent
+PackageUrl: https://github.com/Stack-Cairn/LiveAgent
+License: MIT
+LicenseUrl: https://github.com/Stack-Cairn/LiveAgent/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Stack-Cairn
+ShortDescription: A local-first AI agent desktop client that deeply integrates large language model reasoning with local system tools.
+Description: LiveAgent is a local-first AI agent desktop client. It deeply integrates large language model reasoning with local system tools, so the AI can genuinely operate your file system, run commands, and manage scheduled tasks — while the Gateway enables remote access and collaboration.
+Tags:
+- agent
+- agentic
+- ai
+- claude-code
+- codex
+- large-language-model
+- llm
+- mcp
+ReleaseNotes: |-
+  Improved
+  - Faster startup when old history is still written to.
+    - If another client keeps writing to the legacy conversation folder, LiveAgent no longer re-reads the whole folder at every startup. It now reads only the files that are new or changed.
+    - Measured on a synthetic folder of 300 conversations (51 MB) with one file appended: native work drops from about 548 ms to about 2 ms, and the frontend pass from about 600 ms to about 5 ms.
+    (#1417, via #1418)
+  - Conversations still being written are imported later.
+    - A file changed in the last 2 minutes is not imported yet. The startup screen lists it as "Later N (still being written)", separately from Issues, and startup does not wait for it.
+    - LiveAgent picks it up in the background. It retries after 2 minutes, then waits twice as long each time, up to 30 minutes.
+    (#1417, via #1418)
+  - Old conflict records no longer block imports forever.
+    - A conversation that once failed with a conflict is retried automatically when any of these happens:
+      - the data folder changes;
+      - the source file changes;
+      - the conflicting conversation is gone;
+      - you upgrade to a K-brain that can extend an imported conversation in place.
+    - Settings now shows why each conversation could not be migrated, in English and Chinese. Reasons include "the messages differ partway through" and "the conversation was continued in K-brain after import".
+    (#1417, via #1418)
+  - Faster desktop launch. The history migration code now loads after the backend connects. This cuts the desktop startup JavaScript from about 255 kB to 88 kB gzip, and the startup files from 16 to 10. (#1418)
+  - Bundled K-brain is now v0.107.47.
+    - An interrupted legacy import is completed in place instead of failing with a conflict.
+    - Import conflicts now include the reason.
+    - A conversation that is busy is retried later instead of being reported as a conflict.
+    (#1419, via #1420)
+  Quality
+  - New tests cover:
+    - incremental migration
+    - conflict retries
+    - the conflict reasons shown in Settings
+    - end-to-end prefix updates against the new K-brain backend
+    Rust tests also cover the new manifest and the selective read commands. (#1418)
+  - Lower startup bundle budget. The desktop startup bundle budget now matches the new, smaller size, so future growth is caught earlier. (#1418)
+ReleaseNotesUrl: https://github.com/Stack-Cairn/LiveAgent/releases/tag/v2.0.38
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
