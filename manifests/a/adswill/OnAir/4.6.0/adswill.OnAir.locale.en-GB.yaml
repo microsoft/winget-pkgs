@@ -1,0 +1,89 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: adswill.OnAir
+PackageVersion: 4.6.0
+PackageLocale: en-GB
+Publisher: OnAir project
+PublisherUrl: https://github.com/adswill
+PublisherSupportUrl: https://github.com/adswill/OnAir/issues
+PrivacyUrl: https://on-air.dev/docs/privacy/
+Author: Kristijonas Adomaitis
+PackageName: OnAir
+PackageUrl: https://on-air.dev/
+License: GPL-3.0-or-later
+LicenseUrl: https://github.com/adswill/OnAir/blob/HEAD/LICENSE
+Copyright: Copyright (C) 2026 Kristijonas Adomaitis and OnAir contributors
+ShortDescription: Free, open-source software-defined radio receiver covering TV, radio, aviation, maritime, satellite and amateur modes.
+Description: |-
+  OnAir turns a low-cost software-defined radio (a HackRF, an RTL-SDR, an Airspy and many others) into a receiver for most of what is on the air. Plug in an antenna, pick a mode, and watch the spectrum, the sync, the error correction and the decoded data.
+
+  It covers 392 modes in 14 families, from TV and DAB to aircraft, ships, satellites, two-way radio, pagers and sensors, including digital TV (DVB-T/T2/C/S2, ATSC, ISDB-T, DTMB), DAB+, FM/RDS, DRM, ADS-B, ACARS, AIS, weather satellites, GNSS, FT8 and other amateur modes, DMR, P25 and TETRA, and pagers.
+
+  It works with HackRF, RTL-SDR, Airspy, SDRplay, BladeRF, LimeSDR, USRP and Pluto, plus network radios, sound cards and Hamlib rigs. Free and open source under GPL-3.0-or-later.
+
+  It is a receiver first. It can also send test signals through a transmit-capable radio into a dummy load, which is off by default behind a licence notice. New users can press Tour in the app to walk through OnAir on a built-in demo signal before buying a radio.
+Tags:
+- ads-b
+- dab
+- dvb-t
+- fm-radio
+- sdr
+- software-defined-radio
+ReleaseNotes: |-
+  OnAir 4.6.0
+  OnAir 4.6 splits the mode list into 35 groups, adds a session export, share-ready spectrum snapshots, optional sound cues, a DAB picture window, user-installed voice codecs on Android, voice codecs in the headless server, a smoother waterfall in the web app, and fixes for the bugs reported on Discord and GitHub since 4.5. Most of it was tested on generated signals only: read Known limits at the end.
+  New features
+  - Mode list in 35 groups: the old 17 groups are split by what the modes are (Aviation, Satellite & navigation, IoT, Weather & science, Amateur digital, HF utility, General & tools and more), with new colours and chips. Group names you saved in 4.5 are carried over.
+  - Export this session (Tools > Backup and restore): one zip with the decoded log (CSV, KML, GPX), the list of recordings, your settings without passwords or keys, the radio, an optional location and a short text summary.
+  - Share-ready snapshot: the Radio clips window makes one captioned PNG of the spectrum and waterfall (frequency, mode, UTC time, optional place, OnAir version), with a button that copies the caption.
+  - Sound cues (Settings > Notifications, off by default): short tones for lock, lost lock, signal found and pass ended.
+  - DAB picture window (#656): the slideshow picture can open bigger, in a window of its own.
+  - RTL-SDR Blog V4 by hand (#663, #337): an option treats a dongle as a V4 when it does not report itself as one.
+  - Bigger tables (#455): the Mesh and packet tables can keep up to 200 times as many rows.
+  - Analog TV transmit, long videos: the sound of a long video file is streamed, so a 3-hour file keeps its sound (it was cut at 900 s).
+  - Android, Settings > Codecs: import and remove the speech codec libraries you supply yourself. A library must be an arm64 Android library on the allowed list; OnAir shows its SHA-256 and a trust warning before copying it. OnAir still ships no patented codec.
+  - Headless server, voice: onair-server now loads the speech codec plug-ins you installed, so TETRA, TETRA DMO and Yaesu System Fusion voice play in the browser. Accept a codec notice with --accept-codec-notice, in the settings file, or in the browser app (Settings > Voice codecs).
+  - Web app waterfall (#654): it keeps its rows when you zoom, retune or change the range or the colours, paints once per screen refresh and fits its column.
+  - LimeSDR Mini on HF: tuning below the LimeSDR's lower limit through its built-in frequency shifter (NCO). Written without the radio: see Known limits.
+  - Analog TV deinterlacing: Weave and Bob have tooltips that say what each one does.
+  - A friendly "star OnAir on GitHub" card after the third launch or a good decode (never on the first launch, at most a few times, no network use; Settings has a switch to turn it off).
+  Changes
+  - QO-100: the LNB error now comes from a steady beacon tracker, so the dial no longer jumps when a beacon fades; a spectrum detail setting and a full-resolution waterfall make the narrowband view finer (DG2YK's feedback).
+  - ATSC 3.0 (#574, Felbs): a PLP that decodes nothing is tried with a few blocks per frame instead of all of them, so a weak 256QAM PLP or an unlocked LDM core no longer slows the receiver until it drops samples.
+  - Choose a mode: the filter row wraps instead of clipping, and both checkboxes stay on one row when they fit.
+  - Simplified Chinese (#558, BG2GGF): many terms reviewed and corrected (DAB ensembles, Band III, meteor scatter, sample rate, AIS, Sigfox, satellite passes, signal reports and more).
+  - Web app (#653): Listen works over plain http (the audio worklet loads as a page script).
+  - Builds: release builds reuse the compiler cache across versions; the Windows build went from about 86 to 8 minutes when the cache is warm.
+  Fixes
+  - Analog transmit (#660): AM, WFM, USB, LSB and CW sent an NFM signal; each now sends its own modulation, with tests.
+  - Mesh (#659): the Custom preset now unlocks and applies its own bandwidth (for example 62.5 kHz for SF Narrow).
+  - Maps (#652): scroll-to-zoom on the AIS map is no longer far too sensitive with a Magic Mouse or trackpad.
+  - ATSC 3.0 (#650): switching to another service could crash (the service list was read while the receiver updated it).
+  - macOS (#646): a crash at start on Macs with the Homebrew SoapySDRPlay module: OnAir now loads Soapy modules one by one and skips that one (it has its own SDRplay driver).
+  - Airband (#668): a guide to the automatic scanner, docs/AIRBAND-AUTO.md.
+  Contributors
+  Pull requests merged since 4.5: #653, #654 and #655 (rrayn), #574 (Felbs), #558 (BG2GGF), #644 (OnAir). Thank you.
+  OnAir's own code carries one attribution term under GPL section 7(b) (see ADDITIONAL-TERMS.md): keep the notices and the line "Based on OnAir by Kristijonas Adomaitis - https://on-air.dev" in a program that contains it. Third-party material is credited in THIRD_PARTY.md and in the in-app credits. The full list of contributors is in CONTRIBUTORS.md.
+  Coming next (not in 4.6)
+  IQ file playback with a seek bar, a shared build cache, more of the approved feature list (scan list import, share by link, recording trim, profiles, accessibility), and the SNR work on the modes that decode noise.
+  Known limits
+  Please read these before relying on a new feature.
+  - Almost everything new was tested on generated signals only, and most of it was first built by the CI. The LimeSDR Mini HF tuning was written without the radio. The Android codec import was not tried on a phone.
+  - The equaliser that was planned for 4.6 is not in it (it was taken out again before the release).
+  - DRM at 17.7 MHz (audio plus data) still plays badly (#516, #332).
+  - Not fixed: shortwave RTTY and Wefax staying at "starting" (#506), Tetrapol traffic (#408, #333), the Windows 11 wizard buttons (#590), RSP1 and MSi2500 on Linux (#561), ATSC 3.0 channel 21 (#484). They need the reporters' logs or recordings.
+  - Chinese strings are reviewed by a contributor, not all of them yet.
+  - Tests: some tests on the Windows CI shards have load-dependent timing flakes (a whole-process stall on the shared machines), and two long-form tests (hfutil_hdreq, loraraw_survey) fail on Linux arm64 in the nightly full run.
+ReleaseNotesUrl: https://github.com/adswill/OnAir/releases/tag/v4.6.0
+Documentations:
+- DocumentLabel: OnAir documentation
+  DocumentUrl: https://on-air.dev/docs/
+- DocumentLabel: Your first reception
+  DocumentUrl: https://on-air.dev/docs/first-reception/
+- DocumentLabel: Supported radios
+  DocumentUrl: https://on-air.dev/docs/radios/
+- DocumentLabel: Troubleshooting
+  DocumentUrl: https://on-air.dev/docs/troubleshooting/
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
