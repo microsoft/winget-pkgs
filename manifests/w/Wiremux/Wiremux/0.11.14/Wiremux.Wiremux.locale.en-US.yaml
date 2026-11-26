@@ -1,0 +1,42 @@
+# Created with WinGet Releaser using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Wiremux.Wiremux
+PackageVersion: 0.11.14
+PackageLocale: en-US
+Publisher: Wiremux
+PublisherUrl: https://github.com/wiremuxhq/wiremux
+PublisherSupportUrl: https://github.com/wiremuxhq/wiremux/issues
+PackageName: Wiremux
+PackageUrl: https://github.com/wiremuxhq/wiremux
+License: MIT OR Apache-2.0
+LicenseUrl: https://github.com/wiremuxhq/wiremux/blob/v0.9.3/LICENSE
+ShortDescription: Wiremux maps Chat Completions, Messages, Responses, Gemini, and Converse through one IR.
+Moniker: wiremux
+Tags:
+- anthropic
+- llm
+- openai
+- proxy
+- rust
+ReleaseNotes: |-
+  wiremux 0.11.14
+  Highlights
+  A file from Notepad, a blank tool id, and a role the API does not use now fail or get recorded instead of being sent as something else.
+  Token limits and temperatures written as text are kept.
+  Bug fixes
+  - A Notepad file failed at column 1. wiremux map and profile validate accept a UTF-8 BOM at the start of the file. An empty model is left out, and the loss line is drop model: empty model is omitted, instead of sending "model":"" (#741, #746).
+  - A directory path looked like a permission error. wiremux map and profile validate say the path is a directory. On Windows that used to be Access is denied. (os error 5) (#741, #745).
+  - A tool id that was blank was sent as "". Converse decode and encode fail when toolUseId is empty or only spaces. A missing id still says omitted toolUseId. A Chat tool message without tool_call_id fails. An assistant tool_calls entry with "id":"" fails. A call that includes an id is unchanged (#744, #750, #751).
+  - A message list that was not an array became an empty list. Chat, Messages, Gemini contents, and Converse record a drop and name the JSON kind. A missing list stays empty with no drop. A Responses input string is still the user text (#746, #747).
+  - "max_tokens":"16" became 4096. Integer strings are kept, including surrounding spaces. "temperature":"0.2" and a top_p written as text are kept. A string that is not a number still does not become a number (#748, #749).
+  - "role":"nope" was sent as the user. Chat, Messages, Gemini, and Responses drop that turn and record nope is not a role. A missing role still defaults to user (#753).
+  - stop set to 5 disappeared. A stop that is not a string, or an array of strings, is dropped and recorded. "stop":"END" is unchanged (#753).
+  Upgrading
+  Set wiremux and wiremux-auth to 0.11.14. No public struct or enum field was added, so existing literals still compile.
+  Calls that used to succeed now fail when a Converse toolUseId is blank, when a Chat tool message has no tool_call_id, or when an assistant tool call id is blank. An unknown role is no longer rewritten as user.
+  Full changelog
+  v0.11.13...v0.11.14
+ReleaseNotesUrl: https://github.com/wiremuxhq/wiremux/releases/tag/v0.11.14
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
