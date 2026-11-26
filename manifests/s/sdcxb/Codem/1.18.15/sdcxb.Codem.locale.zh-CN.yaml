@@ -1,0 +1,64 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: sdcxb.Codem
+PackageVersion: 1.18.15
+PackageLocale: zh-CN
+Publisher: codem
+PublisherUrl: https://github.com/sdcxb
+PublisherSupportUrl: https://github.com/sdcxb/codem/issues
+Author: sdcxb
+PackageName: Codem
+PackageUrl: https://github.com/sdcxb/codem
+License: 专有软件
+ShortDescription: 对标 Codex 的 AI 编程助手桌面客户端，支持代码生成、文件操作与终端执行。
+Description: Codem 是基于 Tauri v2 + React + TypeScript 构建的 AI 编程助手桌面应用，为 MiMo Code 等 CLI 提供可视化界面，支持代码生成、项目文件读写、终端执行、子智能体协作、技能与插件扩展，以及 Git 项目与 worktree 管理。
+Tags:
+- harness
+- 人工智能
+- 代码
+- 大模型
+- 大语言模型
+- 智能体
+- 编程
+- 聊天机器人
+- 自主智能
+ReleaseNotes: |-
+  # Codem v1.18.15
+  发布日期：2026-11-23
+  类型：稳定版（Windows x64）
+  下载：Codem_1.18.15_x64-setup.exe（NSIS 安装包）· Codem_1.18.15_x64_en-US.msi（MSI）
+  本版要点
+  1. 新版界面成为默认：壳层、聊天、设置、任务/团队/记忆等视觉统一；设置 → 外观 → 界面版本可随时切回经典界面。
+  2. 读取工作区里的 .env、.git 元数据、SSH 私钥、云凭据等敏感文件时，请求批准 / 替我审批模式会弹出审批；完全访问模式允许读取，但写/删这些文件在任何模式下都会被拒绝。
+  3. 敏感文件判定改为按真实路径：符号链接、junction、8.3 短名、Windows 备用数据流（ADS）不能再靠换名字绕过；shell 命令、grep/lsp、run_code/workflow、附件、MCP 文件资源与自动源码命中走同一规则。
+  4. 子进程（bash / 终端 / MCP / 后台任务）默认不再继承宿主密钥环境变量；设置里提供默认关闭的「整份继承」逃生开关。
+  5. 非文件 MCP 资源（memory://、db:// 等）无法按路径判断内容，首次读取需要按 URI 批准。
+  6. 插件管理不再出现「能关闭、但关闭后没有任何效果」的假开关；修复兼容层重复加载导致的静默失败，以及插件目录声明的服务与实际提供不一致。
+  变更
+  新增与改进
+  - 新版界面（v2）默认；设置 → 外观 → 界面版本可切回经典。
+  - 轮询改为通知驱动，流式输出时外壳不再随之重渲染；窄屏与无障碍细节修正。
+  安全
+  - 敏感文件读取保护覆盖 read / grep / glob / lsp / bash / terminal / run_code / workflow / read_attachment / MCP 资源 / 自动注入 / 读缓存。
+  - 子进程环境默认剥离密钥变量，保留 PATH、HOME、USERPROFILE、工具链路径与无凭据代理；MCP 用户显式配置的环境变量仍然保留。
+  - 敏感文件判定使用真实路径，并识别 Windows ADS。
+  修复
+  - 插件兼容层不再被装配两次。
+  - 系统内置且不可安全关闭的插件统一标记为只读，不再提供无效开关。
+  - 修正 Host / Store 插件目录声明的服务与实际提供不一致。
+  - 删除未注册的重复插件市场实现。
+  升级说明
+  - 可直接覆盖安装，不需要先卸载旧版。
+  - 若某些本地构建脚本依赖子进程读取 OPENAI_API_KEY、GITHUB_TOKEN 等环境变量，可在「设置 → 安全」打开「允许子进程继承密钥环境变量」；默认关闭。
+  - 更新器清单同时提供 windows-x86_64-nsis 与 windows-x86_64 两个平台键。
+  已知问题
+  - shell 脚本内部自行拼接路径（例如 python run.py 内部再读 .env）无法只靠命令文本判定；这类行为仍受沙箱与直接文件名规则约束，彻底隔离需要更小的 OS 能力沙箱。
+  - 非文件 MCP 资源采用「按 URI 首次审批」，不是内容级 DLP；服务器返回什么仍由服务器决定。
+  - 历史遗留：个别长会话在压缩事件缺少 removedMessageIds 时会按「不删除任何消息」处理，只上报不自修。
+  校验
+  - 更新器签名：Codem_1.18.15_x64-setup.exe.sig
+  - 更新清单：latest.json（windows-x86_64-nsis + windows-x86_64）
+ReleaseNotesUrl: https://github.com/sdcxb/codem/releases/tag/v1.18.15
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
