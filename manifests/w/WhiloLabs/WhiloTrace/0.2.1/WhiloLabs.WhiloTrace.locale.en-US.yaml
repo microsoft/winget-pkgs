@@ -1,0 +1,53 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: WhiloLabs.WhiloTrace
+PackageVersion: 0.2.1
+PackageLocale: en-US
+Publisher: Whilo Labs
+PublisherUrl: https://github.com/Whilo-Labs
+PublisherSupportUrl: https://github.com/Whilo-Labs/whilo-trace/issues
+Author: Firat Baghirli
+PackageName: Whilo Trace
+PackageUrl: https://github.com/Whilo-Labs/whilo-trace
+License: MIT OR Apache-2.0
+LicenseUrl: https://github.com/Whilo-Labs/whilo-trace/blob/v0.2.1/README.md#license
+Copyright: Copyright (c) 2026 Firat Baghirli
+ShortDescription: Network path monitor that shows per-hop packet loss and latency for several hosts at once.
+Description: |-
+  Whilo Trace watches the network path to several hosts at once and shows per-hop packet loss and latency in real time.
+  It tells loss that carries on to the destination apart from routers that only limit the replies they send about themselves, and points at the hop where the loss starts.
+  All targets and pinned hops share one timeline, from 5 minutes to 24 hours, with red columns for loss and a jitter strip.
+  The route map shows the path on a world map. Router places come from the DB-IP Lite databases (CC BY 4.0) installed with the app, so lookups stay on your computer. Router locations in these free databases are often wrong, and the map has so far been checked only with made-up places, not on real traces.
+  Rounds are kept locally in SQLite, and any period can be saved as a report for your ISP in HTML, PNG, CSV and JSON.
+  The interface is in English and Russian, with a light, dark or system theme.
+  On Windows it uses the system ICMP API and runs without administrator rights. Probes are ICMP over IPv4 only for now.
+  Tested by the author on Windows 11. Windows 10 is expected to work but has not been tested yet.
+Moniker: whilo-trace
+Tags:
+- icmp
+- isp
+- jitter
+- latency
+- mtr
+- network
+- network-diagnostics
+- network-monitoring
+- networking
+- packet-loss
+- ping
+- route
+- traceroute
+ReleaseNotes: |-
+  This release fixes figures that could be wrong in the trace and in the report for your ISP.
+  - Where the loss starts. A single round that found the destination one hop deeper than usual no longer turns real loss into "answers some probes" and hides where it starts. A router that limits its own answers is no longer named as the start of the loss. When only such routers stand before the destination, the app says that the start cannot be told from the hops.
+  - A route that got longer. A live destination no longer shows 100% loss until a restart when the route grew behind a router that stays silent: after 5 lost rounds in a row, a round goes the full depth once a minute. A round that stopped short of a longer route no longer counts as lost.
+  - Reports over an outage. For a period where no round reached the destination, the hop table goes on to the destination and no longer calls the hop of the outage the destination. A window inside a long outage on the screen does the same.
+  - Findings for a picked period. The report's findings now name the hops of that period, not of the whole window.
+  - Pinned hops in the report. On the chart in report.html, a hop that misses probes while the destination answers gets amber marks, as on the screen, instead of red loss.
+  - Numbers in the findings. A tiny loss no longer reads as 0% and a loss just under 100% no longer reads as 100%. The period of a report ends no later than the moment it is made, and the method line takes the interval from the rounds of the period.
+  - One running copy. Starting the app a second time brings up its window instead of probing every target twice.
+  - Command line. The whilo-trace-cli watch command no longer adds a target to the app's main screen or resumes a paused one.
+  - Picture for publishing. Your home city and your own network stay hidden in a few more cases, and a far hop in a district that shares its name with one at home keeps its city.
+ReleaseNotesUrl: https://github.com/Whilo-Labs/whilo-trace/releases/tag/v0.2.1
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
