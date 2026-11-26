@@ -2,7 +2,7 @@
 # yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
 
 PackageIdentifier: Skonester.Shiira
-PackageVersion: 0.4.0
+PackageVersion: 0.5.0
 PackageLocale: en-US
 Publisher: Shiira Project
 PublisherUrl: https://github.com/skonester
@@ -52,15 +52,22 @@ Tags:
 - web
 - webpage
 ReleaseNotes: |-
-  - YouTube media requests retain Litube-style pre-roll availability deadlines, adaptive query ranges, and same-source POST compatibility after a refused GET. Shaka retries temporary failures before source recovery.
-  - Pre-roll handling includes modern ad slots and forecasting ads with unknown duration. Buffering alone no longer unloads the player. Equal challenges share evaluation, and VOD HLS path challenges are resolved.
-  - The separate WEB_SAFARI route preserves its request/media identity. Playback confirmation requires a decoded frame from Shiira's player; local diagnostics identify extraction, transport and player failures.
-  - YouTube player DOM rebuilds retain the loaded stream. Terminal failures show a retry choice; native YouTube playback requires selecting its button.
-  - Startup enables persistent V8 compilation caching before loading the main application, covering CommonJS and ES modules.
-  - A lightweight splash uses the bundled Shiira logo while the browser prepares its initial tab.
-  - The UI preload sets the home screen's dark canvas before renderer initialization. Remote fonts wait until initial readiness, and the splash timeout waits for first paint.
-  - Graphics selection uses Chromium's platform defaults and driver restrictions instead of forcing Vulkan on every operating system.
-  Live playback, splash appearance and startup timing still need verification in the packaged application. The Litube playback audit records the remaining gaps in the adaptation.
-ReleaseNotesUrl: https://github.com/skonester/Shiira#latest-release--040
+  Version 0.5.0 makes YouTube playback reliable when signed out and replaces the old sign-in modal with real website popups.
+  YouTube playback
+  - Seeking works. Earlier releases built DASH streams from the iOS and visionOS clients. YouTube cuts those URLs off after about 1 MB unless the request carries a proof-of-origin token, so playback stopped and every seek outside the buffer failed with HTTP 403. Shiira now plays these clients' HLS manifests, which need neither a token nor the player-script solver.
+  - Fewer bot checks. visionOS requests carry a visitor ID issued by YouTube instead of a locally generated one. The iOS client rotates to a fresh visitor when YouTube leaves out the HLS manifest, and keeps the first one that works.
+  - Audio starts. YouTube labels every HLS segment seg.ts, whatever its real format. Shiira now reports each segment's container (MPEG-TS, fMP4 or packed AAC) so the player buffers audio correctly.
+  - visionOS and iOS now come first in the client order, ahead of the web clients.
+  In a signed-out live test of the same 16-minute video that failed in 0.4.0, Shiira played 1080p60 in about one second, completed all four seek scenarios, and made 92 media requests without one failure. 0.4.0 lost 90 of 295 requests to HTTP 403. Only that one video was tested. This approach follows Stream Tube (MIT).
+  Website sign-in
+  - Native site popups. Login and other popups that a page requests open as real windows in the originating page's profile, including private tabs. They keep window.opener, cross-origin messaging, referrers, form submissions and named windows. The old sign-in modal, which loaded popup URLs in an unrelated view, has been removed.
+  - Browser identity. Shiira reports the installed Chromium version and the real operating system, without Electron or Shiira product tokens, and disables Blink's automation indicator.
+  - Regular new-tab links still open in Shiira's tab strip.
+  Important
+  Google sign-in can still be rejected. Google may still answer "This browser or app may not be secure", for example on Scira's Continue with Google. The cause has not been found. See website sign-in compatibility.
+  Release checks
+  - The Windows release workflow runs a new sign-in smoke test against two local origins, covering popups, cross-origin messages, form POSTs and profile isolation.
+  - Local verification passed 240 unit tests and the YouTube Electron smoke test.
+ReleaseNotesUrl: https://github.com/skonester/Shiira/blob/HEAD/README.md#latest-release-050
 ManifestType: defaultLocale
 ManifestVersion: 1.28.0
