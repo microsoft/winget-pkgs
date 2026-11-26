@@ -1,0 +1,76 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Canestack.Kiri
+PackageVersion: 0.2.2
+PackageLocale: en-GB
+Publisher: Kiri
+PublisherUrl: https://canestack.com/
+PublisherSupportUrl: https://github.com/libracoder/kiri/issues
+Author: Canestack Labs
+PackageName: Kiri
+PackageUrl: https://runkiri.com/
+License: Apache-2.0
+LicenseUrl: https://github.com/libracoder/kiri/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 the Kiri contributors
+ShortDescription: A tiny, fast container runtime for Windows
+Description: Kiri is a container runtime written in Rust that runs your Docker images on Windows through a lightweight Linux VM. It works with the docker, Compose and buildx command lines you already use, and the installer registers no Windows service and no kernel driver.
+Tags:
+- buildx
+- compose
+- container
+- container-engine
+- containers
+- devcontainer
+- docker
+- linux-vm
+- oci
+ReleaseNotes: |-
+  Security
+  This release fixes several security problems, most of them reported to us privately. Update now. Details are in the advisories on the repository's Security tab.
+  - An image can no longer reach files on your Mac that you didn't share. The Linux VM is now given /Users, /Volumes and /private (as Docker Desktop shares by default), not the whole disk, and mount settings that come from an image are checked more strictly.
+  - A container's working directory always stays inside the container, and so does the folder Kiri makes for it when it is missing.
+  - A new volume is filled without following links inside it, so a container sharing the volume can't send the copy somewhere else.
+  - A malformed DNS query from a container can no longer stop the engine.
+  - Mac: containers can't reach other containers through the domain router (*.kiri.localhost), and its "not found" page lists your running containers only when asked by one of your own machine's names.
+  - Seccomp profiles are applied, and the default filter matches Docker's.
+  - Linux and WSL: containers are firewalled on kernels before 6.3, and reach the internet there.
+  - An --init container's first process keeps none of the engine's open files.
+  New
+  - Compose has its own section in the window.
+  - Install with Homebrew: brew install --cask libracoder/kiri/kiri.
+  - Every menu in the window can be searched: type to filter fonts and other long lists, with the arrow keys, Enter and Escape.
+  - Windows: Settings → Import brings images, volumes and containers over from Docker Desktop.
+  - Loop devices work in containers (losetup, disk images).
+  - Container files in Finder show volumes and bind mounts.
+  Fixed and improved
+  - Compose 5.7 and later attach again: docker compose up and docker compose logs -f show output.
+  - Testcontainers for .NET, MongoDB and LocalStack start: Kiri closes a connection when the client asks it to, answers exec and attach as Docker does, joins a container only to its own network, and a file copied in straight after a start is there.
+  - docker exec straight after a start finds the image's users, and a start that fills a new volume no longer holds up every other container.
+  - Saves made on the Mac reach file watchers in containers, so hot reload works in bind-mounted folders.
+  - always and unless-stopped containers come back after the VM crashes, and Kiri restarts on the new version after every update.
+  - A published TCP connection stays open however long it is quiet.
+  - Pulling several images at once can no longer damage the image list, and a damaged one is repaired. A damaged container list no longer costs containers their logs, files or volumes.
+  - A named pipe, or a program that never stops writing, no longer holds up the engine.
+  - Images with hard links to absolute symlinks unpack (Supabase's PostgreSQL image).
+  - k3d finds its nodes: the name filter is a regular expression, as in Docker.
+  - Images list newest first, and a missing working directory is made for non-root and read-only containers.
+  - A tmpfs volume keeps its owner and mode.
+  - Image update checkers (Watchtower, Arcane) work: Kiri answers GET /distribution/{name}/json.
+  - docker inspect reports a container's port bindings and exposed ports.
+  - Image names with encoded characters resolve (mongodb%2Fmongodb-atlas-local).
+  - docker cp never mounts a container's root twice, and containers start and commit correctly on kernels with overlayfs index on (Arch, CachyOS).
+  - Signals only reach running processes, and a failed start leaves no DNS name behind.
+  - Import brings volumes, containers that share a network and digest-pinned images across, leaves a volume in use alone, and says plainly when OrbStack or Docker Desktop isn't running.
+  - Windows: Docker works again after WSL restarts, launching Kiri at login no longer undoes a Stop, and the window opens whatever the page's size.
+  - Mac: ⌘C, ⌘V, ⌘X, ⌘A and ⌘Z work in the window's text fields, the traffic lights stay in the strip after switching themes, and opening Kiri from Finder no longer quits silently when a shell profile is a link to nothing.
+  - Mac: a first-launch step that fails no longer closes Kiri. It waits in the setup checklist with its error and Try again, and the window works meanwhile.
+  - Linux: an engine restart cleans up containers whose cgroup systemd already removed.
+ReleaseNotesUrl: https://github.com/libracoder/kiri/releases/tag/v0.2.2
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://docs.runkiri.com/
+- DocumentLabel: Features
+  DocumentUrl: https://github.com/libracoder/kiri/blob/HEAD/docs/features.md
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
