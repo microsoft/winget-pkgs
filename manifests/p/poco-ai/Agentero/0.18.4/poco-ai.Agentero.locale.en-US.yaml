@@ -1,0 +1,42 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.28.0.schema.json
+
+PackageIdentifier: poco-ai.Agentero
+PackageVersion: 0.18.4
+PackageLocale: en-US
+ShortDescription: Agent-friendly reference management.
+Description: 'Traditional reference managers are not agent-friendly: highlights and notes stay locked inside single files, making it hard for agents to reuse knowledge across papers; every conversation starts from scratch without a stable local knowledge map; PDFs are human-friendly but not the most comfortable reading material for agents. Agentero aims to build an agent-friendly, agent-native way to manage references, exploring how humans and agents collaborate on reference management. Connect your local agent via ACP (BYOA), select-text chat, import papers and Skills, stay compatible with the Zotero ecosystem, and get paper translation, bidirectional links with a knowledge graph, and deep PDF reading.'
+Tags:
+- academics
+- agent
+- article
+- literature
+- paper
+- pdf
+- reference
+- research
+- thesis
+- zotero
+ReleaseNotes: |-
+  This release brings Agent conversations into a full-window Agents Window and continues refining translation selection and export in PDFs: finished translations now live in the paper folder and sync only when opted in, while element selection and display-formula hit testing follow what is actually rendered. Translation PDFs now embed only the glyphs they use and share source-page resources, bringing a 10-page paper to about 5 MB. The Azure and Google Cloud translation engines are removed.
+  Features
+  - Agents Window: A new title-bar entry switches the main window into a full-window Agents workspace. The left rail lists conversation history per agent, each open conversation becomes a tab that can sit side by side, model and collaboration controls move into the composer footer, and the conversation column can be centered and resized. The sidebar Agent node goes back to expanding like a normal folder. (commit by @Phil-Fan)
+  - Translation storage and opt-in sync: Finished translations are written to translations/translated.pdf in the paper folder, bilingual exports go to translations/bilingual.pdf, and the export dialog opens there by default. Sync gains a Translation scope that stays off by default; the directory stays out of Git sync even when PDF, source, and attachments are all enabled. (#1268 by @ffy6511)
+  Improvements
+  - Title-bar quick open: The centered command palette is now an inline search field in the title bar. Results drop below it without a scrim, and Cmd+P, Shift+Cmd+P, Esc, click-outside, and keyboard navigation continue to work. (commit by @Phil-Fan)
+  - Translation PDF size: Fonts embed only the glyphs the translation uses, and formulas from the same source page share one page resource instead of repeating the full page. The translation of a 10-page paper lands around 5 MB, cutting storage by roughly 80%. (#1270 by @ffy6511)
+  Fixes
+  - Element-selection bounds: Cmd+. selection over translated text keeps only the layout blocks the rectangle covers; grazing the next section no longer pulls in a whole sentence, while a rectangle that truly covers two sections keeps both. Drag hits are measured from rendered lines, click and hover land on the chosen sentence, and saved highlights match on the page. (#1266 by @ffy6511)
+  - Display formulas and prose selections: Unnumbered display formulas are selectable in element mode and show a Formula label on hover, and a drag that starts on a formula keeps the formula under the pointer. Prose lines are no longer mistaken for display formulas, highlights no longer cut words out of a sentence, and descenders stay inside the selection. (#1267 by @ffy6511)
+  - Copying a paper path from the sidebar: WKWebView rejects clipboard writes once the translated PDF has focus; the copy now happens during the click, and an open PDF selection no longer replaces a copy started from the sidebar. (#1271 by @ffy6511)
+  - Claude detection on Windows: A leftover claude.cmd whose npm package is gone no longer hides a native claude.exe. Detection walks PATH candidates and keeps the first one the SDK can spawn; CLAUDE_CODE_EXECUTABLE stays authoritative and an explicit but unusable override fails instead of falling back. (#1259 by @JiaheChen2002)
+  - Translation pane closes with the paper body: Closing the paper body tab now closes its comparison translation pane too; closing NOTES or the translation pane alone still leaves the body open. (commit by @Phil-Fan)
+  - Trash clears translation cache: Moving a paper to the trash deletes its reflow-ir directory and removes matching reflow-build PDFs by content hash; unmapped hashes and font assets stay until a full cache clear. (#1268 by @ffy6511)
+  Breaking Changes
+  - Azure and Google Cloud translation engines removed: The Microsoft Translator (Azure) and Google Cloud Translate BYOK providers, their settings cards, host request paths, the Azure-only region field, and CLI profile fields are gone. Stored selections fall back to the default engine. (commit by @Phil-Fan)
+ReleaseNotesUrl: https://github.com/poco-ai/Agentero/releases/tag/v0.18.4
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://agentero-docs.poco-ai.com/
+ManifestType: locale
+ManifestVersion: 1.28.0
