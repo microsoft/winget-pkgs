@@ -1,0 +1,71 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: AnInsomniacy.Rayburst
+PackageVersion: 4.1.3
+PackageLocale: en-US
+Publisher: motrix
+PublisherUrl: https://github.com/AnInsomniacy
+PublisherSupportUrl: https://github.com/AnInsomniacy/rayburst/issues
+PackageName: Rayburst
+PackageUrl: https://github.com/AnInsomniacy/rayburst
+License: MIT
+LicenseUrl: https://github.com/AnInsomniacy/rayburst/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2025-present AnInsomniacy
+ShortDescription: Redefining the open-source download manager
+Description: |-
+  Redefining the open-source download manager
+
+  Design & Motion
+  Every transition and micro-interaction has been carefully tuned to follow Material Design 3 motion guidelines:
+  - Asymmetric timing — enter animations are slightly longer than exits, giving new content time to land while dismissed content leaves quickly
+  - Emphasized easing curves — decelerate on enter (cubic-bezier(0.2, 0, 0, 1)), accelerate on exit (cubic-bezier(0.3, 0, 0.8, 0.15)), replacing generic ease curves throughout the codebase
+  - Spring-based modals — dialogs use physically-modeled spring animations for a natural, responsive feel
+  - Consistent motion tokens — all durations and curves are defined as CSS custom properties, ensuring a unified rhythm across 12+ components
+
+  Features
+  - Multi-protocol downloads — HTTP, HTTPS, SFTP, ED2K, BitTorrent, Magnet, and .torrent tasks
+  - HLS and DASH — Native track selection, subtitles, live recording, resumable media downloads and MP4/MKV output. See media downloads.
+  - BitTorrent — Selective file download, DHT, peer exchange, encryption controls, metadata caching, GeoIP peer flags, and tracker probing
+  - Browser extension integration — Embedded Extension API with independent authentication, download confirmation, smart auto-submit, filename hints, referer/cookie forwarding, and real-time controls (Rayburst Connect)
+  - Safe filename handling — Content-Disposition, RFC 2047, non-UTF-8, percent-encoded, and extensionless URL resolution with path traversal sanitization
+  - Download organization — Favorite and recent folders, optional file-type categorization, stale-record cleanup, and completed history backed by SQLite
+  - Concurrent downloads — Independent limits for active tasks, stream connections, and BitTorrent peers
+  - Speed control — Global and per-task upload/download limits with day-of-week and time-of-day scheduling
+  - System integration — Tray operation, optional tray speed display, macOS Dock badge/progress, protocol handlers for magnet://, ed2k://, thunder://, and rayburst://
+  - Lightweight mode — Destroys the WebView on minimize-to-tray while Rust keeps the engine, task monitor, notifications, history, and extension routing alive
+  - Notifications and power options — Native task start/complete/failure notifications, keep-awake during downloads, and optional shutdown after completion
+  - Network controls — Scoped proxy support for downloads, app updates, and tracker updates, plus system proxy detection
+  - Auto-update channels — Stable, Beta, and Latest Across Channels policies with separate download and install phases
+  - Diagnostics — Structured logs, exportable diagnostic ZIPs, database integrity checks and Linux GPU rendering fallback
+  - Personalization — Light/dark/system theme, 10 color schemes, 27 languages, and first-launch system language detection
+  - Native desktop app — Tauri 2 with a Rust backend
+Tags:
+- download
+- downloader
+ReleaseNotes: |-
+  What's Changed
+  This release collects the 4.1.3 betas. It bundles Aria2 Next 3.1.2, so deleting or pausing a download the engine is still stopping no longer fails, and adding a link again continues its unfinished file. Cmd+Q no longer crashes Rayburst on macOS, windows no longer reopen off screen, and the extension API stays responsive while the engine is busy. New are a collapsible sidebar, paused adding, custom BitTorrent peer rules and the native edit menu in text fields. Use it with Rayburst Connect 2.2.2.
+  ✨ New Features
+  - Collapsible sidebar — a button at the bottom of the sidebar collapses it to icons; the choice is remembered (#839)
+  - Start immediately — the add-task dialog has a checkbox to add tasks paused; the choice is remembered (#809)
+  - Custom peer rules — Settings → BitTorrent takes your own IP and CIDR rules, checked before saving and merged with the downloaded block list (#816)
+  - Edit menu in text fields — right-clicking an input or text area opens the system menu with cut, copy, paste and select all (#837)
+  - Windows installer artwork — the installer's welcome and finish pages show Rayburst artwork, and the uninstaller uses the app icon (#836)
+  - Brand mark — the Rayburst mark and name head the sidebar (#812)
+  🛠 Improvements
+  - Resuming — adding a link again after its unfinished download was removed continues the file instead of saving a new copy, when the server shows the same file (#842)
+  - Extension API — /stat waits at most two seconds for the engine and answers with the last statistics, download support is read from the engine state, and requests slower than a second are logged (#828)
+  - Remote access — without an API secret, requests from other machines are refused; /ping and /version stay open
+  - Dialogs — the extension dialog shows the current Rayburst Connect artwork, and its content comes in item by item, as in About
+  - Aria2 Next 3.1.2 — moving paused torrents no longer crashes the engine, shutdown requests are answered, stops that could hang after a failed disk write are fixed, large Linux preallocations stop promptly, path options expand ${HOME}, and media downloads with the same name run side by side (#819)
+  🐛 Bug Fixes
+  - Fixed Cmd+Q crashing Rayburst on macOS. Quit now goes through the same path as the tray's Quit (#822)
+  - Fixed a window reopening off screen. If its title bar is outside every display's work area, it is fitted to the primary display and centered (#826)
+  - Fixed deleting a download that the engine was still stopping, for example while it retried after HTTP 429. The task leaves the list at once and its files are removed when the engine lets go of them, instead of failing with a timeout and coming back (#832)
+  - Fixed Pause All reporting an error when the engine took longer than its wait to pause everything (#832)
+  - Fixed the Linux tray failing to register inside Flatpak and Snap (#825)
+  - Fixed download progress bars flickering on Linux (#813)
+ReleaseNotesUrl: https://github.com/AnInsomniacy/rayburst/releases/tag/v4.1.3
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
