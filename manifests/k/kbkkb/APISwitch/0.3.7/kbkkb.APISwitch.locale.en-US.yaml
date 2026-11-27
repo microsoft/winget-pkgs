@@ -1,0 +1,71 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: kbkkb.APISwitch
+PackageVersion: 0.3.7
+PackageLocale: en-US
+Publisher: kbkkb
+PublisherUrl: https://github.com/kbkkb
+PublisherSupportUrl: https://github.com/kbkkb/APISwitch/issues
+PackageName: APISwitch
+PackageUrl: https://github.com/kbkkb/APISwitch
+License: MIT
+LicenseUrl: https://github.com/kbkkb/APISwitch/blob/HEAD/LICENSE
+Copyright: Copyright © 2026 kbkkb
+ShortDescription: Provider switcher and local routing gateway for AI coding assistants.
+Description: |-
+  APISwitch is a lightweight desktop management tool and local protocol routing gateway for third-party API providers and Google Antigravity official subscriptions. It manages provider configurations for Google Antigravity, Claude Code, Claude Desktop, Codex, OpenCode, and Pi, switches Google accounts with credential snapshots, tracks quota usage, and bridges OpenAI/Anthropic protocols through a local gateway with hot reload.
+
+  ✨ Key Features
+  1. Unified Multi-Tool Management & Zero-Intrusion Switching
+  - Antigravity Quick Account Switching: Save credential snapshots and switch Google accounts with one click. Automatically captures and synchronizes the latest credentials before switching (preventing Refresh Token rotation expiration). Optionally auto-closes and smoothly restarts the IDE.
+  - Cross-Client Provider Sharing: One-click copy of provider configurations across Claude CLI, Claude Desktop, Codex, OpenCode, and Pi with intelligent field mapping (Auth Token ↔ Bearer Token / API Key). Enter once, use everywhere.
+  - Model Pool Management: Dedicated model pool mechanism for OpenCode and Pi, clearly distinguishing "In Config" from "Not in Config" states, supporting on-demand activation and batch maintenance.
+  - One-Click cc-switch Migration: Built-in migration wizard directly reads ~/.cc-switch/cc-switch.db, allowing checkbox selection to import existing providers with automatic deduplication and overwriting.
+  2. Built-in Local Protocol Routing Gateway
+  - High-Performance Local Gateway: Built-in lightweight HTTP gateway service (listening on 127.0.0.1:15725 by default, configurable Host and Port in settings, supports LAN sharing).
+  - Seamless Multi-Protocol Bridging:
+    - Codex Protocol Bridge: Translates standard OpenAI Chat Completions / Anthropic endpoints into Codex native Responses protocol.
+    - Claude CLI Protocol Bridge: Automatically manages authentication headers and request format mapping.
+    - Claude Desktop Model Mapping: Intercepts and rewrites claude-sonnet / opus / haiku requests to your designated upstream custom models.
+  - Long-Context Protection & Prompt Stripping: Automatically strips non-essential excessive system prompts and provides safeguards against massive 1M context overflows to prevent upstream 400 errors or unexpected costs.
+  - Zero-Restart Hot Reload: Point your client to the local gateway once. Provider switches reload instantly in the gateway with no client restarts needed.
+  3. Data Backup & Multi-Device Roaming
+  - One-Click Full Export: Bundle all tool provider configurations and Antigravity account data into a standardized JSON backup file.
+  - Flexible Restore Modes: Supports both "Merge & Append" (recommended: keeps existing configs while adding new or updating matching items) and "Full Overwrite" modes for seamless roaming across multiple machines.
+  - Direct Local Management: One click to open the local physical storage directory for full data ownership and transparency.
+
+  🔬 How It Works
+  - Google Antigravity: Login sessions are stored in VS Code's globalStorage SQLite database (ItemTable) under antigravityUnifiedStateSync.oauthToken and userStatus (base64-encoded Protobuf). APISwitch includes a lightweight Protobuf parser to safely extract email, subscription tier, and quota information. Account switching executes safe transactional writes with automatic .backup creation.
+  - Claude Code CLI: Precisely rewrites ANTHROPIC_* environment variables in ~/.claude/settings.json, strictly preserving all other configuration sections such as hooks and permissions.
+  - Claude Desktop: Manages Cowork inference gateway parameters (inferenceProvider, inferenceGatewayBaseUrl, inferenceGatewayApiKey, etc.). Switching back to "Official" cleanly removes these fields to restore native official login.
+  - OpenAI Codex: Configures model_provider and [model_providers.<id>] in ~/.codex/config.toml, synchronizing authentication with auth.json. Supports direct upstream connections or routing through the local gateway for protocol adaptation.
+  - OpenCode & Pi: Strictly adheres to their official specifications to read and write opencode.json and models.json / auth.json, ensuring immediate recognition by CLI and runtime environments.
+  - Safe Atomic Writes: All file modifications follow a "write temporary file → verify integrity → atomic replace" workflow, generating automatic .bak backups to prevent corruption from unexpected interruptions.
+Tags:
+- ai
+- api
+- gateway
+- proxy
+ReleaseNotes: |-
+  [New · Equivalent USD Cost Engine & Pricing Center]
+  - 4-Dimension Token Costing: Added UsagePricingService to calculate real-time equivalent USD value across all 10 supported clients using per-million rates for Input, Output, Cache Read, and Cache Write tokens.
+  - Cloud Catalog Sync + Local Ledger Fusion: Supports one-click and automatic cloud catalog synchronization from models.dev and OpenRouter, seamlessly combined with local Antigravity pricing_ledger_v1.json measured rates.
+  - Visual Pricing Center: Configure per-provider discount multipliers (e.g., 0.2x relay channels) and custom per-model or wildcard rate overrides directly from the UI.
+  [New · Antigravity Quota Insights & 5H/Weekly USD Pool Calibration]
+  - Live USD Pool Pills on Account Cards: Dynamically calibrates and displays remaining USD / 100% pool cap USD (e.g., ≈ $3.32 / $9.04) right next to Gemini and Claude & GPT 5H/Weekly quota bars on MainWindow cards, paired with a quick Insights button.
+  - Quota Deep Insights Window: Supports per-account monthly billing anchor day configuration to track monthly actual spend, estimated monthly supply, expired unused quota, and unactivated idle loss; automatically detects Official Early / Mass Reset clusters alongside full historical cycle settlement records while hiding deprecated Argon buckets.
+  [New · Per-Account Antigravity Attribution & Lightweight Stop Hook]
+  - Per-Account Antigravity Breakdown Tab: Added a dedicated Antigravity tab in Usage Monitor displaying independent token totals, request counts, cache hit rates, subscription badges, and USD spend per Google account.
+  - Zero-Overhead Native Stop Hook & Hub Watcher: Added a fast --ag-hook CLI entry (<30ms, headless, no WPF load, zero network calls) plus live app_storage.json watching so manual in-IDE account switches are tracked accurately (configurable in General Settings).
+  - Mid-Conversation Switch Fix & Self-Healing: Added account_sessions switch barriers, forward-bounded hook matching, and acctAttrVer=3 automatic self-healing for mid-conversation account switches.
+  [UI Overhaul · Modern SaaS Analytics UI & Rich Model Hover Cards]
+  - Refreshed Usage Monitor & Insights Design: Redesigned both analytics windows with crisp SaaS-style hierarchy—5 navigation pill tabs, 6 KPI summary cards (including Equivalent USD Value), collapsible trend/heatmap panels, and clean tabular alignment.
+  - Rich Model Hover Card (Zero Flicker): Eliminated two-stage tooltip flicker on model rows and introduced ModelHoverTipStyle across all 5 model display locations—showing full model name + raw ID, pricing source & multiplier badge, provider & client, 2×2 unit pricing matrix (USD / 1M Tokens), and per-row token/cost breakdown.
+  [Performance & Reliability · SQLite WAL Fluency & Non-Modal Floating Widget Fix]
+  - Zero-Freeze UI Architecture: Enabled SQLite WAL mode (synchronous=NORMAL, busy_timeout=5000), removed synchronous UI-thread cache warming, and moved view-model aggregation to Task.Run with lock-free thread-safe I18nService lookups.
+  - Floating Widget Clickability Fix: Converted Usage Monitor and Quota Insights from modal ShowDialog() calls to singleton modeless ShowOrActivate() windows and added a Win32 WM_ENABLE guard on FloatingWidgetWindow, fixing the bug where opening analytics windows blocked clicks on the desktop floating widget.
+  - Unified Build Output: Consolidated build and publish paths into a single bin\APISwitch.exe binary directory and Release_Package\ artifact folder.
+ReleaseNotesUrl: https://github.com/kbkkb/APISwitch/releases/tag/v0.1.1
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
