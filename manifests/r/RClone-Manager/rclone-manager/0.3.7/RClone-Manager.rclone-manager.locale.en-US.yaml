@@ -1,0 +1,83 @@
+# Created with WinGet Releaser using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: RClone-Manager.rclone-manager
+PackageVersion: 0.3.7
+PackageLocale: en-US
+Publisher: RClone-Manager
+PublisherUrl: https://github.com/Zarestia-Dev
+PublisherSupportUrl: https://github.com/Zarestia-Dev/rclone-manager/issues
+PackageName: RClone Manager
+PackageUrl: https://github.com/Zarestia-Dev/rclone-manager
+License: GPL-3.0-or-later
+LicenseUrl: https://github.com/Zarestia-Dev/rclone-manager/blob/HEAD/LICENSE
+ShortDescription: A powerful, cross-platform GUI for managing Rclone remotes with style and ease.
+Tags:
+- adwaita
+- angular
+- angular-material
+- dropbox
+- fuse
+- gnome
+- google-drive
+- onedrive
+- rclone-gui
+- s3
+- tauri
+ReleaseNotes: |-
+  RClone Manager v0.3.7
+  This release adds a "What do you want to do?" wizard, a Mounted Remotes panel, name-conflict handling in the file browser, the system accent colour and an interface scale, and a lot of accessibility work. It fixes a sync that could delete files when several sources went into one folder, and it makes Android background work and Windows shutdown more reliable. The old RClone Manager Headless app is now RClone Manager Server, which has its own release.
+  Warning
+  - RClone Manager Headless is now RClone Manager Server. If you use the headless app, see the RClone Manager Server v0.3.7 release. Your settings, remotes and data stay where they are, and most installations move by themselves with the in-app update. Desktop installs are not affected.
+  Highlights
+  - "What do you want to do?" wizard. A step-by-step guide sets up a mount, a backup, a two-way copy, a download, a copy or move between clouds, a share (WebDAV, HTTP or DLNA) or a check from everyday questions, with a preview, an undo and a list of what is already set up. It opens from the add menu in the title bar and, if you want, after adding a new cloud.
+  - Mounted Remotes panel. The dashboard and Quick Run overviews list your mounts with open, copy-path and unmount actions, show when and how each was mounted, and open the Quick Run or workflow that started it.
+  - Name conflicts in the file browser. A copy, move, paste, drag or upload into a folder that already holds the name asks first: replace, skip or keep both as name (2).ext. Folders are merged, and you choose what happens to the files of the same name inside.
+  - System accent colour and interface scale. The app follows your system's accent colour, and Preferences › General › Interface Scale sets the size of the interface from 50 to 200 %.
+  - Sync of several sources into one folder is fixed. Before, each source's sync deleted the files the other sources had put there (see Fixed).
+  Added
+  - "What do you want to do?" Wizard: Includes a preview, an undo and a list of what is already set up. Folder checks now say which profile or Quick Run already uses a folder, and a Quick Run's mount point or BiSync folder counts as taken.
+  - Mounted Remotes Panel: A mount or serve opens the Quick Run or workflow that started it; a mount on a non-local backend opens in the app's file browser. Mount cards show when and how a remote was mounted, serve cards open their address in the browser, and the overview filters list only origins that have something to show.
+  - System Accent Color (Desktop): The app takes your system's accent colour as its main colour and follows it when it changes: the desktop's on Linux (GNOME 47 and later, KDE Plasma 6), the Windows accent, and the macOS accent. Text in that colour is adjusted so it stays readable on light and dark backgrounds. Preferences › General › System Accent Color turns it off. Thanks to @repires (#363).
+  - Interface Scale (Desktop): Preferences › General › Interface Scale, from 50 to 200 %, applied at once; useful with fractional display scaling on KDE. Thanks to @repires (#362).
+  - Windows Mount Targets (Windows): Pick a drive letter, take a free letter automatically (previewed before saving, shown as Automatic · X: while mounted) or mount into a folder, with an optional name. A drive that rclone has mounted also shows in the file browser and the path pickers. Thanks to @Vaso73 (#361, #349).
+  - Name Conflicts in the File Browser: Replace, skip or keep both; names are compared the way the destination does, so Report.pdf and report.pdf count as the same name on Dropbox, OneDrive and the local disk of Windows or macOS. A copy into the folder it comes from keeps both without asking.
+  - Downloads Are Jobs: Saving a file to this device, or opening or sharing one in another app, runs as a job with progress and a stop button, and on Android keeps the phone awake.
+  - Transfer Progress in the Notification (Android): The background notification shows the transferred amount, speed and time left with a progress bar, and the status bar chip shows the percentage. Uploads to rclone on another computer now count as running jobs.
+  - Slovak Translation: The interface is available in Slovak (sk-SK). Thanks to @Vaso73 (#345).
+  Changed
+  - Accessibility: Icon buttons and dialogs have names, menus use the right ARIA roles, every page has a main landmark and a heading, the UI behind full-window views can no longer be reached with Tab, every control shows one keyboard focus ring, the Preferences tabs work with the arrow keys, and coloured text meets contrast requirements in both themes. Thanks to @repires (#355, #356, #366, #371, #373, #374, #375, #376, #377, #378, #382).
+  - Smaller Job Lists: The lists no longer carry the file list of every finished job; the job detail and monitor fetch it for the job they show.
+  - AppImage Updates (Linux): The app updates an AppImage itself, from the same signed catalog as the portable builds, without asking for a password. Versions before this one still update once through Tauri.
+  - Simpler Self-Updates (Portable, AppImage): An update replaces the file in place and the app restarts the usual way. No update process stays in the background, and an update is no longer undone when the new version does not start within 90 seconds; if a release does not start, install the previous one by hand.
+  - Update Announcements for Flatpak and AUR: These installs announce the newest release of their channel and show how to update; the Flathub or AUR package may follow a little later.
+  - Leaving the Beta Channel (DEB): Switching to the stable channel moves a beta DEB install to the latest stable release at once, instead of waiting for the next stable version. The RPM and Android still only move to newer versions.
+  - Dates and Numbers Follow the Language: Formatted for the interface language everywhere.
+  - Plural Forms in Translations: "1 job" and "3 jobs" now read correctly in every language, including Slovak, Russian and Ukrainian.
+  Fixed
+  - Several Sources Synced Into One Folder Deleted Each Other's Files: A profile that synced several sources into the same destination ran one sync per source, and each sync deleted what the other sources had put there. The sources are now synced in one go as one read-only folder, so nothing is deleted that one of them has. A file in more than one source is taken from the first one listed. Such a sync is now slower, because the files no longer copy inside the cloud (server-side) but pass through this computer; sources that go into folders of their own are not affected.
+  - New Remotes Froze File Managers on Large Cloud Drives: New remotes no longer get --vfs-refresh, which walked the whole remote at mount time and made Nautilus wait on a large Google Drive or OneDrive. A remote that already has it keeps it. Thanks to @repires (#381, fixes #379).
+  - Restoring a Remote From a Backup Could Choose Another OneDrive Drive or Never Finish: A restore now stores the remote exactly as the backup holds it and asks nothing.
+  - Exporting One Remote Left rclone's Part Out of the Backup: An export of a single remote, or of the remotes only, now includes the remote's rclone configuration.
+  - Undo After a Merge Deleted the Folder's Old Files: A copy or move that replaces or merges anything now has no Undo.
+  - Folder Copied Into Itself Without End: Pasting or dropping a folder into itself is refused with the reason.
+  - Running Mounts and Serves Showed Their Profile as Stopped: After a restart, or when connected to an rclone that was already running, a running mount or serve is linked to its saved profile or Quick Run again.
+  - Drives Left Mounted After Quitting (Windows): The app waits until rclone no longer lists any mount (up to 30 seconds), and stops only an engine it started itself. Thanks to @Vaso73 (#348, closes #347).
+  - Mount Plugin Banner and App Exit During WinFsp Install (Windows): The banner shows only when WinFsp is really missing, and installing it no longer closes the app.
+  - Tray Icon on a Dark Taskbar (Windows): With the System tray icon theme the icon now follows the Windows mode.
+  - Window Buttons Follow the Desktop Layout (Linux): The title bar shows the buttons your desktop asks for, in its order and on its side. Thanks to @repires (#353).
+  - Interface Drawn Only Under the Mouse on Hybrid Laptops (Linux): The NVIDIA workaround is skipped when the boot GPU is not NVIDIA. Fixes #344.
+  - File Manager Entries Left Behind (Linux): Removing the DEB or RPM now removes the Nautilus extension and the other file manager entries.
+  - System Bus Connection Leak While Preventing Sleep (Linux) and Window Controls and Theme on the Lock Screen (Linux).
+  - Window Opened on the Wrong View, Mount Button Label, Wrong Total in "x of y Failed", Quick Run Monitor Showed Another Job's Number, Jobs of a Deleted Remote Stayed in the List and Notifications Named Jobs by Their Internal Type. Thanks to @Vaso73 (#346) for the mount button label.
+  - Beta Channel Offered an Older Stable Release: The beta channel now offers only newer releases.
+  - Android: the background service comes back after Android closes the app and starts auto-start profiles, Quick Runs, workflows and schedules again; mounts are listed again after a restart; the background service no longer keeps the phone awake with nothing to do; the notification says when the vault is locked and says what open files are about; mounts of a remote rclone are listed.
+  Security
+  - RC Credentials No Longer on the Command Line (Linux): The local rclone engine's generated RC username and password were passed as --rc-user / --rc-pass, which any local user could read through ps or /proc/<pid>/cmdline. They are now passed through the engine's environment. Fixes GHSA-5q5w-3j5f-v425 and #359. Thanks to @repires (#358).
+  See the full changelog for the details of every change.
+ReleaseNotesUrl: https://github.com/Zarestia-Dev/rclone-manager/releases/tag/v0.3.7
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/Zarestia-Dev/rclone-manager/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
