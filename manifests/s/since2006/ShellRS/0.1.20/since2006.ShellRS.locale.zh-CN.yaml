@@ -1,0 +1,55 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.28.0.schema.json
+
+PackageIdentifier: since2006.ShellRS
+PackageVersion: 0.1.20
+PackageLocale: zh-CN
+ShortDescription: GPU 渲染的原生 SSH 客户端。
+Description: ShellRS 是一个免费开源的 SSH 客户端，用 Rust 编写、由 GPU 渲染界面：主机管理、终端、WinSCP 式 SFTP 和端口转发，都在一个窗口里，支持 macOS、Windows 和 Linux。
+Tags:
+- sftp
+- shell
+- ssh
+- 上传
+- 下载
+- 传输
+- 控制台
+- 文件
+- 服务器
+- 终端
+- 远程
+ReleaseNotes: |-
+  Added
+  - AI assistant: a new “AI assistant” in the right sidebar beside SSH terminals. Ask about the host in English or Chinese (“why is the disk full?”), and the model reads the terminal, runs commands on the host and reads files before it answers. It’s off until you add a model service and turn on “Enable AI assistant” under Settings › AI assistant. Presets cover Anthropic, OpenAI, DeepSeek, Qwen, Kimi, Zhipu GLM, Doubao, SiliconFlow, OpenRouter, and Ollama and LM Studio on your own computer; choose “Custom” for any other compatible service. Commands run in the background or are typed into the terminal; with the default approval mode, “Approve for me”, you’re asked first only for risky ones such as deleting, restarting or sudo. Model services and API keys sync with cloud sync; conversations stay on this computer. Your questions, the terminal’s contents and command output go only to the model service you chose, never through ShellRS’s servers.
+  - A new “Connection” for hosts, “Proxy command”, like OpenSSH’s ProxyCommand: reach servers with no port 22 open through cloudflared (Cloudflare Access), AWS SSM, Google Cloud IAP, tailcat, ncat and the like. In the command, %h, %p and %r become the address, port and username. SSH hosts only. If the command exits (it isn’t installed, say, or you aren’t signed in), the error shows its exit code and the last lines it printed. Importing hosts from ~/.ssh/config brings their ProxyCommand along. (#103, #134)
+  - Terminal recording: right-click a terminal, choose Start recording… and pick where to save it (named like ShellRS-20261123-174322.log), and what the terminal shows goes into that file as plain text, line by line, until you choose Stop recording or close the tab. Colors and control characters are left out, so any text editor opens it; what you type is there as the shell echoes it, so passwords that aren’t echoed aren’t. While it records, the terminal’s top right says Recording. (#121)
+  - Commands after login, in the host dialog’s Advanced: on every connection of an SSH host (reconnecting with Enter too), ShellRS types them into the terminal a line at a time, each once the output of the one before has paused. Use it for sudo -i, a cd to the folder you work in, or picking the target machine in a bastion host’s menu. The commands sync with cloud sync, so don’t put passwords in them. (#138)
+  - The editor opens and saves files that aren’t UTF-8, such as GBK, GB18030, Big5, Shift_JIS, EUC-KR and Windows-1252. The encoding is detected for you and shown in the status bar (such as “GBK · CRLF”), and saving writes the file back in it, leaving what you didn’t change as it was. If you type a character the encoding can’t hold (an emoji in a GBK file, say), saving names the character and leaves the file unchanged. Markdown preview reads these encodings too. (#159)
+  - Setup codes for cloud sync: on a computer that syncs, click Show setup code… in Settings › Cloud sync; on another computer, click Enter setup code…, paste it and enter the sync password to join, without typing the address and keys again. The setup code is encrypted with the sync password. Folder sync has no setup code. (#95)
+  - Paste to upload on the remote side of SFTP: files and folders you copied in the Finder, File Explorer or an IDE upload to the current folder when you press ⌘V in the remote list (Ctrl+V or Shift+Insert on Windows and Linux) or right-click empty space and choose Paste. (#129)
+  - The host list on the left follows the tab in front: switching tabs, or clicking into another pane of a split, selects that tab’s host and scrolls to it. For a host in a folded group, or one a search leaves out, right-click its remote terminal or SFTP tab and choose “Show in host list” to unfold the groups above it and select it. (#135, #161)
+  - Confirm before quitting: quitting with tabs open (⌘Q / Ctrl+Shift+Q, the tray’s “Quit”, or closing the window on Windows and Linux) first asks “Quit ShellRS?”, so a stray click doesn’t close every open session. To skip the question, turn off “Confirm before quitting” under Settings › General › Window; unsaved files are always asked about. (#152)
+  - New shortcuts for the front remote terminal: Duplicate session ⌘⇧D (Ctrl+Shift+D on Windows and Linux), Open SFTP ⌘⇧S (Ctrl+Shift+S), Reconnect ⌘⇧R (Ctrl+Shift+R, which reconnects a connected one too, for example for a change to your profile on the server to take effect), and Show or hide Files in the right sidebar ⌘⌥F (Ctrl+Alt+F). You can change them in Settings › Keyboard shortcuts. (#137, #151)
+  - A shortcut for Find a host: ⌘P (Ctrl+Shift+P on Windows and Linux) opens Find a host, where typing a name, address and the like finds a saved host and Enter connects to it. It works in a terminal too. The Focus search shortcut (⌘K / Ctrl+K) is gone, and ⌘K only clears the terminal.
+  - Shift+PageUp and Shift+PageDown scroll a terminal’s scrollback a screen at a time (fn+Shift+↑ and fn+Shift+↓ on a Mac laptop’s keyboard). Full-screen programs such as vim and less still get the keys. (#148)
+  - On macOS, open a folder from the Finder: drop it on the ShellRS icon in the Dock, or open it with ShellRS from a tool that adds to the Finder’s menu, and a new local terminal opens in that folder. ShellRS never becomes the app folders open in, so double-clicking a folder still opens it in the Finder. (#146)
+  - The editor colors XML, .properties, INI (systemd unit files and yum’s .repo too) and nginx configuration. Other .conf files stay plain text. (#142)
+  Improved
+  - On Windows and Linux, ShellRS’s own shortcuts are now Ctrl+Shift with a letter (as in Windows Terminal and GNOME Terminal), so they work in a terminal too: New local terminal Ctrl+Shift+T (Ctrl+T went to the shell in a terminal, typing ^T instead of opening another), New host Ctrl+Shift+N, New group Ctrl+Shift+G, Show or hide sidebar Ctrl+Shift+B and Quit Ctrl+Shift+Q. Shortcuts you changed in Settings › Keyboard shortcuts stay as they are; one set to Ctrl with a single letter says on its row that it goes to the shell in a terminal. (#163)
+  - Reconnecting a remote terminal in its tab keeps everything it showed before, scrollback included, and the new connection carries on below it. (#162)
+  - When an SSH terminal’s connection drops, the terminal says Connection lost and why, such as the server not answering for a long time, instead of “Process exited with code 0”. Closing a tab tells the server before disconnecting. (#140)
+  - The journal in a service’s details and the logs in a Docker container’s details can be selected and copied, and “Copy journal” or “Copy logs” beside the tabs copies all of it. A container’s environment can be selected and copied too. (#164)
+  - With the center area split, “Duplicate session” opens the new tab in the same pane as the original instead of always in the first one. (#105, #160)
+  - On the start page, only the list of hosts scrolls; the title and the Find a host and New host… buttons above it stay put. The bottom of the page may show recommendations from the ShellRS website.
+  Fixed
+  - On Windows and Linux, selecting text in a terminal with a select-to-look-up tool such as Feishu or Yuanbao no longer types 5~ into it. Ctrl+Insert in a terminal now copies the selection when there is one and goes to the program otherwise, as in Windows Terminal. (#158)
+  - On Windows, about 20 seconds of network trouble (VPN, Wi-Fi) ended SSH connections. They now wait about two minutes for the server, as on the other platforms. (#140)
+  - In tmux 2.4 to 3.1 (such as the 3.0a in Ubuntu 20.04), detaching from a program that wants every mouse motion, such as Claude Code, left the shell typing junk when the mouse moved, and a drag selected nothing. Now a program turning off any kind of mouse reporting turns off all three, as in xterm. (#150)
+  - In a terminal, function keys with modifiers lost their Shift, so mc’s Shift+F5 copy and Shift+F6 rename didn’t work. They now go to the program with their modifiers, as xterm sends them. F3 and Shift+F3 find only while the find bar is open, and otherwise go to the program. On Windows and Linux, Shift+Insert always pastes in a terminal. (#145)
+  - The local side of SFTP couldn’t open Windows shortcuts (.lnk). Double-click one to a folder to go into that folder; one to a file opens that file, also for Edit and Preview. (#144)
+  - Text pasted into the editor from the Windows clipboard put CRLF line endings into a script that uses LF, which broke its \ line continuations. It’s now saved with LF. (#129)
+  - Dragging an SFTP column header moved only the column widths, leaving the headers and contents where they were. The whole column moves now, and stays after refreshing or changing folders.
+  - Confirming “Discard changes and quit” no longer skips the last sync before quitting.
+ReleaseNotesUrl: https://shellrs.com/zh/changelog#0.1.20
+ManifestType: locale
+ManifestVersion: 1.28.0
