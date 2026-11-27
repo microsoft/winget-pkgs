@@ -1,0 +1,64 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: WhiloLabs.WhiloTrace
+PackageVersion: 0.4.0
+PackageLocale: en-US
+Publisher: Whilo Labs
+PublisherUrl: https://github.com/Whilo-Labs
+PublisherSupportUrl: https://github.com/Whilo-Labs/whilo-trace/issues
+Author: Firat Baghirli
+PackageName: Whilo Trace
+PackageUrl: https://github.com/Whilo-Labs/whilo-trace
+License: MIT OR Apache-2.0
+LicenseUrl: https://github.com/Whilo-Labs/whilo-trace/blob/v0.4.0/README.md#license
+Copyright: Copyright (c) 2026 Firat Baghirli
+ShortDescription: Network path monitor that shows per-hop packet loss and latency for several hosts at once.
+Description: |-
+  Whilo Trace watches the network path to several hosts at once and shows per-hop packet loss and latency in real time.
+  It tells loss that carries on to the destination apart from routers that only limit the replies they send about themselves, and points at the hop where the loss starts.
+  All targets and pinned hops share one timeline, from 5 minutes to 24 hours, with red columns for loss and a jitter strip.
+  The route map shows the path on a world map. Router places come from the DB-IP Lite databases (CC BY 4.0) installed with the app, so lookups stay on your computer; a newer month of the databases is downloaded only after you agree. Router locations in these free databases are often wrong, and the map has so far been checked only with made-up places, not on real traces.
+  Rounds are kept locally in SQLite, 30 days by default, and a strip of the last day, week or month opens any moment of the past. Any period can be saved as a report for your ISP in HTML, PNG, CSV and JSON.
+  Closing the window leaves the app in the notification area, still probing, and it can start with Windows. A notification comes when a target stops answering for a minute or the loss to it reaches a threshold, naming the hop where the loss starts.
+  The interface is in English and Russian, with a light, dark or system theme.
+  On Windows it uses the system ICMP API and runs without administrator rights. Probes are ICMP over IPv4 only for now.
+  Tested by the author on Windows 11. Windows 10 is expected to work but has not been tested yet.
+Moniker: whilo-trace
+Tags:
+- icmp
+- isp
+- jitter
+- latency
+- mtr
+- network
+- network-diagnostics
+- network-monitoring
+- networking
+- packet-loss
+- ping
+- route
+- traceroute
+ReleaseNotes: |-
+  The app now keeps watching with its window closed, tells you when something breaks, and collects better evidence for your ISP.
+  In the background:
+  - Runs in the notification area. Closing the window leaves the app in the tray, still probing, so the history has no holes. Click the icon to open the window; its menu has Quit. The settings can make closing quit instead.
+  - Starts with the system. Off by default. Turn it on in the settings, and the app starts in the tray when you sign in and resumes its targets.
+  - Alerts. A notification comes when a target does not answer for over a minute, or when the loss to it over the last 2 minutes reaches 10% (5, 10 or 20% in the settings). It names the hop where the loss starts, and another one comes when it is over. Only the destination counts, so a router that limits its own answers raises nothing, and an outage gives one alert rather than a stream of them. While a target has an alert, the tray icon has a red dot.
+  - Quiet while hidden. While the window is in the tray or minimized, the screen and the route map stop redrawing, and they catch up as soon as the window is back. Probing and alerts go on.
+  Evidence for your ISP:
+  - Where each hop is. The trace table, the report and hops.csv show where each hop is and whose network it is on, from the places database of the route map.
+  - One router behind several targets. When the loss of two or more targets starts at the same router, the summary, the trace findings and the report say so: the trouble is most likely at that router or before it.
+  - Route changes. The trace findings and the report list the changes of the route over the window: a new address of the target, another router at a hop, the destination at another hop. A load balancer that alternates between routers is not a change.
+  - Before and after. The trace screen compares the window, or the period you picked, with the same time a day or a week before: loss and latency to the target, and hop by hop what got worse, better or changed.
+  - A week and a month of history. The history strip above the timelines now shows the last day, week or month.
+  - Safe CSV files. A CSV cell that starts like a formula gets a leading quote, so a spreadsheet does not run it.
+  Smaller things:
+  - Shortcuts: Ctrl+N for a new target, Ctrl+1 to Ctrl+6 for the window, Ctrl+, for the settings, in any keyboard layout.
+  - error.log next to the history records what went wrong. Attaching it to an issue helps.
+  - The status bar asks once whether to tell you about new versions. With yes, the app asks GitHub once a day and shows "Version X is out" with a link. Nothing is downloaded by itself.
+  The first start of 0.4.0 adds an index to the history file, so a large history may take a few seconds longer to open once.
+  Updating from 0.2.x: five minutes after the first start, history older than 30 days is deleted (this came in 0.3.0). To keep it, open the settings right after the start and choose "always" under History.
+  0.3.0 added a ceiling on probes for all targets together, kept rounds without a network out of the loss, and keeps the history for 30 days.
+ReleaseNotesUrl: https://github.com/Whilo-Labs/whilo-trace/releases/tag/v0.4.0
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
