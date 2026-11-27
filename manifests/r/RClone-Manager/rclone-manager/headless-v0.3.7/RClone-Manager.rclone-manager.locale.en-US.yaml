@@ -1,0 +1,76 @@
+# Created with WinGet Releaser using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: RClone-Manager.rclone-manager
+PackageVersion: headless-v0.3.7
+PackageLocale: en-US
+Publisher: RClone-Manager
+PublisherUrl: https://github.com/Zarestia-Dev
+PublisherSupportUrl: https://github.com/Zarestia-Dev/rclone-manager/issues
+PackageName: RClone Manager
+PackageUrl: https://github.com/Zarestia-Dev/rclone-manager
+License: GPL-3.0-or-later
+LicenseUrl: https://github.com/Zarestia-Dev/rclone-manager/blob/HEAD/LICENSE
+ShortDescription: A powerful, cross-platform GUI for managing Rclone remotes with style and ease.
+Tags:
+- adwaita
+- angular
+- angular-material
+- dropbox
+- fuse
+- gnome
+- google-drive
+- onedrive
+- rclone-gui
+- s3
+- tauri
+ReleaseNotes: |-
+  RClone Manager Server v0.3.7
+  RClone Manager Headless is now RClone Manager Server. The headless app (Tauri, 0.3.6 and older) is replaced by the server, the same program as the server ZIP and the Docker image. It no longer needs GTK, WebKit or a virtual display, and it shows a system tray on Linux and Windows whenever a desktop session is there to show it. This release also makes the server listen only on this computer by default, adds an Arch Linux package, and brings the web UI changes of RClone Manager 0.3.7.
+  Warning
+  - Moving from RClone Manager Headless. Your settings, remotes and data stay where they are. Most installations move by themselves with the in-app update; the server then moves your start-at-login and file manager (Send To) entries to its new name the first time it starts.
+    - DEB and RPM: The update installs the rclone-manager-server package and removes r-clone-manager-headless. The old rclone-manager-headless command still starts the server.
+    - Windows setup: The update removes the old installation, keeping its settings, installs RClone Manager Server and starts it.
+    - Windows MSI: The update replaces the old MSI. Start RClone Manager Server once from the Start menu; until then, starting at login does not work.
+    - Arch Linux: rclone-manager-headless is replaced by rclone-manager-server. Install the new Arch package from this release (sudo pacman -U RClone.Manager.Server-*.pkg.tar.zst) or run yay -S rclone-manager-server once, and let pacman remove the old package. The AUR rclone-manager-server package now also installs the menu entry.
+    - Server ZIP and Docker: They update as before.
+  - The server listens only on this computer by default. Started without --host (or RCLONE_MANAGER_HOST), it now accepts connections from this computer only (127.0.0.1) instead of the whole network (0.0.0.0), so the Start menu entry and starting at login no longer open it to the network without a password. The Docker image and the systemd service still listen on every address. If you reach a server ZIP from another device, start it with --host 0.0.0.0 and set --user and --pass.
+  Highlights
+  - One server for every install. ZIP, Docker, DEB, RPM, Arch, Windows setup and MSI all run the same server, without GTK or WebKit.
+  - Arch Linux package. A .pkg.tar.zst with the menu entry, the systemd service and its user. The server updates it in the app, asking for the administrator password like the DEB and RPM.
+  - "What do you want to do?" wizard, Mounted Remotes panel and file browser name conflicts in the web UI (see Added).
+  - No console window on Windows. The Windows server, including the ZIP, runs without one; quit it from the tray icon.
+  Added
+  - Arch Linux Package for the Server: Each server release has an Arch Linux package next to the DEB and RPM. The server also updates an installation from the AUR rclone-manager-server package, which now repackages the same file.
+  - "What do you want to do?" Wizard: A step-by-step guide sets up a mount, a backup, a two-way copy, a download, a copy or move between clouds, a share (WebDAV, HTTP or DLNA) or a check, with a preview, an undo and a list of what is already set up.
+  - Mounted Remotes Panel: The dashboard and Quick Run overviews list mounts with open, copy-path and unmount actions; serve cards open their address in the browser.
+  - Name Conflicts in the File Browser: A copy, move, paste, drag or upload into a folder that already holds the name asks first: replace, skip or keep both as name (2).ext. Folders are merged, and you choose what happens to the files of the same name inside.
+  - Windows Mount Targets (Windows): The mount editor offers the drive letters of the computer rclone runs on, so the picker also works in the server's web UI from any device. Choose a letter, a free letter automatically or a folder. Thanks to @Vaso73 (#361, #349).
+  - Downloads Are Jobs: Saving a file from a remote, or opening or sharing one, runs as a job with progress and a stop button.
+  - Slovak Translation: The interface is available in Slovak (sk-SK). Thanks to @Vaso73 (#345).
+  Changed
+  - Server on Windows Opens No Console Window.
+  - Simpler Self-Updates (Server ZIP): An update replaces the file in place and the server restarts the usual way. No update process stays in the background, and an update is no longer undone when the new version does not start within 90 seconds; if a release does not start, install the previous one by hand. On Windows the replaced file is kept as <name>.old.exe until the next start.
+  - Leaving the Beta Channel (Packages): Switching to the stable channel moves a beta DEB, RPM, Arch, Windows setup or MSI install to the latest stable release at once, like the server ZIP, instead of waiting for the next stable version. An MSI from before this release still refuses to be replaced by an older stable one.
+  - Faster Web UI Start: About 20 % faster to show the remotes over a slow network, with five fewer calls on startup. Thanks to @repires (#370, closes #368).
+  - Smaller Job Lists: The lists the web UI loads no longer carry the file list of every finished job, so they stay small however many jobs are kept.
+  - Accessibility: Named buttons and dialogs, ARIA roles, landmarks, one keyboard focus ring and readable coloured text in both themes. Thanks to @repires (#355, #356, #366, #371, #373, #374, #375, #376, #377, #378, #382).
+  - Dates and Numbers Follow the Language and Plural Forms in Translations ("1 job", "3 jobs") in every language.
+  Fixed
+  - Docker Password on the Command Line: The container entrypoint turned RCLONE_MANAGER_PASS (and the other RCLONE_MANAGER_* variables) into command-line arguments, so the password was visible to every user on the host through ps and /proc/<pid>/cmdline. The server now reads them from its environment; empty values are still treated as unset.
+  - File Manager Entries Left Behind (Linux): The server packages remove their own context menu entries when uninstalled, and also those of the RClone Manager Headless app.
+  - Several Sources Synced Into One Folder Deleted Each Other's Files: Each source's sync deleted what the other sources had put into the destination. The sources are now synced in one go as one read-only folder. Such a sync is slower, because the files pass through the computer instead of copying inside the cloud; sources that go into folders of their own are not affected.
+  - New Remotes Froze File Managers on Large Cloud Drives: New remotes no longer get --vfs-refresh, which walked the whole remote at mount time. A remote that already has it keeps it. Thanks to @repires (#381, fixes #379).
+  - Restoring a Remote From a Backup Could Choose Another OneDrive Drive or Never Finish, and Exporting One Remote Left rclone's Part Out of the Backup.
+  - Undo After a Merge Deleted the Folder's Old Files, Folder Copied Into Itself Without End, Running Mounts and Serves Showed Their Profile as Stopped, Jobs of a Deleted Remote Stayed in the List, Wrong Total in "x of y Failed", Quick Run Monitor Showed Another Job's Number and Notifications Named Jobs by Their Internal Type.
+  - Beta Channel Offered an Older Stable Release: The beta channel now offers only newer releases.
+  Security
+  - RC Credentials No Longer on the Command Line (Linux): The local rclone engine's generated RC username and password are now passed through its environment instead of --rc-user / --rc-pass, which any local user could read. Fixes GHSA-5q5w-3j5f-v425 and #359. Thanks to @repires (#358).
+  - Listens only on this computer by default, see Warning.
+  See the full changelog for the details of every change.
+ReleaseNotesUrl: https://github.com/Zarestia-Dev/rclone-manager/releases/tag/headless-v0.3.7
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/Zarestia-Dev/rclone-manager/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
