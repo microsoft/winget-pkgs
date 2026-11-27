@@ -1,0 +1,75 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: 3899.ncmm
+PackageVersion: 1.2.11
+PackageLocale: zh-CN
+Publisher: "3899"
+PublisherUrl: https://github.com/3899
+PublisherSupportUrl: https://github.com/3899/ncmm/issues
+PackageName: ncmm
+PackageUrl: https://github.com/3899/ncmm
+License: MIT
+LicenseUrl: https://github.com/3899/ncmm/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 chaunsin
+ShortDescription: 网易云音乐一站式任务管理工具。
+Description: ncmm 是一个基于 Go 开发的网易云音乐一站式任务管理工具，同时提供命令行与 WebUI。支持日常签到、云贝与成长值任务、音乐人任务、歌曲播放、图文动态、每日推歌、会员礼品和乐迷团打卡，并提供多账号管理、定时调度、收益统计、运行日志与失败通知。
+Tags:
+- 任务
+- 签到
+- 网易云
+- 网易云音乐
+- 自动化
+ReleaseNotes: |-
+  版本信息
+  - 版本：v1.2.11
+  - 构建时间：2026-11-27 18:05:49 (北京时间)
+  - 发布类型：最新正式版（latest release）
+  更新记录
+  ✨ 新增功能
+  - 独立 Web 浏览器播放引擎（playMode: "web" + webPlayback）：
+    - 新增完全独立的 Web 浏览器播放引擎 WebPlaybackSession，与原有 legacy 播放逻辑完全隔离；支持在 playids.playMode、musician.play.playMode、fansgroup.playMode、sign.yunbeiTask.playDailyRecommendMode 以及 WebUI 策略配置中按需切换（默认保持 legacy）；
+    - 沙箱 Cookie 自动执行 web_clean 隔离（剥离 os/appver/deviceId 等客户端字段，保留 sDeviceId），并自动补齐与持久化网页前端标识 Cookie（WNMCID、WEVNSM=1.0.0、_ntes_nuid、%2C 编码的 _ntes_nnid、_iuqxldmzr_=33、ntes_kaola_ad=1），确保 clientlogusf.music.163.com/weapi/feedback/weblog 播放上报稳定计入周榜、总榜、最近播放与 listenSongs；
+    - 支持 chunked 边播边分片拉流（默认 256KB/片、目标 1800KB）、100 秒绝对网格心跳（pl/count + impress）、standard/exhigh 音质选择及 ui/playend 上报模式；
+    - ncmm playids 新增 --play-mode、--only、--count、--verify-rank、--rank-only 参数，可一键验证播放前后的听歌周榜、总榜、最近播放（/weapi/play-record/song/list）及 listenSongs 差值。
+  - 官方 URS 网页手机验证码登录（CLI + WebUI）：
+    - 新增 pkg/urs 纯 Go 实现（SM4-ECB-PKCS#7 + VDF + MurmurHash3），完整接入网易云官网 URS 手机短信验证码登录流程；
+    - ncmm login phone 默认使用 --mode web 启动本地一次性易盾验证页（支持 --addr 自定义监听地址），同时保留 --mode pc 旧版 EAPI 通道；
+    - WebUI 账号中心「手机验证码」默认采用 Web 网页模式（推荐），点击「获取验证码」后按需弹出居中易盾安全滑块弹窗（独立同源 iframe 作用域 CSP，不放宽主页面策略），通过后自动发短信并签发纯净网页版 Cookie（含全部网页前端标识字段）。
+  - WebUI 远端系统公告与通知弹窗：
+    - WebUI 顶栏新增系统公告铃铛入口（支持未读红点提示与公告列表弹窗），支持按公告级别、优先级、适用版本区间与生效时间自动弹出重要公告；
+    - 支持「不再提示此公告」、稍后提醒、手动刷新（带冷却防抖）及已读确认状态本地持久化；
+    - 在 WebUI「系统设置」新增「接收远端公告」开关（默认开启，也可通过环境变量 NCMM_NOTICE_DISABLE 强制禁用），关闭后不再请求远端公告源。
+  - 代理池管理与账号代理绑定默认开启：
+    - 代理池功能调整为默认开启（新装与旧版升级用户均可在 WebUI 侧边栏直接进入「代理池」配置节点与绑定账号），支持静态 http/socks5 代理节点与 Resin 网关，未配置节点时默认直连且不自动生成冗余文件；
+    - 如需全局禁用代理池并强制直连，可在 proxies.yaml 中显式写入 enabled: false（运行期实时生效，无需重启）。
+  - 乐迷团点赞笔记自动取消点赞（fansgroup.autoUnlikeNote）：
+    - 新增 /api/resource/unlike（ResourceUnlike）接口封装，并在 fansgroup 配置段及 WebUI 乐迷团配置页新增 fansgroup.autoUnlikeNote 开关（默认 true，支持手动关闭）；
+    - 乐迷团「点赞乐迷笔记」任务升级为两阶段执行：先逐条完成点赞（成功间隔 1–4 秒，失败退避 1–2 秒），全部点完后等待 4–6 秒给服务端异步记账留足缓冲，再按原点赞顺序（FIFO）逐条取消本次成功点赞的帖子（每条间隔 2–4 秒），并支持任务取消时即时退出。
+  💫 体验优化与协议对齐
+  - 二维码扫码登录全面优化：
+    - 对齐官网 ctWebLogin.main.js 二维码 URL 格式（/st/platform/scanlogin?codekey=...&chainId=...&hdw_device=web&hdw_appid=web&hitExp=1）、x-login-chain-id 请求头及 noCheckToken: true 参数；
+    - 请求继续沿用 network.user_agent.weapi（MacOS 客户端 UA），规避浏览器 UA 在无易盾设备指纹时触发的 8821 安全风控；
+    - 使用全新隔离的临时会话启动、提前预置 6 项网页前端标识 Cookie 并预热 NMTID，避免旧文件残留 PC 客户端 Cookie 污染，落盘前先同步 Close 再原子移动；
+    - 轮询改为 2~3 秒随机抖动 并支持即时取消；802 授权中状态解析并实时回显扫码账号昵称（CLI 与 WebUI 同步展示「已扫码（昵称），请在手机上确认登录」），800 状态自动归类为过期。
+  - WebUI 运行战报、插件环境与更新镜像优化：
+    - 补齐 playids 模拟播放日志的账号与进度解析，WebUI 运行记录战报可准确展示各账号刷歌完成数与当日目标；
+    - 插件执行环境新增 NCMM_EXE 环境变量（注入宿主可执行文件路径），便于伴生插件直接定位并调用 ncmm；
+    - 更新器默认 GitHub 代理镜像列表新增 https://gh-proxy.org/、https://axisnow.gh-proxy.org/ 与 https://v4.gh-proxy.org/，提升在线检查与热更新连通率；
+    - 自建会员礼品互助云端服务（tools/vip_member_gift_cloud）新增 VIP_GIFT_PRIORITY_MODE（first_time_fallback / always / first_time_only）优先名单分配策略。
+  🐞 Bug 修复
+  - 修复 WebUI 策略配置页面部分新增配置项未显示的问题：
+    - 补齐 playids.playMode、musician.play.playMode、fansgroup.playMode 以及 webPlayback 独立配置卡片在 WebUI 流程编辑器中的展示，并更新云贝子任务数量及 network.user_agent.weapi / web_player 说明文案；
+    - 新增自动化单测校验 config_schema.go 与前端流程编辑器的字段 100% 覆盖对齐，防止后续新增配置项漏渲染。
+ReleaseNotesUrl: https://github.com/3899/ncmm/releases/tag/v1.2.11
+Documentations:
+- DocumentLabel: WebUI 使用说明
+  DocumentUrl: https://github.com/3899/ncmm/blob/HEAD/docs/webui.md
+- DocumentLabel: 命令行使用说明
+  DocumentUrl: https://github.com/3899/ncmm/blob/HEAD/docs/cli.md
+- DocumentLabel: 配置文件详解
+  DocumentUrl: https://github.com/3899/ncmm/blob/HEAD/docs/configuration.md
+- DocumentLabel: Windows 运行指南
+  DocumentUrl: https://github.com/3899/ncmm/blob/HEAD/docs/windows.md
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
