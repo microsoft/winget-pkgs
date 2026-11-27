@@ -1,0 +1,55 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: justhil.piDesktop
+PackageVersion: 0.8.1
+PackageLocale: zh-CN
+Publisher: pi-desktop
+PublisherUrl: https://github.com/justhil
+PublisherSupportUrl: https://github.com/justhil/pi-app/issues
+PackageName: pi Desktop
+PackageUrl: https://github.com/justhil/pi-app
+License: 免费软件
+ShortDescription: 面向个人开发者的 pi 桌面 GUI
+Description: |-
+  面向个人开发者的 pi 桌面 GUI：在 Electron 里跑 pi SDK，复用 ~/.pi/agent 的认证、配置与会话 JSONL，用时间线、工具卡片、改动审查和扩展兼容层替代终端里那套 TUI 交互。
+
+  核心思想
+  1. 会话以 pi 为准
+  - 对话内容、工具调用记录、分支与压缩信息，都以 pi 写在 ~/.pi/agent/sessions/ 里的 JSONL 会话文件为准。
+  - 桌面端不另建一套「聊天记录数据库」来替代 pi；本地只存窗口布局、最近项目、扩展开关、适配器覆盖等应用偏好。
+  - 好处：终端 pi 与桌面 pi 可以接着同一条会话用；卸载桌面也不丢对话历史。
+  2. 配置与认证与终端共用
+  - 模型账号、settings.json、扩展包列表（packages）、项目下 .pi/ 资源，与你在终端用的 pi 同一套路径与规则。
+  - 桌面在 设置 → Pi 里改的项会写回全局 settings.json（与终端一致）；Skills 开关等也落在全局配置里，而不是只在桌面私有文件里「假启用」。
+  3. 扩展：兼容层 + 适配器，而不是改插件源码
+  - 扩展在终端里常用 TUI（选择、确认、问卷、工具结果卡片、/命令 进配置）。桌面没有终端画布。
+  - 兼容层：在应用内部统一接收扩展的 UI 请求，转成 Electron 对话框、时间线卡片、设置表单。
+  - 适配器：每个扩展一份「在桌面上怎么显示、怎么配、哪些命令特殊处理」的说明（内置在应用里，高级用户可用 JSON 覆盖）。
+  - 原则：不动扩展 npm 包、不 fork pi；差异写在适配器说明和文档里。
+  - 给 AI 写适配器：见仓库 doc/（adapter-authoring-guide.md 可整份发给模型定制 adapter.json）。
+Tags:
+- pi
+- pi-agent
+- 人工智能
+- 代码
+- 大语言模型
+- 智能体
+- 编程
+- 聊天机器人
+- 自主智能
+ReleaseNotes: |-
+  pi Desktop v0.8.1
+  新增
+  - Google AI Ultra 订阅抢先体验（上游 PR #12614）：在「设置 → 模型」新增 Google AI Ultra 订阅 卡片，支持按需从上游 earendil-works/pi#12614 拉取非侵入式本地兼容扩展，无需等待或升级内置 Pi SDK 即可一键登录并使用 Gemini 4 系列模型（gemini-4-hydrogen、gemini-4-neon、gemini-4-carbon、gemini-3.5-flash-lite）；采用系统代理感知的 PKCE + DPoP OAuth 授权流（提供手动粘贴回调 URL 兜底），并在后续升级到原生内置 google-ai-plan 的 Pi SDK 后自动检测并清理旧版抢先扩展，同时保留已有登录凭据
+  - 四栏工作台重构、AI 画布（AI Canvas）与外观引擎升级：桌面端重构为无缝 L 型四栏工作台（48px 对齐顶栏、极简左侧活动栏、固定序侧栏与无损收藏置顶、按需打开且支持中键关闭的右侧多标签工作坞、Codex 风格新标签启动台）；新增 AI 画布（Canvas） 与 canvas_* 主机工具，支持沙盒 HTML、结构化 UI 块、图表、Markdown、委派树与设备画面流渲染（默认保持干净空白）；升级 4 标签页实时外观调校与工作台预览，新增极光/网格底衬、Codex Light / Nord / Catppuccin 主题及面板显隐与预设布局切换
+  - 会话分支树（Tree）全面重做（#150）：用「轮次聚合微卡片 + 彩色缩进分支轨」取代旧版泳道图，直接展示每轮提问、回复摘要与工具步数；筛选时完整保留全部分叉锚点，支持按分支折叠、一键聚焦当前分支、实时关键词搜索与快速定位当前节点
+  - 侧栏长会话列表自动折叠（#151）：项目会话较多时自动折叠并支持展开/收起切换与键盘导航，保持侧栏清爽紧凑
+  优化与修复
+  - 右键菜单与窄侧栏弹出层防裁切（#149）：按 UI 缩放比例精确测量菜单尺寸，贴近窗口边缘自动向上或向左翻转，低视口高度自动启用内部滚动；窄右侧栏下拉菜单统一通过 Portal 挂载至 document.body，消除宽度裁切与遮挡
+  - 侧栏展开列表滚动条统一：将侧栏展开项目会话列表的原生平台滚动条替换为与对话时间线一致的细线悬浮滚动条
+
+  安装包见本页 Assets。更新说明以本正文为准（应用内「发现新版本」弹窗会展示）。
+ReleaseNotesUrl: https://github.com/justhil/pi-app/releases/tag/v0.8.1
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
