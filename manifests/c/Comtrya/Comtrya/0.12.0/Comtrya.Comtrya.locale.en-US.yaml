@@ -1,0 +1,61 @@
+# Created by Anthelion using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Comtrya.Comtrya
+PackageVersion: 0.12.0
+PackageLocale: en-US
+Publisher: Comtrya
+PublisherUrl: https://github.com/comtrya
+PublisherSupportUrl: https://github.com/comtrya/comtrya/issues
+PackageName: Comtrya
+PackageUrl: https://github.com/comtrya/comtrya
+License: MIT License
+LicenseUrl: https://github.com/comtrya/comtrya/blob/HEAD/LICENSE
+ShortDescription: Comtrya is a tool to help provision a fresh OS with the packages and configuration (dotfiles) you need to become productive again.
+Tags:
+- configuration-management
+- dotfiles
+- hacktoberfest
+ReleaseNotes: |-
+  Stage 3 of the road to 1.0.0: make it readable. Most of this release is inside the code, so it's easier to read and to contribute to. For you, the log reads better and a few bugs are gone. No breaking changes for manifests.
+  Install
+  curl -fsSL https://comtrya.dev/install.sh | sh
+  Windows: irm https://comtrya.dev/install.ps1 | iex. Or cargo install comtrya.
+
+  Security
+  - url 2.5.9 for RUSTSEC-2026-0592, a stack overflow on deeply nested blob: URLs (#779)
+
+  Features
+  - os.arch context names the CPU, like x86_64 or aarch64 (#753)
+  - Global options also work after the command: comtrya apply -v -d ./manifests is the same as comtrya -v -d ./manifests apply (#756)
+
+  Changed
+  - Step texts in the log say what happens in plain words, like Run pacman -S git or Link ~/.zshrc to files/zshrc (#763)
+  - Action summaries read the same way, like Copy the contents of a into b or Set com.apple.dock autohide to true; package.install lists its packages (#780)
+  - Errors of include_variables sources and where conditions keep their cause (#755)
+
+  Fixes
+  - --dry-run shows a file.link to a file an earlier step makes, like a program it unpacks, instead of failing (#754)
+  - FreeBSD/DragonFly pkg checks with a dry run whether packages would be removed before it installs, like pkgin. Before, it installed right away, twice (#757)
+  - Windows: directory.copy fails on a link back to a directory above it instead of copying it into itself until the path gets too long (#761)
+  - A manifest that is a link is named by the link, like dev.git for dev/git.yaml, not by the file it points to (#775)
+  - macos.default shows what it writes instead of a missing-summary warning (#752)
+
+  Build
+  - Smaller and quicker to build: gix without default features, rustls with ring instead of aws-lc, the update check on reqwest instead of ureq (#765, #768, #769)
+  - tracing-journald only on Linux, where journald exists (#781)
+  - sha2 0.11, dirs 7 (#751)
+
+  Library (comtrya-lib)
+  - No anyhow: functions return typed errors, comtrya_lib::error_chain prints them (#755)
+  - Step has no initializers and finalizers; Exec.stop_if_stdout_contains replaces OutputContains, Event::FinalizersFailed is gone (#757)
+  - Atom::execute and Exec::execute_with_lines return Result<()>, atoms::Output is removed (#759)
+
+  For contributors
+  - ARCHITECTURE.md: the path of comtrya apply as a diagram, and where to change what (#776, #777)
+  - Module docs with examples on docs.rs (#774); cargo xtask check runs fmt, clippy, tests, docs and the MSRV check (#773)
+  - CI: clippy pedantic subset (#764), cargo doc -D warnings (#767), cargo deny and cargo machete (#762)
+  - Large files split by topic (#770, #771, #772); no unwrap outside tests (#766)
+ReleaseNotesUrl: https://github.com/comtrya/comtrya/releases/tag/v0.12.0
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
