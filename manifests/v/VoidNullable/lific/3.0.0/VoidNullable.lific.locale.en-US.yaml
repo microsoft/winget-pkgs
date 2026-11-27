@@ -1,0 +1,70 @@
+# Created with lific release workflow using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: VoidNullable.lific
+PackageVersion: 3.0.0
+PackageLocale: en-US
+Publisher: VoidNullable
+PublisherUrl: https://github.com/VoidNullable
+PublisherSupportUrl: https://github.com/VoidNullable/lific/issues
+PackageName: Lific
+PackageUrl: https://github.com/VoidNullable/lific
+License: Apache-2.0
+LicenseUrl: https://github.com/VoidNullable/lific/blob/HEAD/LICENSE
+ShortDescription: Local-first, lightweight issue tracker. Single binary, SQLite-backed, MCP-native.
+Description: |-
+  An issue tracker for prolific agents. Plans and issues live on your server instead of in the context window, so work outlives the session. Agents use it over MCP; you use the web UI.
+
+  - 31 MCP tools in 5,781 tokens, about one long file read.
+  - One 25 to 32 MB binary with SQLite, the web UI and backups built in. No Docker, no Postgres.
+  - lific connect writes MCP config for 11 AI clients.
+  - Identifiers like APP-42, never UUIDs.
+Tags:
+- ai-agents
+- issue-tracker
+- local-first
+- project-management
+ReleaseNotes: |-
+  Lific 3.0
+  Lific 3.0 is a major release, and several changes can break an existing setup: project roles are always enforced, the /mcp/<token> route is gone, published projects move to their normal links and take /public/api with them, and the web UI keeps its session only in an HttpOnly cookie, so sign-in responses no longer return a token. Read Before you upgrade first. Most of the rest is for agents sharing a tracker. An agent can claim an issue for a set time, retry a create without filing it twice, record a decision, and get the project's conventions page at the top of every briefing, which now remembers where it left off. The web UI is redrawn almost everywhere, from the sidebar and Inbox to the Pages tab, account settings and the issue and page views, and bodies are edited in place. Eighteen migrations run on first start.
+  Before you upgrade
+  - Project roles are always enforced. The authz_enforced setting and its unenforced mode are gone, with the web UI's Project permissions switch and lific instance set --authz-enforced. An instance that already enforced roles upgrades unchanged; that includes every instance created with 2.1 or later. On an instance that still had the setting off, the upgrade gives out roles from evidence: each project's lead becomes lead, anyone who wrote in a project becomes maintainer (a connected tool's work counts for its owner), and existing memberships stay. Someone who only ever read a project loses access to it.
+  - Everyone who lost access that way is logged once at startup, and lific doctor lists them in a project_access warning until each has a role again. lific member add --project <PROJECT> --user <name> --role maintainer gives access back.
+  - PATCH /api/instance/settings refuses "authz_enforced": false with 400 and ignores true. The settings response no longer has the field, and GET /api/projects/{id}/my-role no longer returns enforced. The rules that only applied with enforcement off are gone too: a project's lead can delete or archive it, maintainers manage modules, labels and folders, workspace pages are for administrators only, and @-mentions only suggest people who can see the project.
+  - The /mcp/<token> route is removed and answers 404, since a credential in a URL ends up in proxy logs and shell history. Point clients at /mcp and send Authorization: Bearer <API_KEY>, or use the client's OAuth login; lific connect sets up either and refuses old URLs. The old mcp_path_token was a server secret, not an API key, so it does not work in the header. mcp_path_token and mcp_path_user in [server] still parse, so the server starts, but they do nothing, and startup and lific doctor warn until you remove them. lific doctor also finds old URLs in supported clients' configuration files without printing the secret.
+  - A published project is read at its ordinary links and API routes, by visitors with no account, every signed-in account and every API key or MCP connection. Changing anything still needs a role. Plans and their steps, activity and edit history, insights, assignees, waits with their notes, claims with the holder's username, comment authors' usernames and live updates become readable, so review those in each published project, or unpublish it, before upgrading.
+  - Every route under /public/api now answers 404; use the ordinary routes with no credential, such as GET /api/issues/resolve/APP-12. Old /public/APP/... links answer 301 to /APP/.... If a proxy or CDN special-cased /public/, apply those rules to requests that carry neither an Authorization: Bearer header nor a lific_token cookie, and do not cache responses to requests that carry the cookie.
+  - The web UI's session lives only in the HttpOnly lific_token cookie. Sign-in, sign-up, auto-login, session refresh and password change responses no longer include the token, so a script that signed in with a password and sent the returned token must use an API key instead (Settings, Agents, or lific key create --user <name>). MCP clients and lific login use OAuth and are not affected.
+  - Writes authenticated by the cookie must come from the server's own origin, public_url or a cors_origins entry, or they get 403. If people reach the instance over plain HTTP at any address other than localhost, set public_url = "http://..." to that address, or nobody can sign in. Behind a reverse proxy, set public_url to the address people open, or pass the original Host (and X-Forwarded-Proto when the proxy terminates TLS).
+  - Project archives are written in format 3. Upgrade the destination to 3.0 before importing an archive exported by 3.0; format 1 and 2 archives still import.
+  - The server now returns active issues untouched for 14 days to todo once a day, starting shortly after the first start. Run lific instance set --stale-active-reset-days 0 first if you do not want that.
+  - 2.11 refuses a database that 3.0 has migrated. Take a backup first; going back means restoring it.
+  Claiming issues
+  - An agent can claim an issue for a limited time with update_issue (claim, claim_minutes, worker) or POST /api/issues/{id}/claim and /release. While a claim lasts, other workers are refused with the holder's name, and the issue is left out of their workable lists and the briefing's workable section. Claiming again moves the expiry and keeps the original claim time. An expired claim stops counting; no cleanup job is involved.
+  - Two sessions on the same key are separate workers: each stdio process, each lific mcp --remote process, and each HTTP client sending Mcp-Session-Id or X-Lific-Worker gets its own id. A client resumes a claim by sending the worker id the claim returned.
+  - Closing, deleting or moving an issue to another project ends its claim, and project archives do not carry live claims. Releasing a claim keeps it on record as activity.
+  - Home lists claimed issues with their holder and time left, and the issue view and peek panel show who holds a claim. The web UI judges expiry by the server's clock, which GET /api/clock now reports as now_ms.
+  - A claim counts as activity, so an issue someone keeps claiming is never reported as stale or moved back to todo.
+  Safe retries
+  - A create can be retried without writing it twice. create_issue (single and batch), add_comment, create_page and create_plan take an optional op_key, and the REST create routes for issues, comments, pages and plans read an Idempotency-Key header. A retry with the same key returns the first result, marked as a replay (Idempotent-Replayed: true over REST). The same key with a different request is refused and writes nothing. A failed write records no key, so a corrected retry goes through. Keys last 24 hours.
+  - lific mcp --remote adds a key to every create that lacks one and resends it once when the connection drops or times out. The CLI's HTTP backend does the same for issue create, page create and comment add, but only resends to a server that lists idempotency-key in the new capabilities field of GET /api/instance, since an older server would write the create twice.
+  - MCP create_plan now writes the plan and its steps in one transaction.
+  Decisions
+  - Mark a comment as a decision from the web composer, MCP (kind: "decision"), REST or the CLI. Decisions carry a badge, the web UI filters the thread to them, and project archives keep the kind.
+  - get_issue lists the newest decisions in their own section, within 50 entries and 32 KiB, even when comment bodies are left out or the discussion is trimmed. Each summary is the first line of prose, skipping leading headings and code blocks. Older decisions are counted, with a pointer to list_comments, which now filters by kind.
+  - The remote CLI reports when an older server stored an ordinary comment instead of the requested decision, naming the comment it created.
+  Conventions pages
+  - Each project can have one conventions page: the rules for working with its issues, pages and plans. New projects start with one, from a template you pick: empty (the default), heavily AI managed, human managed or human owned. Because of that, the first page a client creates in a new project through REST, MCP or the CLI is DOC-2.
+  - get_briefing opens with the conventions page, up to 4,000 characters, outside its usual budget, and does not list it again among recently updated pages. Projects created before 3.0 get a one-line reminder in the briefing until they get a conventions page or turn the reminder off.
+  - Turning the page off keeps its text. Deleting or emptying it also takes it out of briefings. get_page and page listings mark it, and search ranks it higher when it covers the query.
+  - manage_resource, create_page, POST /api/projects, POST /api/pages, PUT /api/pages/{id} and lific project create take the new conventions options, and GET /api/conventions/templates lists the templates.
+  - In the web UI the conventions page has its own project tab, listed after Pages in the sidebar, the collapsed rail, the mobile menu and the command palette. Without text, the tab shows the four templates at full length with one button to use the one you picked. With text, it is the page itself, with the usual editor, history and comments. Changing the template and leaving the page out of briefings are in the page's menu, each behind a confirmation. Creating a project offers the same picker. The Pages list leaves the conventions page out, and its old page link opens the tab.
+  Briefing
+  - get_briefing(since='last') resumes from your previous briefing of the project. The server keeps that mark per user, so agents no longer carry a timestamp between sessions. The change section now lists new comments and who made each change.
+  - Briefings open with a human queue: open issues assigned to a person in every project you can view, ranked by how much work each blocks, then due date, then age, with possible duplicates flagged.
+ReleaseNotesUrl: https://github.com/VoidNullable/lific/releases/tag/v3.0.0
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://lific.dev/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
