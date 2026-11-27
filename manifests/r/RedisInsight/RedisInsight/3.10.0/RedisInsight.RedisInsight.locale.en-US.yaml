@@ -1,0 +1,78 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: RedisInsight.RedisInsight
+PackageVersion: 3.10.0
+PackageLocale: en-US
+Publisher: Redis Ltd.
+PublisherUrl: https://redis.io/company/
+PublisherSupportUrl: https://redis.io/support/
+PrivacyUrl: https://redis.io/legal/privacy-policy/
+PackageName: Redis Insight
+PackageUrl: https://redis.io/insight/
+License: Proprietary
+LicenseUrl: https://www.redis.io/legal/redis-insight-license-terms/
+Copyright: Copyright © 2024 Redis Ltd.
+CopyrightUrl: https://redis-doc-test.readthedocs.io/en/latest/topics/trademark/
+ShortDescription: Visualize and optimize Redis data, connect to RDI, and more.
+Description: |
+  Redis Insight is a powerful tool for visualizing and optimizing data in Redis, making real-time application development easier and more fun than ever before. Redis Insight lets you do both GUI- and CLI-based interactions in a fully-featured desktop GUI client.
+Tags:
+- database-gui
+- redis
+- redis-gui
+- redis-gui-client
+ReleaseNotes: |-
+  # 3.10.0 (November 2026)
+
+  This is the General Availability (GA) release of Redis Insight 3.10.0, which includes new features, improvements, and bug fixes.
+
+  ## Headlines
+
+  • **Security update:** Redis Insight now ships with Node.js 24.22.2 and Electron 43.8.7, which fix CVE-2026-111497. The Docker image also no longer trusts the compromised eMudhra emSign ECC Root CA - G3 certificate and includes an updated npm with a patched `tar`.
+  • **Stricter TLS verification:** the "Verify TLS Certificate" option now behaves as labeled. When it is off, the certificate is no longer checked. When it is on, the server certificate must also match the host you connect to.
+  • **Set up your coding agent for Redis:** a new **Redis tools** panel in the page header gets your coding agent working with Redis. Run one command, `npx @redis/redisctl init`, and it detects your stack and agents, connects your database, teaches your agent Redis, and adds the MCP server.
+
+  ## Details
+
+  • **Breaking Change:** when "Verify TLS Certificate" is on, Redis Insight now also verifies that the server certificate matches the host name or IP address you connect to. Connections to a server by IP address with a certificate issued only for a host name will fail. To fix this, set the TLS server name on the database, or set the environment variable `RI_TLS_SKIP_HOSTNAME_VERIFICATION=true` to keep the previous behavior. Connections with "Verify TLS Certificate" turned off are not affected.
+  • "Verify TLS Certificate" turned off is now honored：previously the certificate was still verified in this case. Databases found through Azure autodiscovery keep verification on.
+  • **Breaking Change:** in Docker, Redis Stack, and the VS Code extension, importing databases no longer reads certificate and SSH key files from a path on the host. Use the PEM content inline in the import file instead. The desktop app is not affected.
+  • Security hardening across the app：WebSocket connections are now authorized, plugin read-only command checks match exact commands, markdown content and module names are rendered safely, and the telemetry endpoint and profiler log file ids are validated.
+  • Added a **Search** box to the index drop-down and the indexes list, so you can find an index among many.
+  • Large vector embeddings are now detected and highlighted in the query editor, and can be collapsed and expanded to keep long queries readable.
+  • Choose how the desktop app updates：in **Settings**, switch between automatic downloads and a notify-only mode that shows an "Update available" prompt with **Update** and **Skip this version**. A new **Check for Updates** action is available in notify mode.
+  • The **Array** (Redis 8.8+) and **Vector Set** (Redis 8.0+) key types now stay visible in the Add Key list on older Redis versions, greyed out with a "Requires Redis x.y+" hint.
+  • Browser tree view：added an "Ignore separator in first N chars" setting that skips delimiters in the first characters of a key name. Keys that share a Redis hash tag now stay together in a single tree node.
+  • Editing a value while a non-Unicode format (such as JSON) is selected now shows a confirmation, because saving can rewrite the stored bytes. You can cancel, edit anyway, or switch to Unicode.
+  • The **Key size** column in the Browser is hidden for databases labeled as production, so key requests no longer run `MEMORY USAGE`, which can block a large database. Your saved column choice is kept and applies again if the database is no longer labeled production.
+  • Redis Copilot is retired：the Copilot chat panels are turned off. Use the new **Redis tools** panel to set up your own coding agent for Redis.
+
+  ## Bugs
+
+  • [#6555](https://github.com/redis/RedisInsight/pull/6555) Fixed IPv6 hosts being rejected in connection URLs.
+  • [#6551](https://github.com/redis/RedisInsight/pull/6551) Fixed WebSocket connections not working under `RI_PROXY_PATH` when `RI_SOCKET_PROXY_PATH` is not set.
+  • [#6180](https://github.com/redis/RedisInsight/pull/6180) Fixed cluster discovery for Redis Clusters that announce a host name per node, such as ElastiCache and load-balanced setups.
+  • [#6232](https://github.com/redis/RedisInsight/pull/6232) Fixed Workbench not showing module command results when ACL hides the module list.
+  • [#6230](https://github.com/redis/RedisInsight/pull/6230) Fixed modules not refreshing when connecting through a deep link.
+  • [#6299](https://github.com/redis/RedisInsight/pull/6299) Fixed a Workbench crash in command autocomplete.
+  • [#6231](https://github.com/redis/RedisInsight/pull/6231) Fixed `WITHSUFFIXTRIE` not being shown for RediSearch text fields.
+  • [#6200](https://github.com/redis/RedisInsight/pull/6200) Fixed indexes for a key being matched without checking the key type.
+  • [#6319](https://github.com/redis/RedisInsight/pull/6319) Fixed Azure Entra ID connections using a cached token from a different tenant.
+
+  ## New Contributors
+
+  • @MickeyShnaiderman-RecoLabs made their first contribution in https://github.com/redis/RedisInsight/pull/6180
+  • @trippyogi made their first contribution in https://github.com/redis/RedisInsight/pull/6231
+  • @AleksaMCode made their first contribution in https://github.com/redis/RedisInsight/pull/6416
+  • @Rasu-Dev made their first contribution in https://github.com/redis/RedisInsight/pull/6409
+  • @RaphaelFakhri made their first contribution in https://github.com/redis/RedisInsight/pull/6551
+
+  **SHA-512 Checksums**
+
+  https://redis.io/docs/latest/develop/tools/insight/release-notes/v.3.10.0/
+
+  **Full Changelog**：https://github.com/redis/RedisInsight/compare/3.8.0...3.10.0
+ReleaseNotesUrl: https://github.com/redis/RedisInsight/releases/tag/3.10.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
