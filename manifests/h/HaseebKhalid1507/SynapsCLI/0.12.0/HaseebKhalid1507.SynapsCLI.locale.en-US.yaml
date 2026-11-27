@@ -1,0 +1,96 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: HaseebKhalid1507.SynapsCLI
+PackageVersion: 0.12.0
+PackageLocale: en-US
+Publisher: Haseeb Khalid
+PublisherUrl: https://github.com/HaseebKhalid1507
+PublisherSupportUrl: https://github.com/HaseebKhalid1507/SynapsCLI/issues
+Author: Haseeb Khalid
+PackageName: SynapsCLI
+PackageUrl: https://github.com/HaseebKhalid1507/SynapsCLI
+License: Apache-2.0
+LicenseUrl: https://github.com/HaseebKhalid1507/SynapsCLI/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Haseeb Khalid
+ShortDescription: Terminal-native AI agent runtime for parallel agent orchestration on any model.
+Description: |-
+  SynapsCLI is a terminal-native AI agent runtime written in Rust. Run a crew of AI agents in your terminal, on any model, from one small binary.
+
+  - Sessions outlive the window: a background daemon owns every session, /sessions lists them, and pinned ones come back after a restart.
+  - Every terminal is you: attach several clients to one session, and any of them can type, steer or take over.
+  - Run a crew: named subagents work in parallel, and any one of them can be opened in its own view and steered mid-flight.
+  - Any model: Claude, Codex, Grok, Copilot, Gemini, Kimi, Meta Muse, Azure, Bedrock, Vertex, any OpenAI-compatible endpoint, or Ollama.
+  - Credentials stay in the broker: agents get short-lived, scoped tokens rather than your keys, with several accounts per provider.
+  - Bounded turns when you want them: optional caps on rounds, tool calls, time, tokens and cost.
+  - Long sessions stay cheap: the prompt cache lasts an hour on a Claude subscription, large tool output waits on disk behind a short preview, re-reads of unchanged files are deduplicated, and workers roll their context over instead of filling the window.
+  - Memory that survives: project memory, /compact checkpoints, and sessions that chain across days.
+  - Sees what you see: the model reads images, and /attach adds images, PDFs and text to a turn.
+  - Build on it: extensions in any language, MCP servers, and the engine over JSON-RPC or the daemon socket.
+
+  Run synaps login to sign in with a provider subscription, an API key, a cloud identity or a local endpoint, then run synaps to start the TUI. synaps chat exposes the same engine on stdin and stdout for pipes, scripts and CI, synaps rpc speaks JSON-RPC over stdio, and synaps daemon manages the shared sessions.
+
+  The project treats agents as programs that happen to use language models rather than as chat products: the system prompt is a file on disk, the tool list is opt-out, and nothing phones home. Tools run as you, so SynapsCLI is not a sandbox.
+Tags:
+- agent
+- ai
+- coding-agent
+- llm
+- mcp
+- orchestration
+- tui
+ReleaseNotes: |-
+  Memory in core is plain files only, and Axel is an extension. The Axel
+  memory backend, its helper process, the built-in project forum and built-in
+  automatic memory are gone from core; Axel 0.1.0, released with this
+  version, brings recall, capture, search and the forum back as an extension,
+  through new hooks (on_context_archived, on_memory_forgotten) and the
+  cwd and caller every hook and tool call now carries. The plugin sidecar
+  system, synaps agent, synaps watcher and synaps server are removed.
+  grep and find run in-process on ripgrep's engine, so a|b works and
+  .gitignore is respected on every platform. Daemon sessions can be owned
+  by the client that created them, keep-warm covers a response that streams
+  past the cache TTL, and Windows, subagent, MCP and image fixes round it out.
+  Read the Upgrade notes first, above all if your config has
+  memory.backend = axel: archives and notes in the Axel brain are not read
+  any more until you move them with Axel 0.1.0. Full notes:
+  docs/upgrading/0.12.0.md.
+  Upgrade notes
+  - Reload the daemon after installing: synaps daemon reload, then
+    restart attached TUIs. A reload stops running subagents (they can be
+    resumed), so let them finish first. Daemon protocol (v3) and extension
+    protocol (1) are unchanged.
+  - memory.backend = axel: move your memory first. 0.12.0 keeps notes
+    and context archives in plain files only and no longer reads the Axel
+    brain. Export with axel synaps-export (Axel 0.1.0), import with
+    synaps memory import-archives / import-notes, then install the Axel
+    extension for recall, capture and the forum. Nothing is deleted, and
+    0.11.1 reads the brain again. Step by step:
+    docs/upgrading/0.12.0.md.
+  - Removed commands and tools: synaps agent, synaps watcher and
+    synaps server print one line and exit 2; /memory, /sidecar, the
+    memory_context and forum_* tools and synaps retention memory-scope,
+    upgrade-memory and migrate-memory are gone. The guide has a
+    replacement for each.
+  - Removed config keys load with a warning and do nothing: the
+    memory.* backend and automatic-memory keys, sidecar_toggle_key, the
+    eight shell.* keys, turn_budget.autonomous.*, bridge.*,
+    server.token, server.allowed_origins and server.max_message_size.
+  - Plugin sidecars are gone. A plugin.json with provides.sidecar
+    still loads with the block ignored; local-voice dictation stops working
+    until it is rebuilt on extensions.
+  - grep patterns are Rust regex (escape (, [, { to match them),
+    and grep and find respect .gitignore (no_ignore: true for
+    everything). Their schemas changed, so the first request after upgrading
+    rewrites the prompt cache once.
+  - synaps retention sweep keeps saved notes unless --include-notes
+    is given.
+  - Going back to 0.11.1: a chat that rolled over on 0.12.0 counts its
+    windows from 1 again there (and is refused on memory.backend = axel).
+    Nothing is lost; see the guide.
+ReleaseNotesUrl: https://github.com/HaseebKhalid1507/SynapsCLI/releases/tag/v0.12.0
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://github.com/HaseebKhalid1507/SynapsCLI/tree/HEAD/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
