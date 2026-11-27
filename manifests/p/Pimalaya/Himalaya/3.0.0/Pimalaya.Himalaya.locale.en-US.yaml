@@ -1,0 +1,113 @@
+# Created with komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Pimalaya.Himalaya
+PackageVersion: 3.0.0
+PackageLocale: en-US
+Publisher: Pimalaya
+PublisherUrl: https://pimalaya.org/
+PublisherSupportUrl: https://github.com/pimalaya/himalaya/issues
+Author: Clément DOUIN
+PackageName: Himalaya
+PackageUrl: https://github.com/pimalaya/himalaya
+License: Apache-2.0 or MIT
+LicenseUrl: https://github.com/pimalaya/himalaya/blob/master/README.md#license
+Copyright: Copyright (c) 2022-2026 soywod <pimalaya.org@posteo.net>
+ShortDescription: CLI to manage emails
+Moniker: himalaya
+Tags:
+- cli
+- client
+- email
+- gpg
+- himalaya
+- imap
+- notmuch
+- pgp
+- pimalaya
+- rust
+- sendmail
+- smtp
+- terminal
+ReleaseNotes: |-
+  Himalaya 3 is a low-level CLI over a unified mail API: the same commands on every backend, the protocol-specific ones beside them, plain text for a glance and --json for scripts, frontends and AI agents. Daily-mail comfort (tables, colours, relative dates, rich composition) moves to frontends such as himalaya-tui and to mml, and the offline side to the pimdir store Neverest syncs, which Himalaya reads and queues its writes into.
+  The wizard, the m2dir backend and the display options are gone, an unknown configuration key fails the load, and every failure carries a stable code. MIGRATION.md lists what to act on when upgrading from 2.x.
+  Added
+  - Added the account-level tls table (tls.provider, tls.rustls.crypto, tls.cert, tls.client.cert, tls.client.key), inherited field by field by every network backend.
+    A backend's own tls wins, so one trusted certificate reaches IMAP, SMTP, ManageSieve, JMAP, Gmail and Microsoft Graph alike.
+  - Added tls.client.cert and tls.client.key to every network backend, a client certificate presented for mutual TLS.
+    native-tls reads a PKCS#8 key only.
+  - Added maildir.layout, fs by default or maildir++ for a Dovecot or Courier store.
+    The root is the inbox, .a.b lists as a/b, and a level holding a dot is refused.
+  - Added message.reply.posting-style and message.forward.posting-style, global or per account, the style used without --posting-style ([#772]).
+  - Added the first-run welcome: at a terminal without a configuration, a command prints the missing path and the commands copying config.sample.toml in place, then exits 1.
+    Under --json or with stderr piped, the error names the path and the sample instead.
+  - Added config.sample.toml to the Nix package and the release archives as share/doc/himalaya/config.sample.toml, which install.sh installs under its prefix.
+  - Added a stable code to the JSON failure object for the failures a caller is expected to act on, null otherwise.
+    json-schema himalaya-error describes the object and lists every code.
+  - Added the item and mailbox codes message-not-found, mailbox-not-found, message-unreadable, mailbox-unreadable, mailbox-duplicate, message-too-complex, thread-not-found, identity-not-found and submission-not-found.
+  - Added the server refusal codes permission-denied, quota-exceeded, rate-limited (a Google daily quota included) and recipient-refused.
+  - Added the usage codes usage-invalid, capability-missing, search-invalid, search-unsupported, page-token-invalid, stdin-taken, attachment-too-large, attachment-invalid and request-origin.
+  - Added the account codes account-missing, account-default-missing, account-default-several and backend-not-built, the last naming the cargo feature to rebuild with.
+  - Added the pimdir codes io-pimdir gives a store, its queue and its search index.
+    Store: store-version, store-uncreated, store-foreign, store-corrupt, store-not-current, store-hash-algo, store-busy, store-owned, store-staging, store-in-flight, store-exposed, store-reset, source-empty, store-account-ambiguous, store-account-unknown, sync-version, lock-replaced.
+    Queue and index: body-pending, item-duplicate, flag-invalid, action-malformed, conflict-unread, unsupported, no-performer, ambiguous-performer, row-not-found, confirmation-required, index-missing, index-outdated, index-version, index-zone-unknown, index-fts5-missing, query-refused, query-unanswerable, tag-refused.
+  - Added errors to envelope list|search, mailbox list, flag add|set|remove and message copy|move|delete, one item error {id, code, error, sources} per item the command could not list or act on.
+    A non-empty errors exits 3. In text each entry prints as an Error: line after the items.
+  - Added a JSON Schema for every command, himalaya-error for the failure object, and .events schemas for what imap raw and sieve raw print before their result.
+  - Added total to envelope list --json, how many messages the mailbox holds, null on Gmail and Microsoft Graph and for envelope search.
+  - Added --page-token to envelope list|search and jmap email|mailbox|submission query, taking back the nextPage a page printed, null on the last page.
+    It is refused beside --page, and a token no listing printed fails page-token-invalid.
+  - Added --page-token to msgraph messages list, mail-folders list and mail-folders child-folders, following as is the Graph next link they print as nextPage.
+    A query option beside it is refused (exit 2), the link carrying the query.
+  - Added a library target, which himalaya-tui pins by git revision to run Himalaya's commands in-process, with no semver promise beyond the CLI grammar and --json.
+  - Added himalaya repl, a session running one command per line over clients connected once for the session.
+    Piped, every line gets exactly one answer; a line setting -a, -c, --log-level or -b, or reading stdin (stdin-taken), is refused.
+  - Added himalaya mcp, a Model Context Protocol server over stdio exposing the account's unified API as tools named after their command.
+    Only the reading tools are listed by default: --allow-write adds the writes and --allow-send the sends, which keep no copy without --allow-write.
+  - Added the MCP tool attachment_download and the attach-data argument of message_compose, message_reply and message_forward ([#805], [#806]).
+    Both refuse a part over himalaya mcp --max-attachment-size, 10 MiB by default, coded attachment-too-large.
+  - Added account capability, listing what the account serves of the unified API: per capability its backend, its level (full, partial, server, none) and the detail.
+  - Added a capability table per backend: a unified command reaching a capability its backend declares none is refused before connecting, coded capability-missing.
+    The --help of every unified command ends with a generated Backends: footer listing those levels.
+  - Added mailbox create, mailbox rename and mailbox delete to the unified API, on every backend.
+    A delete takes the messages the mailbox holds; on pimdir each is queued for the sync engine.
+  - Added the important and junk flags (RFC 8457 $Important, $Junk) to flag add|set|remove.
+    Graph refuses junk, Gmail's junk is the SPAM label, and Maildir needs maildir.keywords.dovecot.
+  - Added vacation get and vacation set, reading and changing the auto-reply on JMAP and Gmail, whatever configured backend holds the mail.
+    IMAP refuses it, naming himalaya sieve.
+  - Added message parse [EML], printing the message read view of a raw message from a file or stdin with no account, --part and --section writing one part.
+  - Added --stdout to attachment download, writing one part's decoded bytes to stdout, or {id, mime, filename, size, data} with data in base64 under --json.
+    It takes exactly one part id, no id or several being refused usage-invalid, exit 2, before connecting.
+  - Added contentId to attachment list --json.
+  - Added --all (-A) to message reply, replying to everyone but the account's own address ([#779]).
+  - Added the source's attachments to message forward, --no-attachments leaving them out ([#780]).
+  - Added the answered flag to the source of message reply --send and the forwarded flag to that of message forward --send ([#778]).
+    Gmail and Microsoft Graph keep no answered flag, so a reply there flags nothing.
+  - Added date, messageId and attachments to the JSON template message compose|reply|forward print without --save or --send.
+    attachments lists {filename, mime, size} with no bytes: hand the files back through --attach.
+  - Added --notify, --ret and --envid to smtp send, requesting delivery status notifications (RFC 3461) ([#775]).
+    The command fails when the server does not announce DSN.
+  - Added from, date and flags to each imap thread entry, the flags as the server spells them, as imap fetch prints them.
+  - Added the IMAP mailbox roles a plain LIST marks with a special-use attribute (RFC 6154), shown by mailbox list and taken by -m.
+    A mailbox.alias.<role> still wins.
+  - Added jmap request, sending one whole JMAP request object and printing {response}, as Cardamum's does.
+    jmap query, taking a method-calls array, stays as a hidden command.
+  - Added gmail request and msgraph request, sending one request to the Gmail or Microsoft Graph API and printing {response}, the provider's answer.
+    A URL off the API's origin is refused before the session opens, coded request-origin.
+  - Added msgraph messages send-draft, sending an existing Microsoft Graph draft ([#787]).
+  - Added --no-categories to msgraph messages update, removing every category of the message.
+  - Added pimdir search, searching the account's mail in the pimdir query language (SEARCH.md §8) from the store's search index.
+    --sort, --threads and --page-token shape the answer; each hit carries its envelope, mailboxes and a snippet, and coverage says what the index could not see.
+  - Added pimdir count, counting the account's mail a query matches, with its coverage.
+  - Added pimdir thread, listing the thread of a message from the search index, oldest first, a member the store cannot read under errors (exit 3).
+  - Added pimdir tag, queueing a flag change on every message a query matches, --dry-run queueing nothing, a placement whose flags were never read printing flags null.
+  - Added pimdir flag list|add|set|remove, reading and staging any flag of a pimdir message by its raw spelling, keywords included ([#790]).
+  - Added pimdir mailbox list, listing each mailbox with its total and unread counts and the coverage the sync engine last listed it within.
+  - Added pimdir mailbox create, rename and delete, queueing the change for the sync engine to apply on the server.
+    A delete takes the messages; a mailbox holding other mailboxes parks, naming them.
+  - Added pimdir message add and pimdir message send, staging a message and printing its link id as id with its queue row.
+  - Added pimdir queue show, printing a row as pimdir queue list does, then its state (pending, parked, unconfirmed, applied), appliedAt and refusals.
+ReleaseNotesUrl: https://github.com/pimalaya/himalaya/releases/tag/v3.0.0
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
