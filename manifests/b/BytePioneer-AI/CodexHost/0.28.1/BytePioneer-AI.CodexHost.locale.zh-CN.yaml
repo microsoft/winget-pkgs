@@ -1,0 +1,114 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: BytePioneer-AI.CodexHost
+PackageVersion: 0.28.1
+PackageLocale: zh-CN
+Publisher: codexhost
+PublisherUrl: https://github.com/BytePioneer-AI
+PublisherSupportUrl: https://github.com/BytePioneer-AI/codex-host/issues
+PrivacyUrl: https://github.com/BytePioneer-AI/codex-host/blob/HEAD/docs/PRIVACY.md
+Author: BytePioneer-AI
+PackageName: CodexHost
+PackageUrl: https://github.com/BytePioneer-AI/codex-host
+License: MIT
+LicenseUrl: https://github.com/BytePioneer-AI/codex-host/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 BytePioneer-AI
+ShortDescription: 在 Codex Desktop 中直接运行 Pi 和 Claude Code 等 Agent Harness
+Description: |-
+  CodexHost 是一个独立的非官方开源项目，让 Pi、Claude Code 等 Agent Harness 在 Codex Desktop 中运行，并支持跨 Agent 协作。
+  支持通过 SSH 和官方 Codex Desktop Remote Control 使用远程主机上的 Harness。
+  CodexHost 与 OpenAI 无隶属关系，也未获得 OpenAI 的背书。
+
+  我们认为 Codex Desktop 提供了目前最好的桌面开发交互体验。
+  但 Codex 并不是唯一优秀的 Agent Harness，也有人偏好 Claude Code 和 Pi Agent。
+  CodexHost 让你在 Codex Desktop 中选择真正执行任务的 Agent，同时保留 Codex 的原生体验，并让它们协作完成任务。
+  无需切换应用，Pi、Claude Code、OMP、Grok Build 和 DeepSeek Harness 都可以在同一个 Codex Desktop 窗口中直接使用。
+
+  跨 Agent 协作
+
+  你可以让当前 Agent 把独立任务交给另一个 Harness。例如：
+  让 @claude-code 独立审查这次修改，并指出兼容性风险。
+  让 @pi 调查这个测试为什么偶发失败。
+  让 @omp 实现这个功能，我继续整理文档。
+  CodexHost 会为目标 Harness 创建独立的 Native Session。委派会话将出现在 Codex Desktop 的会话列表中，你可以随时打开、查看进度或继续对话。
+Tags:
+- claude-code
+- codex
+- pi
+- 智能体
+- 编程智能体
+ReleaseNotes: |-
+  本次更新重点修复移动端与 Safari/WebKit 的布局、毛玻璃透底和长对话滚跳问题，并改进了 Windows 启动更新、AgentRouter 鉴权、ZCode 模型刷新与远端配对去重体验。
+  📱 移动端与 WebKit 体验全面打磨
+  移动端窄屏不再裁切 Composer 的 Harness 切换按钮，设置页更新卡片在附带停止日志时排版清晰不重叠，触控点击顶栏不再残留悬停提示；WebKit/Safari 下手机抽屉与浮层菜单不再透底重叠，长会话滚动虚拟化不再异常回跳；侧栏「最近」自动剔除已在展开项目中显示的重复会话。
+  — @iruriQ · @TimYuhong
+  🪟 Windows 启动、桌面壳与更新检查更稳健
+  npm 安装版在遇到 GitHub API 限流时自动回退至 npm 源完成更新检查；Windows 强制重启遇到瞬时拒绝访问改为轮询重试而非直接中断；桌面壳仅在显式配置数据目录时注入环境变量，避免默认目录冷启动冲突。
+  — @koeria
+  🔌 原生来源透传与 ZCode 模型同步
+  共享 Host 原样透传 Codex Desktop 原生来源，修复经 Host 访问 AgentRouter 返回 401 的问题；ZCode 优先读取 ZCode Desktop 刷新后的内置 Provider 配置，及时同步 App 发布后新增的 Model。
+  — @ifsherlock · @oneopcai
+  🔗 远端配对去重、CLI 帮助与细节修复
+  本机添加或更新远端 Peer 时自动拦截重复地址与节点，避免拓扑图与侧栏会话重复；外部 Harness 首轮失败停止后交接提示更准确；codexhost web/launch/inspect/status 等命令补齐 --help/-h 用法输出。
+  — @iruriQ
+  📋 完整更新清单
+  展开查看全部修复（16 项）
+  🐛 修复
+  - 移动端 Composer：窄屏下长模型名正常省略收缩，不再挤压裁切右侧 Harness 切换按钮 (#1278)
+  - 移动端更新页：窄屏下更新状态卡片附带停止日志时标题不再竖排、文字不再重叠、更新按钮不再被裁切 (#1277)
+  - WebKit / Safari 视觉：修复手机左侧抽屉、@ 委派浮层与 Harness 下拉菜单毛玻璃失效导致的透底重叠 (#1276)
+  - WebKit 长会话滚动：修复长对话虚拟化过程中的异常滚跳、中段位置偏移与宽表格对齐问题 (#1254)
+  - 移动端触控提示：修复触控点击顶栏侧边栏按钮后 Tooltip 残留遮挡会话标题 (#1275)
+  - 侧边栏「最近」：展开项目后不再在「最近」列表中重复显示同一会话，收起项目后自动恢复 (#1279)
+  - npm 更新检查：GitHub Release API 匿名限流时，npm 安装版自动回退至 npm registry 检查最新版本 (#1259)
+  - Windows 强制重启：终止 Codex 进程遇到瞬时拒绝访问（os error 5）时在超时内重试，不再立即报错中断 (#1253)
+  - 桌面壳启动：仅在显式配置数据目录时注入 CODEXHOST_DATA_DIR，修复 Windows 默认目录托盘冷启动超时 (#1258)
+  - AgentRouter 鉴权：共享 Host 透传 Codex Desktop 原生来源，修复 AgentRouter 请求返回 401 (#1252)
+  - ZCode 模型目录：优先读取 ZCode Desktop 刷新后的内置 Provider 配置，同步最新内置 Model (#1256)
+  - 远端 Peer 去重：本机添加或修改远端主机时拒绝重复的 origin 或 nodeId，避免拓扑与会话翻倍 (#1272)
+  - 跨 Harness 交接：外部 Harness 首轮启动失败或已停止且无已完成轮次时，不再误提示「当前轮次完成后可交接上下文」 (#1273)
+  - CLI 帮助参数：codexhost web、launch、inspect、status 等原生子命令支持 --help / -h (#1274)
+  - 设置文案与更新日志：修正中英文「会话树的展示方式」错别字 (#1269)，修复更新日志折叠块内代码块包含 </details> 时提前闭合 (#1270)
+
+  This release focuses on mobile and Safari/WebKit layout, frosted-glass bleed-through, and long-transcript scroll stability, alongside fixes for Windows restarts, rate-limited npm update checks, AgentRouter auth, ZCode model discovery, and duplicate remote Peer prevention.
+  📱 Mobile & WebKit Polish
+  Long model names on narrow phone screens now truncate cleanly without clipping the Composer Harness picker, the mobile Settings update card keeps status logs and buttons neatly stacked without overlap, and touch taps no longer leave sticky tooltips behind. In WebKit/Safari, the phone drawer and floating menus no longer bleed background text through, long-transcript virtualization no longer jumps scroll position, and Recents omits conversations already shown inside expanded projects.
+  — @iruriQ · @TimYuhong
+  🪟 Reliable Windows Restarts, Desktop Shell & Update Checks
+  npm installations now fall back to the npm registry when GitHub Release discovery is rate-limited, Windows forced restarts retry transient access-denied errors instead of aborting immediately, and the desktop shell only injects CODEXHOST_DATA_DIR when explicitly configured.
+  — @koeria
+  🔌 Native Originator Forwarding & ZCode Model Sync
+  The shared Host now forwards Codex Desktop's native originator to fix AgentRouter 401 errors, and the ZCode Adapter prefers the refreshed builtin Provider config written by ZCode Desktop so newly added Models appear immediately.
+  — @ifsherlock · @oneopcai
+  🔗 Duplicate Peer Prevention, CLI Help & Details
+  Local remote Peer add/update now rejects duplicate origins or node IDs so topology graphs and sidebar lists stay clean, failed/stopped first turns show an accurate handoff message, and native launcher subcommands (web, launch, inspect, status, etc.) now support --help / -h.
+  — @iruriQ
+  📋 Full Changelog
+  Show all fixes (16)
+  🐛 Fixes
+  - Mobile Composer: shrink long model labels on narrow screens so the Harness picker button stays visible and unclipped (#1278)
+  - Mobile Update Card: stack status output cleanly inside the Settings update panel so titles never wrap vertically and buttons never clip (#1277)
+  - WebKit / Safari Surfaces: fix backdrop blur loss and bleed-through on the mobile drawer, @ delegation menu, and Harness dropdown (#1276)
+  - WebKit Long-Transcript Scroll: prevent scroll jumps, mid-transcript drift, and wide-table alignment glitches during virtualization (#1254)
+  - Mobile Touch Tooltips: prevent sticky hover tooltips after tapping topbar buttons on touch devices (#1275)
+  - Sidebar Recents: omit conversations already visible inside expanded projects and restore them when collapsed (#1279)
+  - npm Update Checks: fall back to the npm registry for npm installs when GitHub Release API discovery is rate-limited (#1259)
+  - Windows Forced Restart: retry transient access-denied (os error 5) errors within the timeout instead of aborting restart (#1253)
+  - Desktop Shell Startup: only inject CODEXHOST_DATA_DIR when explicitly configured, fixing Windows default-directory cold-start timeouts (#1258)
+  - AgentRouter Auth: forward Codex Desktop's native originator through the shared Host to resolve 401 errors (#1252)
+  - ZCode Models: prefer ZCode Desktop's refreshed builtin Provider config so newly shipped Models are discovered (#1256)
+  - Remote Peer Deduplication: reject duplicate origin or nodeId on local add and update (#1272)
+  - Cross-Harness Handoff: stop showing the wait-for-turn hint when a stopped or failed session has no completed turns yet (#1273)
+  - CLI Help Flags: support --help and -h across codexhost web, launch, inspect, status, and sibling native subcommands (#1274)
+  - Settings Copy & Release Notes: fix zh/en thread tree display labels (#1269) and keep literal </details> tags inside fenced code blocks intact (#1270)
+  Install & Upgrade
+  - New install: npm install -g @codexhost/cli, or download the installer for your platform from Assets below.
+  - Upgrade: codexhost update. For npm installs, run codexhost stop before reinstalling.
+  - macOS "cannot verify this app": xattr -dr com.apple.quarantine /Applications/codexhost.app
+  - More: README
+  🙏 致谢 / Thanks
+  @iruriQ (#1254, #1269, #1270, #1272, #1273, #1274, #1275, #1276, #1277, #1278) · @koeria (#1253, #1258, #1259) · @ifsherlock (#1252) · @oneopcai (#1256) · @TimYuhong (#1279)
+ReleaseNotesUrl: https://github.com/BytePioneer-AI/codex-host/releases/tag/v0.28.1
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
