@@ -1,0 +1,95 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: fwilhe2.Grind
+PackageVersion: 0.2.0
+PackageLocale: en-US
+Publisher: Florian Wilhelm
+PackageName: grind
+License: AGPL-3.0-or-later
+Copyright: Copyright (C) 2026 Florian Wilhelm
+PublisherSupportUrl: https://github.com/fwilhe2/grind/issues
+PackageUrl: https://github.com/fwilhe2/grind
+LicenseUrl: https://github.com/fwilhe2/grind/blob/HEAD/LICENSES/AGPL-3.0-or-later.txt
+ShortDescription: An ODF-native office suite with native clients for Windows, macOS, GTK, the browser, the terminal and the command line.
+Description: |-
+  grind is an ODF-native office suite written from scratch, with a native application for each platform rather than a cross-platform toolkit: a Windows program, a Mac program, GTK windows, a terminal UI, a browser client and a command line. Its native format is OpenDocument (odf).
+
+  - A plain-text projection of a document makes every cell a line, so a spreadsheet can live in git and be reviewed and audited as diff, and it still opens in the window.
+  - Formulas can be shown as self-documenting text instead of terse references, for example Future Value(Rate: Loan.B7/12, Number Of Periods: 10*12, Payment: -Loan.B6) in place of =FV(Loan.B7/12;10*12;-Loan.B6).
+  - A domain specific language based on rhai generates spreadsheets from dynamic data without a Turing complete language, and without macro support.
+  - A scratch calculator for the times where a calculator comes first and a spreadsheet would be easier later: define names, calculate line by line, and promote the tape to a real spreadsheet.
+  - The CLI is a first class citizen, whether it is used by a human, in shell scripts or by AI agents; discover it with grind --help.
+  - Excel workbooks are imported and their formulas recalculated, and their bar, line, pie and area charts are brought along.
+
+  The clients are the spreadsheet and the word processor for Windows, macOS, GTK and the browser, the terminal version grind-tui, the command line grind, and a VS Code extension for .grind and .rhai files.
+Tags:
+- document
+- docs
+- editor
+- odf
+- office
+- spreadsheet
+- word
+- word-processor
+- work
+ReleaseNotes: |-
+  Changes
+
+  - grind calc, a scratch calculator: type formulas line by line, refer to an
+    earlier line as #3 or name one as vat = 0.19, and save the lines as a spreadsheet with
+    --save. Numbers follow --locale. In the terminal version it is grind-tui --tape, or
+    :tape; in the spreadsheet window, the calculator button in the header bar or Scratch
+    Calculator in the menu, with Open as Spreadsheet to carry on in a sheet; in the browser,
+    the calculator button over a spreadsheet, or Scratch calculator in Ctrl+K; on Windows,
+    Data ▸ Scratch Calculator…; on a Mac, Edit ▸ Scratch Calculator….
+  - The scratch calculator in the browser, on Windows and on a Mac is a notebook: type a line,
+    press Enter, and the next one is ready; Enter on an earlier line opens a new one under it, the
+    arrow keys move between lines, and Backspace in an empty line removes it.
+  - The scratch calculator completes as you type: Tab takes the names your lines define, offered
+    first with their values, and the functions. A name the tape knows is coloured apart from a
+    misspelt one. In every window and in the terminal.
+  - grind sheet extract, and Extract a Number into a Named Cell… in the spreadsheet window,
+    move a number out of a formula into a named input cell, and have the formula use the name
+    instead.
+  - Excel's newer functions recalculate instead of showing #NAME?: IFS, SWITCH, CONCAT,
+    TEXTJOIN, XLOOKUP, XMATCH, STDEV.S, STDEV.P, VAR.S and VAR.P.
+  - Statistics: PERCENTILE, QUARTILE, MODE, PERCENTRANK, CORREL, PEARSON, RSQ, SLOPE,
+    INTERCEPT, FORECAST, SUMSQ, DEVSQ, AVEDEV, GEOMEAN, HARMEAN, COMBIN and PERMUT.
+  - TEXT: a number or a date spelled in a format code such as #,##0.00 or dd.mm.yyyy.
+  - LOOKUP, ISEVEN, ISODD, ISREF, ISFORMULA, FORMULA (Excel's FORMULATEXT),
+    ERROR.TYPE, CHAR, CODE, UNICHAR and UNICODE.
+  - OFFSET and INDIRECT: a reference moved and resized, and a reference spelled as text — with
+    . or Excel's ! before a sheet, a defined name, or in R1C1 style.
+  - Four more spreadsheet functions: FIXED, LEGACY.NORMSINV, and Excel's NORM.S.DIST and
+    GAMMA.DIST, so workbooks that simulate with the normal and gamma distributions recalculate
+    instead of turning into errors.
+  - Importing an Excel workbook keeps a one-cell array formula as a formula when it computes the
+    same as an ordinary one, instead of freezing it to its saved value.
+  - Area charts: offered beside bar, line and pie wherever a chart is inserted or changed, and
+    drawn as LibreOffice draws them — stacked bands, with lines over them.
+  - Charts LibreOffice anchors to a cell are shown; they used to be invisible in grind.
+  - Stacked bar and line charts are drawn stacked; they used to be drawn side by side.
+  - A formula whose saved result was rounded to ten digits no longer counts as out of date: editing
+    such a workbook no longer warns about thousands of formulas, and recalculating leaves them be.
+  - Importing an Excel workbook brings its charts along — bar, line, pie and area, stacked or not,
+    with a line over bars or areas — placed where they were, drawn from the workbook's cells, and
+    with their series' names even where the workbook gives a name as text rather than a cell, and
+    their colours, theme colours included. A 3D chart comes in as its flat kind.
+
+  Fixes
+
+  - Formulas in a spreadsheet grind saved open as formulas in current LibreOffice, rather than as
+    Err:510 in every formula cell.
+  - A date format that shows the day of the week names the right day; every day but Sunday was
+    shown as the day before.
+  - MATCH searches an array as well as a range, so MATCH(TRUE(); INDEX(B1:B9>15; 0); 0) finds
+    the first row over 15 instead of failing; INDEX picks a row or column of an array inside one.
+  - INDEX over a range gives back a cell, row or column you can use as a range, so
+    MAX(A2:INDEX(A2:A99; B1)) and SUM(INDEX(A1:C9; 0; 2)) work instead of showing #VALUE!.
+ReleaseNotesUrl: https://github.com/fwilhe2/grind/releases/tag/v0.2.0
+Documentations:
+- DocumentLabel: User guide
+  DocumentUrl: https://github.com/fwilhe2/grind/blob/HEAD/doc/user-guide.md
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
