@@ -1,0 +1,34 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.28.0.schema.json
+
+PackageIdentifier: mateo-ki.VProxy
+PackageVersion: 1.17.5
+PackageLocale: zh-CN
+ShortDescription: Windows 桌面程序：采集订阅、解析成节点、跑代理，并把代理质量实测出来。
+Description: VProxy 是用 Rust + egui 编写的 Windows 桌面程序，负责采集免费或自建订阅、解析成节点、跑代理，并把代理质量实测出来。订阅入口包括带 `YYYY-MM-DD` 日期占位符的订阅 URL、Gist 搜索页发现，以及 Telegram 频道预览（裸节点链接和订阅链接两类都取，节点只增不删）。解析支持 `ss` `vmess` `vless` `trojan` `hysteria2/hy2` `socks5` `http(s)` 分享链接，以及 Clash / Clash Meta YAML、Base64 与混合文本。延迟以经内核访问 Google `generate_204` 的真实握手为准，24 小时出口健康条按实测绘制，而不是看内核上报的状态。Windows 上它同时管理系统代理、TUN（提权交接后只保留一个实例）和终端 `HTTP_PROXY` 环境变量，按 exe 路径添加防火墙允许规则，支持单实例互斥与托盘，记录出口切换历史并按天统计规则命中，同时提供强制 bearer 鉴权的本地 HTTP API 与 mihomo / sing-box / xray 配置导出。安装包不含内核，内核缺失时由程序按需下载。
+Tags:
+- clash
+- sing-box
+- 代理
+- 出口健康
+- 测速
+- 节点解析
+- 订阅
+ReleaseNotes: |-
+  🚀 VProxy v1.17.5 发布说明 / Release Notes
+  🎉 VProxy v1.17.5 正式发布！本版本重点集成 DNS 防泄露全栈治理与 Windows 智能多宿主防护、「路由与 DNS 链路追踪」单屏重构与控制台快捷入口、原生 warp://native MASQUE 采集，并对 VP-Core 蛇形配置冲突去重、规则命中/DNS 监控过滤 及 设置/关于界面细节 进行了打磨：
+  🛡️ DNS 防泄露治理与智能多宿主防护
+  - 网络体检 DNS 静态审计与系统防护：吸收 DNSnitch 规则与解析审计思路，在网络体检弹窗集成 audit_dns_config 静态配置审计，并新增 Windows 智能多宿主名称解析检查与提权一键修复（写入 DisableSmartNameResolution=1 并清理缓存），防范 TUN 模式下系统向物理网卡并发发送明文 DNS 导致域名泄露；
+  - 纯 IP DoH 与反劫持嗅探：内置国内与兜底 DNS 全面切换为纯 IP DoH 端点（https://223.5.5.5/dns-query、120.53.53.53、1.1.1.1、8.8.8.8），消除 DoH 域名二次递归解析隐患，并在 Mihomo 编译输出中补全 sniffer.skip-domain；
+  - VP-Core 配置蛇形键去重：vp_core 编译器新增 dedup_alias_keys，自动合并根配置、tun 与 dns 节的蛇形/连字符别名（如 enhanced_mode → enhanced-mode、fake_ip_range → fake-ip-range），解决覆写脚本或 YAML 与默认字段并发输出触发 duplicate field 报错的问题；
+  - 多地址探活回退：verify_selected_outbound_alive 改为依次探测多组 STARTUP_PROXY_VERIFY_URLS，避免单一测速站偶发 504/超时导致误判节点不可用。
+  🧭 路由与 DNS 链路追踪极简重构 & 控制台快捷入口
+  - 控制台测速左侧快捷入口：控制台状态栏测速按钮左侧新增路由链路入口（Icon::Radar），点击即可为当前选中或运行中节点打开路由追踪；
+  - 单屏四步链路直出：移除冗余的 5 段 Tab 切换、双层详情卡与伪毫秒子步骤，重构为单屏直出「1. 入站 → 2. DNS → 3. 规则（支持展开已比对明细）→ 4. 出口」；
+  - 通俗化 DNS 诊断文案：重写前置 IP 规则触发本地解析与 DoH 安全提示，消除晦涩倒装与重复输出，已加密 DoH 安全场景不再弹出误导性黄色告警横幅。
+  📡 原生 WARP 采集、分流/DNS 监控与界面打磨
+  - warp://native 原生订阅采集：采集器新增对 warp://native 的支持，直接调用 Cloudflare WARP 设备注册接口拉取并入库 MASQUE 节点；
+  - 规则命中与 DNS 记录排查增强：规则命中表新增分组筛选、关键词过滤与点击展开最近连接明细；DNS 记录页新增按分流目标分组统计与一键过滤；
+  - 界面精简打磨：系统设置「清理」分页去掉超大按钮并改为紧凑链接/图标操作；控制台状态栏精简内核偏好提示并展示回退原因；修复 segmented_pills 浅色模式凹槽轨道对比度，并移除「关于」页标题栏容易误导用户的 [ 稳定版 | 预发版 ] 切换开关。
+ManifestType: locale
+ManifestVersion: 1.28.0
