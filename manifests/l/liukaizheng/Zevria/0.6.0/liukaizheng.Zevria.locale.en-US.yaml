@@ -1,0 +1,62 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: liukaizheng.Zevria
+PackageVersion: 0.6.0
+PackageLocale: en-US
+Publisher: liukaizheng
+PublisherUrl: https://github.com/liukaizheng
+PublisherSupportUrl: https://github.com/liukaizheng/zevria/issues
+PrivacyUrl: https://github.com/liukaizheng/zevria/blob/HEAD/PRIVACY.md
+PackageName: Zevria
+PackageUrl: https://github.com/liukaizheng/zevria
+License: Freeware
+ShortDescription: A terminal coding agent, written in Rust.
+Description: |-
+  Zevria is a terminal coding agent written in Rust. It can investigate a codebase, prepare a plan for approval, edit files, run commands, and delegate independent work—all from an interactive terminal UI. It also runs as a headless Agent Client Protocol (ACP) agent for editors and other clients.
+  Highlights
+  - Collaborative Plan writing: /ensemble-plan <prompt> gathers independent proposals from configured ACP agents—including Claude Code and Codex in the default setup—and synthesizes a Plan after you review and confirm the proposals. Workers must be installed and authenticated.
+  - Vim-style transcript navigation: switch between Normal and Insert modes, move quickly through messages, copy message or tool content, and fold or unfold transcript items and turns with familiar Vim-inspired controls.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  Zevria v0.6.0
+  Edit and resend earlier messages in Desktop, connect MCP servers to interactive sessions, and run web searches independently of the model handling the conversation.
+  Breaking Changes
+  - Root session transcripts now use JSONL v2; older transcripts cannot be resumed in v0.6.0. There is no migration: keep old histories for use with the previous version and start a fresh session.
+  - Web search moved from providers.<name>.web_search in models.jsonc to an opt-in [web_search] section in config.toml; remove the old setting and any additional_params.tool_choice that forces hosted search before upgrading.
+  - Rust integrations must update their SessionEvent matches to use the new domain enums, such as SessionEvent::Turn(TurnEvent::Started { .. }).
+  Features
+  - Use Edit and resend on an earlier Desktop prompt to replace it and its later turns once the engine accepts the new message.
+  - Connect local stdio and Streamable HTTP MCP servers to interactive sessions, or inspect and manage them with zevria mcp.
+  - Configure a dedicated Responses profile for web search to bring cited results into Responses and Anthropic sessions without adding the search request to conversation replay.
+  Bug Fixes
+  - Preserve the original Desktop draft when editing is cancelled, and keep the old history and edited draft when a resend is rejected.
+  - Keep Desktop command rows stable during execution and distinguish live jobs from historical job notices.
+  - Paste multiline text in the Windows TUI without submitting it accidentally.
+  - Suppress extra console windows for captured commands on Windows.
+  - Recover from transient credential-helper failures without sending an extra request with rejected credentials.
+  Improvements
+  - Show consistent copy confirmation in the Desktop timeline, code blocks, Jobs, and Plan.
+  - Keep TUI startup interruptible with Ctrl+C and show progress if shutdown takes longer than expected.
+  Performance
+  - Reduce session startup, transcript replay, and request-building overhead while preserving the provider’s cacheable prompt prefix.
+  - Update only changed transcript content during streaming to reduce redundant Desktop and TUI work.
+  Build and Dependencies
+  - Update Desktop to GPUI Kit 0.11.0.
+  - Test the optimized CLI on all three release platforms instead of exercising an unoptimized fixture binary.
+  Known Issues
+  - GitHub archives contain the unsigned Zevria CLI only; they do not include Desktop or its dependencies.
+  Compare v0.5.0 to v0.6.0
+  Source commit: 1edc4e79e0d50cadada068770a0d630049639de2
+ReleaseNotesUrl: https://github.com/liukaizheng/zevria/releases/tag/v0.6.0
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
