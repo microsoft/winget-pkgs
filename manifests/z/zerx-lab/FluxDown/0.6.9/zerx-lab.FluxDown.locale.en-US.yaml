@@ -1,0 +1,211 @@
+# Created with WinGet Tracker using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: zerx-lab.FluxDown
+PackageVersion: 0.6.9
+PackageLocale: en-US
+Publisher: FluxDown
+PublisherUrl: https://github.com/zerx-lab
+PublisherSupportUrl: https://github.com/zerx-lab/FluxDown/issues
+Author: zerx-lab
+PackageName: FluxDown
+PackageUrl: https://github.com/zerx-lab/FluxDown
+License: AGPL-3.0
+LicenseUrl: https://github.com/zerx-lab/FluxDown/blob/HEAD/LICENSE
+ShortDescription: Rust 驱动的多协议下载管理器，支持 HTTP/FTP/BitTorrent 磁力链接及 HLS/DASH 流媒体，智能多线程加速与浏览器无缝集成。精美界面，极致性能，永久免费，零广告。
+ReleaseNotes: |-
+  📦 下载与安装说明（服务器 / CLI / Android / iOS）· 文件校验见 SHA256SUMS.txt
+  📦 Headless 服务器：直接下载运行（免 Docker）
+  ──────────────────────────────────────────────────────────────┬─────────────────────────────────────────────────────────────────
+  平台                                                          │资产
+  ──────────────────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────
+  Windows x64 / ARM64                                           │FluxDown-Server-0.6.9-windows-{x64,arm64}.zip
+  ──────────────────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────
+  macOS Intel / Apple Silicon                                   │FluxDown-Server-0.6.9-macos-{x64,arm64}.tar.gz
+  ──────────────────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────
+  Linux x64 / ARM64（musl 静态链接，任意发行版可用）            │FluxDown-Server-0.6.9-linux-{x64,arm64}.tar.gz
+  ──────────────────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────
+  OpenWrt 软路由 24.10 及更早（opkg，x86_64 / aarch64 各子架构）│fluxdown-server_0.6.9_<arch>.ipk +
+                                                                │luci-app-fluxdown_0.6.9_all.ipk
+  ──────────────────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────
+  OpenWrt 软路由 25.12 起（apk，x86_64 / aarch64 各子架构）     │fluxdown-server_0.6.9_<arch>.apk +
+                                                                │luci-app-fluxdown_0.6.9_all.apk
+  ──────────────────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────
+  QNAP NAS（QTS x86_64 / ARM64）                                │FluxDown-Server-0.6.9-qnap-{x64,arm64}.qpkg
+  ──────────────────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────
+  群晖 NAS（DSM 7 / DSM 6，x86_64 / ARM64）                     │FluxDown-Server-0.6.9-synology-{dsm7,dsm6}-{x64,arm64}.spk
+  ──────────────────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────
+  飞牛 fnOS NAS（x86 / ARM）                                    │FluxDown-Server-0.6.9-fnos-{x64,arm64}.fpk
+  ──────────────────────────────────────────────────────────────┴─────────────────────────────────────────────────────────────────
+  解压后运行 fluxdown-agent --server（Windows 为 fluxdown-agent.exe --server），浏览器访问 http://127.0.0.1:17800。
+  包内两个可执行文件必须放在同一目录：fluxdown-agent（含 Web 控制台，已编译进二进制）与 fluxdownd（下载 daemon，由 agent 自动拉起、退出时一并关停），无需附带任何静态资源目录。
+  首次启动请在浏览器里完成「初始化 FluxDown Server」向导。向导需要数据目录 agent/setup-bootstrap 里的一次性口令（Docker 为 /data/agent/setup-bootstrap）；无人值守部署可用 FLUXDOWN_TOKEN 预置并跳过向导。
+  OpenWrt：24.10 及更早用 opkg install fluxdown-server_*.ipk luci-app-fluxdown_*.ipk；25.12 起用 apk add --allow-untrusted fluxdown-server_*.apk luci-app-fluxdown_*.apk（包未用 OpenWrt 官方密钥签名）。<arch> 取路由器 /etc/apk/arch（或 opkg print-architecture）中的架构名。LuCI「服务 → FluxDown」页管理，Web 界面在 http://路由器IP:17800。agent 二进制含完整 Web UI，另附 fluxdownd，需 overlay 空间充足的软路由设备。
+  QNAP：App Center → 手动安装 .qpkg（需在设置中允许安装未经验证的应用），装完点应用图标直达 Web 界面。
+  群晖：套件中心 → 手动安装 .spk（需在「设置 → 信任来源」允许任何发行者）。DSM 7.x 装 dsm7 包（以套件专属用户运行），DSM 6.x 装 dsm6 包；Intel/AMD 机型选 x64，ARM 机型（rtd1296/rtd1619b 等）选 arm64。装完在套件中心点「打开」直达 Web 界面（端口 17800）。
+  飞牛 fnOS：应用中心 → 手动安装 .fpk；x86 机型选 x64，ARM 机型选 arm64。以专用应用用户 fluxdown 运行，默认保存到安装时创建的 fluxdown 共享文件夹，其他目录在应用设置「授权目录」中添加。装完点桌面图标直达 Web 界面（端口 17800）。
+  🐳 Headless 服务器：Docker（linux/amd64 · linux/arm64）
+  docker pull ghcr.io/zerx-lab/fluxdown-server:0.6.9
+  docker run -d -p 17800:17800 -v fluxdown-data:/data \
+    ghcr.io/zerx-lab/fluxdown-server:0.6.9
+  Compose 部署见仓库 docker/docker-compose.yml。首次打开 Web 界面时按向导设置访问密钥（须先读取数据卷里的 agent/setup-bootstrap），或用 -e FLUXDOWN_TOKEN=... 预置。
+  📦 命令行 CLI
+  ──────────────────────────────────────────────────┬───────────────────────────────────────────
+  平台                                              │资产
+  ──────────────────────────────────────────────────┼───────────────────────────────────────────
+  Windows x64 / ARM64                               │FluxDown-CLI-0.6.9-windows-{x64,arm64}.zip
+  ──────────────────────────────────────────────────┼───────────────────────────────────────────
+  macOS Intel / Apple Silicon                       │FluxDown-CLI-0.6.9-macos-{x64,arm64}.tar.gz
+  ──────────────────────────────────────────────────┼───────────────────────────────────────────
+  Linux x64 / ARM64（musl 静态链接，任意发行版可用）│FluxDown-CLI-0.6.9-linux-{x64,arm64}.tar.gz
+  ──────────────────────────────────────────────────┴───────────────────────────────────────────
+  解压后得到 fluxdown（Windows 为 fluxdown.exe），放入 PATH 即可使用；也可从源码安装：
+  cargo install --git https://github.com/zerx-lab/FluxDown fluxdown_cli。
+  fluxdown ping                         # 探活（需 FluxDown App / server 运行中）
+  fluxdown add https://example.com/f.zip
+  fluxdown ls
+  服务地址经 --url 或 FLUXDOWN_URL（默认 http://127.0.0.1:17800），管理 token 经 --token 或 FLUXDOWN_TOKEN。
+  📱 Android
+  ─────────────────────────────┬──────────────────────────────────────
+  设备                         │资产
+  ─────────────────────────────┼──────────────────────────────────────
+  不确定架构（通用包）         │FluxDown-0.6.9-android-universal.apk
+  ─────────────────────────────┼──────────────────────────────────────
+  64 位 ARM（绝大多数手机）    │FluxDown-0.6.9-android-arm64-v8a.apk
+  ─────────────────────────────┼──────────────────────────────────────
+  32 位 ARM                    │FluxDown-0.6.9-android-armeabi-v7a.apk
+  ─────────────────────────────┼──────────────────────────────────────
+  x86_64（模拟器 / Chromebook）│FluxDown-0.6.9-android-x86_64.apk
+  ─────────────────────────────┴──────────────────────────────────────
+  ⚠️ 从旧版（Flutter 版）升级：新版 Android 客户端换用了新的签名证书，不能直接覆盖安装旧版（系统可能提示「应用未安装」「软件包无效」「无法降级」或签名冲突）。
+  请先在旧版中记下需要保留的下载任务与设置，卸载旧版后再安装新版；卸载会清除旧版的本地数据，已下载到公共目录的文件不受影响。
+  📱 iOS（侧载，未签名）
+  ───────────────────────────────────────────────────────────┬────────────────────────────────────────
+  版本                                                       │资产
+  ───────────────────────────────────────────────────────────┼────────────────────────────────────────
+  完整版：含 BitTorrent / eD2K，远端主机的插件 / 组件管理可用│FluxDown-0.6.9-ios-sideload-unsigned.ipa
+  ───────────────────────────────────────────────────────────┴────────────────────────────────────────
+  IPA 未签名，需用 AltStore / SideStore / Sideloadly 等工具以自己的 Apple ID 签名后安装；免费 Apple ID 的签名 7 天后过期，需重新签名（AltStore / SideStore 可自动续签）。
+  不想自签可加入 TestFlight 公测（App Store 版，不含 P2P 与插件 / 组件功能），入口见官网下载页。
+  [0.6.9] - 2026-11-26
+  🚀 Features
+  - (download) 支持按主机名和 IP 限制连接数
+  - (ext) 任务列表支持本地清理已完成记录
+  - (remote) 支持远程任务批量指令与投影收敛
+  - (agent) 桌面 UI Gateway 首选本机 IPC 通道
+  - (desktop) 支持下载完成后自动退出
+  - (ui) 支持切换文件大小与速度单位
+  - (proxy) 支持按下载协议配置代理
+  - (icon-pack) 新增迅雷文件图标包
+  - (agent) 重复添加种子时弹出系统通知
+  - (ui) 截断文件名悬停显示完整文本
+  - (agent) 远程任务仅对发起端与执行端可见
+  - (android) 显示独立的逐任务下载进度通知
+  - (rss) 支持按需预览条目描述图片
+  - (website) 定价页移除投票入口与投票引导区块
+  - (website) 定价投票页移除讨论区
+  - (logging) 支持主机日志级别并完善下载诊断
+  - (android) 授权后将脱敏诊断日志发布到共享目录
+  - (downloads) 新建下载时提示重复链接和同名文件
+  - (engine) 已完成记录可在下载成功后立刻清除
+  - (downloads) 在桌面顶栏清除已完成任务
+  - (website) 新增数码荔枝官方授权证明页
+  - (settings) 关于页支持一键安装浏览器扩展
+  - (plugins) 按站点汇总 resolver 冲突并支持预置默认
+  - (ext) 页面脚本列表改站点摘要并加详情弹窗
+  - (plugin) 在客户端提交插件问题反馈
+  - (android) 支持下载深链指定目录和自动开始
+  - (windows) 在托盘显示未读下载状态
+  - (plugins) 支持圆角缩略图与弹性滚动区
+  - (downloads) Add sweep selection and desktop cleanup controls
+  - (engine) Verify matching files before checksum adoption
+  - (downloads) 支持按 URL 文件名编号范围批量新建下载
+  - (website) 首页促销胶囊改由 FluxCloud 目录驱动
+  - (i18n) 新增 Qwen 机器翻译脚本
+  - (website) 新增账户中心与登录态购买
+  - (i18n) 新增 qwen-mt 自动翻译工作流
+  - (plugin) Resolve 硬顶提至 120s
+  - (i18n) Qwen-mt 自动翻译官网界面文案
+  - (website) 官网界面文案多语言基础设施
+  - (website) 站点与文档按语言路由
+  - (i18n) 系统语言按首选列表推导
+  - (i18n) Qwen-mt 按 RPM/TPM 匀速限流
+  - (mobile) 声明新增界面语言
+  - (web) 接入新增界面语言
+  - (website) 官网补齐多语言文案与路由
+  🐛 Bug Fixes
+  - (website) Waffo 支付不再因活动价禁用
+  - (agent) 防止刷新令牌轮换后丢响应导致登出
+  - (ext) 识别伪装扩展名的 HLS 分片
+  - (engine) HLS 根列表 403 时回退协商 HTTP/2
+  - (ext) XHR 二进制响应提前按魔数打标并识别伪装分片
+  - (gpui) 统一 toast 布局修复通知图标错位
+  - (download) 并发请求被拒后自动降档续传
+  - (download) 隔离单次限流与并发上限学习
+  - Address FluxDown issue 417
+  - Address FluxDown issue 417
+  - Address FluxDown issue 417
+  - (extension) 管理 API 异常不再锁死下载接管，远程列表用 15 秒超时并限制已完成条数
+  - (engine) 非法保存路径的失败任务可以删除
+  - (gpui) BT 选择窗关闭按钮复用取消流程
+  - Address FluxDown issue 972
+  - Address FluxDown issue 972
+  - Address FluxDown issue 564
+  - Address FluxDown issue 570
+  - Address FluxDown issue 570
+  - (mobile) 修复 BT 监听状态轮询和设置定位
+  - (bt) 保留瞬态失败前的监听状态
+  - (i18n) Ru 术语对齐 glossary(Global→глобальн*、Лимит загрузки、строка статуса、aria2 按钮名)
+  - (ext) 修复嵌入播放器子帧 HLS 与图片前缀 TS
+  - Address FluxDown issue 478
+  - Address FluxDown issue 478
+  - Address FluxDown issue 478
+  - Address FluxDown issue 478
+  - Address FluxDown issue 478
+  - Address FluxDown issue 478
+  - Address FluxDown issue 478
+  - Address FluxDown issue 478
+  - Address FluxDown issue 478
+  - (extensions) GPUI 授权按钮与徽章同按加载失败门控
+  - Address FluxDown issue 675
+  - Address FluxDown issue 675
+  - Address FluxDown issue 675
+  - (engine) 组件版本源回退改用拥有型闭包，修复 daemon Send 推断失败
+  - Address FluxDown issue 675
+  - Address FluxDown issue 675
+  - Address FluxDown issue 675
+  - Address FluxDown issue 569
+  - Address FluxDown issue 569
+  - Address FluxDown issue 569
+  - Address FluxDown issue 569
+  - Address FluxDown issue 569
+  - Address FluxDown issue 569
+  - Address FluxDown issue 497
+  - Address FluxDown issue 497
+  - (gpui) 拖出完成产物丢失时立即重扫
+  - (gpui) 补查 Wayland 拖出后延迟移动的文件
+  - Address FluxDown issue 558
+  - (gpui) BT 文件按类型/大小排序时显示相对路径并取消缩进
+  - Address FluxDown issue 558
+  - Address FluxDown issue 558
+  - Address FluxDown issue 558
+  - Address FluxDown issue 558
+  - Address FluxDown issue 558
+  - Address FluxDown issue 443
+  - Address FluxDown issue 443
+  - Address FluxDown issue 443
+  - Address FluxDown issue 443
+  - (gpui) 仅删除文件确认框带上文件名并提示不可撤销
+  - (engine) 仅删除文件的中断重入只探测不再 unlink，先删主文件再清衍生产物
+  - Address FluxDown issue 443
+  - Address FluxDown issue 443
+  - Address FluxDown issue 443
+  - Address FluxDown issue 443
+  - Address FluxDown issue 443
+  - Address FluxDown issue 443
+  - Address FluxDown issue 443
+  - Address FluxDown issue 443
+  - (engine) 已清理记录不再认领同名产物，从零重下保留 Range 已验证
+ReleaseNotesUrl: https://github.com/zerx-lab/FluxDown/releases/tag/v0.6.9
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
