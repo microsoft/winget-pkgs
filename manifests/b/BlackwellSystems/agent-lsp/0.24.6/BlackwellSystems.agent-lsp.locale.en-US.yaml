@@ -1,0 +1,31 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: BlackwellSystems.agent-lsp
+PackageVersion: 0.24.6
+PackageLocale: en-US
+Publisher: Blackwell Systems
+PublisherUrl: https://github.com/blackwell-systems
+PublisherSupportUrl: https://github.com/blackwell-systems/agent-lsp/issues
+PackageName: agent-lsp
+PackageUrl: https://github.com/blackwell-systems/agent-lsp
+License: MIT
+LicenseUrl: https://github.com/blackwell-systems/agent-lsp/blob/main/LICENSE
+ShortDescription: MCP server giving AI agents reliable access to language server protocol
+Description: agent-lsp is a stateful MCP server over real language servers. It keeps the language server's semantic index warm and adds a skill layer that turns multi-step code operations into single, correct workflows. 50 tools, 30 languages, persistent sessions.
+Tags:
+- ai
+- code-intelligence
+- developer-tools
+- language-server
+- lsp
+- mcp
+ReleaseNotes: |-
+  ### Fixed
+  • **`blast_radius` no longer reads a failed analysis as "no callers"** ([#82](https://github.com/blackwell-systems/agent-lsp/pull/82), [#85](https://github.com/blackwell-systems/agent-lsp/pull/85))：when it could not read the symbols of a changed file, the warning reached the caller only as text inside the JSON summary and was dropped entirely from the default GCF output, and when no file could be analyzed it returned an empty successful result that an agent reads as "nothing calls this". Failed symbol extraction and reference-query failures are now reported in the warnings of every output format, and an analysis where every file failed returns an error. It also refuses to run when the language server does not advertise `documentSymbolProvider` and `referencesProvider` instead of returning an empty graph, and `get_server_capabilities` lists `blast_radius` as supported or unsupported.
+  • **`get_diagnostics` no longer reports "No errors" for a version it has not checked** ([#84](https://github.com/blackwell-systems/agent-lsp/pull/84))：it reopens the document and waited for any `publishDiagnostics`, including one published for the version before the reopen, so a server that published late or for an old version produced "Safe to proceed" for text it had not seen. It now waits for diagnostics that cover the reopened version and says which files did not settle.
+  • **A cold `blast_radius` and a file for a configured but unstarted server went to the wrong place** ([#83](https://github.com/blackwell-systems/agent-lsp/pull/83), [#86](https://github.com/blackwell-systems/agent-lsp/pull/86))：`blast_radius` failed with "LSP client not initialized" while other file tools started the server for their file, one configured server whose binary was missing blocked cold queries for every other language, and a file for a configured language whose server was not yet running was answered by a running server for another language. Auto-initialization now starts only the server for the file's language, `blast_radius` routes by its first changed file, and a configured language's file never falls back to another language's server. Each configured server now starts on the first query for one of its files rather than all at once. Contributed by [@lostbean](https://github.com/lostbean).
+  • **`get_symbol_documentation` for Go gave up after ten seconds**：a cold toolchain cache on a slow or busy machine can take longer to answer `go doc`, and the timeout turned that into a failed lookup (it also made a release's test step fail once). The limit is now 45 seconds.
+ReleaseNotesUrl: https://github.com/blackwell-systems/agent-lsp/releases/tag/v0.24.6
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
