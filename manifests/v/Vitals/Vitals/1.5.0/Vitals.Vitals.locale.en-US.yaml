@@ -1,0 +1,182 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Vitals.Vitals
+PackageVersion: 1.5.0
+PackageLocale: en-US
+Publisher: Vitals contributors
+PublisherUrl: https://github.com/dragoscv
+PublisherSupportUrl: https://github.com/dragoscv/vitals/issues
+PrivacyUrl: https://github.com/dragoscv/vitals/blob/main/PRIVACY.md
+Author: Dragos Catalin Vladulescu
+PackageName: Vitals
+PackageUrl: https://github.com/dragoscv/vitals
+License: MIT
+LicenseUrl: https://github.com/dragoscv/vitals/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Vitals contributors
+ShortDescription: Lightweight, private Windows system monitor.
+Description: |-
+  Vitals shows what is slowing your computer down, in plain language: CPU, GPU, memory, disks,
+  network, temperatures and per-process usage, with history, alerts and a compact overlay.
+  Optional read-only access from your phone on the local network. No account, no telemetry.
+Moniker: vitals
+Tags:
+- cpu
+- gpu
+- hardware-monitor
+- performance
+- system-monitor
+- task-manager
+ReleaseNotes: |-
+  Added
+  - AI page → Projects: the Codwen projects pane, built against the contract
+    the platform has specified but does not serve yet. It is a read-client and
+    nothing more — it keeps no second list, invents no endpoint and persists
+    nothing. Whether a Codwen account is stored is the real read the Cloud tab
+    already makes; the project list itself is a fixture, and only in a
+    development build. A packaged build with an account signed in says the
+    projects could not be read rather than showing invented ones, which is also
+    what a signed-out one says, in its own words. Projects are listed
+    worst-first, each with what is wrong and since when, and a reading that was
+    never measured is a dash — a zero there would read as healthy. Beside them
+    sits the devcloud half this window can already prove: how many cloud runs
+    went out in the window, and which workspaces are marked down, with the reason
+    where one was recorded. The live half of a workspace — how long ago it
+    reported, whether it is busy, what is queued for it — is read from agentq's
+    own read-only status document, through a Rust command that runs it under the
+    same ownership guards the agentq actions use; the webview spawns nothing, a
+    figure the document did not carry is an em dash rather than a zero, and a
+    read that failed is a sentence naming which failure it was. The tab itself is
+    a development-build surface for now: a packaged build has no reader for the
+    list, so the tab is absent rather than present and broken, and it returns in
+    the commit that gives projectsApi a real source.
+  - The Tizen lane is a script now, not a recipe: scripts/tizen-package.ps1
+    builds the widget, signs it, and refuses to hand back a package the Tizen CLI
+    did not sign — a TV refuses an unsigned archive, and a hosted runner that
+    cannot sign would otherwise produce one silently. It refuses to start at all
+    without Tizen Studio and the signing profile, naming exactly what is missing,
+    and it cross-checks the version scripts/version.ps1 owns against the widget
+    manifest. -DryRun prints the plan and runs on a machine without the SDK.
+  - The tracker's own conventions are a gate: scripts/check-tracker.ps1
+    runs inside scripts/verify.ps1 and fails when a docs/tracker.csv row
+    loses a field, when an id is duplicated or names another slice's id, when an
+    id referenced in docs/TRACKER.md has no row, when a slice has no section,
+    or when a status leaves the vocabulary the file actually uses. Four rows were
+    added by hand with nothing watching them; this is the gate that would have
+    said so.
+  - The command line grew the rest of the machine: vitals sensors and
+    vitals history read what the window reads, vitals alerts lists what the
+    alert engine has raised, and vitals completions prints a completion script
+    for the shell you name. --source chooses where the numbers come from —
+    attach to a running app, or sample directly — and says which one happened on
+    stderr, so --json stays parseable. vitals top prints one snapshot and
+    exits 0 when stdout is not a terminal, because a pipe is not a place to draw
+    an alternate screen. vitals serve --json prints the port, scope, token,
+    pairing code and URL as one object before it starts serving, so a script that
+    let the server generate a token can still learn it, and --control is
+    refused: a headless server holds no pairing to grant it. A PID given to a
+    process action is resolved to PID plus start time from a fresh sample, so a
+    recycled PID is never hit. All of it is written down in docs/cli.md.
+  - The window says when its numbers are old. When the sampler's stream stops
+    — a stalled sample, a machine that slept, a workspace that stopped answering —
+    the shell puts a banner under the title bar saying how long ago the last
+    reading was, and asks the backend for a keyframe instead of waiting for a
+    delta that may never come. The phone shows the same age against the machine it
+    is watching, and the TV dims what it cannot vouch for.
+  Changed
+  - A refusal is a sentence in your language, not a debug string. The
+    command-error kinds — denied, not found, unsupported, refused, internal — map
+    to sentences in English and Romanian, and the raw text the backend sent stays
+    available under Details rather than being replaced by a polite nothing. A
+    refusal that names a setting is a stable key now rather than a Rust {:?}
+    (the watchdog's "when to warn" was the last one), and the file dialog the
+    watchdog asks for is named in the language the reader is using instead of a
+    hard-coded Audio.
+  - A reading that was never taken is a dash, everywhere. The phone and the
+    television printed a fabricated 0 for memory they could not read and for a
+    status they did not have; both print a dash now, and the same rule holds in
+    the storage, agents and benchmark windows. Zero is a measurement.
+  - The phone says the pairing expired instead of retrying forever. A 401
+    marks the pairing unauthorised and stops the retry loop, with a sentence and a
+    way to pair again. A 403 is deliberately not treated as a dead key: a scope
+    refusal is not a revoked credential.
+  - PID is translated, and the phone's active tab is readable. The diagnosis
+    dialog and the phone's process list printed a hard-coded English PID; both
+    read process.pid. The mobile active tab uses the readable accent rather than
+    the fill accent, which measured 4.08:1 on the subtle background in the light
+    theme, below the 4.5:1 a small label needs — and the accessibility scan's
+    allowance for it is gone, so putting it back fails a test rather than passing
+    quietly.
+  Fixed
+  - An unmeasured sampling schedule is nothing, not a crash — a machine that
+    reports no supported interval left the schedule blank and the settings restore
+    step dereferenced it.
+  - The AI page's cloud-status refresh survives a re-render. It is a property
+    holding a function, so the effect no longer restarts on every render and
+    cannot drop an in-flight read.
+  - A blank screen is not an error message. The phone, the TV and the HUD each
+    mount their own error boundary, so a component that throws shows a sentence
+    and a way to retry instead of leaving an empty surface. Each is a local copy,
+    because those roots are fenced off from the shell: the HUD is a 220×96 overlay
+    and has no business carrying the window's bundle.
+  Security
+  - A half-sent request cannot hold a connection open. The LAN server wraps
+    every accepted socket in a five-second request-head deadline, because axum 0.8
+    exposes no header-read timeout and a slowloris is what one is for. An accept
+    error backs off and keeps accepting rather than ending the server.
+  - Redaction covers the places a credential actually hides: the userinfo of a
+    URL (scheme://user:pass@host becomes scheme://[redacted]@host, which a git
+    remote or a webhook carries), pwd, cookie, credential and session
+    values, and a recognised key prefix with no label at all. Home directories are
+    still replaced by ~.
+  - Two RustSec advisories left the dependency list before it shipped: cookie
+    0.18.3 (RUSTSEC-2026-0594, published 2026-11-23) and url 2.5.9
+    (RUSTSEC-2026-0592, 2026-11-20), plus the form_urlencoded that follows
+    url. Both crates are transitive — neither is named in any manifest or in
+    crates/ or apps/ — so no code path here reaches either one, but a
+    dependency list is a claim about what is installed, and "the advisory is not
+    reachable" is an argument a reader can only take on trust. Bumping it in the
+    release that would otherwise have carried the versions is the end of the
+    argument. scripts/third-party-notices.ps1 was regenerated with them, which
+    is why its crate count moved.
+  Downloads
+  ──────────────────────────────────┬───────────────────────────────
+  Platform                          │Download
+  ──────────────────────────────────┼───────────────────────────────
+  Windows, Intel / AMD (x64)        │Vitals_x64-setup.exe
+  ──────────────────────────────────┼───────────────────────────────
+  Windows, ARM64 (Snapdragon)       │Vitals_arm64-setup.exe
+  ──────────────────────────────────┼───────────────────────────────
+  macOS 13+, Apple silicon and Intel│Vitals_universal.dmg
+  ──────────────────────────────────┼───────────────────────────────
+  Android phone (APK)               │Vitals_1.5.0_android.apk
+  ──────────────────────────────────┼───────────────────────────────
+  Android watch, Wear OS (APK)      │Vitals_1.5.0_wear.apk
+  ──────────────────────────────────┼───────────────────────────────
+  Android TV (APK)                  │Vitals_1.5.0_tv.apk
+  ──────────────────────────────────┼───────────────────────────────
+  Windows command line (x64)        │vitals-cli_1.5.0_x64.zip
+  ──────────────────────────────────┼───────────────────────────────
+  Windows command line (ARM64)      │vitals-cli_1.5.0_arm64.zip
+  ──────────────────────────────────┴───────────────────────────────
+  The Android downloads are the github flavour — the one allowed to scan
+  folders; the Play builds have no all-files access.
+  Verifying this download
+  Windows may show a SmartScreen warning on first run (Windows protected your
+  PC) because the installer is not yet signed with a commercial certificate.
+  Choose More info → Run anyway. That is expected — see
+  docs/distribution.md.
+  You do not have to take our word for what is in the binary. With the
+  GitHub CLI:
+  gh attestation verify .\Vitals_x64-setup.exe --repo dragoscv/vitals
+  This proves the file was built by this repository's release workflow from the
+  tagged commit, and nowhere else. Checksums for every file are in
+  SHA256SUMS.txt:
+  (Get-FileHash .\Vitals_x64-setup.exe -Algorithm SHA256).Hash.ToLower()
+  Software bills of materials (CycloneDX) for the Rust and JavaScript
+  dependencies are attached as sbom-rust.cdx.json and sbom-js.cdx.json,
+  and one for the command-line tool as sbom-cli.cdx.json.
+  Full Changelog: v1.4.0...v1.5.0
+ReleaseNotesUrl: https://github.com/dragoscv/vitals/releases/tag/v1.5.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
