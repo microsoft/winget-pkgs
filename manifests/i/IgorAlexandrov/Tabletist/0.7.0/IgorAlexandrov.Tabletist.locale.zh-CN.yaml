@@ -1,0 +1,37 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.28.0.schema.json
+
+PackageIdentifier: IgorAlexandrov.Tabletist
+PackageVersion: 0.7.0
+PackageLocale: zh-CN
+ShortDescription: 支持 PostgreSQL、MySQL、MariaDB、SQLite 和 BigQuery 的快速原生数据库客户端。
+Description: |-
+  一款快速、原生的数据库客户端，支持 PostgreSQL、MySQL（含 MariaDB）、SQLite 和 BigQuery。使用 Rust 与 egui 编写，可运行在 Linux（优先适配 Omarchy 与 Hyprland）、macOS 和 Windows 上。连接 BigQuery 时使用服务账号密钥文件或 Google Cloud 的默认凭据登录，并以只读方式打开（可浏览、筛选和执行 SELECT；BigQuery 没有可用于编辑行的事务）。
+  - 已保存的连接按分组显示在选择器中，每个连接都标有所属环境（开发、预发布、生产）和最近使用时间。打开多个连接时，每个都会成为窗口标题栏中的一个标签，点击即可切换。
+  - 支持直接连接、TLS（沿用 libpq 的 sslmode 取值，allow 按 prefer 处理；verify-ca 需要 CA 文件，MySQL 目前不支持 verify-ca）以及 SSH 隧道（密码、密钥文件或 agent），主机密钥在首次使用时确认信任。agent 取自该主机在 ~/.ssh/config 中指定的 IdentityAgent（与 1Password 的做法相同），否则使用 SSH_AUTH_SOCK。
+  - 密码保存在系统密钥环中，或者每个连接标签页询问一次（在同一标签页里重连会复用）。
+  - 连接勾选了“以只读方式打开”时就以只读打开，生产环境的连接默认勾选。可写的连接会开启读写会话，其中浏览数据、填写原始 WHERE 条件，以及切到 Read-only 的 SQL 编辑器仍然只读。
+  - 在可写连接上，表的值直接在其数据网格中编辑：改动会保持待处理状态，直到点击保存，由一个事务写入，且绝不覆盖别人改过的行。若发现这样的行，保存不写入任何内容并逐行询问，同时展示读取到的值、服务器上现在的值和你改的值（保留我的、改用服务器的值，或强制覆盖）。保存前，Review SQL 会显示将要执行的语句（Cmd/Ctrl+Shift+D，Omarchy 上是 :diff）并可以复制；向生产环境保存时会先询问，并把语句显示在屏幕上。
+  - 侧边栏包含最近使用的对象，以及某个 schema 下的表和视图，可按前缀分组（book_）折叠或平铺列出；每张表打开后有数据网格（主键、外键、值标签、一目了然的 JSON）、逐字段完整展示并能沿外键跳转的行面板（可写表的值就在此就地编辑：点击它，或按 Cmd/Ctrl+I，Omarchy 上按 Enter，进入该行的字段后再按 Enter 或直接输入以编辑），还有结构视图（列、索引、外键）。
+  - 排序、分页由服务端完成，筛选栏支持原始 WHERE 条件，可按需取精确行数，任何正在执行的查询都能取消。MySQL 会话以 utf8mb4 运行，并关闭 ANSI_QUOTES、会隐含它的组合模式以及 NO_BACKSLASH_ESCAPES：在原始 WHERE 中 "..." 是字符串，标识符用反引号。
+  - 每个连接都有一个 SQL 编辑器（Cmd/Ctrl+T）：可执行光标所在语句或整个脚本，可设行数上限与超时，并在行面板中完整查看结果行。在只读连接上以及在生产环境上，每次执行都在一个会被回滚的只读事务中进行，会脱离该事务的语句会被拒绝。在非生产的可写连接上，标签页以 Read-write 打开：改动数据的执行是一个事务，所有语句都成功才提交，首次出错、取消或超时即回滚，Messages 会说明结果。只读语句的执行为同样只读，工具栏开关（或 Cmd/Ctrl+Shift+M；Omarchy 上的 :ro 与 :rw）在 Read-only 之间切换。Format（Cmd/Ctrl+Shift+F；Omarchy 上的 =）以河流式排版查询并把保留字大写，作用于选区内的语句或整个脚本。输入时会补全关键字、schema、表、视图以及语句所用表的列（任意位置按 Ctrl+Space 请求列表）。
+  - 在表的数据网格和 SQL 结果中可选中单元格、一块区域或整行，并复制为 TSV（Cmd/Ctrl+C，Omarchy 上的 y），或用 Copy as（Cmd/Ctrl+Alt+C，gy）复制为 CSV、JSON、Markdown、SQL INSERT 或列名。导出（Cmd/Ctrl+Shift+E，E）可把表、选中内容或 SQL 结果写为 CSV、TSV、JSON、JSON Lines、SQL INSERT 或 Markdown，在后台进行且可同时导出多个。写出的值按数据库保存的原样，而不是数据网格的显示格式。
+  - 快速打开（macOS 与 Windows 上为 Cmd/Ctrl+P）与完整的快捷键表：在应用中按 ? 查看。
+  - 在每个平台上都呈现原生观感：macOS 外观使用 IBM Plex，Linux 上使用 Omarchy 外观（方正、键盘优先、vim 按键，全程使用桌面的等宽字体）。在 Omarchy 上跟随桌面主题实时换色，其他系统则跟随系统的浅色/深色设置。
+Tags:
+- bigquery
+- mariadb
+- mysql
+- postgresql
+- sql
+- sqlite
+- 数据库
+- 数据库客户端
+- 数据库工具
+Documentations:
+- DocumentLabel: 使用指南
+  DocumentUrl: https://igor.works/tabletist/what-is-tabletist/
+- DocumentLabel: 功能参考
+  DocumentUrl: https://igor.works/tabletist/connections/
+ManifestType: locale
+ManifestVersion: 1.28.0

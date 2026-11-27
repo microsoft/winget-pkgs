@@ -1,0 +1,88 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: IgorAlexandrov.Tabletist
+PackageVersion: 0.7.0
+PackageLocale: en-US
+Publisher: Igor Alexandrov
+PublisherUrl: https://igor.works/
+PublisherSupportUrl: https://github.com/igor-alexandrov/tabletist/issues
+Author: Igor Alexandrov
+PackageName: Tabletist
+PackageUrl: https://igor.works/tabletist/
+License: MIT
+LicenseUrl: https://github.com/igor-alexandrov/tabletist/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Igor Alexandrov
+ShortDescription: A fast, native database client for PostgreSQL, MySQL, MariaDB, SQLite and BigQuery.
+Description: |-
+  A fast, native database client for PostgreSQL, MySQL (and MariaDB), SQLite and BigQuery. Written in Rust with egui; runs on Linux (Omarchy and Hyprland first), macOS and Windows. BigQuery connections sign in with a service-account key file or Google Cloud's default credentials, and open read-only (browse, filter and run SELECTs; BigQuery has no transactions to edit rows with).
+  - Saved connections grouped in a picker, each tagged with its environment (dev, staging, production) and when it was last used. Open more than one and each is a chip in the window's header: click one to switch.
+  - Direct connections, TLS (libpq's sslmode values, with allow read as prefer; verify-ca needs a CA file, and MySQL has no verify-ca yet), and SSH tunnels (password, key file or agent) with host keys trusted on first use. The agent is the one ~/.ssh/config names for the host (IdentityAgent, as for 1Password), else SSH_AUTH_SOCK.
+  - Passwords live in the system keyring, or are asked for once per connection tab (reconnecting in that tab reuses them).
+  - A connection opens read-only when its "Open read-only" box says so, which is the default for production. A writable one opens a read-write session, in which browsing, a raw WHERE and a SQL editor switched to Read-only still only read.
+  - On a writable connection a table's values are edited in its grid: changes stay pending until Save writes them in one transaction, which never overwrites a row someone else changed: a save that finds one writes nothing and asks about each such row, with what was loaded, what the server holds now and yours side by side (keep mine, use the server's values, or overwrite). Before saving, Review SQL shows the statements that will run (Cmd/Ctrl+Shift+D, or :diff on Omarchy) and copies them, and a save to production asks first, with them on screen.
+  - A sidebar of recent objects and one schema's tables and views, folded into prefix groups (book_) or listed flat; each table opens with a data grid (keys, foreign keys, value tags, JSON at a glance), a row panel showing every field in full with a jump along foreign keys, where a value of a writable table is edited in place (a click on it, or Cmd/Ctrl+I, Enter on Omarchy, to reach the row's fields, and Enter or typing to edit one), and a Structure view (columns, indexes, foreign keys).
+  - Server-side sorting and paging, a filter bar with a raw WHERE option, exact counts on demand, and cancel for any running query. MySQL sessions run in utf8mb4, with ANSI_QUOTES, the combination modes that imply it and NO_BACKSLASH_ESCAPES turned off: in a raw WHERE "..." is a string and names take backticks.
+  - A SQL editor per connection (Cmd/Ctrl+T): run the statement at the cursor (Cmd/Ctrl+Return) or the whole script, with a row limit and a timeout, and read a result row in full in the row panel. On a read-only connection, and on production, every run happens in a read-only transaction that is rolled back, and statements that would leave it are refused. On a writable connection that is not production's a tab opens in Read-write: a run that changes data is one transaction, committed when every statement succeeded and rolled back on the first error, cancel or timeout, and the Messages say which. A run of reads is read-only there too, and the toolbar's switch (or Cmd/Ctrl+Shift+M; :ro and :rw on Omarchy) sets the tab to Read-only and back. Format (Cmd/Ctrl+Shift+F; = on Omarchy) lays queries out in river style and uppercases reserved words, in the selection's statements or the whole script. Keywords, schemas, tables, views and the columns of a statement's tables are completed while typing (Ctrl+Space asks for the list anywhere).
+  - Cells, a block of them or whole rows are selected in a table's grid and in a SQL result, and copied as TSV (Cmd/Ctrl+C, y on Omarchy) or, with Copy as (Cmd/Ctrl+Alt+C, gy), as CSV, JSON, Markdown, SQL INSERT or column names. Export (Cmd/Ctrl+Shift+E, E) writes a table, a selection or a SQL result to CSV, TSV, JSON, JSON Lines, SQL INSERT or Markdown, in the background and several at once. Values are written as the database holds them, never as the grid formats them.
+  - Quick open (Cmd/Ctrl+P on macOS and Windows) and a full keyboard map: press ? in the app.
+  - Looks native on each platform: a macOS look in IBM Plex, and on Linux the Omarchy look (square, keyboard first, vim keys, the desktop's monospace font throughout). It follows the Omarchy theme live on Omarchy, and the system light/dark setting elsewhere.
+Tags:
+- bigquery
+- database
+- database-client
+- database-gui
+- mariadb
+- mysql
+- postgresql
+- sql
+- sqlite
+ReleaseNotes: |-
+  What's Changed
+  - Take an SSH tunnel through the ProxyJump or ProxyCommand ~/.ssh/config names by @JoshAntBrown in https://github.com/igor-alexandrov/tabletist/pull/296
+  - Reload the table list from the tree over a SQL editor by @igor-alexandrov in https://github.com/igor-alexandrov/tabletist/pull/302
+  - Read a PostgreSQL table's page in three round trips, not six by @igor-alexandrov in https://github.com/igor-alexandrov/tabletist/pull/304
+  - Search the keyboard shortcuts dialog by name, group or keys by @igor-alexandrov in https://github.com/igor-alexandrov/tabletist/pull/312
+  - Read a PostgreSQL table's structure in one round trip, not seven by @igor-alexandrov in https://github.com/igor-alexandrov/tabletist/pull/309
+  - Let a PostgreSQL cancel return only once the server has acted on it by @igor-alexandrov in https://github.com/igor-alexandrov/tabletist/pull/307
+  - Let a superseded page finish, and check for PgBouncer beside the session by @igor-alexandrov in https://github.com/igor-alexandrov/tabletist/pull/306
+  - Refresh the sidebar after a run that creates or drops a table by @igor-alexandrov in https://github.com/igor-alexandrov/tabletist/pull/301
+  - Start a MySQL read's read-only transaction in one statement, not two by @igor-alexandrov in https://github.com/igor-alexandrov/tabletist/pull/305
+  - Keep a MySQL spare's idle connection alive with TCP keepalive by @igor-alexandrov in https://github.com/igor-alexandrov/tabletist/pull/313
+  - Prepare a MySQL session, and ask who its server is, in one message by @igor-alexandrov in https://github.com/igor-alexandrov/tabletist/pull/308
+  - Send a read-only PostgreSQL run in four round trips, not seven by @igor-alexandrov in https://github.com/igor-alexandrov/tabletist/pull/303
+  - Send a read-only MySQL SQL editor run in six round trips, not nine by @igor-alexandrov in https://github.com/igor-alexandrov/tabletist/pull/315
+  - Set the shortcuts dialog's groups under section labels, names first by @igor-alexandrov in https://github.com/igor-alexandrov/tabletist/pull/314
+  - Open a MySQL table in five round trips, not twenty by @igor-alexandrov in https://github.com/igor-alexandrov/tabletist/pull/316
+  - Hand a MySQL editor run's outcome back before the session reset by @igor-alexandrov in https://github.com/igor-alexandrov/tabletist/pull/317
+  - Read a PostgreSQL page in one round trip by @igor-alexandrov in https://github.com/igor-alexandrov/tabletist/pull/318
+  - Run a read-only PostgreSQL SELECT in three round trips, not four by @igor-alexandrov in https://github.com/igor-alexandrov/tabletist/pull/319
+  - Read a MySQL page in one round trip by @igor-alexandrov in https://github.com/igor-alexandrov/tabletist/pull/320
+  - Pass the tabletist-db suite on MariaDB as well as MySQL by @igor-alexandrov in https://github.com/igor-alexandrov/tabletist/pull/321
+  - Tell what each MariaDB view reads from its definition by @igor-alexandrov in https://github.com/igor-alexandrov/tabletist/pull/322
+  - Name a MariaDB server in the same one message as a MySQL one by @igor-alexandrov in https://github.com/igor-alexandrov/tabletist/pull/323
+  - Run the MySQL tests against MariaDB 11.4 in CI by @igor-alexandrov in https://github.com/igor-alexandrov/tabletist/pull/324
+  - Run a MySQL editor statement in one round trip by @igor-alexandrov in https://github.com/igor-alexandrov/tabletist/pull/327
+  - Refuse an agent's read of a PostgreSQL view that calls a refused function by @igor-alexandrov in https://github.com/igor-alexandrov/tabletist/pull/326
+  - Run a read-only PostgreSQL SELECT in one round trip, not three by @igor-alexandrov in https://github.com/igor-alexandrov/tabletist/pull/328
+  - Refuse an agent's read of a MySQL view that calls a refused function by @igor-alexandrov in https://github.com/igor-alexandrov/tabletist/pull/325
+  - Give the MySQL driver its packet limit so a connect skips its question by @igor-alexandrov in https://github.com/igor-alexandrov/tabletist/pull/330
+  - Roll back and release in one trip after a cancel on PostgreSQL by @igor-alexandrov in https://github.com/igor-alexandrov/tabletist/pull/332
+  - Cancel the call in the stops test once its read has begun by @igor-alexandrov in https://github.com/igor-alexandrov/tabletist/pull/333
+  - Count a MySQL table's rows in one round trip by @igor-alexandrov in https://github.com/igor-alexandrov/tabletist/pull/331
+  - Raise russh to 0.65 for RUSTSEC-2026-0495 by @igor-alexandrov in https://github.com/igor-alexandrov/tabletist/pull/329
+  - Open a table in one round trip by @igor-alexandrov in https://github.com/igor-alexandrov/tabletist/pull/334
+  - Read every listed table's shape with the listing, so a first open is one round trip by @igor-alexandrov in https://github.com/igor-alexandrov/tabletist/pull/335
+  - Send a MySQL cleartext password only inside TLS by @ricardofelgueiras in https://github.com/igor-alexandrov/tabletist/pull/337
+  - Connect until the tables show: version and zone at connect, MySQL schemas in one round trip by @igor-alexandrov in https://github.com/igor-alexandrov/tabletist/pull/338
+  - Connect until the tables show: the schemas and the default schema's tables in one round trip by @igor-alexandrov in https://github.com/igor-alexandrov/tabletist/pull/347
+  - Cut nine minutes from the Windows test job by @igor-alexandrov in https://github.com/igor-alexandrov/tabletist/pull/346
+  - Bump the version to 0.7.0 by @igor-alexandrov in https://github.com/igor-alexandrov/tabletist/pull/348
+ReleaseNotesUrl: https://github.com/igor-alexandrov/tabletist/releases/tag/v0.7.0
+Documentations:
+- DocumentLabel: Guide
+  DocumentUrl: https://igor.works/tabletist/what-is-tabletist/
+- DocumentLabel: Reference
+  DocumentUrl: https://igor.works/tabletist/connections/
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
