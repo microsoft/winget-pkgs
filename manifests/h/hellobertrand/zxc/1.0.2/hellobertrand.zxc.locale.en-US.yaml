@@ -1,0 +1,59 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: hellobertrand.zxc
+PackageVersion: 1.0.2
+PackageLocale: en-US
+Publisher: Bertrand Lebonnois
+PackageName: zxc
+License: BSD-3-Clause
+ShortDescription: Asymmetric lossless compression built for ultra-fast decode
+ReleaseNotes: |-
+  # Release Notes
+
+  v1.0.2 is a maintenance release of the **Hydrogen** series, aimed at packagers and embedders：two CMake fixes, a Nix flake, and two build options that trim the library for size-sensitive static links.
+
+  **Drop-in for v1.0.1.** Same format v9, same API and ABI, soname still `libzxc.so.6`. No symbol added, removed or changed. A default build behaves as v1.0.1, and archives written by any 1.0.x release decode with any other.
+
+  ## Build fixes
+
+  • **The exported CMake target follows `CMAKE_INSTALL_INCLUDEDIR` (#639).** Its include path was hard-coded to `include`, so `find_package(zxc)` named a directory that did not exist when the headers were installed elsewhere, as with a split `dev` output. The path now comes from `CMAKE_INSTALL_INCLUDEDIR`.
+  • **`-march=native` is probed before use (#640).** GCC rejects the flag on RISC-V and POWER, which failed the build with `ZXC_NATIVE_ARCH` on. CMake now tests it, and when the compiler refuses it, reports so and builds without.
+
+  ## Trimming the library (#641, #643, #646)
+
+  By default the codec is built once per SIMD tier of the target and the tier is selected at run time. Each tier is a full copy of the codec, which a small static link may not want. Two new options trade those copies away; left at their defaults, they change nothing. Neither changes the format or the API.
+
+  | `ZXC_BUILD_SIMD_VARIANTS` | Encoder | LZ decoder | Entropy decoder (levels 6-7) |
+  |:---|:---|:---|:---|
+  | `all` (default) | every tier | every tier | every tier |
+  | `decoder` | baseline | baseline, AVX2 / NEON | baseline, AVX2 / NEON |
+  | `minimal` | baseline | baseline | baseline, AVX2 / NEON |
+
+  • **`ZXC_BUILD_SIMD_VARIANTS`** selects the tiers to build. The baseline keeps its intrinsics (SSE2 on x86-64, NEON on AArch64), unlike `ZXC_DISABLE_SIMD`. Without an AVX-512 variant, AVX-512 processors run the AVX2 one. Every such build reads what any other build wrote.
+  • **`ZXC_ENABLE_DICT=OFF`** removes dictionary support. This one changes what the library accepts：attaching a dictionary, or reading an archive written with one, returns `ZXC_ERROR_DICT_UNSUPPORTED`.
+
+  ```sh
+  # Small static library without dictionary support
+  cmake -B build -DZXC_BUILD_SIMD_VARIANTS=minimal -DZXC_ENABLE_DICT=OFF
+  ```
+
+  Meson has the same switches, `-Dbuild_simd_variants=` and `-Ddict=`. Details：[docs/INSTALL.md](https://github.com/hellobertrand/zxc/blob/v1.0.2/docs/INSTALL.md#trimming-the-library).
+
+  ## Packaging
+
+  • **Nix flake (#638).** The repository carries a `flake.nix` and a `package.nix`：`nix build github:hellobertrand/zxc` builds the library, the CLI and the man pages, runs the tests, and `nix run` starts `zxc`. CI checks the flake on Linux and macOS. Contributed by @kleindotc.
+  • CI builds the trimmed configurations, with and without dictionary support (#641, #643, #646).
+
+  ## Changelog
+
+  • api：Adds ZXC_BUILD_SIMD_VARIANTS and ZXC_ENABLE_DICT build trim options (#641, #643, #646)
+  • api：Nix support and CI nix job. (#638)
+  • fix：Probe -march=native support (#640)
+  • fix：Guard shared helpers in trimmed builds (#652)⁠
+  • fix：Install include dir from CMAKE_INSTALL_INCLUDEDIR (#639)
+
+  Full Changelog：[v1.0.1...v1.0.2](https://github.com/hellobertrand/zxc/compare/v1.0.1...v1.0.2)
+ReleaseNotesUrl: https://github.com/hellobertrand/zxc/releases/tag/v1.0.2
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
