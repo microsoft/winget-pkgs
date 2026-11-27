@@ -1,0 +1,62 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: wm94i.WorkReview
+PackageVersion: 1.2.0
+PackageLocale: zh-CN
+Publisher: workreview
+PublisherUrl: https://github.com/wm94i
+PublisherSupportUrl: https://github.com/wm94i/Work-Review/issues
+PackageName: Work Review
+PackageUrl: https://github.com/wm94i/Work-Review
+License: 免费软件
+Copyright: © 2026 WorkReview
+ShortDescription: 帮你自动记录一天中使用了哪些应用、浏览了哪些网页、在每个应用上花了多少时间
+Description: |-
+  Work Review 会在后台持续记录你当天使用过的应用、访问过的网站、关键窗口和屏幕内容，再把这些离散片段整理成一条可回看、可追问、可复盘的工作轨迹。
+  - 不需要手动打卡，也不用事后回忆今天干了什么
+  - 概览、时间线、日报、工作助手共用同一份底层记录
+  - 既能看统计，也能直接追到具体页面、窗口标题和上下文截图
+  - 支持简体中文 / English / 繁體中文三种界面语言，日报会按当前语言分别生成与切换
+  - 支持轻量模式、按小时活跃度视图、日报 Markdown 导出和多屏截图策略切换
+  - 现在还提供 桌面化身 Beta，用更轻量的桌宠状态反馈陪你工作
+  全部数据本地存储，不上传任何服务器。AI 功能可选，关掉也完全可用。
+Tags:
+- 时间
+- 计时器
+- 跟踪器
+ReleaseNotes: |-
+  English → | 繁體中文 →
+
+  正式发布，包含 1.2.0-rc.1 的隐私与安全、性能、项目工时、周报/月报、导出备份及前端现代化改进，并新增个人 Agent 工作流。已有 RC 发布与标签保留；稳定客户端可通过原有更新入口获取本版。升级前请备份完整数据目录。
+  个人 Agent 工作流
+  - 运行追踪与权限审计：工作助手新增「引擎与技能」抽屉，查看运行状态、工具审批、数据边界、上下文压缩与事件轨迹；大工具结果暂存在本次运行内并按需读取。
+  - 个人技能：在本机数据目录的 skills/<name>/SKILL.md 中维护可复用步骤，可在助手界面创建、编辑或删除；仅工作复盘模式按需加载。
+  - 自主任务：支持每日定时、15–1440 分钟间隔和手动执行；应用运行期间串行调度，后台仅使用只读工具。默认使用本机统计或回环本地模型，单条任务明确允许后才调用云模型，发送的工作记录遵循隐私过滤。
+  - 外部 HTTP MCP：仅桌面工作复盘模式可调用，每次调用必须人工确认，普通聊天、Bot 和自主任务不接入；公网端点必须 HTTPS，回环端点需显式允许。支持初始化会话、JSON / SSE、过期会话重建，工具结果作为不可信内容处理。
+  修复
+  - 恢复备份与失败回滚时原位保留本机个人技能、自主任务、MCP 配置及凭证，不再因受管目录切换删除这些文件。
+  - 本地模型连接固定回环地址并禁用系统代理及自动重定向，流式、非流式与回退路径共用限制，防止绕过自主任务的云模型授权。
+  - Run 账本与自主任务摘要先完整清洗带空格、分隔符及转义字符的引号凭证，再执行隐私过滤，避免口令后半段落盘。
+  - MCP Streamable HTTP 按完整 SSE 事件帧匹配响应后立即返回，无需等待连接关闭；保留响应体积、会话、请求 ID 和超时校验。
+  相对 1.1.3 的主要更新
+  - 项目工时归集、专注与上下文切换指标、Git 提交关联、Obsidian 增量导出与按任务模型分流。
+  - 多语言日 / 周 / 月复盘，CSV / JSON 导出，SHA-256 校验备份、恢复与安全回滚，增量语义索引及可选 Bot 只读自然语言问答。
+  - WebDAV 同步 v2 仅同步白名单偏好与更严格的隐私规则，Bot 发送者绑定、Windows 截图遮罩、WebView 与助手出站安全加固。
+  - SQLite WAL 与查询优化、常驻 Windows OCR / UIA、截图与计时管线、后台任务监督及 Svelte 5 与组件测试体系。
+  - Linux / macOS 编译门禁修复，cookie 升至 0.18.3、url 升至 2.5.9，纳入对应 RustSec 修复。完整功能清单见下方 1.2.0-rc.1 记录。
+  升级与数据
+  - SQLite Schema 升至 user_version = 4，新增本机 Run 账本与审计表；启动时自动迁移。新版本数据库或备份不能直接在旧客户端使用，回退应还原升级前备份。
+  - 飞书 / 钉钉 / 企业微信查询需绑定发送者；所有设备升级后再启用 WebDAV 同步 v2。自动语义索引、Bot 自然语言问答、元数据清理及自主任务云模型授权均默认关闭。
+  - 数据目录迁移会携带个人技能、自主任务和 MCP 配置；一键备份当前只覆盖数据库、应用配置及可选截图，skills/、agent_routines.json 与 mcp_clients.json 需单独安全备份，恢复及回滚会保留目标机器的这些文件。
+  - Windows 便携版与 Linux 使用发布页手动更新；更换便携版 EXE 时保留原 Data。MCP Token 保留在本机，修改端点将清空旧 Token。
+  验证与已知边界
+  - 本机 Windows 已通过 800 项 Node 测试、20 项组件测试、944 项 Rust 测试（另 2 项忽略）、类型检查、生产构建、格式、warnings-denied check 与 Clippy。发布仍须通过当前提交的跨平台 CI、安全审计和五平台安装包、更新签名、附件及 Linux GLIBC 门禁。
+  - 自动回归不等于真实桌面验收：安装升级、跨机便携启动、长时间 OCR / 采集、Windows 实际待机、macOS / Linux 真机交互及真实第三方 MCP 服务仍未完成全面验证。
+  - 截图遮罩仅 Windows，保留透明浮层限制；macOS 仍为 ad-hoc 签名，更新后可能需要重新授权。搜索查询发送到所配置的搜索服务，Bot 群聊回复对全群可见；联网工具的代理重定向保留 RC 记录中的限制。
+  macOS 安装说明
+  首次打开可能提示「已损坏，无法打开」，请执行：
+  sudo xattr -rd com.apple.quarantine '/Applications/Work Review.app'
+ReleaseNotesUrl: https://github.com/wm94i/Work-Review/releases/tag/v1.2.0
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
