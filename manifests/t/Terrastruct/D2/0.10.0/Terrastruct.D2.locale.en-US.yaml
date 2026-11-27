@@ -1,0 +1,110 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Terrastruct.D2
+PackageVersion: 0.10.0
+PackageLocale: en-US
+Publisher: Terrastruct, Inc.
+PublisherUrl: https://terrastruct.com/
+PublisherSupportUrl: https://discord.com/invite/NF6X8K4eDq
+Author: Terrastruct, Inc.
+PackageName: D2
+PackageUrl: https://d2lang.com/
+License: MPL-2.0
+LicenseUrl: https://github.com/d2lang/d2/blob/v0.10.0/LICENSE.txt
+Copyright: Copyright 2022 Terrastruct Inc.
+CopyrightUrl: https://github.com/d2lang/d2/blob/v0.10.0/LICENSE.txt
+ShortDescription: A modern diagram scripting language that turns text to diagrams.
+Moniker: d2
+Tags:
+- diagram
+- script
+- text-to-diagram
+ReleaseNotes: |-
+  AI is ripping. Finally got around to clearing out some long-standing issues, formalize a grammar (though it's still wip), fix a bunch of corner cases, tedious issues, etc. I'm focusing on 2 things:
+  1. Performance -- across size of build (mainly for client-side/JS use case), size of output, and speed. All 3 have advanced significantly in this release, somewhat near capabilities of public frontier models. We'll revisit when the Reimann Hypothesis-solving generation of models come out.
+  2. Animations. I make a lot of 3b1b-type explainer videos to understand things in my day-to-day work and the quality is tempermental. There's a 3b1b library for their animations but it didn't work well for me and I've removed it from my prompts. I'm more motivated to do well here for my own use case, so I want to make animations in D2 really nice throughout the 0.10 series of releases.
+  I plan to cut a 1.0 soon finally. There'll be more one-time breaking changes like consolidating casing/hyphenation (e.g. sequence_diagram to sequence-diagram).
+  AI-generated changelog:
+  Features 🚀
+  - Animated transitions. Set animate-duration to animate styles, gradients, text decorations, grid edits, and sketch shading in SVG or GIF. It defaults to zero. animate-interval sets the minimum time per board. Timing · Grid examples
+  Cache stampede source
+  - TALA step animations. Small edits can preserve node positions and routes across steps and scenarios. Connections draw in, groups move between containers, trailing SQL rows slide in or out, and sequence messages travel to their receivers. Animated steps and source · Go API
+  Warning
+  Animated transitions are in alpha. Send feedback or suggestions.
+  - Language server. Run d2 lsp for live diagnostics, completion, and formatting in your editor. Go to definition, find references, and rename shapes across open diagrams and their imports. In VS Code, install the official extension with code --install-extension d2lang.d2lang. VS Code guide · Other editors
+  - MCP server. Run d2 mcp to let an AI client look up D2 syntax, check diagrams, and render PNG, SVG, or text. Starting with v0.10.0, stable releases publish io.github.d2lang/d2 to the official MCP Registry after the PyPI package ships. Set up Codex or Claude Code · Registry listing manifest
+  - ELK. Set elk-algorithm in the diagram. New options control edge routing, layer placement, tree ordering, and spacing. Compare algorithms · Layered options
+  - Configuration. Set scale and force-appendix in vars.d2-config, and dagre-nodesep and dagre-edgesep in vars.d2-config.data. Export options · Dagre spacing
+  - Connections. Crossing lines now leave a transparent gap in the back line where there’s room. #3011
+  - Themes. Select light and dark themes by name, for example theme-id: Terminal or --dark-theme dark-mauve. Themes
+  - Syntax. Use unquoted labels like cost $5 and #oncall, colors like #abc, and names like R&D. Variables can use keyword names, and nested shapes can be named layers, scenarios, or steps. Punctuation · Hash-prefixed labels and keyword names
+  - Formatter. d2 fmt README.md formats D2 fences in Markdown. Use d2 fmt --check --diff README.md to show a diff in CI. Formatter options
+  - Installation. Run the CLI with uvx d2lang, or install it in CI with d2lang/setup-d2@v1. Windows x64 now has a -user.msi installer for users without administrator rights. uv and uvx · GitHub Actions · Windows
+  - Linux packages. Install a specific GitHub release with APT on Debian or Ubuntu (amd64, arm64) or DNF on Fedora or RHEL (x86_64, aarch64). Download the matching .deb or .rpm and pass its local path to the package manager. Debian and Ubuntu · Fedora and RHEL
+  - Language reference. Explore the grammar with railroad diagrams, EBNF, and parser conformance cases. Download the docs as Markdown, by page or in one file. Grammar reference · Conformance cases · Page index · Full text
+
+  Improvements 🧹
+  CLI export time on an Apple M4, including startup, layout, and SVG output. Timings use d70ec718.
+  ────────────────────────────────────────────┬──────┬─────────────────┬───────
+  Workload                                    │v0.9.0│v0.10.0 candidate│Speedup
+  ────────────────────────────────────────────┼──────┼─────────────────┼───────
+  3,000 rectangles in a grid                  │8.29 s│159 ms           │52.1×
+  ────────────────────────────────────────────┼──────┼─────────────────┼───────
+  Ten real-world diagrams, sum of medians     │451 ms│307 ms           │1.47×
+  ────────────────────────────────────────────┴──────┴─────────────────┴───────
+  Layout and rendering. Native timings compare each optimization with its preceding implementation. Engine rows total layout time across the test suite. Layout benchmarks
+  ───────────────────────────────────────────────────────────────────┬────────┬────────
+  Workload                                                           │Before  │After
+  ───────────────────────────────────────────────────────────────────┼────────┼────────
+  Dagre                                                              │298 ms  │22.9 ms
+  ───────────────────────────────────────────────────────────────────┼────────┼────────
+  ELK                                                                │190 ms  │28.1 ms
+  ───────────────────────────────────────────────────────────────────┼────────┼────────
+  TALA, one seed, including routing                                  │11.47 s │3.08 s
+  ───────────────────────────────────────────────────────────────────┼────────┼────────
+  Choose grid row breaks, 100 cells in 10 rows                       │27.94 ms│11.38 µs
+  ───────────────────────────────────────────────────────────────────┼────────┼────────
+  Compile two SQL tables with a global edge style declared first     │936 µs  │73 µs
+  ───────────────────────────────────────────────────────────────────┼────────┼────────
+  Re-render a 1,000-message sequence after a label edit              │24.4 ms │16.3 ms
+  ───────────────────────────────────────────────────────────────────┼────────┼────────
+  Write a 30-slide PowerPoint deck                                   │3.3 ms  │2.1 ms
+  ───────────────────────────────────────────────────────────────────┴────────┴────────
+  SVG output size. Each file uses gzip level 9. The two candidate builds produced identical SVGs for all 16 fixtures with version metadata omitted. SVG changes
+  ───────────────────────────────────────┬────────┬─────────────────┬─────────
+  Diagram                                │v0.9.0  │v0.10.0 candidate│Reduction
+  ───────────────────────────────────────┼────────┼─────────────────┼─────────
+  Links example with forced appendix     │274.6 KB│117.8 KB         │57.1%
+  ───────────────────────────────────────┼────────┼─────────────────┼─────────
+  Five multiboard animations             │37.9 KB │30.4 KB          │19.6%
+  ───────────────────────────────────────┼────────┼─────────────────┼─────────
+  Ten real-world diagrams                │200.8 KB│198.9 KB         │1.0%
+  ───────────────────────────────────────┴────────┴─────────────────┴─────────
+  CLI and Docker sizes. The macOS candidate was built at e53d9644.
+  ────────────────────────────────────────────────────────────┬────────┬────────┬──────
+  Artifact                                                    │Before  │After   │Change
+  ────────────────────────────────────────────────────────────┼────────┼────────┼──────
+  Docker layers, Linux x86-64, before/after deduplication     │92.16 MB│54.60 MB│−41%
+  ────────────────────────────────────────────────────────────┼────────┼────────┼──────
+  Docker layers, Linux arm64, same change                     │86.55 MB│52.16 MB│−40%
+  ────────────────────────────────────────────────────────────┼────────┼────────┼──────
+  macOS arm64 CLI, v0.9.0 → candidate                         │40.04 MB│39.28 MB│−1.9%
+  ────────────────────────────────────────────────────────────┼────────┼────────┼──────
+  Linux x86-64 CLI, PowerPoint writer change alone            │43.47 MB│40.42 MB│−7%
+  ────────────────────────────────────────────────────────────┴────────┴────────┴──────
+  - TALA aligns connections across containers, centers parallel branches, packs hierarchies more tightly, and routes larger diagrams. #3034 · #2986 · #3025
+  - Grids balance row widths with grid-rows alone and column heights with grid-columns alone. Grid layouts
+  - Exports. Repeated renders reuse bundled font measurements and subsets. Animated SVG connections respect prefers-reduced-motion. Multiboard exports preserve user edits, roll back on failure, and give reserved or nonportable board names hashed filenames. Links between boards follow the new paths. Font caching · #2976 · #2900
+  - File and image access. Exports validate image contents and sizes. Use --allow-private-network for trusted internal images or --allow-local-files=false to disable local reads by diagrams. Go callers must set CompileOptions.FS to enable imports. Image access is configured separately. Go import options · Image options
+  - Watch mode authenticates browser sessions through the URL printed by d2 --watch. #2910
+  - Installation. Standalone installs verify SHA-256 checksums. Add --verify-provenance to verify signed builds locally. Source builds require Go 1.27.4 or newer. Go module installs report the installed D2 version in the CLI, LSP, and MCP server. Installer verification · Build from source
+
+  Bugfixes ⛑️
+  - CLI exports. Navigating the watch preview keeps the complete export on disk. Watch resolves Windows imports relative to their diagram. Links open boards with dotted names in SVG, PDF, and PowerPoint. The CLI preserves the source when input and output identify the same file. Text export honors source-selected TALA, and D2_STDOUT_FORMAT selects the format for stdout. #3076
+  - Dagre. Containers keep the same dimensions across runs. Nested diagrams with connections between sibling containers can now render when Dagre previously failed during ordering or edge routing. Deterministic layouts · Nested diagrams
+ReleaseNotesUrl: https://github.com/d2lang/d2/releases/tag/v0.10.0
+Documentations:
+- DocumentLabel: D2 Tour
+  DocumentUrl: https://d2lang.com/tour/intro
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
