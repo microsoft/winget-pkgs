@@ -1,0 +1,140 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: NetEase.LobsterAI
+PackageVersion: 2026.11.27
+PackageLocale: zh-CN
+Publisher: LobsterAI
+PublisherUrl: https://www.youdao.com/
+PublisherSupportUrl: https://github.com/netease-youdao/LobsterAI/issues
+Author: 网易有道信息技术（北京）有限公司
+PackageName: LobsterAI
+PackageUrl: https://lobsterai.youdao.com/
+License: MIT
+LicenseUrl: https://github.com/netease-youdao/LobsterAI/blob/HEAD/LICENSE
+Copyright: © 2026 NetEase Youdao
+CopyrightUrl: https://c.youdao.com/dict/hardware/lobsterai/lobsterai_service.html
+ShortDescription: 一个 7×24 小时帮你干活的全场景个人助理 Agent
+Description: |-
+  LobsterAI 是由网易有道开发的全场景个人助理 Agent。它 7×24 小时待命，能够帮你完成日常办公中的各类事务 —— 数据分析、制作 PPT、生成视频、撰写文档、搜索信息、收发邮件、定时任务，以及更多。
+  LobsterAI 的核心是 Cowork 模式，它能在本地或沙箱环境中执行工具、操作文件、运行命令，一切都在你的监督下自主完成。此外，LobsterAI 支持通过钉钉、飞书、Telegram、Discord 等 IM 平台远程触发，让你在手机上也能随时指挥 Agent 工作。
+  核心特性
+  - 全场景办公助理 — 数据分析、PPT 制作、视频生成、文档撰写、Web 搜索、邮件收发，覆盖日常办公全流程
+  - 本地 + 沙箱执行 — 任务执行支持本地直接运行或隔离的 Alpine Linux 沙箱
+  - 内置技能 — 包括 Office 文档生成、Web 搜索、Playwright 自动化、Remotion 视频生成等
+  - Windows 内置 Python 运行时 — Windows 安装包内置可直接使用的 Python 解释器运行时；Python 技能依赖可按需安装
+  - 定时任务 — 支持对话式发起或 GUI 界面添加定时任务，如每日新闻收集、邮箱整理、周期性报告生成等
+  - 持久记忆 — 自动从对话中提取用户偏好与个人信息，跨会话记住你的习惯，越用越懂你
+  - IM 远程操控 — 通过钉钉、飞书、Telegram、Discord 在手机端随时触发 Agent
+  - 权限门控 — 所有敏感工具调用需用户明确批准后执行
+  - 跨平台 — macOS（Intel + Apple Silicon）、Windows、Linux 桌面端，配合 IM 实现移动端覆盖
+  - 数据本地化 — SQLite 本地存储，聊天记录和配置不离开你的设备
+Tags:
+- 人工智能
+- 大语言模型
+- 智能体
+- 聊天机器人
+- 自主智能
+- 龙虾
+ReleaseNotes: |-
+  What's Changed
+  This release moves the agent engine from OpenClaw to DeepSeek Harness (DSH) — 106 PRs, the largest architectural migration in LobsterAI's history. Sessions, experts, memory, IM channels, media generation, office editing and plugins were all rebuilt on the new engine, closing every capability gap left by the old one.
+  ✨ Highlights
+  - New engine, same app — DSH is now the default runtime, with native desktop integration across sessions, tooling and packaging (#3239)
+  - Agents that work together — cross-agent collaboration and specialist delegation let the main agent hand off subtasks to dedicated specialists (#3137)
+  - Every IM channel back online — POPO added; WeCom, Weixin, Feishu, DingTalk, QQ, Telegram and Discord all restored with group-chat routing (#3160, #3232)
+  - Plugin ecosystem — marketplace, version checks, hot updates and an embedded plugin shell (#3202, #3207)
+  - Instant launch — the main UI no longer waits on engine boot; cold start is substantially faster (#3157, #3213)
+  ⚠️ Breaking Changes & Upgrade Notes
+  - The agent engine is now DSH. Existing sessions, agents, experts, memory, IM bindings and settings migrate automatically on first launch — back up your workspace before upgrading.
+  - The legacy web-search server is retired in favor of native web_search routing. Any custom configuration pointing at the old server must be updated (#3155).
+  - Experimental DSH flags and dead IPC channels are removed; config files relying on them no longer take effect (#3224).
+  - Bundled skills are mounted read-only. To customize one, copy it into your user skills directory (#3236).
+  - Fresh installations now require sign-in, and Full Access permissions require explicit confirmation (#3212, #3165).
+  - Backup and migration were rebuilt; older backup archives must go through the new migration flow (#3190).
+  🧠 Core Engine: OpenClaw → DSH
+  Engine migration and native desktop integration (#3239, #3136) by @fisherdaddy
+  DSH stabilization series (1/6 – 6/6)
+  - Harden startup gating, isolation, backup/restore and packaging (#3146)
+  - Repair session lifecycle, goals, context compaction and permissions (#3147)
+  - Enforce project/expert memory scoping, CRUD migration and the dream diary viewer (#3148)
+  - Repair skills, the email skill, the web-search sandbox and plugin lifecycle (#3149)
+  - Harden DSH MCP sync, OAuth 2.1, the SSE bridge, tool filters and package paths (#3150)
+  - Repair model compatibility, office editing, scheduled tasks, the decision tool and the companion (#3151)
+  Compatibility and protocol
+  - Restore the plan model protocol, thinking and kimi-k3 compatibility (#3144) by @fisherdaddy
+  - Harden model thinking defaults and codex responses compatibility (#3203) by @fisherdaddy
+  Migration and data integrity
+  - Sync engine-agnostic fixes from release/2026.11.17 to DSH (#3142) by @fisherdaddy
+  - Address desktop migration regressions (#3177) by @btc69m979y-dotcom
+  - Overhaul DSH data backup and migration (#3190) by @fisherdaddy
+  - Clean up legacy experimental DSH configs and dead IPC (#3224) by @fisherdaddy
+  Runtime reliability
+  - Bind scheduled tasks to their working directory and recover pending DSH prompts on reload (#3152) by @fisherdaddy
+  - Retain the hidden web-search view and return ContentBlock[] from lobster_enable_tools (#3153) by @fisherdaddy
+  - Forward host diagnostics to the main log (#3174) by @btc69m979y-dotcom
+  - Recover linked artifacts and await MCP registration (#3173) by @btc69m979y-dotcom
+  - Fix write conflicts and duplicate sends after session disconnects (#3204) by @btc69m979y-dotcom
+  - Preserve host identity and avoid duplicate session titles (#3223) by @btc69m979y-dotcom
+  - Recover profile reloads and transient desktop connections (#3227) by @btc69m979y-dotcom
+  🤝 Agents, Experts & Collaboration
+  - Restore expert personas before starting DSH (#3132) by @btc69m979y-dotcom
+  - Restore subagent sessions (#3123) by @btc69m979y-dotcom
+  - Add cross-agent collaboration and specialist delegation (#3137) by @fisherdaddy
+  - Show New badges in featured scenarios (#3167) by @btc69m979y-dotcom
+  - Preserve agent collaboration across downgrades (#3187) by @btc69m979y-dotcom
+  - Populate the existing agent workspace tree (#3191) by @btc69m979y-dotcom
+  - Add draft generation, the rules tool and a settings redesign (#3200) by @fisherdaddy
+  - Fix the agent workspace sync race and video reference previews (#3205) by @btc69m979y-dotcom
+  💬 Cowork & Conversation
+  - Deliver user question answers to DSH (#3131) by @btc69m979y-dotcom
+  - Preserve visual history and library previews (#3134) by @btc69m979y-dotcom
+  - Fork conversations at the selected message (#3135) by @btc69m979y-dotcom
+  - Place turn artifacts above the reply metadata row (#3139) by @fisherdaddy
+  - Remove the home engine starting pill and legacy gateway copy (#3159) by @fisherdaddy
+  - Redesign the home composer layout and default permission settings (#3164) by @fisherdaddy
+  - Preserve context controls after DSH replies (#3171) by @btc69m979y-dotcom
+  - Add pinned task reordering, a task hover card and model switch confirmation (#3179) by @fisherdaddy
+  - Fix the sidebar model picker, auto-compaction turn split, image edit status and IM timeout (#3214) by @btc69m979y-dotcom
+  - Add a turn rail outline, session scroll restore and a simplified DSH plugin menu (#3219) by @fisherdaddy
+  - Add a context breakdown popover, page file drop and a DSH memory guard (#3220) by @fisherdaddy
+  - Redesign DSH side chat with a multi-tab panel and native fork (#3221) by @fisherdaddy
+  - Optimize initial context tokens and add idle capability cleanup (#3222) by @fisherdaddy
+  - Add side chat rename/delete/promote UI and collapse stopped turn metadata (#3229) by @btc69m979y-dotcom
+  - Polish artifact tabs, the cleanup undo toast and the MCP marketplace cache (#3235) by @fisherdaddy
+  📡 IM Channels
+  - Add native POPO channel support (#3160) by @btc69m979y-dotcom
+  - Restore WeCom connectivity (#3169) by @btc69m979y-dotcom
+  - Preserve direct-message conversations across the DSH upgrade (#3170) by @btc69m979y-dotcom
+  - Preserve Weixin authorization across DSH upgrades (#3182) by @btc69m979y-dotcom
+  - Stop competing WeCom subscriptions and recover dropped connections (#3188) by @btc69m979y-dotcom
+  - Preserve Feishu topic sessions and scheduled delivery (#3192) by @btc69m979y-dotcom
+  - Deliver scheduled reminders to private conversations (#3195) by @btc69m979y-dotcom
+  - Remove the obsolete gateway restart notice (#3198) by @btc69m979y-dotcom
+  - Add channel permission presets, approval relay and session presets (#3199) by @fisherdaddy
+  - Restore question filtering and rich IM replies (#3210) by @btc69m979y-dotcom
+  - Finalize DingTalk cards after delivery (#3211) by @btc69m979y-dotcom
+  - Preserve shared group conversations (#3228) by @btc69m979y-dotcom
+  - Prevent the legacy 60s timer from racing DSH approvals (#3230) by @btc69m979y-dotcom
+  - Let multiple bots of the same agent share group tasks (#3231) by @btc69m979y-dotcom
+  - Fix QQ, Telegram and Discord group chat routing (#3232) by @btc69m979y-dotcom
+  - Show effective main agent bindings and select the current group task (#3234) by @btc69m979y-dotcom
+  🎨 Media, Artifacts & Office
+  - Restore image generation and legacy artwork (#3125) by @btc69m979y-dotcom
+  - Restore video generation and legacy playback (#3127) by @btc69m979y-dotcom
+  - Ensure the workbook relationship namespace on xlsx export (#3143) by @fisherdaddy
+  - Restore media previews and turn model labels (#3178) by @btc69m979y-dotcom
+  - Add new-tab blank office docs, inline rename and media preview (#3181) by @fisherdaddy
+  - Render local HTML to PNG and JPEG in Electron (#3183) by @btc69m979y-dotcom
+  - Add an isolated Word panel, a workspace browser and office editor upgrades (#3186) by @fisherdaddy
+  - Support expert image attribution and watermark removal in DSH (#3216) by @Mind-Hand
+  🧩 Plugins, Skills, MCP & Web
+  - Restore in-app browsing with the DSH engine (#3128) by @btc69m979y-dotcom
+  - Simplify browser and web access settings (#3193) by @fisherdaddy
+  - Add plugin ecosystem management and an embedded plugin shell (#3202) by @fisherdaddy
+ReleaseNotesUrl: https://github.com/netease-youdao/LobsterAI/releases/tag/2026.11.27
+Documentations:
+- DocumentLabel: 用户手册
+  DocumentUrl: https://lobsterai.youdao.com/#/docs/lobsterai_user_manual
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
