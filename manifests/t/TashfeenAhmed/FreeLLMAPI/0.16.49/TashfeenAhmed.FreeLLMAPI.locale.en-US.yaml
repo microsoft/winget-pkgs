@@ -1,0 +1,48 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: TashfeenAhmed.FreeLLMAPI
+PackageVersion: 0.16.49
+PackageLocale: en-US
+Publisher: tashfeenahmed
+PublisherUrl: https://tashfeen.me
+PublisherSupportUrl: https://freellmapi.co/faq
+PrivacyUrl: https://freellmapi.co/privacy
+Author: Tashfeen Ahmed
+PackageName: FreeLLMAPI
+PackageUrl: https://freellmapi.co
+License: MIT
+LicenseUrl: https://github.com/tashfeenahmed/freellmapi/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Tashfeen Ahmed
+ShortDescription: Local OpenAI-compatible router that aggregates free LLM providers.
+Description: |-
+  FreeLLMAPI aggregates the free tiers of dozens of LLM providers, plus custom OpenAI-compatible chat, embedding, image, and audio endpoints, behind a single /v1 API.
+
+  A router picks the best available model for each request, falls over to the next provider when one is rate-limited, and tracks per-key usage so you stay under every free-tier cap. Provider keys are stored encrypted, and the router refreshes its model catalog from a signed feed. Built for personal use only; each provider's terms of service apply.
+Tags:
+- ai
+- gateway
+- large-language-model
+- llm
+- proxy
+- router
+ReleaseNotes: |-
+  New
+  - Round-robin key selection: a new strategy that rotates evenly through the keys of a provider. Choose it in the routing settings. The default is unchanged. Thanks @Aniketchavan7. (#2022, #2027)
+  - Copy API URL button: each key row on the Keys page has a button that copies the provider's API base URL. Thanks @flipcyde101. (#2020, #2031)
+  - Clearer 429 errors: when every route is blocked, the error now says why (cause: cooldown, provider limit, quota and so on), in the body and in X-Block-Cause headers. Thanks @FabioLeitao. (#2118)
+  - CLI: freellmapi keys add reads the provider key from FREELLMAPI_PROVIDER_KEY or piped stdin, so the key stays out of the command line. Thanks @w21180239. (#2100)
+  Fixes
+  - Failover on HTTP 405: a relay that answers 405 (a login or firewall page) no longer stops the request. The gateway tries the next route. Thanks @zhangsheng377. (#1999)
+  - Cloudflare neuron cap: one oversized call no longer blocks the whole Cloudflare account until midnight UTC. A call that does not fit is skipped and the request goes to the next provider. Calls now reserve max_tokens up front, so clients that send very large max_tokens use Cloudflare less. Thanks @tevasas. (#2016)
+  - Token usage on streamed Gemini and Ollama requests: usage now shows the provider's real counts instead of an estimate. Thanks @chuenchen309. (#2128)
+  - *.localhost custom providers: names such as ollama.localhost now work on systems whose DNS does not resolve them. Thanks @ixABK. (#2038)
+  - Media models: catalog sync no longer removes or overwrites media models that a user added. Thanks @w21180239. (#2099)
+ReleaseNotesUrl: https://github.com/tashfeenahmed/freellmapi/releases/tag/v0.16.49
+PurchaseUrl: https://freellmapi.co/pricing
+InstallationNotes: Open the app, then copy the unified API key shown in the tray popover and add your provider keys on the Keys page before pointing a client at the local /v1 endpoint.
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://github.com/tashfeenahmed/freellmapi/blob/HEAD/docs/en/README.md
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
