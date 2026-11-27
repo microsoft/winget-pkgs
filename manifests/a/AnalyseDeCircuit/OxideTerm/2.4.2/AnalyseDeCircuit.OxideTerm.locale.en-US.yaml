@@ -1,0 +1,111 @@
+# Created with WinGet Tracker using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: AnalyseDeCircuit.OxideTerm
+PackageVersion: 2.4.2
+PackageLocale: en-US
+Publisher: AnalyseDeCircuit
+PublisherUrl: https://github.com/AnalyseDeCircuit
+PublisherSupportUrl: https://github.com/AnalyseDeCircuit/oxideterm/issues
+Author: AnalyseDeCircuit
+PackageName: OxideTerm
+PackageUrl: https://github.com/AnalyseDeCircuit/oxideterm
+License: GPL-3.0
+LicenseUrl: https://github.com/AnalyseDeCircuit/oxideterm/blob/HEAD/LICENSE
+ShortDescription: Local-first SSH workspace for local shells and remote machines.Zero Electron, zero OpenSSL, zero telemetry, and no app subscription for core SSH workflows.
+Tags:
+- agent
+- ai-terminal
+- bring-your-own-key
+- filemanager
+- mcp
+- rag
+- russh
+- rust
+- sftp
+- ssh-client
+- tauri
+- terminal
+- terminal-emulator
+- tool-calling
+- wslg
+- xterm-js
+ReleaseNotes: |-
+  中文 | English
+  中文
+  OxideTerm 2.4.2 在主机工具中新增容器管理（Docker / Podman / WSL）与 Redis 工具，增强 SSH 弱网保活与老旧设备兼容，加入 AI Auto 安全模式与 Public MCP 本地路径大文件传输，并改进多行命令栏、终端链接菜单、标签页菜单和连接表单体验。
+  🐳 主机工具与监控
+  - 容器管理与 Redis 工具：主机工具新增统一容器管理，支持自动探测 Docker、Podman 和 WSL 容器引擎，涵盖容器、镜像、卷、网络与 Pod 视图，提供启停/重启/暂停/日志跟踪/进入终端/导出，以及镜像运行向导、拉取推送、构建、搜索和磁盘占用分析；新增 Redis 工具，支持端点发现、按库键树搜索与 TTL 筛选、文本与 JSON 预览、重命名、TTL 编辑和写前一致性校验的内联编辑，密码与值经标准输入传输，不进入命令行参数或日志。（PR #854）
+  - 非 POSIX 远程 Shell 兼容：Unix 主机工具探针与操作脚本改由 /bin/sh -c 执行，修复远端默认登录 Shell 为 Fish 等非 POSIX 环境时的解析失败。
+  🔌 连接、SSH 与 SFTP
+  - 弱网保活与系统唤醒感知：SSH 活跃探测改用对端确认的全局请求并开启系统级 TCP_KEEPALIVE，放宽弱网和 RTT 自适应超时预算，并监听网络接口切换与系统休眠唤醒以合并触发即时探活；连接表单支持按连接配置保活间隔与最大重试次数，并从 OpenSSH 配置导入 ServerAliveInterval、ServerAliveCountMax 与 Compression。
+  - 老旧 SSH 设备兼容：兼容模式下优先协商固定群组密钥交换（group14-sha1 / group1-sha1），避免旧设备返回 1024 位 DH-GEX 导致握手失败；支持 3des-cbc 算法、放宽显式 diffie-hellman-group-exchange-sha256 群组下界、兼容模式采用 2 MiB 窗口与 32 KiB 最大包长，并在服务端未返回 RFC 8308 算法列表时优先尝试 ssh-rsa。
+  - 连接表单与会话管理：重做连接表单布局，提供响应式摘要导航、独立拆分的端点输入框（用户名 / 主机 / 端口）和三列终端选项网格，并将独立 SFTP 表单统一至相同折叠结构；修复会话管理器树形视图搜索时无法展示折叠分组内匹配项的问题；代理 TCP 拨号错误现包含目标端点与协议信息。（搜索修复：PR #861）
+  - SFTP 交互修复：修复点击或拖拽 SFTP 过滤框、路径栏或弹窗输入框时的重入更新崩溃；发起快速 SCP 下载时自动聚焦远程路径提示框，点击路径栏空白处不再重置当前输入内容。
+  🤖 AI 与 MCP
+  - AI Auto 安全模式：新增 Auto 安全模式，对已知只读 Shell 命令快速放行，对灰区执行、写入或交互调用交由缓存隔离的 fail-closed 分类器判定；工具设置改为显式启用/禁用开关，Bypass 模式跳过所有已启用非凭据工具的审批。
+  - Public MCP 本地路径大文件与目录传输：transfers_start 上传与下载支持传入绝对 local_path，直接流式传输大文件与目录（目录优先采用流式 tar 打包/解包并自动回退递归 SFTP），不受 MCP JSON-RPC 或 64 MiB 产物大小限制，同时保留 SFTP 根目录/符号链接边界与审批检查。
+  ⚡ 终端、标签页与界面
+  - 多行命令栏自动展开：当快捷命令填入、终端右键填入、粘贴多行命令或在紧凑命令栏按 Shift+Enter 输入换行时，底部命令栏自动展开为多行命令编辑器并保留全部内容，方便修改参数后再发送。
+  - 终端右键打开链接：在终端输出中的网址或可打开路径上右键时，菜单新增“打开链接”操作。
+  - 标签页与分离窗口：标签页右键菜单新增“编辑连接”，并将标签合并操作收拢为级联子菜单；修复分离窗口中设置页及其他标签页的文本输入快捷键、删除/导航键与失焦清理行为。
+  - 外观、插件与底层整理：背景媒体支持调节表面不透明度，统一标签页、侧边栏与终端的半透明遮罩层级；云同步卡片标题与设置页样式对齐，知识库源码/预览切换改为轻量化图标按钮；语言插件支持声明自定义浅色/深色 SVG 文件图标（校验 SHA-256 且优先于内置图标）；抽取共享工作区壳层 oxideterm-gpui-shell、引入支持 wasm32 的浏览器预览基础并优化原生安装包构建与压缩。
+  👥 贡献者
+  - 感谢 @idxdy 实现主机工具中的容器管理（Docker / Podman / WSL）与 Redis 工具（PR #854）。
+  - 感谢 @heinhtetag-dev 修复会话管理器搜索时折叠分组内匹配项不显示的问题（PR #861）。
+  English
+  OxideTerm 2.4.2 adds container management (Docker, Podman, WSL) and a Redis tool to Host Tools, strengthens weak-network SSH keepalive and legacy appliance compatibility, introduces AI Auto safety mode and local-path large file transfers in Public MCP, and refines the multiline command bar, terminal link menu, tab menus, and connection forms.
+  🐳 Host Tools and Monitoring
+  - Container management and Redis tool: Host Tools now includes unified container management with detection across Docker, Podman, and WSL container engines covering containers, images, volumes, networks, and pods, along with lifecycle actions, log following, exec/attach, structured image run, pull/push/build/search, and disk usage. A new Redis tool provides endpoint discovery, per-database key trees with search and TTL filtering, text and JSON value views, rename, TTL editing, and an inline editor that verifies values before writing while keeping passwords and values on stdin rather than argv or logs. (PR #854)
+  - Non-POSIX remote shell compatibility: Unix Host Tools probes and action scripts now run via /bin/sh -c, fixing parse failures on hosts whose default login shell is non-POSIX such as Fish.
+  🔌 Connections, SSH, and SFTP
+  - Weak-network resilience and per-connection keepalive: SSH liveness checks now use peer-confirmed global requests alongside OS-level TCP_KEEPALIVE, wider weak-network and RTT-adaptive probe budgets, and coalesced probes on system wake and network interface changes. Connection forms expose per-connection keepalive interval and retry limits, and SSH config import preserves ServerAliveInterval, ServerAliveCountMax, and Compression.
+  - Legacy SSH compatibility: Legacy mode now prefers fixed-group KEX (group14-sha1 / group1-sha1) ahead of dynamic DH-GEX to avoid 1024-bit prime rejections on older appliances, adds 3des-cbc, relaxes explicit diffie-hellman-group-exchange-sha256 group bounds, uses RFC 4254 2 MiB windows / 32 KiB max packet size in legacy mode, and tries ssh-rsa first when servers omit RFC 8308 server-sig-algs.
+  - Connection forms and Session Manager: Redesigned connection studio forms with responsive summary navigation, split endpoint fields (user / host / port), a three-column terminal options grid, and unified disclosure layout for standalone SFTP. Fixed Session Manager search so matches inside collapsed groups are revealed in Tree view, and included target endpoint and protocol in proxy TCP dial errors. (Search fix: PR #861)
+  - SFTP interaction fixes: Prevented re-entrant view update panics when focusing or dragging SFTP filter, path, or dialog inputs; focused the remote path prompt for quick SCP downloads; and stopped path-bar padding clicks from resetting active path edits.
+  🤖 AI and MCP
+  - AI Auto safety mode: Added Auto safety mode, fast-pathing known read-only shell commands while routing grey-area execute, write, and interactive tool calls through a cache-isolated, fail-closed classifier. Tool settings now act as explicit enable/disable switches, and Bypass skips approval for all enabled non-credential tools.
+  - Public MCP local-path large file and directory transfers: transfers_start now accepts an optional absolute local_path for both uploads and downloads, streaming arbitrarily large files and directories (using streaming tar pack/unpack with recursive SFTP fallback) without hitting MCP JSON-RPC or 64 MiB artifact limits while preserving SFTP root/symlink boundaries and approval checks.
+  ⚡ Terminal, Tabs, and UI
+  - Auto-expanding multiline command bar: Inserting, appending, or pasting multiline commands into the compact command bar—or pressing Shift+Enter there—now promotes automatically to the multiline command editor with all lines intact for editing before send.
+  - Open link from terminal context menu: Right-clicking a URL or openable path in terminal output now offers an Open link action.
+  - Tabs and detached windows: Added Edit connection to the tab context menu and grouped tab merge actions into cascading submenus. Detached windows now route shared IME text-editing shortcuts, delete/navigation keys, settings input handling, and blur/drag cleanup consistently with the main window.
+  - Appearance, plugins, and platform foundations: Added surface opacity control for background media and unified translucent surface scrims across tabs, sidebars, and terminal. Aligned Cloud Sync card headers with Settings cards and flattened the Knowledge Base source/preview switcher into icon buttons. Language plugins can now provide SHA-256-verified dark and light custom SVG file icons ahead of built-in icons. Extracted the shared oxideterm-gpui-shell layer, established wasm32 browser-preview foundations, and improved native release build speed and installer compression.
+  👥 Contributors
+  Thank you to the external contributors to this release:
+  - @idxdy: container management (Docker, Podman, WSL) and Redis tools in Host Tools (PR #854).
+  - @heinhtetag-dev: reveal Session Manager search matches inside collapsed groups (PR #861).
+  📥 Download for your system
+  ────────────────┬───────────────────────────────────────┬───────────────────────────────────────
+  Operating system│x64                                    │ARM64
+  ────────────────┼───────────────────────────────────────┼───────────────────────────────────────
+  Windows         │Setup (.exe) · Portable (.zip)         │Setup (.exe) · Portable (.zip)
+  ────────────────┼───────────────────────────────────────┼───────────────────────────────────────
+  macOS           │DMG (Intel)                            │DMG (Apple Silicon)
+  ────────────────┼───────────────────────────────────────┼───────────────────────────────────────
+  Linux           │AppImage · DEB · RPM                   │AppImage · DEB · RPM
+  ────────────────┴───────────────────────────────────────┴───────────────────────────────────────
+  Additional portable archives, signatures, and sha256sums.txt remain available in the release assets below.
+  📌 Installation Tips / 安装提示
+  macOS
+  Downloaded .dmg files may be quarantined by Gatekeeper. Run in Terminal:
+  xattr -cr ~/Downloads/OxideTerm_*.dmg
+  # or after install / 或安装后
+  xattr -cr /Applications/OxideTerm.app
+  Windows
+  If SmartScreen warns, click More info -> Run anyway.
+  若 SmartScreen 弹出警告，点击 更多信息 -> 仍要运行。
+  Linux
+  # AppImage
+  chmod +x OxideTerm_*_linux_*.AppImage && ./OxideTerm_*_linux_*.AppImage
+  # Debian/Ubuntu
+  sudo dpkg -i OxideTerm_*_linux_*.deb && sudo apt-get install -f
+  # Fedora/RHEL-compatible systems
+  sudo dnf install ./OxideTerm_*_linux_*.rpm
+  🔗 Links
+  - Documentation: https://oxideterm.app
+  - GitHub Issues: https://github.com/AnalyseDeCircuit/oxideterm/issues
+  - Changelog: https://github.com/AnalyseDeCircuit/oxideterm/blob/main/.github/release-notes/stable-changelog.md
+ReleaseNotesUrl: https://github.com/AnalyseDeCircuit/oxideterm/releases/tag/v2.4.2
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
