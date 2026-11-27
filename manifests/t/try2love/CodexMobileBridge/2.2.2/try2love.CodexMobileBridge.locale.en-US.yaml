@@ -1,0 +1,58 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.28.0.schema.json
+
+PackageIdentifier: try2love.CodexMobileBridge
+PackageVersion: 2.2.2
+PackageLocale: en-US
+ShortDescription: A local gateway that continues desktop Codex App chats in a mobile browser.
+Description: |-
+  Continue existing chats in the desktop Codex App from your phone browser, or create an empty chat in a saved project.
+  The phone and desktop use the same chat. Read replies, send messages, choose models and Skills, and respond to pending confirmations. Local tasks continue on the original computer; SSH tasks continue on the original server. Each chat keeps its model provider and authentication settings.
+  Your phone does not need to sign in to the same OpenAI account as the desktop. The gateway has its own username/password login and an explicit passwordless option. Connect over LAN, a temporary HTTPS tunnel, or your own reverse proxy.
+  Community project, not affiliated with OpenAI. Supports macOS and Windows and depends on internal Codex App IPC. See verification records for what was actually tested. App updates may require compatibility changes.
+
+  Edit, branch and copy messages
+  - Copy user messages from their action row. Choose Edit and resend on the latest user message, or Edit in new branch on an older message to keep the original conversation.
+  - Choose Branch from here under a completed answer. The new chat keeps history through that turn and waits for your next message. Chat details link back to the source.
+  - Copy complete replies as Markdown or copy an individual code block. Long replies load their full text. When clipboard access is unavailable, selectable text supports the system Copy action.
+  - In-place editing requires the turn to be stopped and generates a new answer. Editing and branching do not undo file changes; both chats share the working directory.
+  - Branching requires a Codex runtime with turn-specific forking and deferred goal continuation; older versions show an update prompt. Copying and latest-message editing do not require those fork capabilities. Creating a branch does not send a model request.
+  - If delivery is uncertain, check the chat list first; repeating the same request does not replay it. If a branch was created but could not connect, the replacement remains an edit draft for that branch.
+Tags:
+- remote
+- remote-access
+- remote-connection
+ReleaseNotes: |-
+  Update both the gateway and mobile App for compatibility with the latest Codex App native connection and the complete history-download, offline-reading and interaction improvements.
+  This stable release brings together the previews since v2.2.1, focusing on Codex native connections, long chats and offline use, Antigravity controls, gateway version management and cross-platform reliability.
+  - Newer Codex native connections. Support the latest Codex App native connection while retaining older clients. Improve recovery after normal launches, client updates and reopening, preserving the original chat, account and execution environment. Fix chats incorrectly becoming read-only after a third-party API execution error. #252 · #254 · #205
+  - Long chats and execution details. Show cached and recent content first, and load message bodies and execution details separately on demand. Improve intermediate output, expandable processes, elapsed times and historical images while preserving the reading position. Fix older content disappearing after a new input and empty snapshots overwriting streamed text. #212 · #258
+  - Full-history downloads and offline reading. Download messages, execution details and attachments, reuse existing content, resume interrupted transfers and recover unfinished downloads. Remove offline records by date to reclaim storage.
+  - Offline drafts and queued messages. Keep typing and queue messages while disconnected, retaining a separate next-message draft. On reconnection, verify the original gateway, account and chat before sending in order. Edit explicitly unsent failures in place or remove them; manage unconfirmed sends without duplicating messages. PR #247
+  - Customizable composer. Choose single- or dual-column layouts, reorder tools by dragging, organize panels and select icon or text labels. Unified send/stop controls and layout changes preserve drafts, with improved narrow-screen, touch and input-focus behavior. #175 · PR #201
+  - Split views and native queued messages. Open files or tools beside a wide-screen chat and refresh image thumbnails more reliably. Message management displays Codex App's native send-after-completion queue separately from the gateway queue. PR #178
+  - Quota display and optional continuation. Add a movable Remaining quota tool with consistent rings, time windows and expandable quota pools. Quota-recovery continuation is off by default and supports quota-interrupted tasks for official accounts in the default local Codex Desktop profile. #255 · PR #256 · PR #257
+  - Gateway version selection and download cache. Browse stable and preview releases and download historical packages for the current OS and architecture. After compatibility checks, upgrade, downgrade or reinstall the current version. Keep installers in a cache labeled by version, format and size, reuse verified downloads and select entries to delete.
+  - Update recovery and one-click credential migration. Improve macOS startup-timeout rollback, Windows installation-directory occupancy checks and configuration backups. On macOS, Migrate credentials appears only when legacy credentials need migration and disappears after success. Keep the old credentials, retry failures and retain existing phone pairings. #268
+  - Windows Codex initialization and shutdown. Improve normal shutdown when native menus are expanded on demand, and complete the quit, configure, restart and connection-verification sequence during initialization while retaining task and approval checks. #206
+  - Antigravity commands, modes and models. Support native slash commands, multiple Skills, context compaction and supported native Plan/Goal modes. Select models and reasoning effort separately, refreshing command and model catalogs for the current account and model. PR #173 · PR #180
+  - Antigravity chat management and branching. Rename, archive and restore chats, set titles for new chats and create native branches from completed replies. Revert to a selected native step, with file rollback left to the user's choice. #231 · PR #232 · #233 · PR #234 · PR #246
+  - Antigravity background tasks and stopping. View background tasks and subagents and stop individual tasks. Stop the current chat even while a send request is pending. Fix stale state after stopping and recovery when a new task starts on the desktop. PR #179 · #235 · PR #236 · #223 · PR #224 · #241 · PR #242
+  - Antigravity images, references and context. Send image attachments through the native API and preserve native workspace-file references. Show context capacity, system messages and turn durations when reliable native timestamps are available. #237 · PR #238 · #239 · PR #240
+  - Antigravity version and platform compatibility. Improve Linux AppImage, extracted-installation and automatic discovery support. Fix project binding for new chats, stale model catalogs and reasoning-effort detection in older versions. Discover environment tokens for newer native services on macOS and Linux. #210 · PR #209 · #213 · PR #215 · #214 · PR #216 · #249 · PR #250
+  - Antigravity history and error recovery. Improve older-chat reading, history-cache refresh and handling of temporarily unreadable databases. Fix errors caused by missing or malformed account-index fields. PR #245 · PR #196 · #225 · PR #226
+  - Files and Git. Sort directories by name, modification time or size and upload into the currently browsed directory. Show recent Git commits first, fully page large change lists and share font-size and wrapping settings with diff views. #262 · #263 · #264
+  - Chat lists and device management. Show the last user-input time, improve project grouping and platform-specific path handling. Display readable browser, device-model and app-version information for connected devices and allow renaming. #265
+  - Task-completion notifications. Optionally include a final-answer excerpt; this is off by default. Fix inconsistent Android notification-panel styling in dark mode. #163 · #176
+  - Mobile connections and refresh. Improve reachability checks for slow responses over cellular, Tailscale and similar connections, avoiding premature offline reports. Fix iOS Refresh page not actually reloading, and reuse appearance and toolbar preferences for the same computer connection. #218
+  - ZCode login and local connections. Fix browser authorization handoff for official remote access and improve handling of deleted working directories and new chats. Add all upstream models at once after fetching them, with stronger checks for unknown task state and native questions. #174 · #204 · #203 · PR #191
+  - Claude, Codex and DSH compatibility. Correct Claude context-usage reads and native-question validation. Handle nullable Codex model catalogs and Fast-mode policies. Support empty configuration sections in DSH credentials, improve transport errors and restore connections after opening a chat. PR #189 · PR #192 · PR #190 · #217 · PR #193
+  - Startup, configuration saves and background stability. Fix startup and write failures caused by corrupt rebuildable state, leftover temporary files and data-directory save errors. Isolate maintenance failures in one chat so other chats and notification workers keep working. #184 · #188 · PR #194 · PR #195 · PR #198
+  - Client discovery and protocol handling. Fix client scans blocked by protected Windows installation directories and improve path discovery after application updates. Correct WebSocket control-frame, fragmentation and binary-message handling. #211 · PR #200 · PR #197
+  - Networking and file protection. Support explicit IPv6 listeners and fix public IPv6 address handling. Tolerate SSH login-output noise while retaining upload-integrity verification, and consistently block case variants of .git paths. #208 · #219 · PR #220 · #221 · PR #222
+  - Message-management compatibility. Fix message management failing to open in older browsers, archived filters persisting into new chats and malformed queue-text rendering. #227 · PR #228 · #229 · PR #230
+  - Application appearance. Update desktop, Android, iOS and web icons with light/dark variants, and let the gateway App follow the system dark theme. #181 · PR #182 · #261
+  Install over the existing App without uninstalling or clearing data. Android supports in-place upgrades from v2.2.1 and this preview series; use your existing signing identity for iOS. Initial migration of legacy macOS connection credentials may require one system authorization. Switching to a historical version checks credential and configuration compatibility; incompatible installers remain available for separate download.
+  Thanks to @windowmmk, @heiqiu47, @mc373906408, @hmho000, @a32556376, @ufomaker, and everyone who tested previews and shared issues and suggestions.
+ManifestType: locale
+ManifestVersion: 1.28.0
