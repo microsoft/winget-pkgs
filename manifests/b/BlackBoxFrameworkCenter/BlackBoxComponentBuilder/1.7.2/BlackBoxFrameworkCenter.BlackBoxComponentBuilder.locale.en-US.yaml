@@ -1,0 +1,193 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: BlackBoxFrameworkCenter.BlackBoxComponentBuilder
+PackageVersion: 1.7.2
+PackageLocale: en-US
+Publisher: BlackBox Framework Center
+PublisherUrl: https://blackboxframework.org/
+PublisherSupportUrl: https://redmine.blackboxframework.org/projects/blackbox
+Author: BlackBox Framework Center
+PackageName: BlackBox Component Builder
+PackageUrl: https://blackboxframework.org/index.php?cID=goto-download-page
+License: BSD-2-Clause
+LicenseUrl: https://github.com/BlackBoxCenter/blackbox/blob/HEAD/LICENSE.txt
+Copyright: Copyright (c) 2013 - 2019 BlackBox Framework Center
+CopyrightUrl: https://github.com/BlackBoxCenter/blackbox/blob/HEAD/LICENSE.txt
+ShortDescription: Open-source IDE and framework for the Component Pascal programming language.
+Description: |-
+  BlackBox Component Builder is an open-source integrated development environment and a framework (a collection of modules) written in the Component Pascal programming language, a superset of the Oberon-2 language developed by Niklaus Wirth.
+  BlackBox provides facilities for document creation, program compilation, module execution, and interface design. It is a Win32 application for Windows operating systems.
+Tags:
+- code
+- coding
+- component-pascal
+- develop
+- development
+- ide
+- oberon
+- oberon-2
+- pascal
+- programming
+ReleaseNotes: |-
+  BlackBox 1.7.2 Changes
+
+  Features
+  #187 adding a run-time debugger to BlackBox
+  #189 improving the treatment of the sign bit in Math/SMath
+  #196 StdCoder to support both "\" & "/" in file paths
+  #201 Importer and Exporter for UTF-8 texts
+
+  Documentation
+  #190 add comment about stack and heap memory configuration
+
+  Bugs
+  #184 HYPERLINK ignored in RTF import
+  #186 aligning code procedure syntax with docu
+  #188 compiler trap with SYSTEM.VAL
+  #191 fixing a compiler trap after syntax error
+  #192 Kernel.Call does not work with ANYREC-parameters
+  #193 typing error in Documents.SetPageOp.Do
+  #194 Meta.PutParam and Kernel.Call for open arrays are mismatched
+  #195 support for long identifiers in trap handlers
+  #199 compiler trap with SYSTEM.ADR(BasicType)
+  #200 network file delete under Win10 sometimes fails
+  #202 drag & pick across BlackBox instances traps
+
+  Details
+
+  #184 (Bug, 2018-03-21): HYPERLINK ignored in RTF import
+  Some RTF exporters add leading white space to the HYPERLINK field instruction.
+  This leading white space needs to be skipped in order to handle the HYPERLINK correctly.
+
+  In addition, the closing double quote of the link target needs to be removed.
+  This applies to all HYPERLINKs.
+
+  Reported by Helmut Zinn, 2018-03-12.
+
+  #186 (Bug, 2018-06-02): aligning code procedure syntax with docu
+  Dev/Docu/P-S-I.odc specifies that code procedures are a comma-separated sequence of constant expressions.
+  Leading, trailing, or multiple adjacent commas are not allowed.
+  In addition, the docu allows arbitrary constant expressions, not only integer and string literals.
+  The parser in DevCPP.GetCode therefore needs to be aligned with the docu.
+
+  Reported by Zorko, 2018-04-18.
+
+  #187 (Feature, 2018-06-07): adding a run-time debugger to BlackBox
+  It is proposed to add a run-time debugger for BlackBox.
+  A prototype of such a debugger is available from Oberon microsystems
+  and has been adapted to BlackBox 1.7 by oberoncore.
+  It is based on the Windows debugging API and is able to set code
+  and data breakpoints, do single step execution and more.
+  However, the user interface needs improvements and various changes
+  made in the post-mortem debugger since BlackBox 1.6 need to be applied
+  also to the run-time debugger.
+
+  Proposed by J. Templ, 2018-05-15.
+
+  #188 (Bug, 2018-06-16): compiler trap with SYSTEM.VAL
+  The following example leads to a compiler trap:
+
+  <pre>
+  PROCEDURE Test;
+  VAR li: LONGINT; s: SET;
+  BEGIN
+  li := SYSTEM.VAL(LONGINT, s * s) + 1
+  END Test;
+  </pre>
+
+  Reported by Oleg N. Cher, 2018-06-12.
+
+  #189 (Feature, 2018-07-05): improving the treatment of the sign bit in Math/SMath
+  It is proposed to add the functions CopySign and SignBit according to IEEE 754-2008 to Math/SMath. In addition, the implementation of Sign, Sinh, Tanh, ArcSinh, ArcTanh, Mantissa, and Real should return negative zero (-0.0) if the argument is negative zero.
+
+  Reported by Robert, 2018-06-19.
+
+  #190 (Documentation, 2018-11-30): add comment about stack and heap memory configuration
+  When increasing the stack size in DevLinker for creating an exe file with a larger stack the
+  heap size must be reduced. Otherwise there may be strange effects for example when opening
+  a file dialog box because Windows functions are running out of memory.
+  This fact should be added as a comment in Kernel and DevLinker.
+
+  #191 (Bug, 2018-11-30): fixing a compiler trap after syntax error
+  The compiler produces a NIL dereference (read) trap instead of an error message
+  for the following example:
+
+  @MODULE TestCompilerError;
+  VAR string: POINTER TO ARRAY OF CHAR;
+  BEGIN NEW(string, LEN 5 1); ...
+  @
+  Reported by Rainer Neubauer
+
+  #192 (Bug, 2018-12-07): Kernel.Call does not work with ANYREC-parameters
+  Kernel.Call does not work with ANYREC-parameters because the type tag is not passed.
+
+  Reported by Eugene Temirgaleev.
+
+  #193 (Bug, 2018-12-10): typing error in Documents.SetPageOp.Do
+  In the procedure Documents.SetPageOp.Do a typing error should be fixed.
+  wrong is:
+  op.ph := d.ph;
+  correct is:
+  op.pw := pw;
+
+  Reported by Ivan Denisov
+
+  #194 (Bug, 2018-12-20): Meta.PutParam and Kernel.Call for open arrays are mismatched
+  Meta.PutParam and Kernel.Call for open arrays are mismatched.
+  Thereby the order of parameters representing the length-vector
+  of a multi-dimensional dynamic array gets inverted.
+
+  Reported by Eugene Temirgaleev, 2018-12-02.
+
+  #195 (Bug, 2018-12-20): support for long identifiers in trap handlers
+  issue-#36 introduced long identifiers for CP names but the
+  procedure GetTrapMsg in DevDebug and StdDebug trap when using them.
+
+  Reported by Helmut Zinn, 2018-12-01.
+
+  #196 (Feature, 2019-02-18): StdCoder to support both "\" & "/" in file paths
+  Currently StdCoder only supports "/" as a file path separator, whereas most other BlackBox routines support both "\" & "/".
+  The proposal is to also support "\".
+  An implementation has been proposed by luowy (see https://forum.blackboxframework.org/viewtopic.php?f=40&t=748).
+
+  Reported by luowy.
+
+  #199 (Bug, 2019-07-01): compiler trap with SYSTEM.ADR(BasicType)
+  The following erroneous module causes a compiler trap because it tries to access the type descriptor of a basic type, which does not exist.
+  @MODULE TestAdr;
+  IMPORT SYSTEM;
+  PROCEDURE Adr;
+  BEGIN ASSERT(~ODD(SYSTEM.ADR(INTEGER)));
+  END Adr;
+  END TestAdr.
+  @
+  Reported by luowy on 2019-04-28
+
+  #200 (Bug, 2019-07-09): network file delete under Win10 sometimes fails
+  Under Windows 10 it has been observed that deleting a file on a network share sometimes
+  does not work. This is possibly related to using a virus scanner. However, repeating the
+  delete attempt does work and this leads to the proposed change appended below.
+
+  Reported by Rainer Neubauer, 2019-06-03
+
+  #201 (Feature, 2019-09-06): Importer and Exporter for UTF-8 texts
+  UTF-8 encoded texts play an important role particularily in the Linux world.
+  Therefore it is proposed to add an UTF-8 importer and exporter to HostTextConv
+  and preconfigure them in the module Config.
+  Proposed by Helmut Zinn, 2019-04-22.
+  https://community.blackboxframework.org/viewtopic.php?f=32&t=220#p1479
+
+  #202 (Bug, 2019-10-02): drag & pick across BlackBox instances traps
+  When using drag & pick between two BlackBox instances a trap results when the mouse moves over a text window of the second instance.
+  The trap is an "illegal memory read" and sometimes crashes the BlackBox instance that was used for starting the drag & pick operation.
+
+  Reported by Erwin Templ, 2019-09-03
+ReleaseNotesUrl: https://blackboxframework.org/stable/blackbox-1.7.2-changes.html
+Documentations:
+- DocumentLabel: BlackBox Framework Wiki
+  DocumentUrl: https://wiki.blackboxframework.org/
+- DocumentLabel: Issue Tracker
+  DocumentUrl: https://redmine.blackboxframework.org/projects/blackbox
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
