@@ -1,0 +1,69 @@
+# Created with WinGet Releaser using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: agentty.agentty
+PackageVersion: 0.9.65
+PackageLocale: en-US
+Publisher: agentty
+PublisherUrl: https://agentty.org/
+PublisherSupportUrl: https://github.com/1ay1/agentty/issues
+PackageName: agentty
+PackageUrl: https://agentty.org/
+License: MIT
+LicenseUrl: https://github.com/1ay1/agentty/blob/HEAD/LICENSE
+Copyright: Copyright (c) agentty contributors
+ShortDescription: Blazing-fast Claude in your terminal — a C++26 alternative to claude-code.
+Description: agentty is a native C++26 terminal coding agent and a drop-in alternative to claude-code. A single static binary with sub-millisecond cold start, sandboxed by default, and one-command SSH air-gap. No Node, Python, or Electron. Signs in with your Claude Pro/Max subscription or an ANTHROPIC_API_KEY.
+Moniker: agentty
+Tags:
+- ai
+- claude
+- cli
+- coding-agent
+- developer-tools
+- terminal
+ReleaseNotes: |-
+  Changed
+  - The changes strip is one row, shown or hidden. Ctrl+K → Changes strip
+    now toggles show / hide; the bordered file list and its scrolling are
+    gone, since the review pane (Ctrl+R) is where you read the files. It is a
+    one-row box above the composer: what changed on the left, the keys flush
+    right in the review pane's words — ✎ 12 files changed · +65 −73 …
+    ^R review ^A keep all ^X undo all. On a narrow terminal the keys
+    drop off from the right and the row never wraps.
+  - The review pane never outgrows the screen. Its code follows Settings →
+    Appearance → Panel height, and the list of changes in a file is a window
+    too (a third of that setting), so a file with 40 separate edits no longer
+    makes a 40-row list. On a short terminal the list shrinks first, then the
+    code; the keys stay on screen.
+  Fixed
+  - ^R / ^A / ^X from the changes strip always land. They were decided late,
+    after any open prompt, so a permission request or question above the strip
+    swallowed them, and ^R was handled in a different place again. All three
+    are now decided first, by one decoder that understands every way a
+    terminal sends them (raw control bytes, kitty, xterm modifyOtherKeys, Esc
+    just before). ^A keeps the changes at any time; ^X mid-turn says it will
+    work once the turn ends instead of reverting files the agent is still
+    writing, and a ^X armed before a turn never fires after it.
+  - ^A under a permission prompt no longer grants "always allow". On
+    kitty-protocol terminals Ctrl+A arrives as a + Ctrl, and the prompt only
+    looked at the letter. Prompts now answer to plain letters only.
+  - "Waiting for the first token" no longer shows while a model reasons.
+    Only answer text ended the wait, so thinking models (shown or hidden
+    reasoning, on Anthropic, OpenAI-compatible, Responses, Ollama and ACP)
+    sat on "Streaming · waiting for the first token" through their whole
+    reasoning pass. Any reasoning now ends it, and the chip says Thinking
+    until the answer starts.
+  - The welcome screen fits narrow terminals. Below about 50 columns the
+    pixel logo was clipped to "agen" and the key hints lost their labels
+    (^K · ^J · ^T), which told a new user nothing. The logo now falls
+    back to a one-line » A G E N T T Y when it doesn't fit the width, and
+    hints always keep their labels; if they would wrap past four lines, the
+    least important ones at the end are left out instead.
+  - Ctrl+Tab works in the model picker. Its footer offered ^Tab prev,
+    but the open picker swallowed the key. It now swaps to the previous model
+    and closes the picker, like Enter.
+  Full history: CHANGELOG.md
+ReleaseNotesUrl: https://github.com/agentty-org/agentty/releases/tag/v0.9.65
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
