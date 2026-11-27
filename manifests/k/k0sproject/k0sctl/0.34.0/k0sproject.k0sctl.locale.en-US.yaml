@@ -1,0 +1,91 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: k0sproject.k0sctl
+PackageVersion: 0.34.0
+PackageLocale: en-US
+Publisher: k0sproject
+PublisherUrl: https://github.com/k0sproject
+PublisherSupportUrl: https://github.com/k0sproject/k0sctl/issues
+Author: k0sproject authors
+PackageName: k0sctl
+PackageUrl: https://github.com/k0sproject/k0sctl
+License: Apache-2.0
+LicenseUrl: https://github.com/k0sproject/k0sctl/blob/HEAD/LICENSE
+ShortDescription: A bootstrapping and management CLI tool for k0s clusters
+Description: A command-line bootstrapping and management tool for k0s zero friction Kubernetes clusters.
+Moniker: k0sctl
+Tags:
+- cli
+- k0s
+- kubernetes
+- ssh
+ReleaseNotes: |-
+  ## Breaking change
+
+  • WinRM no longer sends a password over plain HTTP. A host with `winrm.password` and without `useHTTPS：true` now fails validation. This also applies with `useNTLM: true`. Set `useHTTPS: true`. To keep the old behavior, set
+  `insecure：true`. `insecure` now means "allow an unprotected connection", not only "accept invalid TLS certificates". (k0sproject/rig#516)
+
+  ## New features
+
+  • Manage node labels and taints from the host config by @cvas22 in #1259
+  • Allow per-host k0s config overrides by @cvas22 in #1285
+  • Add a `logs` command to show the k0s service logs by @cvas22 in #1290
+  • Block controller upgrades that skip a Kubernetes minor version by @cvas22 in #1260
+  • Refuse to restore a backup onto a running cluster by @cvas22 in #1264
+  • Warn about multiple controllers without a load balancer by @cvas22 in #1269
+
+  ## Fixes
+
+  • Stop retrying credentials that the host keeps rejecting by @100milliongold in #1211
+  • Stop retrying when k0s refuses to create a join token by @cvas22 in #1281
+  • Upgrade stopped workers when `--force` is given instead of rejoining them by @amlaban65 in #1270
+  • Wait for the k0s PID to change after a worker upgrade by @kke in #1284
+  • Detect the IPv6 primary address family with node-local load balancing by @itskyf in #1256
+  • Treat an unset CPLB type as Keepalived by @twz123 in #1292
+  • Keep leader-only SANs off other controllers when reusing an existing config by @kke in #1242
+  • Improve how `--config` flag is generated in the `k0sctl kubeconfig` tip shown after apply by @blicknix in #1268
+  • Close the GitHub API response body on every return path by @kke in #1249
+
+  ### Fixes from rig v2.4.1
+
+  • sudo with `Defaults requiretty` works again. k0sctl v0.32.0 to v0.33.1 could not use sudo on these hosts. k0sctl now runs sudo inside `script(1)` and logs a warning when it does. The host must have `script`. It is part of
+  util-linux. On Alpine, install `util-linux-misc`. (k0sproject/rig#514)
+  • Uploads to XFS are fast again. The upload block size came from the wrong stat field. On XFS, the default filesystem on RHEL and its derivatives, uploads could run with blocks of a few dozen bytes. (k0sproject/rig#467)
+  • Uploads to Windows hosts are faster. They are sent in 4 MiB pieces instead of 32 KiB pieces. Overwriting a file on Windows now replaces all of the old content, and files larger than 2 GiB can be written. (k0sproject/rig#479,
+  k0sproject/rig#482)
+  • A silent SSH connection no longer stops k0sctl indefinitely. Commands and keepalives now time out when the connection stops answering. (k0sproject/rig#507, k0sproject/rig#510)
+  • SSH connection errors show the text the server sent before its SSH version line, for example a connection limit message or a service on the wrong port. (k0sproject/rig#486)
+  • ssh_config algorithm lists work as in OpenSSH. The `+`, `-` and `^` modifiers on `KexAlgorithms`, `Ciphers`, `MACs`, `HostKeyAlgorithms` and the related options now change the default list. Before, `+` could put the weakest
+  key exchanges first, and `-` with a wildcard removed nothing. The `%l` and `%k` tokens are now expanded. (k0sproject/rig#513, k0sproject/rig#505)
+
+  ## Other changes
+
+  • Remove the rig v2 migration warning banner by @kke in #1278
+  • Add a security policy by @kke in #1298
+  • Build with Go 1.27.4 by @kke in #1299
+  • Update dependencies：rig/v2 2.4.1, client-go and apimachinery 0.37.2, doublestar 4.10.7, go-diff 1.4.5, x/text 0.44.0
+
+  ## New Contributors
+  • @100milliongold made their first contribution in https://github.com/k0sproject/k0sctl/pull/1211
+  • @cvas22 made their first contribution in https://github.com/k0sproject/k0sctl/pull/1260
+  • @blicknix made their first contribution in https://github.com/k0sproject/k0sctl/pull/1268
+  • @amlaban65 made their first contribution in https://github.com/k0sproject/k0sctl/pull/1270
+  • @itskyf made their first contribution in https://github.com/k0sproject/k0sctl/pull/1256
+
+  **Full Changelog**：https://github.com/k0sproject/k0sctl/compare/v0.33.1...v0.34.0
+
+  ### SHA256 Checksums
+
+  ```
+  49439684e52a601924136ae8aa4aff81330c1976de8fe21d8a9a687fd68058ba *k0sctl-linux-amd64
+  485b977ac406e040a5db4e314d142a3a5db382a8af5085fe4d39404f7ab9c585 *k0sctl-linux-arm64
+  3d35a4c4f2b96b79439d68095d86ec6f0262b5ab229a46ecfd27c66e822968a9 *k0sctl-linux-arm
+  9c4642bed4a9e5824791d85ece78c1a7d1285c12462cee1be0929065f50bbbf4 *k0sctl-linux-riscv64
+  ad381839a21a2018cae7f2cddfdc40a06cff4e82028ddbc878e0769ddc9fee63 *k0sctl-win-amd64.exe
+  2b629ac9a86093025aabb1c6a88c37e9c699f434fa06e1eacfd3a05b0c84773a *k0sctl-darwin-amd64
+  e4d4b60b3ddcdccedf318244065c5c1ad5c935e5c4a1b0016e4ac720b0418f41 *k0sctl-darwin-arm64
+  ```
+ReleaseNotesUrl: https://github.com/k0sproject/k0sctl/releases/tag/v0.34.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

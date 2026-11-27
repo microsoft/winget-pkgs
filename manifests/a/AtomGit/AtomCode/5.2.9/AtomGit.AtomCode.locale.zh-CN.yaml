@@ -1,0 +1,133 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: AtomGit.AtomCode
+PackageVersion: 5.2.9
+PackageLocale: zh-CN
+Publisher: 重庆开源共创科技有限公司
+PublisherUrl: https://atomgit.com/
+PublisherSupportUrl: https://atomgit.com/atomgit_atomcode/atomcode/issues
+PrivacyUrl: https://docs.gitcode.com/docs/help/home/protocol/privacy-policy
+Author: 重庆开源共创科技有限公司
+PackageName: AtomCode
+PackageUrl: https://atomcode.atomgit.com/
+License: MIT
+LicenseUrl: https://atomgit.com/atomgit_atomcode/atomcode/blob/main/LICENSE
+Copyright: Copyright (c) 2026 Yubang Xu
+CopyrightUrl: https://docs.gitcode.com/docs/help/home/protocol/ai-privacy-policy
+ShortDescription: AI 编程助手 在你的终端中运行
+Description: Claude Code / Cursor Agent 的开源平替，住在你的终端里。连接任意 OpenAI 兼容大模型，自主读文件、改代码、跑测试、自我验证 —— 用 Rust 构建。
+Tags:
+- 人工智能
+- 代码
+- 大语言模型
+- 智能体
+- 编程
+- 聊天机器人
+- 自主智能
+ReleaseNotes: |-
+  AtomCode v5.2.9 Release Notes
+  发布日期：2026-11-27
+  v5.2.9 聚焦团队协作、长会话稳定性与日常操作体验：团队成员可在授权下直接交接并记账任务成本，会话支持跨项目浏览与恢复、旧会话预览与清理，写文件新增写保护；TUI 的 /provider 改为列表 → 详情两层，WebUI 的 Git 面板改为 VSCode 式源控制，并新增 AI 行内补全（幽灵文本）。
+
+  ⚠️ Behavior Changes（注意行为变化）
+  - write_file 写保护：write_file 不再覆盖本会话没有碰过的已有文件。需要改写既有文件时，请先读取它，或改用 edit_file / search_replace 做定点修改。
+  - 团队角色配置改为严格校验：tools 与 allowed_tools 是同一列表的两个别名，同时写会直接报错；denied_tools 会先剔除重叠工具；角色写了 model: inherit / model: auto 后再显式指定模型会被拒绝；角色文件点名的模型不在目录中会直接失败，不再回落成别的模型。
+  - 进程与前台输出有上限：采集的进程输出、bash 前台输出与 TUI 实时缓存都有上界，超长输出会被截断（截断时保留原始编码）。
+  - 会话历史有界且可清理：JSONL 会话日志不再无限增长，新增容量控制与会话清理能力，旧会话可在 TUI 内预览后删除。
+  ✨ 新增功能（Features）
+  Team 协作
+  - 成员间授权直达交接：成员可在授权下直接向对方交接任务与结论，不必全部经 lead 中转；tell_parent 要求交付内容真正进入汇报，派只读成员时当场说明交付方式。
+  - 角色模型与工具授权：角色支持 model: inherit（沿用会话模型）与 model: auto（按难度在可委派且有档位的模型间选：简单取最弱、困难取最强）；allowed_mcp_servers 按服务器名限定可直查的只读 MCP 工具，填 [] 即关闭。
+  - 成员申请预算与任务成本记账：成员可 opt-in 申请预算，任务成本按角色与任务分别记账，配套 scripts/team-task-cost.py 汇总查看。
+  - 按角色直查只读 MCP 工具：成员可绕过主模型中转，直接查询已授权的只读 MCP 工具并复核结果。
+  - 满员腾位：团队满员时自动停掉报告完成后空闲最久的成员来腾出位置。
+  - 成员完成提醒与唤醒：成员报告完成时提醒 lead 核对后停掉它；成员在进度汇报后停下会唤醒 lead。
+  AI 行内补全（Cue）
+  - 幽灵文本补全：编辑器扩展端与 daemon 端支持 AI 行内补全，按上下文给出灰字建议，Tab 接受。
+  - 过期请求处理：取消过期的补全请求并保留用户原始插入文本，避免补全抢占输入。
+  TUI 交互
+  - /provider 改为列表 → 详情两层：统一回车 / Ctrl+E / Ctrl+D 操作；表单改为固定键义，去掉 ^o / ^f 与模型表单的 Key 字段；无可用模型时详情页提供「添加并使用」，资格单一且可被显式切换撤销。
+  - 跨项目浏览与恢复会话：可跨工作目录浏览并恢复会话，支持预览与清理旧会话。
+  - /agents 纳入一次性子代理：列出一次性 task 子代理，header 携带子代理标签，保留的 task 会话也可恢复；状态栏显示当前成员的 worktree 分支。
+  - /goal 徽标显示运行时长：运行中动态递增、暂停后冻结，只认自己的样本。
+  - 全角符号快捷调用 Skill：支持用全角人民币符号 ￥ 快捷调用 Skill。
+  WebUI
+  - Git 面板改为 VSCode 式源控制：按文件分组展示变更，支持暂存、提交与丢弃，修正丢弃与提交范围、只读渲染和空仓库加载。
+  - 只读查看团队成员对话：可直接查看团队成员的对话内容，不影响其运行。
+  - 会话目标状态条与实时计时：顶部展示当前会话目标及运行时长。
+  - 长回合结束后的回顾：回合正常结束且耗时超过 2 分钟或中途切走过时，自动请求一段回顾文字。
+  - 附件与图片体验：附件菜单在小屏不再被裁出视口，实时聊天支持粘贴更大的图片。
+  Daemon / Headless
+  - 工作台文件浏览与下载：新增 GET /workbench/tree 递归返回会话工作区目录树（跳过 .git、node_modules、__pycache__ 等，不跟随符号链接，深度上限 32、条目预算 5000，超出在 truncated 标记）；新增 GET /workbench/download 下载工作区内的普通文件（文件名 ASCII 兜底加 RFC 5987 双写，大小上限 100MB）。
+  - 会话隔离工作区：新建会话可指定 isolated_workspace，在当前项目目录下开一个独立子目录作为工作区。
+  - 回合回顾接口：新增 POST /chat/recap，按会话与回合返回一段回顾文字（上限 240 字）；只认正常结束的原生主会话，读日志上限 32MB、超时 30 秒，原回合模型不可用时直接不返回，不把记录发给别的模型。
+  - 中继透传鉴权头：新增 X-Atomcode-Daemon-Authorization 透传头，供会吞掉 Authorization 的中继转发凭据；取 token 顺序为该头、Authorization、Cookie，直连路径行为不变。
+  会话与上下文
+  - 压缩前评审原文可展开：recall 支持展开压缩前的评审原文，压缩不再等于信息永久丢失。
+  - 团队成员会话可压缩：成员压缩后保留的委派标为历史消息，不再混入当前上下文。
+  - 披露被舍弃的需求：编码时若放弃替代方案，会明确披露因此舍弃的用户需求。
+  - 环境信息告知管理员权限：会话开始时告诉模型自己有没有管理员权限；Windows 上两种状态都说明，并提示「拒绝访问」还可能来自占用、安装器或安全软件锁；Unix 只在 root 时加这一行。
+  权限 & 安全
+  - 本地 API 鉴权限流：鉴权失败的本地 API 请求按次数限流，封锁期间已有效的 token 仍可正常使用；token 校验改为常量时间比较。
+  - Windows 凭据 ACL：为凭据文件设置并校验用户专属 ACL。
+  - 遥测与 SSE 加固：panic 遥测脱敏，限制 WebUI SSE 单事件大小。
+  工具与稳定性
+  - 畸形工具调用重试上限：对畸形工具调用的重复重试设上限，避免空转消耗。
+  - 循环检测按会话计数：循环检测不再跨会话累计，多会话并行时互不干扰。
+  - 窗口按当前 agent 的模型计算：压缩与溢出守卫按当前 agent 实际使用的模型计算上下文窗口。
+  🛠 修复（Fixes）
+  后台任务
+  - 完成通知不再丢失：回合中按 Esc 不再丢弃后台任务完成通知。
+  - 日志与运行时状态一致（#1821）：事实只从日志折入，通道上的 Fact 不再重复计数；晚折的 TurnEnd(error) 不再覆盖运行时刚报的新错；日志侧不再清运行时侧的 pending / error；复位只重建日志那一半。
+  - 等待后台结果：等后台结果时不再错误提示「发一句继续」。
+  TUI
+  - @ 提及菜单误触：按 Esc 关闭后同一 token 不再重弹，被拒 token 不再以普通菜单重弹；被拒记录按「偏移 + 文本」识别，同偏移的替换 token 不再被误压制；浏览态保留拒绝记录，编辑与光标跟踪正确。
+  - 面板与布局：短屏不再拿命令行数换面板的脚；窄屏先丢计时再丢徽标状态；审批面板在 legend 与状态栏之间留一行分隔，无应答路由的审批不再显示。
+  - 待办面板：折叠时点标题、任一项或「+N 更多」都能展开，展开后只有表头能收起；清单未做完的停下收成一行暗色「— 停下 钟点 · 账」，不再用黄色警告句。
+  - 生成速度统计：排除突发帧，修正速度虚高。
+  - 强度选择器：迟到回执不再关闭选择器，编辑后添加也遵守在途与去重。
+  - 命令与提示：额度恢复后立即复查底栏提醒；回合中换模型的提示改短并说明如何立即切换；系统代理读取失败时给出恢复提示。
+  WebUI
+  - Git 面板：修正丢弃边界与提交范围、只读渲染、空仓库加载与面板细节。
+  - 粘贴图片：实时聊天接受更大的粘贴图片。
+  - 附件菜单：防止弹层超出可见视口，顶部菜单项不再无法点击。
+  会话 / 历史
+  - /resume 命名：占位名退回首条消息内容，ACP 会话列表不再列空会话。
+  - 引用超限提示：引用其他会话时若事件投影超出预算，提示改为可行动的出路——打开源会话复制片段，/compact 不会删除已提交的事件。
+  - TooLarge 措辞：提示改为如实说明，并给出可执行的处理方式。
+  - 搜索健壮性：recall 跳过当前用户读不了的会话，不让一个文件拖垮整次搜索。
+  技能 / 工具
+  - 技能元信息：frontmatter 支持多行 description，扫描跳过 .trash 目录。
+  - 技能列表预算：目录预算分到每条太短时只列名字，不再挤成断行。
+  - Hooks：整段 stdout 是 JSON 时按整段解析 hook 决定。
+  - 待办提醒：todowrite 描述与提醒对齐实际的触发条件。
+  终端渲染 / Windows 兼容
+  - 追加写入语义：Windows 上 open_append_file 恢复 append 语义。
+  - VS Code 焦点：Alt+Tab 切回后恢复聊天输入框焦点并拦截孤立 Alt，收紧焦点恢复条件。
+  Provider / 网络
+  - 更新服务器连接失败：错误提示更明确，便于区分网络与配置问题。
+  - 弱网恢复：流式恢复达到上限时提示可先执行 /compact 压缩历史，请求体变小后更容易一次通过。
+  性能
+  - 流式回复原地追加：不再逐 delta 复制全文，改为原地追加并增量渲染；切换视图时保留缓冲的 delta；复用未变化的渲染行，复用前先校验修订后的文本。
+  - file-index 过滤：过滤不再逐项做小写转换、只保留前 30 名，改为有界选择与全序排序；非 ASCII 查询复用同一份小写缓冲，ASCII 查询跳过折叠。
+  - 会话历史与事件日志：后台任务改为增量读取会话事件日志；合并会话预览请求，加快历史读取。
+  - 长会话内存占用：降低每轮请求与订阅追赶时的整份复制峰值；已结束轮次的流式片段移出内存日志；logged_view 改为请求内共享的弱引用缓存。
+  🔧 重构（Refactoring）
+  - 提示词职责划分：工具描述只讲调用方式，是否调用的判断留在系统提示词；用 shell 改文件的规则只在 TOOLS 段讲一次，减少重复说明。
+  - TUI 插件安装进度：去掉流式增量的中间合并层，改为按增量生长渲染缓存，安装过程更平滑。
+  📚 文档（Docs）
+  - 新增 AI 行内补全设计说明与团队任务成本文档，补充配置示例中的团队角色字段。
+  - 双语更新日志补齐 v5.2.9 中英文节与里程碑 issue 列表。
+  - 修正 README 中的工具清单（移除已下线的 change_dir、auto_fix，补上 list_skills）。
+  🧹 工程 / 构建
+  - 官网与文档站视觉改版：采用 v5「编程智能体元素表」叙事，补齐图标与横屏、触屏、刘海适配，可点元素在触屏下不小于 44px，移动端安装体验改善。
+  - 页脚字标：由 Ac 改为 AtomCode，改为常亮的「荧光地平线」/「电子轨道照明」动效。
+  - 新增 SkillHub 技能元素库：可浏览技能元素，并用 /plugin install 或 atomcode plugin install 一键安装。
+  - 文档站检索：检索索引由运行时加载的 JSON 改为预生成的 JS，站点与文档构建脚本合流。
+ReleaseNotesUrl: https://atomgit.com/atomgit_atomcode/atomcode/releases/v5.2.9
+Documentations:
+- DocumentLabel: 文档
+  DocumentUrl: https://atomcode.atomgit.com/docs/zh/index.html
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
