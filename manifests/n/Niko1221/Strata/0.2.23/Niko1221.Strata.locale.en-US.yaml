@@ -1,0 +1,87 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Niko1221.Strata
+PackageVersion: 0.2.23
+PackageLocale: en-US
+Publisher: strata
+PublisherUrl: https://github.com/Niko1221
+PublisherSupportUrl: https://github.com/Niko1221/Strata/issues
+PrivacyUrl: https://github.com/Niko1221/Strata/blob/HEAD/docs/SAFETY.md
+Author: Niko1221
+PackageName: Strata
+PackageUrl: https://github.com/Niko1221/Strata
+License: MIT
+LicenseUrl: https://github.com/Niko1221/Strata/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Niko1221 and the Strata contributors
+ShortDescription: Runs AI models on your own computer for chat, coding and image work.
+Description: |-
+  Strata runs powerful AI models on your own computer. Chat, code and work with images locally, with an OpenAI and Anthropic compatible API served on localhost. No account is needed.
+
+  The installer carries the app, the App Host, Node and Strata Control. On first start the app shows the inference engine for your graphics card with its size and one Download button, and then fetches the model you choose.
+Tags:
+- ai
+- large-language-model
+- llm
+- local-llm
+ReleaseNotes: |-
+  Strata 0.2.23
+  The app and the Terminal are 0.2.23. Control and the Inkling engines (every backend) are 0.1.70, and so are the Windows and Mac Qwen engines. The Linux and aarch64 Qwen engines (0.1.69) and the Hy4 engine (0.1.67) have no changes, so nothing is downloaded for them.
+  What's new
+  - New Inkling 2 Mini files. Five builds to choose from: SQ-20 (19.37 GB), SQ-15 (14.35 GB), SQ-10 (10.47 GB), GSQ-RCO IQ3_S (11.43 GB) and Unsloth UD-Q4_K_XL (17.63 GB). The SQ files are new "v2" files; the picture file (Vision v2) is 0.64 GB. If you have the old SQ-20, it shows "Update available": installing it downloads the new file and keeps the old one on disk until you remove it. Update the engine together with the model: the 0.2.22 engine refuses the new files with a clear error.
+  - DFlash 2 drafter. It replaces DSpark and needs one extra 0.55 GB file, downloaded and checked with the model. A drafter guesses the next words and the model checks them, so accepted words cost less time. It is on by default on Radeon RDNA 2 / 3 / 4, the R9700 and Strix Halo, on the Apple M5 Max with the SQ-20 v2 file, and on NVIDIA by card size: from 24 GiB for up to 32 requests at once, below 24 GiB for a single request and from 16 at once. It is not loaded when it would push part of the model off the card, and cards that keep part of the model in RAM run without it (the Tesla P100 is the exception). Opt-in on Intel Arc (--draft on: +25% to +32% on an Arc Pro B70). --draft off always turns it off.
+  - Fast mode on by default on the RTX 5090, RTX 5060 Ti 16 GB, RTX 5070 12 GB, RTX PRO cards, DGX Spark and Radeon R9700. It can change the exact words of an answer slightly. STRATA_INK_SM120=0 turns it off; STRATA_INK_SM120_EXACT=1 keeps the old words and is still faster on the 5090.
+  - GSQ-RCO IQ3_S runs with its own GPU kernels and fits a single 12 GB card.
+  - Your own model files. Add a fine-tune, a merge or another maker's quantization from the app's local-files screens or with strata launch --model-path (--custom-label names it): .gguf for Qwen3.8-Flash-Next and Qwen3.6-35B-A3B, .strata for HY-4 Flash, both for Inkling-2-Mini. Strata uses the files where they are, shows them with a Custom badge, and never renames or deletes them; removing one only removes Strata's settings for it.
+  - Windows crash on start with GGUF models fixed (#7131, #7155, #7206). The five Windows Qwen engines are rebuilt as 0.1.70. #7245: an engine crash is now reported as an engine fault, not as a lack of RAM.
+  - Strix Halo reads prompts faster by default: 4K tokens 887 to 1,528 tok/s, 32K 675 to 1,270.
+  - Olares One: the Olares image ghcr.io/niko1221/strata:0.2.23-cuda13 and two store apps (Inkling-2-Mini SQ-20 v2 and IQ3_S) are already out; the other Docker images follow.
+  Speed
+  Decode in tok/s, one request, SQ-20 v2 unless noted. "Before" is the old path or no drafter; "now" is the 0.2.23 default. † = measured on a test build before the final merges.
+
+  | Card                                                      | Before                     | Now                                    |
+  | --------------------------------------------------------- | -------------------------- | -------------------------------------- |
+  | RTX 5090 (final build)                                    | chat 207.6, counting 415.2 | chat 360.5, counting 502.4             |
+  | RTX 5090, 64 requests at once (512 new tokens each)       | 672.0                      | 845.0                                  |
+  | RTX 5060 Ti 16 GB (final build)                           | code 80.4, counting 104.5  | code 260.7, counting 284.2             |
+  | RTX 5070 12 GB (release package)                          | –                          | 96.9 to 119.5 across prompt kinds      |
+  | RTX 5060 8 GB (release package, part of the model in RAM) | –                          | 32.5 to 41.2                           |
+  | RTX PRO 6000 †, reading a 4K prompt                       | 12,165                     | 25,397                                 |
+  | DGX Spark †                                               | prose 55, code 78          | prose 79, code 115                     |
+  | DGX Spark †, 32 requests at once                          | 186                        | 305                                    |
+  | Radeon R9700                                              | 72.6 to 72.9               | counting 150.2, code 140.3, JSON 136.7 |
+  | Radeon RX 7900 XT †, SQ-15                                | counting 77.5              | counting 153.8                         |
+  | Apple M5 Max †, Metal                                     | 56.9                       | JSON 135.1, code 131.3                 |
+  | Tesla V100 32 GB †                                        | JSON 92.9                  | JSON 135.6                             |
+  | Tesla P100 16 GB †, part of the model in RAM              | counting 24.6              | counting 45.1                          |
+
+  Quality check on the RTX 5090 (final build, default): tool calls 24/26, coding 11/11, maths 148/150, facts hidden in 16K to 128K of text 20/20. RTX 5060 Ti maths 149/150.
+  Other fixes
+  - #7244: the app remembers the port it had to use when the system holds 47831 back (WSL, Hyper-V, Docker).
+  - #7184: a failed tool step no longer stays after the same call worked; new setting "Hide failed steps".
+  - #7183: strata launch no longer freezes for seconds on a key press on Windows.
+  - #7134: Ornith-1.5-35B-A3B is in the model catalog.
+  - #7226: with --parallel 2, two long Inkling chats keep their slots.
+  - The Inkling engine no longer hangs at shutdown.
+  - #7041 / #7076: the Turing (RTX 20) kernels are on by default (STRATA_SM75_PERF=0 turns them off); on our RTX 2080 Ti the words and the speed did not change.
+  - #7075: the 4-row CPU expert kernels are on when two or more tokens share an expert (STRATA_DOT_X4=0 restores 0.2.22).
+  - #7241: --tail-role-token ID (opt-in) saves a prompt checkpoint before the trailing thinking-level turn.
+  - Intel Arc: the GSQ-RCO IQ3_S model gave wrong answers there; it now matches the CPU backend and decodes at 2.5 instead of 1.4 tok/s on an Arc A750.
+  - New opt-ins: --turbo and --turbo-max skip the weakest expert picks in late layers (--turbo-max: +20.7% decode on an RTX 5060 8 GB and +23.0% on an RTX 5070 12 GB; on an RTX 4090 tool calls 22/26 against 23/26).
+  - Licence notices for the libraries bundled in the Inkling engines are in each package's licenses/ folder; Strata itself stays MIT.
+  Known limits
+  - Fast mode changes the exact words of some answers, and on the RTX 5090 a 16K-token document decodes 19% slower (180.9 to 147.3 tok/s). DFlash 2 is slower on code prompts on the 5090 (21%), on chat prompts on the 5060 Ti (17%) and on a 4K document on the V100 (86.9 to 63.8 tok/s). STRATA_INK_SM120=0 and STRATA_INK_SM120_EXACT=1 switch back.
+  - Not on by default: fast mode on the RTX 5080 and 5070 Ti (slower prompt reading at 32K), the hybrid fast path on the RTX 5060 8 GB (STRATA_INK_SM120_COMPACT_HYBRID=1), the Intel Arc fast set (STRATA_INK_INTELARC=1, Alchemist only) and the Mac speed mode (STRATA_INK_M5MAX=1).
+  - The Windows GGUF fix was covered by a sanitizer unit test and a start test on an RTX 5070, but not run with a real GGUF model before release.
+  - Installers: before release the Windows installer was run on a PC that already had Strata (it installed, and a model loaded and answered), and the macOS DMG was installed and the app opened on a Mac. Neither was a clean PC test.
+  - CPUs without AVX2 (#7107): strata-engine-0.1.70-linux-x86_64-cuda12-noavx2-experimental.tar.gz is an experimental Linux CUDA 12 engine, tested only on an emulated Sandy Bridge. It is not in the update feed: unpack it, then strata components add-build <folder> and strata components use. Please report results on #7107.
+ReleaseNotesUrl: https://github.com/Niko1221/Strata/releases/tag/v0.2.23
+Documentations:
+- DocumentLabel: Installation guide
+  DocumentUrl: https://github.com/Niko1221/Strata/blob/HEAD/docs/INSTALL.md
+- DocumentLabel: Supported models
+  DocumentUrl: https://github.com/Niko1221/Strata/blob/HEAD/docs/MODELS.md
+- DocumentLabel: Troubleshooting
+  DocumentUrl: https://github.com/Niko1221/Strata/blob/HEAD/docs/TROUBLESHOOTING.md
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
