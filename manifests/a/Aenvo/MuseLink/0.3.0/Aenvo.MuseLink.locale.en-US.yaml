@@ -2,7 +2,7 @@
 # yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
 
 PackageIdentifier: Aenvo.MuseLink
-PackageVersion: 0.2.2
+PackageVersion: 0.3.0
 PackageLocale: en-US
 Publisher: github
 PublisherUrl: https://github.com/Aenvo
@@ -31,12 +31,18 @@ Tags:
 - sandbox
 - tailscale
 ReleaseNotes: |-
-  - Higher /agent/v1/read limit, chunked reading, and raw binary streaming (fixes #4):
-    - Raised whole-file JSON read limit to 10 MiB: Increased from 2 MiB to 10 MiB (matching the write limit) so existing connectors can read high-resolution photos without prompt updates; oversized requests return HTTP 413 with structured size, max_bytes, chunked_supported, recommended_limit, raw_supported, and recommended_raw_limit fields. Legacy /api/read remains at 2 MiB for v0.3 compatibility.
-    - Added offset / limit chunked reads (no hard total file size limit): Seeks and reads directly from the verified OS file handle; JSON chunks default to 2 MiB (max 4 MiB) and return offset, bytes_read, total_size, next_offset, has_more, and etag. Supports if_match query param or If-Match header (accepting both quoted and unquoted ETag values) and returns HTTP 409 if the file changes mid-read.
-    - Added raw=1 raw binary streaming: Streams raw bytes with detected Content-Type and no 33% Base64 overhead (~40% faster over tunnels, up to 32 MiB per request, combinable with offset/limit), exposing ETag and X-File-* metadata headers.
-    - Updated Muse connection instructions (Prompt): Updated bilingual setup instructions so Muse prefers raw=1 for binary/image files, uses 4 MiB raw chunks (or 2 MiB JSON chunks) for large files, passes if_match, and retries individual chunks on transient drops (existing users can re-copy the updated instructions under Connection).
-ReleaseNotesUrl: https://github.com/Aenvo/MuseLink/releases/tag/v0.2.2
+  - In-app auto-updater & synced changelog modals:
+    - Minisign-verified in-app updates (Windows NSIS installer & Linux AppImage): Silent startup checks and manual About → Check for updates using static latest.json manifests and a compile-time pinned Minisign public key. Active connections stay up during download/verification, services cleanly stop (including managed Everything.exe on Windows) before restarting into the new version. Portable Windows, Linux .deb, and macOS builds check the same latest.json via SemVer for update alerts, release notes, and direct download links.
+    - In-app Changelog & Release notes dialogs: Instant bundled rendering with background GitHub sync and automatic language selection (Japanese falls back to the English changelog).
+  - Linux support (#3): Full file API (list / read / write / mkdir / search) and Tailscale / Cloudflare tunnel support on Linux (prebuilt AppImage & .deb).
+  - macOS Universal support (#7): Native Apple Silicon & Intel prebuilt .dmg installer and .app.zip portable archive (compatible with macOS 14 Sonoma and earlier; minimum macOS 10.13 / 11.0). Automatically discovers /Applications/Tailscale.app CLI and Homebrew tools. Sandboxed command execution (exec) remains Windows-only.
+  - Japanese (ja) localization (#8): Complete Japanese UI, system tray, Muse setup instructions, NSIS installer language, and README.ja.md with Japanese screenshots.
+  ⚠️ Important note for macOS first launch: macOS packages are ad-hoc signed and not notarized with an Apple Developer ID. On first launch:
+  1. Try opening MuseLink.app once, then open System Settings → Privacy & Security → Security and click Open Anyway.
+  2. If macOS Sequoia (15+) still reports that the app "is damaged and can't be opened", run once in Terminal:
+     xattr -dr com.apple.quarantine /Applications/MuseLink.app
+  See CHANGELOG.en.md and the English quick start.
+ReleaseNotesUrl: https://github.com/Aenvo/MuseLink/releases/tag/v0.3.0
 Documentations:
 - DocumentLabel: Quick start
   DocumentUrl: https://github.com/Aenvo/MuseLink/blob/HEAD/README.en.md#quick-start
