@@ -1,0 +1,38 @@
+# Created by Anthelion using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: mostlygeek.llama-swap
+PackageVersion: '277'
+PackageLocale: en-US
+Publisher: mostlygeek
+PublisherUrl: https://mostlygeek.com/
+PublisherSupportUrl: https://github.com/mostlygeek/llama-swap/issues
+PackageName: llama-swap
+PackageUrl: https://github.com/mostlygeek/llama-swap
+License: MIT
+LicenseUrl: https://github.com/mostlygeek/llama-swap/blob/HEAD/LICENSE.md
+Copyright: Copyright (c) 2024 Benson Wong
+ShortDescription: Model swapping for llama.cpp
+Description: llama-swap is a light weight, transparent proxy server that provides automatic model swapping to llama.cpp's server.
+Moniker: llama-swap
+Tags:
+- golang
+- llama
+- llamacpp
+- localllama
+- localllm
+- openai
+- openai-api
+- vllm
+ReleaseNotes: |-
+  Important Security fix for cross-site requests. NVIDIA GPU temperatures show up again on newer drivers.
+  Make sure you update to this releaes to pick up a security fix that prevents
+  third party websites to make requests to llama-swap after you've authenticated. Thank you to @willtejeda
+  for the report and suggested patch.
+  @JimJafar fixed a bug in parsing temperature values in newer nvidia-smi versions.
+  I wrote these release notes. Yay, I'm contributing.
+  - PR #1375 internal/perf: parse fractional nvidia-smi temperatures: reads temperature.gpu with ParseFloat and rounds to the nearest degree (the same way the darwin backend handles mactop's gpu_temp), because newer drivers such as 620.70.06 print decimals like 56.90, which strconv.Atoi failed on so TempC stayed 0 and the Performance tab's temperature chart sat at zero; integer output from older drivers parses as before by @JimJafar
+  - b6204f4 server: reject cross-site requests that use Basic auth: after you log in via the browser's Basic-auth prompt the browser attaches those credentials to requests other sites start (image tags, form posts) and CORS only hides the response, so a hostile page could unload models, pause/resume or start generations with your login; CreateAuthMiddleware now 403s Basic-authenticated requests marked cross-site or same-site by Sec-Fetch-Site, with an Origin vs Host check for browsers lacking Fetch Metadata, keeps top-level GET navigation to /ui/ working from other sites, leaves Bearer, x-api-key and non-browser clients untouched, and documents the behavior in the API keys KB guide by @willtejeda
+ReleaseNotesUrl: https://github.com/mostlygeek/llama-swap/releases/tag/v277
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
