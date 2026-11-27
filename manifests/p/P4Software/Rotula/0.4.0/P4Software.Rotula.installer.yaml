@@ -1,0 +1,42 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.10.0.schema.json
+# Two installers for the same package: the per-user Inno Setup installer (no administrator rights; the default for
+# "winget install P4Software.Rotula") and the machine-wide MSI ("--scope machine"). Double-underscore placeholders are filled by
+# scripts/New-WingetManifest.ps1, which reads the MSI's ProductCode from the signed package.
+PackageIdentifier: P4Software.Rotula
+PackageVersion: 0.4.0
+InstallModes:
+  - interactive
+  - silent
+  - silentWithProgress
+UpgradeBehavior: install
+FileExtensions:
+  - rotula
+ReleaseDate: 2026-11-10
+Installers:
+  - Architecture: x64
+    InstallerType: inno
+    Scope: user
+    InstallerUrl: https://github.com/P4Software/Rotula/releases/download/v0.4.0/Rotula-0.4.0-win-x64-setup.exe
+    InstallerSha256: C548E964380C4C0978570A991BABAC934C28B3ED1BD2F533E5944D8AC437A07F
+    # Inno Setup registers the product as <AppId>_is1; naming it lets winget match the installed app for upgrades.
+    ProductCode: "{6B0E5C1A-3F7D-4C52-9A1E-2D8F4B7A9C31}_is1"
+    AppsAndFeaturesEntries:
+      - DisplayName: Rotula
+        Publisher: P4 Software
+        ProductCode: "{6B0E5C1A-3F7D-4C52-9A1E-2D8F4B7A9C31}_is1"
+  - Architecture: x64
+    InstallerType: wix
+    Scope: machine
+    InstallerUrl: https://github.com/P4Software/Rotula/releases/download/v0.4.0/Rotula-0.4.0-win-x64.msi
+    InstallerSha256: 8365F5478506BCAF2507771985014DC154150640A3A3468B1C7E31B25DFA838A
+    # A per-machine MSI needs administrator rights; winget asks for them before it runs msiexec silently.
+    ElevationRequirement: elevationRequired
+    # The ProductCode changes with every version (MajorUpgrade); the UpgradeCode never does.
+    ProductCode: "{FDF8EA60-CDC7-4804-9591-B0C01E55618F}"
+    AppsAndFeaturesEntries:
+      - DisplayName: Rotula
+        Publisher: P4 Software
+        ProductCode: "{FDF8EA60-CDC7-4804-9591-B0C01E55618F}"
+        UpgradeCode: "{4B2C6076-5B82-411C-B751-EC4B70BEE9C6}"
+ManifestType: installer
+ManifestVersion: 1.10.0
