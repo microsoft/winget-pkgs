@@ -1,0 +1,46 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Aenvo.MuseLink
+PackageVersion: 0.2.2
+PackageLocale: en-US
+Publisher: github
+PublisherUrl: https://github.com/Aenvo
+PublisherSupportUrl: https://github.com/Aenvo/MuseLink/issues
+PackageName: MuseLink
+PackageUrl: https://github.com/Aenvo/MuseLink
+License: MIT
+LicenseUrl: https://github.com/Aenvo/MuseLink/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Aenvo
+ShortDescription: Lets Muse search, read, and write files in authorized Windows folders and drives, and optionally run project commands in a write-restricted sandbox with local approval.
+Description: |-
+  MuseLink lets Muse search, read, and write files in authorized Windows folders and drives, and optionally run project commands inside a write-restricted sandbox with local approval.
+  File permissions: Authorize selected folders and their subfolders, or choose from local fixed drives, with built-in protection for credentials and sensitive system paths.
+  Local file tools: Let Muse search by file name, list folders, read files, and write or create folders when needed.
+  Controlled command execution: Off by default; when enabled, lets Muse run developer tools and controlled PowerShell/cmd inside authorized project subfolders under a per-workspace Windows write-restricted sandbox and 3-tier local approval dialog.
+  Public connection: Use Tailscale Funnel by default, or choose a Cloudflare named tunnel with your own domain.
+  Dedicated token: Generate and copy Muse connection instructions and the dedicated token under Connection; rotate, revoke, or locate the token under Settings → Data, with automatic token redaction in logs.
+  Desktop controls: Filter and search logs by time range, result, scope, and keyword; inspect disk usage, clear or export logs (JSONL/CSV), and manage the local file index under Settings → Data; supports silent launch at startup, configurable minimize-to-tray on close, clean child-process teardown on exit, and English / Simplified Chinese UI.
+Tags:
+- ai
+- cloudflare-tunnel
+- file-search
+- file-sharing
+- muse
+- remote-access
+- sandbox
+- tailscale
+ReleaseNotes: |-
+  - Higher /agent/v1/read limit, chunked reading, and raw binary streaming (fixes #4):
+    - Raised whole-file JSON read limit to 10 MiB: Increased from 2 MiB to 10 MiB (matching the write limit) so existing connectors can read high-resolution photos without prompt updates; oversized requests return HTTP 413 with structured size, max_bytes, chunked_supported, recommended_limit, raw_supported, and recommended_raw_limit fields. Legacy /api/read remains at 2 MiB for v0.3 compatibility.
+    - Added offset / limit chunked reads (no hard total file size limit): Seeks and reads directly from the verified OS file handle; JSON chunks default to 2 MiB (max 4 MiB) and return offset, bytes_read, total_size, next_offset, has_more, and etag. Supports if_match query param or If-Match header (accepting both quoted and unquoted ETag values) and returns HTTP 409 if the file changes mid-read.
+    - Added raw=1 raw binary streaming: Streams raw bytes with detected Content-Type and no 33% Base64 overhead (~40% faster over tunnels, up to 32 MiB per request, combinable with offset/limit), exposing ETag and X-File-* metadata headers.
+    - Updated Muse connection instructions (Prompt): Updated bilingual setup instructions so Muse prefers raw=1 for binary/image files, uses 4 MiB raw chunks (or 2 MiB JSON chunks) for large files, passes if_match, and retries individual chunks on transient drops (existing users can re-copy the updated instructions under Connection).
+ReleaseNotesUrl: https://github.com/Aenvo/MuseLink/releases/tag/v0.2.2
+Documentations:
+- DocumentLabel: Quick start
+  DocumentUrl: https://github.com/Aenvo/MuseLink/blob/HEAD/README.en.md#quick-start
+- DocumentLabel: Changelog
+  DocumentUrl: https://github.com/Aenvo/MuseLink/blob/HEAD/CHANGELOG.en.md
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

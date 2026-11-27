@@ -1,0 +1,37 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.28.0.schema.json
+
+PackageIdentifier: Aenvo.MuseLink
+PackageVersion: 0.2.2
+PackageLocale: zh-CN
+ShortDescription: 让 Muse 在你授权的文件夹和磁盘中搜索、读取、写入 Windows 本机文件，并按需在写受限沙箱与本机审批保护下执行项目命令。
+Description: |-
+  MuseLink 让 Muse 在你授权的文件夹和磁盘中搜索、读取、写入 Windows 本机文件，并按需在写受限沙箱与本机审批保护下执行项目命令。
+  文件授权：选择指定文件夹及其子目录，或从本机固定磁盘中选择授权范围，默认保护凭证与敏感系统路径。
+  本机文件工具：让 Muse 按文件名查找文件、列出目录、读取内容，并按需写入与建目录。
+  受控命令执行：默认关闭；按需开启后，让 Muse 在授权项目子目录内运行开发工具与受控 PowerShell/cmd，运行于每工作区独立 SID 的 Windows 写受限沙箱与三档审批弹窗下。
+  公网连接：默认使用 Tailscale Funnel，也支持 Cloudflare 命名隧道（自有域名）。
+  专用凭证：在「连接」生成并复制 Muse 接入说明与专用令牌，在「设置 → 数据」轮换、撤销或定位令牌文件，日志自动脱敏令牌。
+  桌面管理：按时间、结果、范围与关键词检索日志，在「设置 → 数据」查看占用、清除/导出（JSONL/CSV）日志与管理本机索引；支持开机静默自启、关闭时最小化到托盘、退出自动回收全部托管子进程，支持简体中文 / English。
+Tags:
+- cloudflare-tunnel
+- muse
+- tailscale
+- 人工智能
+- 文件共享
+- 文件搜索
+- 沙箱
+- 远程访问
+ReleaseNotes: |-
+  - 大幅提升 /agent/v1/read 读取上限并支持分片读取与原始二进制直传（解决 #4）：
+    - 整文件 JSON 读取上限提升至 10 MiB：原 2 MiB 上限提升至 10 MiB（与写入上限对齐），老连接器无需修改配置即可直接读取常见高分辨率原图；超限返回 HTTP 413 并附带 size、max_bytes、chunked_supported、recommended_limit、raw_supported 与 recommended_raw_limit 字段引导分片重试；旧版 /api/read 仍保持 2 MiB 兼容。
+    - 支持 offset / limit 分片读取（对文件总大小无硬上限）：在同一已校验操作系统句柄上按字节偏移分段读取，JSON 分片默认 2 MiB、单片上限 4 MiB，返回 offset、bytes_read、total_size、next_offset、has_more 与 etag；支持 if_match 查询参数或 If-Match 请求头（兼容带引号的 ETag），若读取中途文件发生变更返回 HTTP 409。
+    - 支持 raw=1 原始二进制直传：直接返回对应 Content-Type 的原始字节流（无 Base64 33% 膨胀，实测经公网隧道提速约 40%，单次上限 32 MiB，支持与 offset/limit 组合分片），通过 ETag 与 X-File-* 响应头提供完整分片元信息。
+    - 更新 Muse 接入说明（Prompt）：同步更新中英文接入说明，指导 Muse 读取图片/二进制文件时优先使用 raw=1、大文件按 4 MiB 分片（或 JSON 2 MiB 分片）读取并按片重试（已有连接器可在「连接」页重新复制新版接入说明发送给 Muse）。
+Documentations:
+- DocumentLabel: 使用指南
+  DocumentUrl: https://github.com/Aenvo/MuseLink/blob/HEAD/README.md#使用指南
+- DocumentLabel: 更新日志
+  DocumentUrl: https://github.com/Aenvo/MuseLink/blob/HEAD/CHANGELOG.md
+ManifestType: locale
+ManifestVersion: 1.28.0
