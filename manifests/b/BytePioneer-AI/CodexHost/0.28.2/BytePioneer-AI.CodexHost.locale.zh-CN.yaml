@@ -1,0 +1,82 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: BytePioneer-AI.CodexHost
+PackageVersion: 0.28.2
+PackageLocale: zh-CN
+Publisher: codexhost
+PublisherUrl: https://github.com/BytePioneer-AI
+PublisherSupportUrl: https://github.com/BytePioneer-AI/codex-host/issues
+PrivacyUrl: https://github.com/BytePioneer-AI/codex-host/blob/HEAD/docs/PRIVACY.md
+Author: BytePioneer-AI
+PackageName: CodexHost
+PackageUrl: https://github.com/BytePioneer-AI/codex-host
+License: MIT
+LicenseUrl: https://github.com/BytePioneer-AI/codex-host/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 BytePioneer-AI
+ShortDescription: 在 Codex Desktop 中直接运行 Pi 和 Claude Code 等 Agent Harness
+Description: |-
+  CodexHost 是一个独立的非官方开源项目，让 Pi、Claude Code 等 Agent Harness 在 Codex Desktop 中运行，并支持跨 Agent 协作。
+  支持通过 SSH 和官方 Codex Desktop Remote Control 使用远程主机上的 Harness。
+  CodexHost 与 OpenAI 无隶属关系，也未获得 OpenAI 的背书。
+
+  我们认为 Codex Desktop 提供了目前最好的桌面开发交互体验。
+  但 Codex 并不是唯一优秀的 Agent Harness，也有人偏好 Claude Code 和 Pi Agent。
+  CodexHost 让你在 Codex Desktop 中选择真正执行任务的 Agent，同时保留 Codex 的原生体验，并让它们协作完成任务。
+  无需切换应用，Pi、Claude Code、OMP、Grok Build 和 DeepSeek Harness 都可以在同一个 Codex Desktop 窗口中直接使用。
+
+  跨 Agent 协作
+
+  你可以让当前 Agent 把独立任务交给另一个 Harness。例如：
+  让 @claude-code 独立审查这次修改，并指出兼容性风险。
+  让 @pi 调查这个测试为什么偶发失败。
+  让 @omp 实现这个功能，我继续整理文档。
+  CodexHost 会为目标 Harness 创建独立的 Native Session。委派会话将出现在 Codex Desktop 的会话列表中，你可以随时打开、查看进度或继续对话。
+Tags:
+- claude-code
+- codex
+- pi
+- 智能体
+- 编程智能体
+ReleaseNotes: |-
+  本次更新重点修复长会话鼠标滚轮下滑自动回弹、无法滑到底的问题，并显著提升远端图片传输与预览速度，消除发图时误报连接中断的现象。
+  🖱️ 长会话滚轮下滑不再回弹
+  在长对话中使用鼠标滚轮持续向下滚动时，不再滑出一截就自动弹回原位，在 macOS 桌面端、Safari/WebKit 与 Chromium 等各平台均可顺滑直达底部；鼠标悬停在输入框区域向下滚动也能顺畅推进，向上翻看更早历史时阅读位置依然稳固。
+  — @iruriQ
+  🖼️ 大图自动轻量化与预览秒开
+  发送高分辨率大体积 PNG 截图时自动优化为更轻量的 WebP 以大幅缩短上传与回传耗时，小图保持原样不降质；本地与远端会话发图后及切换会话再切回时均直接复用本地缓存秒开预览，不再反复重新拉取同一张图片。
+  — @iruriQ
+  🔗 远端发图不再误报连接中断
+  修复向远端主机发送带图片消息或单次历史读取较慢时误弹「连接中断 · 草稿已保留」提示的问题；单次请求超时不再把在线远端误判为离线，可直接重试且不打断当前对话。
+  — @iruriQ
+  🐛 修复
+  - 长会话滚动：修复鼠标滚轮持续向下滚动时自动弹回原位、无法滑到最底部的问题，并修复在输入框区域向下滚轮仍被旧锚点拉回的问题 (#1288)
+  - 远端连接状态：修复向远端主机发送图片或单次读取超时后误报「连接中断 · 草稿已保留」的问题，并为远端图片加载补齐缓存协商 (#1285)
+  - 图片上传与缓存：大尺寸 PNG 自动压缩为更轻量的 WebP，并支持跨会话复用本地图片缓存，打开图片更快 (#1286)
+  - 远端发图首帧预览：修复向远端会话发图后首帧仍重复回源下载刚上传图片的问题，发完立即秒开 (#1294)
+
+  This release fixes mouse-wheel downward scroll snap-back in long conversations, speeds up image uploads and previews across local and remote sessions, and prevents false disconnect banners when sending images to remote hosts.
+  🖱️ Smooth Downward Wheel Scrolling in Long Conversations
+  Scrolling downward with a mouse wheel in long conversations no longer snaps back upward or stalls short of the bottom across macOS Desktop, Safari/WebKit, and Chromium; wheeling downward over the composer area advances smoothly as well while keeping upward history loading anchored in place.
+  — @iruriQ
+  🖼️ Faster Large Image Uploads & Instant Previews
+  Large high-resolution PNG screenshots are automatically optimized to lighter WebP before upload while smaller PNGs stay untouched; newly sent images and previously viewed images reuse a local cache across session switches for instant display without redundant downloads.
+  — @iruriQ
+  🔗 No More False Disconnects When Sending Remote Images
+  Sending image messages to a remote host or hitting a slow single history request no longer falsely triggers the disconnected banner with a retained draft; transient request timeouts stay retryable while the remote host remains online.
+  — @iruriQ
+  🐛 Fixes
+  - Long-Conversation Scroll: stopped downward mouse-wheel scrolling from snapping back and failing to reach the bottom, including when wheeling over the composer area (#1288)
+  - Remote Connection & Image Delivery: stopped single slow requests or image sends from falsely marking an online remote host as disconnected, and added HTTP cache revalidation for remote images (#1285)
+  - Image Compression & Caching: automatically compress large PNG uploads to WebP and reuse cached images across session switches (#1286)
+  - Remote Image First-Frame Preview: eliminated the redundant remote re-download right after sending an image in a remote session (#1294)
+  Install & Upgrade
+  - New install: npm install -g @codexhost/cli, or download the installer for your platform from Assets below.
+  - Upgrade: codexhost update. For npm installs, run codexhost stop before reinstalling.
+  - macOS "cannot verify this app": xattr -dr com.apple.quarantine /Applications/codexhost.app
+  - More: README
+  🙏 致谢 / Thanks
+  @iruriQ (#1285, #1286, #1288, #1294)
+ReleaseNotesUrl: https://github.com/BytePioneer-AI/codex-host/releases/tag/v0.28.2
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
