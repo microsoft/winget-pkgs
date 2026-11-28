@@ -1,0 +1,49 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.28.0.schema.json
+
+PackageIdentifier: Aenvo.MuseLink
+PackageVersion: 0.3.2
+PackageLocale: zh-CN
+ShortDescription: 让 Muse 在你授权的文件夹和磁盘中搜索、读取、写入 Windows 本机文件，并按需在写受限沙箱与本机审批保护下执行项目命令。
+Description: |-
+  MuseLink 让 Muse 在你授权的文件夹和磁盘中搜索、读取、写入 Windows 本机文件，并按需在写受限沙箱与本机审批保护下执行项目命令。
+  文件授权：选择指定文件夹及其子目录，或从本机固定磁盘中选择授权范围，默认保护凭证与敏感系统路径。
+  本机文件工具：让 Muse 按文件名查找文件、列出目录、读取内容，并按需写入与建目录。
+  受控命令执行：默认关闭；按需开启后，让 Muse 在授权项目子目录内运行开发工具与受控 PowerShell/cmd，运行于每工作区独立 SID 的 Windows 写受限沙箱与三档审批弹窗下。
+  公网连接：默认使用 Tailscale Funnel，也支持 Cloudflare 命名隧道（自有域名）。
+  专用凭证：在「连接」生成并复制 Muse 接入说明与专用令牌，在「设置 → 数据」轮换、撤销或定位令牌文件，日志自动脱敏令牌。
+  桌面管理：按时间、结果、范围与关键词检索日志，在「设置 → 数据」查看占用、清除/导出（JSONL/CSV）日志与管理本机索引；支持开机静默自启、关闭时最小化到托盘、退出自动回收全部托管子进程，支持简体中文 / English。
+Tags:
+- cloudflare-tunnel
+- muse
+- tailscale
+- 人工智能
+- 文件共享
+- 文件搜索
+- 沙箱
+- 远程访问
+ReleaseNotes: |-
+  优化与新增
+  - 首次启动自动匹配系统语言（非中 / 日环境默认英文）：新用户首次打开将自动识别系统语言（中文简繁归属简体中文、日语显示日本語、其余语言统一回退 English），在「设置 → 常规」手动切换后保持固定。
+    - 三平台原生系统语言探测：Windows 通过 GetUserPreferredUILanguages / GetUserDefaultLocaleName 读取显示语言偏好；macOS 通过 NSLocale.preferredLanguages 读取系统语言列表（不依赖 Finder 启动缺失的 LANG）；Linux 按 LC_ALL → LC_MESSAGES → LANG 与 LANGUAGE 规范解析（C / POSIX 稳定回退英文）。
+    - 无闪屏与首次配置保护：首次自动探测仅在内存生效，不提前写入 desktop-state.json，避免干扰新用户首次配置引导；同步将窗口默认标题、HTML 初始属性、前端首帧兜底与 Windows NSIS 安装器回退语言调整为按系统优先并默认英文。
+  - 更新日志阅读分层与原生日语日志支持：应用内「关于 → 更新日志 / 更新详情」弹窗默认只展示精炼重点并支持按版本一键展开细节，日语界面改为直接展示原生日语更新日志。
+    - 新增 CHANGELOG.ja.md，日语界面弹窗与 GitHub 链接不再回退英文。
+    - 发布与 CI 工作流升级为自动扫描仓库全部 CHANGELOG*.md 与 README*.md，自动校验多语言版本一致性并生成全语种 GitHub Release 说明，便于后续零配置扩展新语言。
+  安全与稳定性加固
+  - 旧版 /api 兼容接口改为默认关闭并支持在「设置 → 兼容性」按需开启：新安装与已迁移至新版 Muse 专用令牌的用户默认仅暴露 /agent/v1，大幅收紧公网令牌暴露面；纯旧版 File Bridge 存量用户升级后自动保持兼容不中断。
+    - 精准升级迁移与首次配置保护：未显式配置 legacy_api_enabled 时，仅对已存在旧版 config.json + token 且尚未启用 agent-token 的纯旧版用户自动保持开启（不提前写入 desktop-state.json，保留首次引导状态）；文件夹模式新用户不再自动生成旧版 config.json 与 token。
+    - 设置页「兼容性」卡片与完整闭环：新增「设置 → 兼容性」开关（仅允许在已有旧配置或已保存「指定文件夹」授权时开启，不向整机磁盘模式放开）以及旧版文件令牌轮换与目录定位入口；关闭时保留本地旧令牌文件，且在双表面均关闭时自动暂停连接。
+    - 表面对齐与限流/统计一致性：关闭旧表面时所有 /api/* 在鉴权前直接返回 404 且不污染概览文件活动统计，同时保留未鉴权限流保护；内置归属健康探针改为优先校验 /agent/v1/roots 协议体，接管旧系统（takeover_legacy）时自动开启旧表面并在回滚时还原。
+  - 扩大默认敏感凭证保护范围：新增对主流云/容器凭证目录与浏览器登录数据目录的默认保护，即使开启整盘或主目录授权也不会被读取或搜索。
+    - .npmrc、.pypirc 由仅写保护升级为读 / 搜索 / 写全面保护，并新增 .docker、.kube、.azure 与 gcloud 凭证目录默认保护。
+    - 新增各平台浏览器凭证库默认保护：Windows（Chrome / Edge User Data、Firefox Profiles）、macOS（Application Support 下 Chrome / Edge / Firefox，配合既有 ~/Library/Keychains 保护）、Linux（google-chrome / chromium / microsoft-edge、.mozilla/firefox）。
+  完整变更见 CHANGELOG.md，使用说明见 中文使用指南。
+ReleaseNotesUrl: https://github.com/Aenvo/MuseLink/releases/tag/v0.3.2
+Documentations:
+- DocumentLabel: 使用指南
+  DocumentUrl: https://github.com/Aenvo/MuseLink/blob/HEAD/README.md#使用指南
+- DocumentLabel: 更新日志
+  DocumentUrl: https://github.com/Aenvo/MuseLink/blob/HEAD/CHANGELOG.md
+ManifestType: locale
+ManifestVersion: 1.28.0
