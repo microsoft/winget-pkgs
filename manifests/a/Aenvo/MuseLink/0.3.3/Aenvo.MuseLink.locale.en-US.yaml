@@ -1,0 +1,58 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Aenvo.MuseLink
+PackageVersion: 0.3.3
+PackageLocale: en-US
+Publisher: github
+PublisherUrl: https://github.com/Aenvo
+PublisherSupportUrl: https://github.com/Aenvo/MuseLink/issues
+PackageName: MuseLink
+PackageUrl: https://github.com/Aenvo/MuseLink
+License: MIT
+LicenseUrl: https://github.com/Aenvo/MuseLink/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Aenvo
+ShortDescription: Lets Muse search, read, and write files in authorized Windows folders and drives, and optionally run project commands in a write-restricted sandbox with local approval.
+Description: |-
+  MuseLink lets Muse search, read, and write files in authorized Windows folders and drives, and optionally run project commands inside a write-restricted sandbox with local approval.
+  File permissions: Authorize selected folders and their subfolders, or choose from local fixed drives, with built-in protection for credentials and sensitive system paths.
+  Local file tools: Let Muse search by file name, list folders, read files, and write or create folders when needed.
+  Controlled command execution: Off by default; when enabled, lets Muse run developer tools and controlled PowerShell/cmd inside authorized project subfolders under a per-workspace Windows write-restricted sandbox and 3-tier local approval dialog.
+  Public connection: Use Tailscale Funnel by default, or choose a Cloudflare named tunnel with your own domain.
+  Dedicated token: Generate and copy Muse connection instructions and the dedicated token under Connection; rotate, revoke, or locate the token under Settings → Data, with automatic token redaction in logs.
+  Desktop controls: Filter and search logs by time range, result, scope, and keyword; inspect disk usage, clear or export logs (JSONL/CSV), and manage the local file index under Settings → Data; supports silent launch at startup, configurable minimize-to-tray on close, clean child-process teardown on exit, and English / Simplified Chinese UI.
+Tags:
+- ai
+- cloudflare-tunnel
+- file-search
+- file-sharing
+- muse
+- remote-access
+- sandbox
+- tailscale
+ReleaseNotes: |-
+  Improvements & Added
+  - Added Tailscale Serve (Tailnet-only) connection provider and configurable HTTPS ports: When Muse and the target device share the same Tailnet, switch to Tailscale Serve under Connection for managed private HTTPS forwarding without degraded warnings, and choose an alternate HTTPS port when port 443 is occupied by other services.
+    - Added the tailscale_serve provider and https_port setting (tunnel.rs, profile.rs, service.rs): Tailscale Funnel supports ports 443 (default), 8443, and 10000, while Tailscale Serve supports 443, 8443, 10000, or any custom port (1–65535). Manages --https=<port> start/stop and per-port exclusivity checks without touching other ports, and reuses existing matching tailscale serve mappings (omitting :443 and preserving :port for custom ports).
+    - Two-way exposure safeguards: Tailscale Funnel mode refuses to auto-upgrade an existing matching tailscale serve rule on the chosen port into a public Funnel and prompts you to switch providers; Tailscale Serve mode likewise refuses to take over a port where public Funnel is active.
+    - Added the HTTPS port selector, always-visible provider descriptions, and a Tailnet-only connection guide card (with MagicDNS / HTTPS Certificates tooltips and quick links to the Tailscale DNS console) under Connection, plus localized Tailnet wording across Overview, Setup Guide, and health checks (zh-CN / en / ja).
+  Security & Stability
+  - Hardened command approval against obfuscated flags and download cradles (#15 by @KammyAugust11): Command approval now detects PowerShell -EncodedCommand prefix abbreviations and inline download-and-execute (download cradle) patterns, always requiring single-use confirmation instead of session grants.
+    - Matches -ec and longer -EncodedCommand prefixes (-enc, -enco, etc.) globally while scoping short prefixes (-e, -en) to powershell / pwsh invocations so normal developer commands like pip install -e ., rg -e, and node -e are not falsely escalated.
+    - Added the download_cradle risk tag with localized approval dialog labels (zh-CN / en / ja) covering Net.WebClient (DownloadString / DownloadData / DownloadFile) and Invoke-WebRequest / iwr / Invoke-RestMethod / irm / curl / wget paired with iex or piped into an interpreter, while leaving plain file downloads unchanged.
+  - Exec child processes now strip credential-like environment variables (#14 by @KammyAugust11): Common third-party tokens and secret environment variables are automatically removed when building the sandbox child-process environment block so host credentials cannot be read by agent-executed commands.
+    - Added platform-independent core/env_scrub.rs wired into build_clean_env in sandbox.rs, matching variable names case-insensitively against a curated exact list (GITHUB_TOKEN, AWS_SECRET_ACCESS_KEY, OPENAI_API_KEY, etc.) and sensitive substrings (TOKEN, SECRET, PASSWORD, PASSWD, API_KEY, APIKEY, PRIVATE_KEY, ACCESS_KEY, CREDENTIAL) without ever reading or logging values; essential variables such as PATH, SystemRoot, and TEMP remain intact.
+  - Build provenance attestation for release artifacts (#16 by @KammyAugust11): The release workflow now generates GitHub build provenance attestations for the Windows / Linux / macOS release assets, so users can verify with gh attestation verify that a downloaded binary was built from this repository's source on GitHub Actions and has not been substituted or tampered with.
+  ⚠️ Important note for macOS first launch: macOS packages are ad-hoc signed and not notarized with an Apple Developer ID. On first launch:
+  1. Try opening MuseLink.app once, then open System Settings → Privacy & Security → Security and click Open Anyway.
+  2. If macOS Sequoia (15+) still reports that the app "is damaged and can't be opened", run once in Terminal:
+     xattr -dr com.apple.quarantine /Applications/MuseLink.app
+  See CHANGELOG.en.md and the English quick start.
+ReleaseNotesUrl: https://github.com/Aenvo/MuseLink/releases/tag/v0.3.3
+Documentations:
+- DocumentLabel: Quick start
+  DocumentUrl: https://github.com/Aenvo/MuseLink/blob/HEAD/README.en.md#quick-start
+- DocumentLabel: Changelog
+  DocumentUrl: https://github.com/Aenvo/MuseLink/blob/HEAD/CHANGELOG.en.md
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
