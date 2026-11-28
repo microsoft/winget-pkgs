@@ -1,0 +1,49 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: mouzhai163.mz-browser
+PackageVersion: 0.0.3
+PackageLocale: zh-CN
+Publisher: mzbrowser
+PublisherUrl: https://github.com/mouzhai163
+PublisherSupportUrl: https://github.com/mouzhai163/mz-browser/issues
+PackageName: MZ指纹浏览器
+PackageUrl: https://github.com/mouzhai163/mz-browser
+License: AGPL-3.0
+LicenseUrl: https://github.com/mouzhai163/mz-browser/blob/HEAD/LICENSE
+ShortDescription: 本地优先的指纹浏览器工作台：每个环境都是一个独立、隔离、指纹自洽的浏览器。
+Description: |-
+  MZ指纹浏览器是一款运行在用户自己电脑上的桌面软件，用来创建、运行和管理大量相互隔离的浏览器环境。每个环境有自己的数据目录、代理、指纹和账号，并可以用 RPA 任务流或 AI（MCP）自动操作。数据默认只保存在本机，没有账号体系、没有云端服务、没有环境数量限制。
+
+  特点：
+
+  - 内核级指纹：指纹在浏览器内核的 C++ 层修改，页面脚本无法通过检查函数或原型发现改动。
+  - 指纹自洽：UA、Client Hints、平台、GPU、核心数、内存、分辨率来自同一份设备档案。
+  - 环境稳定：指纹由环境 ID 派生，重启不变；浏览器完整版本号在创建时固定。
+  - 严格隔离：每个环境独立的数据目录，Cookie、localStorage、IndexedDB 互不共享。
+  - 真实操作：RPA 使用真实的鼠标键盘事件，页面看到的是可信事件。
+  - 本地优先：单用户工作台，业务数据存在本地 SQLite。
+
+  主要功能：环境管理与批量创建、浏览器内核按需下载（定制 Chromium 155-157 与基于 Camoufox 的 Firefox 158）、代理中心与账号管理、本地扩展库、RPA 任务流与定时运行、窗口同步器，以及内置的本地 MCP 服务器供外部 AI 客户端使用。
+Tags:
+- 反检测
+- 多账号管理
+- 指纹浏览器
+- 浏览器
+ReleaseNotes: |-
+  新增：批量创建环境
+  - 侧边栏“创建环境”下面新增“批量创建环境”按钮：一次最多 25 个，可以设名称前缀、分组和代理
+  - 每个环境各自从设备样本库抽一台设备：显卡、核心数、内存、屏幕、字体、设备名和 MAC 都不相同，同一批环境不会因为指纹相同被关联
+  - 代理按勾选顺序一个环境一个；代理比环境少时先提示，由你决定多选代理还是仍然创建
+  - 创建后环境列表自动刷新
+  - 新建环境页去掉了原来左侧不好找的数量滑块，那里一次只建一个
+  - HTTP 接口新增 mz_batch_create_environments，和对话框用同一套逻辑；代理不够时需要传 allow_fewer_proxies: true
+  修复
+  - 语言跟随 IP 支持全部国家和地区（#5）：以前只认识 18 个国家，土耳其、荷兰、波兰、越南、泰国、中东、非洲、南美等地的 IP 推断不出语言，环境直接拒绝启动
+  - HTTP 接口：页面里有 about:blank 等空白内嵌框架时（广告、统计、验证码、支付控件常见），整个标签页的页面操作都被拒绝，连导航离开都不行
+  - HTTP 接口：页面或框架不在授权范围时返回 403，不再是 500
+  - 用本地代理（Mihomo 节点）创建环境时，绑定可能失败
+  - 环境列表里代理提示框的国家标签显示成一条白块，看不到内容
+ReleaseNotesUrl: https://github.com/mouzhai163/mz-browser/releases/tag/v0.0.3
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
