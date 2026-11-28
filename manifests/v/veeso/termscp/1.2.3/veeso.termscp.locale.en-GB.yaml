@@ -1,0 +1,64 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: veeso.termscp
+PackageVersion: 1.2.3
+PackageLocale: en-GB
+Publisher: veeso
+PublisherUrl: https://veeso.dev
+PublisherSupportUrl: https://github.com/veeso/termscp/issues
+Author: Christian Visintin
+PackageName: termscp
+PackageUrl: https://termscp.rs
+License: MIT
+LicenseUrl: https://github.com/veeso/termscp/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2020-2022 Christian Visintin
+ShortDescription: A feature rich terminal file transfer client and explorer with a TUI, dual-pane browsing and support for SFTP, SCP, FTP, Kube, S3, GCS, SMB and WebDAV.
+Description: |-
+  termscp is a feature rich terminal file transfer client and explorer, with support for SFTP, SCP, FTP and FTPS, Kube, S3, Google Cloud Storage (GCS), SMB and WebDAV. It is a terminal utility with a TUI that connects to a remote server to retrieve and upload files and to interact with the local file system.
+  Features
+  - Explore and operate on the remote and on the local machine file system with a dual-pane UI: create, remove, rename, search, view and edit files.
+  - Connect to your favourite hosts through built-in bookmarks and recent connections.
+  - View and edit files with your favourite text editor.
+  - Authenticate SFTP and SCP sessions with SSH keys or with a username and password.
+  - Embedded terminal for executing commands on the system.
+  - Customizable themes, file explorer format, text editor and file sorting.
+  - Get notified through desktop notifications when a large file has been transferred.
+  - Keep file changes synchronized with the remote host.
+  - Save your password in your operating system key vault.
+Tags:
+- file-explorer
+- file-manager
+- file-transfer
+- ftp
+- s3
+- scp
+- sftp
+- smb
+- tui
+- webdav
+ReleaseNotes: |-
+  1.2.3
+  Released on 2026-11-28
+  CI
+  - release: install just libsmbclient to release on crates.io
+  Fixed
+  - filetransfer: avoid panic when sync browsing to root directory (#470)
+    Going up a directory with sync browsing enabled could move the opposite
+    pane to /, which has no file name, so unwrapping it panicked. Fall back
+    to the whole path for the directory name shown to the user.
+  - filetransfer: use forward slash for remote paths on Windows (#472)
+    Remote destination paths were built with the host path separator, so on
+    Windows a Unix server received names like tmp\file.txt as a single file
+    name. Join and absolutize remote paths with / regardless of the host OS.
+  Build
+  - deps: migrate from chrono to jiff (#469)
+    - build(deps): migrate from chrono to jiff
+    chrono is deprecated, so dates and times are now handled with jiff 1.x. File times in the explorer and the file info popup, and log timestamps, render exactly as before, including in user supplied time formats. An invalid user supplied time format no longer crashes termscp; the time is left empty and a warning is logged. Also bumps the toolchain and MSRV to 1.100.0 and updates dependencies. Local file times are now set with the standard library, replacing the filetime crate whose functions became deprecated.
+    The cargo deny configuration now ignores the chrono advisory, since chrono only comes in through russh-util for WebAssembly targets, drops two exceptions that no longer match, and allows the license of ar_archive_writer.
+ReleaseNotesUrl: https://github.com/veeso/termscp/releases/tag/v1.2.3
+Documentations:
+- DocumentLabel: User Manual
+  DocumentUrl: https://docs.termscp.rs
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
