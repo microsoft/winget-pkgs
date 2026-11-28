@@ -1,0 +1,46 @@
+# winget VERSION manifest for HMX.
+#
+# The three files in this directory map onto the winget-pkgs tree as:
+#
+#   manifests/h/HMX/HMX/0.10.0/HMX.HMX.yaml                    <- this file
+#   manifests/h/HMX/HMX/0.10.0/HMX.HMX.installer.yaml           <- hmx.installer.yaml
+#   manifests/h/HMX/HMX/0.10.0/HMX.HMX.locale.en-US.yaml       <- hmx.locale.en-US.yaml
+#
+# Note the doubled `HMX.HMX`. The three filenames are prefixed with the whole
+# PackageIdentifier, not just the application name. The first submission used
+# `HMX.yaml` and failed validation with `Manifest-Path-Error` — the folders
+# matched the identifier, the filenames did not. winget-pkgs requires
+#
+#   manifests/<first-letter>/<Publisher>/<PackageName>/<Version>/
+#   ├── <PackageIdentifier>.yaml
+#   ├── <PackageIdentifier>.installer.yaml
+#   └── <PackageIdentifier>.locale.<language>.yaml
+#
+# and it treats the whole path case-sensitively. Section 12 of
+# tests/run_packaging_tests.sh derives these names from PackageIdentifier and
+# PackageVersion and compares them against this comment, so renaming the
+# identifier without updating the copy step fails the packaging gate instead of
+# a CI run.
+#
+# The files are kept side by side here under short lowercase names rather than
+# pre-laid-out in that tree, so the repository stays readable. A winget
+# "singleton" package is one version per directory, and the identity fields
+# (PackageIdentifier/PackageVersion) are repeated in all three because each file
+# is validated on its own.
+#
+# ManifestType is `version` here and `installer` in the installer file. Putting
+# `singleton` in the installer file — which is what this directory used to do —
+# is the kind of thing `winget validate` rejects outright.
+#
+# ManifestVersion is 1.12.0, the version winget-pkgs currently accepts. Its
+# ValidationFailureGuide is explicit: "1.12.0 (1.10.0 is also accepted)", and
+# anything older is rejected as `Manifest-Version-Deprecated`. The first
+# submission said 1.6.0, which had been correct when written and stopped being
+# correct on its own — the gate below pins it so it cannot rot again.
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.version.1.12.0.schema.json
+
+PackageIdentifier: HMX.HMX
+PackageVersion: 0.10.0
+DefaultLocale: en-US
+ManifestType: version
+ManifestVersion: 1.12.0
