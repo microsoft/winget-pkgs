@@ -1,0 +1,62 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: creativeprojects.resticprofile
+PackageVersion: 0.35.0
+PackageLocale: en-US
+Publisher: creativeprojects
+PublisherUrl: https://creativeprojects.tech/
+PublisherSupportUrl: https://github.com/creativeprojects/resticprofile/issues
+Author: Fred
+PackageName: resticprofile
+PackageUrl: https://creativeprojects.github.io/resticprofile
+License: GPL-3.0
+LicenseUrl: https://github.com/creativeprojects/resticprofile/blob/HEAD/LICENSE
+ShortDescription: Configuration profiles manager and scheduler for restic backup
+Moniker: resticprofile
+Tags:
+- backup
+- restic
+ReleaseNotes: |-
+  ## 🛰️ Zarya release
+
+  On this day in 1998, a Proton rocket lifted off from Baikonur carrying Zarya ("dawn"), the first module of the International Space Station. A modest start for a station that has had people on board continuously since 2000.
+
+  ## resticprofile v0.35.0 (2026-11-20)
+
+  This release fixes `dump` and `cat`, which v0.34.0 broke, keeps captured secrets out of systemd unit files, and fixes several configuration issues.
+
+  ### Security
+
+  • **Secrets no longer visible in systemd units** (#367)：the environment captured when scheduling a profile (`capture-environment`, `RESTIC_*` by default) was written as `Environment=` lines in the unit file, and any user on the machine can read those with `systemctl cat` or `systemctl show`. It is now saved in a `resticprofile.env` file in the service drop-in folder, readable only by the owner of the unit, and loaded with `EnvironmentFile=`.
+  • **launchd**：the generated plist file can also contain the captured environment, so only its owner can read it now (`0600`).
+
+  > [!IMPORTANT]
+  > Existing schedules keep the old unit files until you schedule them again：run `resticprofile schedule --all` (with `sudo` for system units) after upgrading.
+  > If you use your own systemd unit template, add an `EnvironmentFile={{ .EnvironmentFile }}` line to it, otherwise the service won't get the captured environment. resticprofile shows a warning when the line is missing.
+
+  ### Bug Fixes
+
+  • **`dump` and `cat` output** (#720)：since v0.34.0, restic's output went to stderr instead of stdout, and binary data lost some bytes, so piping a dump into another program (`resticprofile dump latest /file | pg_restore`) no longer worked. restic's output goes to stdout again, unaltered. resticprofile's own messages still go to stderr for these commands.
+  • **Circular profile inheritance** (#684)：a profile inheriting from itself, or a cycle like `a -> b -> a`, crashed resticprofile with a stack overflow. It now reports a configuration error, in both v1 and v2 configuration files.
+  • **`exclude-cloud-files` on macOS** (#686)：restic 0.19 supports `--exclude-cloud-files` on macOS, but resticprofile dropped the flag there, so restic read online-only iCloud files (which could trigger downloads). The flag is now passed to restic on macOS.
+  • **JSON schema** (#449)：the integer `keep-*` retention flags now accept `unlimited`, like restic does, so editors no longer flag `keep-daily: unlimited` as invalid.
+  • **zsh completion**：the completion script now also works when autoloaded from `$fpath`, not only when sourced.
+
+  ## New contributors
+  Thanks to @lbarrosby and @ericbyz for their first contributions in this release 🎉
+
+  ## Changelog
+  • daeff826539e2ba366b0ab9b2844d87965eae8b3 fix：allow "unlimited" for integer keep-* flags in JSON schema (#683)
+  • afe05d0f5c9fbafa6a85cd6b077225c96dbca520 fix：move environment variables into user read-only file (#718)
+  • 1503aa93c3cb5cf08edf9278b86c54ec662e3081 fix：pass exclude-cloud-files to restic on macOS (#701)
+  • cea795890ec1f77bb5d67a712192c2c718ee3912 fix：report circular profile inheritance instead of crashing (#703)
+  • 2259f6768ccff749f6586804edf1c28db27d4456 fix：send restic output to stdout (#722)
+ReleaseNotesUrl: https://github.com/creativeprojects/resticprofile/releases/tag/v0.35.0
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://creativeprojects.github.io/resticprofile
+- DocumentLabel: Restic documentation
+  DocumentUrl: https://restic.readthedocs.io/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
