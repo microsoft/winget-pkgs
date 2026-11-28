@@ -1,0 +1,86 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: AnywhereLabs.AgentsAnywhere
+PackageVersion: 2.2.0
+PackageLocale: zh-CN
+Publisher: Anywhere Labs
+PublisherUrl: https://github.com/anywhere-labs
+PublisherSupportUrl: https://github.com/anywhere-labs/Agents-Anywhere/issues
+PackageName: Agents Anywhere
+PackageUrl: https://github.com/anywhere-labs/Agents-Anywhere
+License: Apache-2.0
+LicenseUrl: https://github.com/anywhere-labs/Agents-Anywhere/blob/HEAD/LICENSE
+Copyright: Copyright 2026 Agents Anywhere Contributors
+CopyrightUrl: https://github.com/anywhere-labs/Agents-Anywhere/blob/HEAD/NOTICE
+ShortDescription: 跨设备的开源 AI Agent 工作台，把本机 Codex、Claude Code 和 DeepSeek Harness 会话带到桌面、手机和浏览器。
+Description: Agents Anywhere 是跨设备的开源 Agent 工作台。连接运行 Codex、Claude Code 或 DeepSeek Harness 的工作设备，在桌面、手机和 Web 查看会话、回复请求、管理文件与终端。Agent 在连接的工作设备上执行任务。桌面客户端负责连接工作设备，同一会话可以从手机、平板或浏览器继续访问，服务端也支持用 Docker 自托管。
+Tags:
+- 人工智能
+- 代码
+- 大模型
+- 大语言模型
+- 工作台
+- 智能体
+- 编程
+- 聊天机器人
+- 自主智能
+- 自托管
+- 远程访问
+ReleaseNotes: |-
+  Agents Anywhere v2.2.0 是 2.x 系列的接口更新：在 Codex、Claude Code 和 DSH 中支持统一原生 Plan（/plan）并在输入区直接审阅，为 Codex 与 Claude Code 新增统一目标模式（/goal），新增 Pi 与 Hermes Agent 接入，支持模型网关管理与（默认关闭的）Tokens Anywhere 账号登录和链接；同时大幅优化高负载下的数据库读写与实时刷新，全面提升 DSH、Codex 和 Claude 大历史同步与网络抖动恢复的稳定性，Android 新增站内文档预览与折叠屏双栏布局，Desktop 从本版起需要 macOS 13 及以上。
+  本次更新
+  统一 Plan
+  - Codex、Claude Code 和 DSH 会话统一支持 /plan、/plan <任务> 与 /plan off；新会话首条任务即可进入原生规划，裸 /plan 只设置创建意图，不消耗空模型回合
+  - Web、Desktop、Android 和 iOS 新增流式计划卡片，直接在输入区「同意并执行／修改计划／暂不执行」，不再弹出审批窗口；长计划可展开全文，「打开计划」支持复制、导出，Web 与 Desktop 支持与聊天并排阅读
+  - 计划按不可变版本保存，设备离线仍可查阅；修改意见产生的新计划作为同一份计划的下一版本（版本 2、3…），旧版本在时间线中收为一行，阻止旧版本批准或重复执行
+  - 斜杠菜单补充 /plan 及各端中英文说明；Runtime、工作区准备、会话创建和原生历史错误改为按稳定错误码显示对应界面语言的文案，英文界面不再出现中文提示
+  会话创建、Agent 接入与消息交付
+  - 新增 Pi 接入（支持本机 1.2.0 及之后的 1.x 版本）：优先复用本机兼容的模型、认证与配置；支持首条及后续附件、工具审批、运行中追加指令、浏览本机原生历史并在 CLI 退出后「继续任务」；四端统一显示 Pi 单色图标，并在所选模型不支持图片时提前提示
+  - 新增本机 Hermes Agent 接入：支持对话、工具审批、文本和图片附件、运行中追加指令、中断与恢复；Agent 连接断开后，没有原生历史的会话显示「恢复会话」，可直接接着用
+  - Desktop 准备本机 Connector 时将依赖安装与启动分开进行，同时准备 Pi 适配器，缓存有效时直接启动；Connector 重连恢复期间，Web 与 Desktop 等待 Agent 就绪后允许创建，加载失败可查看原因并重试
+  - 附件上传与下载改为流式处理，不再整包占用服务端内存；图片附件同时提供缩略图地址，浏览大图更省流量
+  - 显著降低多会话与高负载场景的数据库和内存压力：
+    - 会话列表改为直接读取最新记录摘要，同一用户的实时变化默认至少每 2 秒合并推送一次（AGENT_SERVER_DASHBOARD_MIN_INTERVAL_SECONDS）；
+    - 同一条流式消息的旧版本不再持续积压占用 Server 内存，支持配置 AGENT_SERVER_MALLOC_TRIM_INTERVAL_SECONDS 定期向系统归还已释放内存；
+    - 修复断线重连或集中补传时会话写入卡住数小时、占用连接池以及 Redis 环境下个别会话约 5 分钟写不进消息的问题；
+    - 修复时间线条目序号越界导致整条会话后续消息无法入库，以及重连/断开期间开启接管后输入框仍显示只读的问题
+  Codex 与 Claude
+  - Web、Desktop、Android 和 iOS 新增统一目标模式 /goal（Codex / Claude Code），可在输入区上方编辑、暂停、恢复或清除目标，停止时阻止自动续跑
+  - 修复 Codex 长时间运行逐渐占满文件句柄导致「Too many open files」离线的问题，以及读写计划记录后未关闭数据库文件的问题
+  - 修复 Codex 接管后原客户端离线导致发送失败、停止无效和状态残留，以及在 Codex App / IDE 中处理审批后 AA 仍一直显示「等待批准」的问题；回合失败后只显示错误卡片，不再锁住输入框
+  - Codex 自动审查（auto-review）和查看图片记录不再显示为 unknown；修复接入已有会话后旧消息排到末尾或顺序交错的问题
+  - Claude 动态唤醒等待时保留原进程，区分首条恢复消息与旧后台任务通知；工具结果里的图片（如截图）同步为摘要而非原文，避免 413 失败
+  - Codex 和 Claude Code 超出单次请求上限的历史改为分批上传，仍被拒收的会话按指数退避单独隔离，不再拖慢同设备其他会话；遇到 Server 写入短暂排队（retryable 拒收）时自动重试，不进入长期隔离
+  - 定时清单扫描仅在真正变化时写入数据库，未变化时不再重复上报，并错开启动和重连扫描；接入模型网关后恢复 Codex 会话保留原服务商，本机 Codex 0.166 / 0.167 在配置网关时改用 AA 自带 Codex，避免重启后无法继续
+  DSH 同步与插件（@agents-anywhere/dsh-bridge-next）
+  - DSH 回合出错或正常结束却没有回复时显示错误/提示卡片（不锁住输入框）；因限流、超时、连接中断等可重试错误失败时，卡片上出现「继续」，点击即可接着生成（需 DSH 0.2.2-rc.3 及以上）
+  - 适配 DSH 0.2.2：修复安装插件时提示 Cordis / Schemastery 版本不满足的问题；实验性 Computer Use 的授权提问重新在 AA 中以中文显示，可从给定选项中选择允许或拒绝
+  - 大历史与流式同步全面加固：
+    - 45 MiB 以内的完整历史一次提交并只改写变化条目，超过 45 MiB 或遇代理 413 时自动缩小分页（最低 1 MiB）并按区间替换；
+    - 大历史上传不再阻塞同设备 Codex / Claude 等会话的实时消息；
+    - 流式回复约每 0.25 秒合并提交一次，显著降低服务端请求和写入压力；
+    - 上行较慢或遇 5xx、短暂写锁排队时自动延长等待并退避重发当前批次，不再断开重扫全部会话；被拒收会话在重连/重建同步流后仍记住退避状态
+  - 启动同步体验与连接稳定性优化：
+    - 首次同步或重新同步期间 Runtime 保持「运行中」，设备页显示「正在同步 DSH 会话…」，可正常打开会话、发消息和回答审批；已打开或正在运行的会话优先完成同步，首次同步后列表按最后使用时间排序；
+    - DSH 插件账号登录 7 天到期后改用本机设备凭据继续同步，并在面板提示「重新登录」；开机自启网络未就绪时自动重试启动 Connector；
+    - 修复 Windows 点击打开数据/日志目录误报失败、安装主题插件后远程控制面板无法关闭、内置 uv 缺少执行权限、停用再启用插件报错，以及 Connector 忙碌或管理锁断开导致 DSH 退出的问题
+  本机连接、桌面端与所有权
+  - 网络抖动连续无法获取连接池时，Connector 自动重建连接池并恢复历史与 DSH 同步，无需重启桌面端；启用 DSH 时桌面端与 DSH 共存不再断开控制连接
+  - Desktop 和 DSH 插件新增「Connector 网络」设置（跟随系统 / 直连 / 自定义代理），接口、实时连接和终端统一走同一链路；修复系统代理例外、NO_PROXY 解析与本机代理软件已退出时连不上服务器的问题
+  - Windows 和 macOS 上 Connector 改用系统证书库校验服务器证书；Intel Mac 首次安装不再卡在编译 cryptography
+  - macOS 上 Desktop 异常退出后自动回收残留 Connector 进程；电脑关机、重启或注销时直接停止本机连接并退出，不再弹窗阻塞关机（可在「设置 → 启动与通知」开启「关机时询问是否退出」）
+  - Desktop 静默启动仅在端口占用、归属失败或凭据失效时弹窗一次；本机 Connector 持续无响应时自动重建后台；Codex 版本检测不再阻塞心跳与控制通道
+  - 管理员删除用户时同步清理该用户的设备、项目和会话；停止或删除 Runtime 后不再每 30 秒刷屏日志
+  Web 与桌面端界面
+  - 对话中点击 Agent 回复的文件超链接（含 file://、空格/中文路径、行号锚点）直接在会话内打开预览标签页；Web 对话中已选中文字时右键打开浏览器自带菜单
+  - Web 与 Desktop 切回最近查看的会话时立即显示缓存消息并恢复阅读位置，随后补齐新消息与运行状态，修复切换会话或刷新凭据时的状态错乱
+  - 「设置 → 模型网关」支持选择默认网关或手动添加模型服务，保存时自动识别协议和模型，Key 只保留首尾提示；管理员可在「管理 → 常规」配置 Tokens Anywhere 地址，侧边栏支持一键授权链接、内嵌打开 Tokens Anywhere 控制台以及使用 AA 账号登录确认（默认关闭，需服务端配置开启）
+  - 管理看板使用报表改为读取按小时汇总，轮次耗时和审批等待分位数统计范围内全部样本；Beta 和实验性 Runtime 显示状态标记
+  - Desktop 选择「自动（跟随系统）」主题时立即响应系统亮暗外观切换；模型列表过长时在窗口内滚动且不遮挡标题栏；修复新建会话时短暂显示「目标状态暂不可用」和 ACP 模型加载位置错位的问题
+ReleaseNotesUrl: https://github.com/anywhere-labs/Agents-Anywhere/releases/tag/v2.2.0
+Documentations:
+- DocumentLabel: 文档
+  DocumentUrl: https://github.com/anywhere-labs/Agents-Anywhere/blob/HEAD/docs/getting-started.md
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

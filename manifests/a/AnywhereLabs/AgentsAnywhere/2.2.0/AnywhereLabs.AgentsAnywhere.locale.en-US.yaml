@@ -1,0 +1,76 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.28.0.schema.json
+
+PackageIdentifier: AnywhereLabs.AgentsAnywhere
+PackageVersion: 2.2.0
+PackageLocale: en-US
+ShortDescription: An open-source agent workbench that brings your local Codex, Claude Code and DeepSeek Harness sessions to desktop, mobile and the browser.
+Description: Agents Anywhere is an open-source agent workbench across your devices. Connect a work machine running Codex, Claude Code or DeepSeek Harness, then view sessions, respond to requests, manage files and use terminals from desktop, mobile and Web. Agents execute tasks on the connected work machine. The desktop client links that machine, so the same sessions stay reachable from a phone, tablet or browser, and the server can also be self-hosted with Docker.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+- remote-access
+- self-hosted
+- workbench
+ReleaseNotes: |-
+  Agents Anywhere v2.2.0 is an interface update to the 2.x series. It adds unified native Plan mode (/plan) with inline composer review across Codex, Claude Code, and DSH, introduces unified Goal mode (/goal) for Codex and Claude Code, adds Pi and Hermes Agent support, brings model gateway management and (disabled-by-default) Tokens Anywhere sign-in and linking, significantly reduces database and memory overhead under heavy load, hardens large-history sync and network recovery for DSH, Codex, and Claude, adds in-app document previews and a foldable two-pane layout on Android, and updates Desktop's minimum requirement to macOS 13.
+  Updates
+  Unified Plan
+  - Codex, Claude Code, and DSH sessions support /plan, /plan <task>, and /plan off; new sessions can enter native planning on the first turn, while bare /plan sets creation intent without burning an empty model turn
+  - Web, Desktop, Android, and iOS add streaming plan cards with inline Approve & Execute / Revise Plan / Dismiss actions in the composer instead of modal dialogs; long plans expand inline, and Open Plan supports copying, exporting, and side-by-side reading on Web and Desktop
+  - Plans are stored as immutable revisions that remain readable offline; revisions become sequential versions (v2, v3…) of the same plan with older revisions collapsed into a single timeline row, and stale approvals or duplicate executions are blocked
+  - Added localized /plan descriptions in the slash menu; runtime, workspace preparation, session creation, and native history errors now map stable error codes to localized messages in the client language
+  Session Creation, New Agents, and Message Delivery
+  - Added Pi support (compatible with local Pi 1.2.0+ in the 1.x line): reuses compatible local models, auth, and config; supports initial and follow-up attachments, tool approvals, in-flight steering, browsing native local history, and Resume Task after the CLI exits; displays the monochrome Pi icon across all clients and warns before sending when the selected model does not support images
+  - Added local Hermes Agent support: conversations, tool approvals, text and image attachments, in-flight steering, interrupt, and resume; sessions without native history show Resume Session after disconnects so you can keep working without starting over
+  - Desktop separates dependency installation from Connector launch and pre-installs the Pi adapter, skipping setup dialogs when cached; during Connector reconnect recovery, Web and Desktop wait for agents to become ready and allow retrying failed loads
+  - Attachment uploads and downloads are now streamed without buffering entire files in Server memory, and image attachments expose WebP thumbnail URLs
+  - Reduced database and memory pressure at scale:
+    - Session list queries read a precomputed latest-item summary instead of querying each session individually, and dashboard pushes coalesce per user (default 2s via AGENT_SERVER_DASHBOARD_MIN_INTERVAL_SECONDS);
+    - Superseded streaming message versions no longer accumulate in Server memory, with optional periodic memory trimming via AGENT_SERVER_MALLOC_TRIM_INTERVAL_SECONDS;
+    - Fixed multi-hour stalls and pool exhaustion during reconnect/backlog bursts, ~5-minute write blocks on Redis reconnects, out-of-range orderSeq blocking entire sessions, and read-only composer states when taking over during connect/disconnect
+  Codex and Claude
+  - Added unified Goal mode (/goal) for Codex and Claude Code across Web, Desktop, Android, and iOS with inline editing, pause, resume, and clear controls above the composer
+  - Fixed file descriptor leaks in long-running Codex Connector sessions ("Too many open files") and unclosed database handles after reading or writing planning records
+  - Fixed Codex takeover send failures, ineffective stops, and stale running states when the original client goes offline, as well as sessions staying stuck on "Waiting for approval" after responding in the Codex App or IDE; turn failures now show an error card without locking the composer
+  - Codex auto-review and image-view timeline items no longer render as unknown; fixed backfilled older messages appearing at the bottom or out of order
+  - Claude dynamic wakeups preserve the original process and distinguish initial resume messages from stale background task notifications; tool-result images (such as screenshots) sync as compact summaries instead of raw payloads to avoid 413 failures
+  - Oversized Codex and Claude Code histories upload in pages and isolate persistently rejected sessions with per-session exponential backoff; transient retryable rejections from Server write contention are retried automatically instead of quarantined
+  - Periodic inventory scans write only changed sessions, skip unchanged re-uploads, and stagger startup/reconnect scans; resuming Codex sessions with a model gateway preserves the original provider, and local Codex 0.166 / 0.167 automatically uses AA's bundled Codex when a gateway is configured
+  DSH Sync and Plugin (@agents-anywhere/dsh-bridge-next)
+  - Turn errors or empty-reply completions in DSH show an error/notice card without locking the composer; retryable errors (rate limits, timeouts, connection drops) include a Continue action to resume generation without resending (requires DSH 0.2.2-rc.3+)
+  - DSH 0.2.2 compatibility: fixed Cordis / Schemastery peer-dependency warnings on plugin install, and restored Chinese authorization prompts for experimental Computer Use with selectable options
+  - More resilient large-history and streaming sync:
+    - Full histories up to 45 MiB commit in one request with diff-only updates; larger histories or 413 responses shrink page size (down to 1 MiB) and replace by orderSeq range;
+    - Large history uploads no longer block real-time messages from Codex, Claude, or other runtimes on the same device;
+    - Streaming replies coalesce roughly every 0.25s to reduce Server write load;
+    - Slow uplinks, 5xx errors, and transient write-lock contention adapt timeouts and retry the current batch without dropping sync or rescanning everything
+  - Startup sync and connection reliability:
+    - Runtimes stay "Running" during initial sync and resyncs (showing "Syncing DSH sessions…"), allowing you to open sessions, send messages, and answer approvals; active or open sessions sync first, and initial sync orders sessions by last used time;
+    - When the 7-day plugin account sign-in expires, sync continues using local device credentials with a Sign in again prompt; auto-start on boot retries until network and Server are ready;
+    - Fixed false errors when opening data/log folders on Windows, modal close/focus conflicts with theme plugins, missing uv executable permissions, registry errors on plugin re-enable, and DSH exiting on busy Connector or manager-lock disconnects
+  Local Connection, Desktop, and Ownership
+  - After repeated connection-pool timeouts caused by network jitter, the Connector recreates its HTTP pool and resumes history and DSH sync without restarting Desktop; running DSH alongside Desktop no longer drops the local control connection
+  - Added Connector Network settings (Follow System / Direct / Custom Proxy) in Desktop and the DSH plugin so API requests, real-time sockets, and terminals use the same path; fixed proxy bypass rules, NO_PROXY parsing, and unreachable connections when a system proxy app has exited
+  - Connector uses the OS certificate store on Windows and macOS; first-time setup on Intel Macs no longer stalls compiling cryptography
+  - Desktop cleans up orphaned Connector processes after abnormal macOS exits and shuts down the local Connector directly on OS shutdown, restart, or sign-out without blocking prompts (optional Ask before quitting on shutdown toggle in Settings → Startup & Notifications)
+  - Silent sign-in launch stays hidden unless port ownership fails or device credentials expire; unresponsive local Connectors auto-recover, and Codex version checks no longer block heartbeats or local control
+  - Deleting a user as admin now cleans up their devices, projects, and sessions; stopped or deleted runtimes no longer emit error log spam every 30 seconds
+  Web and Desktop Interface
+  - Clicking file links in agent replies (including file:// URLs, paths with spaces or CJK characters, and line/column anchors) opens an in-session preview tab; right-clicking selected text in Web chats opens the browser's native context menu
+  - Switching back to recently viewed sessions renders cached messages immediately and preserves scroll position before catching up on new items, fixing state mix-ups across session switches and credential refreshes
+  - Settings → Model Gateways lets you choose a default gateway or add model services with automatic protocol/model detection and masked key hints; admins can configure Tokens Anywhere in Admin → General, enabling sidebar linking, embedded console access, and AA sign-in confirmation (off by default unless configured on the Server)
+  - Admin usage reports read hourly rollups, and turn/approval latency percentiles compute across all samples in range; Beta and experimental runtimes display status badges
+  - Desktop's Auto (Follow System) theme updates live when OS appearance changes; long model lists scroll within the window without overlapping the titlebar; fixed ACP model loading placement and transient "Target state unavailable" banners when creating sessions
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://github.com/anywhere-labs/Agents-Anywhere/blob/HEAD/docs/getting-started.md
+ManifestType: locale
+ManifestVersion: 1.28.0
