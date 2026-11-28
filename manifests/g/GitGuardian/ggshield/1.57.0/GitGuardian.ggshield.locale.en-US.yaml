@@ -1,0 +1,84 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: GitGuardian.ggshield
+PackageVersion: 1.57.0
+PackageLocale: en-US
+Publisher: GitGuardian
+PublisherUrl: https://www.gitguardian.com/
+PublisherSupportUrl: https://github.com/GitGuardian/ggshield/issues
+PrivacyUrl: https://www.gitguardian.com/legal/privacy-policy
+Author: GitGuardian SAS
+PackageName: ggshield
+PackageUrl: https://www.gitguardian.com/ggshield
+License: MIT
+LicenseUrl: https://github.com/GitGuardian/ggshield/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 GitGuardian
+ShortDescription: Detects and validates more than 500 types of hardcoded secrets from your local environment or a CI pipeline.
+Description: |-
+  ggshield is a CLI application that runs in your local environment or in a CI environment to help you detect more than 500+ types of secrets.
+  It uses the GitGuardian public API to scan and detect potential vulnerabilities in files and other text content. Only metadata such as call time, request size and scan mode is stored from scans using ggshield, therefore secrets will not be displayed on your dashboard and your files and secrets won't be stored.
+  Secrets can be searched in files (ggshield secret scan path -r .), in repositories (ggshield secret scan repo .), in Docker images (ggshield secret scan docker ubuntu:22.04) and in PyPI packages (ggshield secret scan pypi flask).
+  Integrations
+  - CI/CD workflows.
+  - pre-commit, pre-push or pre-receive Git hooks, to prevent secrets from reaching your version control system.
+  - AI coding assistants: scan interactions between you and your AI coding assistant in real time and block actions that contain secrets before they are executed. Install the hooks with ggshield install. Supported tools are Cursor, Claude Code, Copilot Chat, Codex and Mistral Vibe 2.21+.
+Tags:
+- devsecops
+- git
+- leak-detection
+- secret-scanning
+- security
+- static-analysis
+ReleaseNotes: |-
+  Added
+  - Each standalone package now comes with a CycloneDX SBOM, attached to the GitHub release as ggshield-<version>-<target>.cdx.json. It lists the Python packages, the Python runtime, the OpenSSL builds and the Rust crates in the package.
+  - ggshield ai discover --activity now also ships the title and name of each Codex thread from Codex's state database, so the GitGuardian dashboard can name a Codex session after it instead of its first prompt.
+  - ggshield quota --json now writes a JSON object with the error detail and the HTTP status_code to stdout when the API rejects the request, so callers can tell a 403 (for example a token without the Manager access level) from other failures without matching on the message. The error message on stderr and the exit code are unchanged.
+  - ggshield honeytoken plant --type all plants every honeytoken type the workspace offers, each with its default placement. Types the workspace does not offer are skipped. It fails when a type returns any other error, or when no type can be planted. It cannot be combined with --method, --filename or --profile-name.
+  - ggshield secret scan ci now detects Harness CI and reports it as HARNESS. Harness pipelines no longer need to set the CI variable.
+  - New secret.ai_hook_failure_policy setting (allow or block, default allow), also available as the GITGUARDIAN_AI_HOOK_FAILURE_POLICY environment variable, decides what ggshield secret scan ai-hook does with an action it cannot scan: an unrecognized agent, a missing or unreadable token, an API error or a timeout. With allow, the action goes through: a known agent shows that it was not scanned, while an unrecognized agent only gets a warning on stderr, which most agents do not display. With block, it is denied.
+  Changed
+  - The release binaries now bundle Python 3.14.10 instead of 3.14.8. This fixes CVE-2026-115557, CVE-2026-114583 and CVE-2026-12345 in the bundled interpreter.
+  - ggshield machine setup now plants every honeytoken type the workspace offers (AWS and kubeconfig), not only AWS, so it can also write a kubeconfig context under ~/.kube/. It exits with an error when a type the workspace offers cannot be planted.
+  - ggshield secret scan ci now exits with a usage error (exit code 2) when it runs in a CI that it does not support. The error message lists the supported CIs.
+  - When the AI hook blocks a secret, the message the agent reads no longer suggests a way to ignore it, on any agent. It tells the agent to relay the notice without suggesting to ignore the secret or to disable the hook.
+  - The false-positive hint now goes to the user only, in the agent's own interface where it has a field the model does not read: on every Claude Code block, on Codex prompt and tool blocks, on Cursor prompt and pre-tool blocks, on VS Code tool blocks, and on Mistral Vibe post-tool blocks. Elsewhere (Copilot CLI, Junie, Kiro and the other events) it comes in a desktop notification, which the hook now raises for every block that has a hint to give, not only when a secret reached the agent.
+  - The AI hook no longer offers a false-positive hint for a secret checked as valid. When the event holds a valid secret, in the blocked content or in another document it scanned (a file mentioned in the prompt, for example), the hint covers the other secrets only and does not suggest --last-found, which would ignore the valid ones too.
+  - .sops files are no longer ignored by default by every ggshield secret scan command, ai-hook included, since they can hold secrets committed in plaintext. To keep skipping them, add **/*.sops to secret.ignored_paths in .gitguardian.yaml or pass --exclude "**/*.sops".
+  - The release binaries and OS packages now bundle anyio 4.16.0, urllib3 2.8.0, dnspython 2.9.2, filelock 4.2.12 and setuptools 84.2.1, which fix known vulnerabilities in the versions bundled before. The Docker image, which runs Python 3.10, gets the new anyio, urllib3 and setuptools.
+  - Updated the native hook's bundled CA certificates to webpki-root-certs 1.0.12.
+  Fixed
+  - Git-diff based scans no longer drop a file in silence when git considers it binary, which happens for UTF-16 and UTF-32 text as well. The file is still not scanned, but it is now named: a warning for a file that was expected to be scannable, and verbose output for one whose extension is already known to be binary. Excluded files stay silent.
+  - ggshield install --mode local run from a repository subdirectory now installs the hook into the repository root's hooks directory (or the directory configured by a relative core.hooksPath), instead of creating a stray .git/hooks directory under the subdirectory.
+  - A scan the GitGuardian API did not perform now fails instead of reporting "No secrets have been found" and exiting 0, in every secret scan command, ci and the git hooks included. It exits with code 4, which --no-fail-on-server-error can skip: a rate limit, a 403 or another error from a proxy, gateway or firewall, a timeout or a 5xx. A 403 for lack of quota still exits with code 128, and a 400 still skips the rejected files, as before.
+  - Commit scans (ci, pre-push, pre-receive, commit-range, changes, repo) now fail with exit code 128 when a batch of commits hits an unexpected error, instead of showing the error and exiting 0.
+  - Secrets found before the API failed to scan other files are now reported (exit code 1) instead of being discarded with the error. The failure is listed in the errors of the JSON report.
+  -  --no-fail-on-server-error now also skips a 502, 503 or 504 still there after the retries, during the API key check that runs before the scan. It made the command exit with code 128.
+  - A page returned with status 200 instead of a scan result, for example by a proxy, now exits with code 4 like the other refusals, and secrets found in other files are still reported. A scan result that ggshield cannot read exits with code 128.
+  - ggshield ai discover --activity no longer ships the per-bubble headers, conversation state and original file contents of a Cursor chat's composer record. A long chat pushed the record past the 256 KiB limit, where truncation made it unreadable, and the chat lost its name in the GitGuardian dashboard.
+  - The AI hook no longer tells Copilot CLI users that a secret in a tool output was exposed to the agent, nor raises the "Secrets Detected" desktop notification for it: Copilot CLI sends the block reason to the model in place of the blocked output, so the secret never reaches it. Homebrew, the Docker image and pip installs without a platform wheel keep the old message.
+  - ggshield auth login now warns when it cannot store the token in the OS credential store, for example when the macOS Keychain is locked, and gives the path of the config file where the token is saved in clear text. ggshield api-status then reports user config as the API key source, instead of keyring.
+  - When a token is in the OS credential store but cannot be read, ggshield now exits with an error instead of saying that no token is saved.
+  - ggshield auth login and other commands no longer rewrite a token they only read from the OS credential store, so the macOS Keychain item keeps the access list that lets the AI hook read it.
+  - The AI hook no longer shows a macOS Keychain dialog when an agent runs it. When it cannot read the token, it allows the action at once with a warning that says to run ggshield auth login in a terminal. ggshield machine setup and ggshield install still ask for Keychain access when needed.
+  - GITGUARDIAN_TIMEOUT=0 disables the secret scan pre-receive timeout again, as documented. Since ggshield 1.16.0 it made the hook stop every scan right away and accept the push. A negative value now falls back to the default timeout with an error message.
+  - The AI hook lists a secret found twice in the same content once, and counts it once.
+  - The AI hook no longer blocks Claude Code when it edits or writes a file that holds a secret. The model never receives that tool output, so the hook removes the secret from the output stored in the session transcript and tells the user, instead of reporting the secret as exposed to the agent.
+  - ggshield secret scan ai-hook no longer fails with "Unrecognized agent" on tool calls from the GitHub Copilot desktop app, which adds a tool_use_id field to its hook payloads.
+  - ggshield secret scan ai-hook now answers Cursor sessions in a project whose path contains "claude" in Cursor's format, and recognizes Claude Code sessions whose CLAUDE_CONFIG_DIR was moved.
+  - ggshield secret scan ai-hook no longer exits 1 for an agent it does not recognize, which made the GitHub Copilot desktop app deny every tool call while other agents ran them unscanned without notice. It now follows secret.ai_hook_failure_policy: exit 0 to allow, exit 2 to block.
+  - ggshield no longer registers AWS CodeBuild, TeamCity and Bamboo build agents as endpoints when they run ggshield.
+  Security
+  - ggshield machine commands do not load the .env file of the current directory or repository. These commands also do not use the instance and insecure values of the repository's .gitguardian.yaml file. A warning shows the values that they did not use. Before this change, a cloned repository could use these files to send the machine data and your API key to a different instance. Other commands use these files as before. Machine commands load the file that GITGUARDIAN_DOTENV_PATH sets. To select the instance of a machine command, use --instance, GITGUARDIAN_INSTANCE, ~/.gitguardian.yaml or --config-path.
+  - On macOS, ggshield machine setup runs the token check of the AI hook outside the current repository. Before this change, the .env and .gitguardian.yaml files of the repository could select the instance that receives the token.
+ReleaseNotesUrl: https://github.com/GitGuardian/ggshield/releases/tag/v1.57.0
+Documentations:
+- DocumentLabel: ggshield documentation
+  DocumentUrl: https://docs.gitguardian.com/ggshield-docs/home
+- DocumentLabel: Getting started
+  DocumentUrl: https://docs.gitguardian.com/ggshield-docs/getting-started
+- DocumentLabel: Reference
+  DocumentUrl: https://docs.gitguardian.com/ggshield-docs/reference/overview
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
