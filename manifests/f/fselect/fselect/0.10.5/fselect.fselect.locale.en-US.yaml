@@ -1,0 +1,77 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: fselect.fselect
+PackageVersion: 0.10.5
+PackageLocale: en-US
+Publisher: fselect
+PublisherUrl: https://github.com/jhspetersson/fselect/
+PublisherSupportUrl: https://github.com/jhspetersson/fselect/issues
+Author: jhspetersson
+PackageName: fselect
+PackageUrl: https://github.com/jhspetersson/fselect/
+License: Apache-2.0
+LicenseUrl: https://github.com/jhspetersson/fselect/blob/master/LICENSE-MIT
+Copyright: Copyright (c) 2018-2023, jhspetersson.
+ShortDescription: Find files with SQL-like queries.
+Tags:
+- cli
+- command-line
+- files
+- filesystem
+- find
+- hacktoberfest
+- query
+- rust
+- sql
+- sql-like
+- tool
+- utility
+ReleaseNotes: |-
+  ### Added
+
+  • `select top N ...` as a synonym for `limit N`
+
+  ### Changed
+
+  • Matroska and WebM metadata is behind the `mkv` build feature, enabled by default.
+  • The `update-notifications` build feature is no longer enabled by default.
+  • Column aliases are no longer accepted after `WHERE` and `HAVING` conditions
+  • Subquery columns are named after their query in output headers and error messages instead of a hash
+  • `DISTINCT` is rejected with a hint instead of being read as a column named "distinct"
+  • A doubled quote inside a quoted string (`'it''s'`) is a literal quote
+  • Missing numeric, date and boolean values are written as `null` in JSON output
+  • Dates and times are handled by `jiff` instead of `chrono`
+  • Several hash columns selected together (`sha1, sha256, sha512, sha3`) are computed in one read of the file
+  • `width`, `height` and `duration` of an MP4 file come from a single parse of the file
+
+  ### Fixed
+
+  • Unterminated or mismatched subquery parentheses are rejected instead of silently closed
+  • Operators such as `IN` and `BETWEEN` work after a subquery in the `SELECT` list
+  • A correlated subquery in a grouped query may only read grouping columns of the outer row
+  • `INTO` inside a subquery is rejected with a clear message
+  • `EXISTS` with a doubly parenthesized subquery evaluates the subquery instead of being always true
+  • An invalid regular expression literal is reported once when the query is parsed instead of per file
+  • A negative operand written with a space after the minus sign (`size > - 1`) is parsed as a number
+  • An aggregate function in `WHERE` is rejected instead of silently matching nothing
+  • `GROUP BY` and `ORDER BY` without an expression are rejected
+  • A column alias may be referenced in the `SELECT` list before the column that declares it
+  • Division by a literal zero is rejected when the query is parsed instead of per file
+  • A date literal with an impossible month (`2020-13-01`) is rejected instead of being read as arithmetic
+  • Nested aggregate functions (`count(count(*))`) are rejected
+  • `AS` without an alias, or an alias inside parentheses, is rejected instead of being ignored
+  • Two search roots with the same alias are rejected
+  • An invalid literal unit, day count, precision or position argument of a date or string function is reported once when the query is parsed instead of per file
+  • `NOT` without a following operator (`where is_file not`) is rejected instead of being ignored
+  • A column name used as a function (`sha1(name)`) is rejected instead of being read as two columns
+  • `NOT IN` no longer accepts a row when the list or subquery contains a NULL member and nothing matches
+  • Numeric functions such as `ABS`, `GREATEST` and `HEX` read the byte count of `fsize` instead of its formatted text
+  • A relative date such as `1 year ago` no longer fails when it lands in January
+  • A date with non-ASCII letters (`2024é`) is rejected instead of crashing
+  • `2 days ago` and similar day offsets keep the time of day across a daylight saving change
+  • Comparing a boolean with a number gives the same result in either order (`is_file = size` and `size = is_file`); the boolean counts as 1 or 0
+  • `HAVING` reads a computed right-hand operand as a number, date or boolean the same way `WHERE` does
+ReleaseNotesUrl: https://github.com/jhspetersson/fselect/releases/tag/0.10.5
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
