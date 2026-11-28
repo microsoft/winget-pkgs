@@ -1,0 +1,69 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: ethan-blue.PopGlot
+PackageVersion: 0.2.0
+PackageLocale: zh-CN
+Publisher: PopGlot
+PublisherUrl: https://github.com/ethan-blue
+PublisherSupportUrl: https://github.com/ethan-blue/PopGlot/issues
+PrivacyUrl: https://github.com/ethan-blue/PopGlot/blob/HEAD/docs/PRIVACY.md
+Author: ethan-blue
+PackageName: PopGlot
+PackageUrl: https://github.com/ethan-blue/PopGlot
+License: MIT
+LicenseUrl: https://github.com/ethan-blue/PopGlot/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 PopGlot Contributors
+ShortDescription: Windows 划词与截图翻译工具，译文出现在光标旁。
+Description: |-
+  选中文字按下 Ctrl+Alt+W，译文出现在光标旁；截图框选默认用本机 Windows OCR，图片不出本机。面向在 Windows 上阅读英文技术内容的程序员：报错、注释、命令、文档。
+  - 划词：任意程序里 Ctrl+Alt+W，原剪贴板按序列号恢复。
+  - 截图：Ctrl+Alt+Space 框选，默认本机 OCR 识别。
+  - 工作台：Ctrl+Alt+O，左原文右译文，「要点」是独立视图。
+  - 查词：Ctrl+Alt+Q，输入后 Enter 翻译。
+  - 引擎：OpenAI 兼容、OpenAI Responses、Anthropic、Gemini、Ollama、LM Studio；未配置引擎时走 Google 公共翻译，可切换 MyMemory。
+  - 安全离线模式：拦截所有外发请求，本机模型地址不受影响。
+  - 主题跟随系统 / 浅色 / 深色，快捷键可在「设置 → 快捷键」重新录制。
+Tags:
+- ocr
+- 人工智能
+- 划词
+- 划词翻译
+- 截图
+- 截图翻译
+- 翻译
+ReleaseNotes: |-
+  本次版本合并了多路对照翻译、统一主窗口、启动提速与公共线路选路修复，建议旧版用户直接运行新版安装包原地覆盖升级。
+  新增
+  - 统一主窗口：原先分开的工作台、资料库、引擎管理、使用指南与设置弹窗合并为同一套主窗口，左侧栏直接切换；划词浮窗与极速查词同步使用同一套浅/深色样式与快捷键配置。
+  - 多路对照翻译（最多 6 路）：工作台与划词浮窗支持同时对比最多 6 个引擎（AI 模型、公共翻译线路、自定义翻译 API 可混排）。顶部引擎条点击即可增删线路，拖动译文卡片左侧手柄直接调整顺序；每条线路可单独设为「自动」或「手动」，手动线路点击播放按钮才发请求；对比中新增线路时只翻译新增的那一路，不重跑已有结果。
+  - 引擎中心与多条自定义翻译 API：「设置 → 引擎」整合为左侧「全部 / 翻译 API / AI 模型」清单加右侧配置面板，列表行支持直接开关与两步删除，添加页按「AI 模型 / 翻译 API / 自定义」分组。自定义翻译 API 支持保存多条（custom-translation-api-list.json，自动迁移旧单条配置），密钥继续按地址隔离保存在 Windows 凭据管理器。
+  - 术语表与资料库优化：新增术语表管理与译文高亮替换；资料库历史和生词本改为分页加载、搜索 150ms 防抖并跳过输入法组词阶段；浮窗与工作台解释区按 Markdown 渲染（粗体、列表、行内代码），列表摘要自动去掉 Markdown 符号。
+  - 手动检查更新：「设置 → 通用」底部显示当前版本号与「检查更新」按钮，检测到新版时给出下载页入口；配合「自动检查更新」开关，发布新版本后自动提示前往下载。
+  变更
+  - 主窗口秒启与去黑闪：内置界面虚拟主机改用保留域名（popglot-ui.example），冷启动首帧缩短至约 200ms；首次显示采用 DWM 隐身等待首帧绘制完成后呈现，并在后台常驻时静默预热主窗口（真实屏幕坐标与 DPI，不抢焦点、不闪任务栏），单击或双击托盘图标可直接热打开，消除打开瞬间的黑框闪烁。
+  - 默认公共线路与多路避重：内置公共翻译默认设为「自动优选」；在多路对照中，「自动优选」会自动避开同组已选中的具体公共线路，并在卡片标题标出本次实际走出的线路名（例如 自动优选 · Google）。
+  - 划词与截图交互精简：划词悬浮触发图标默认关闭（可在「设置 → 通用」开启）且尺寸缩小为 34×34；工作台移除多余的「排序」按钮，直接拖拽卡片排序；首次引导收拢为单页卡片；截图框选在冻结桌面就绪时改用硬件加速绘制并移除随光标移动的阴影，降低拖框卡顿。
+  - 备份包升级至 v2：备份纳入自定义提示词模板与自定义翻译 API 列表（仅元数据，不含密钥），向下兼容 v1 备份恢复，备份元数据改为写入实际程序集版本。
+  修复
+  - 「自动优选」与有道词典在中文句子上报错「无法解析的响应」：此前短词判定按空格分词，无空格的中文长句被误判为单词并送往有道词典接口；现对含 CJK 字符的文本限定 6 字以内且无句中标点才走有道词典，中文句子改走 Google / Bing / MyMemory。手动选用有道词典翻译长句且未命中词条时，如实说明词典适用范围而非提示解析失败。
+  - 多路对照选择与停用保护：修复工作台点「+」新增对照线路后原有勾选被清空的问题；停用当前默认引擎时自动回退到其余可用线路，避免无可用引擎；修复多路引擎栏换行错位与窄窗下设置卡片底部被裁切的问题。
+  - 截图视觉线路与小字号 OCR：文字线路切到公共翻译或自定义 API 时，视觉截图线路仍独立沿用已配置的视觉模型；修正 14px 小字号 OCR 双倍率评分，避免丢词结果覆盖完整识别；截图不可用时按当前模式说明缺少哪一项。
+  - HTTP 错误信息与草稿保护：非流式 4xx/5xx 响应提取并脱敏展示上游错误摘要（如模型不存在、配额用尽），不再只剩状态码；自定义翻译 API 编辑器加入未保存草稿保护，切换条目或页面时不再静默丢稿。
+  迁移
+  - 无破坏性迁移。已有设置、历史记录、生词本、引擎配置与 Windows 凭据管理器中的密钥自动保留；升级直接运行新版安装包即可原地覆盖，无需先卸载。
+  验证与边界
+  - 本地验证通过 Rust 格式/Clippy/工作区全量测试、PureTests（103 项）、CliTests --ui 及 LogicTests（多路对照、免费线路与 WebShell 冷热启动测试）；安装版真机完成后台预热唤醒与冷启像素校验，无黑屏与黑闪。
+  - 安装包未签名，首次运行可能出现 Windows SmartScreen 提示，点「更多信息」→「仍要运行」即可。
+ReleaseNotesUrl: https://github.com/ethan-blue/PopGlot/blob/HEAD/CHANGELOG.md#020---2026-11-28
+Documentations:
+- DocumentLabel: 快速上手
+  DocumentUrl: https://github.com/ethan-blue/PopGlot/blob/HEAD/docs/help/getting-started.md
+- DocumentLabel: 使用帮助
+  DocumentUrl: https://github.com/ethan-blue/PopGlot/blob/HEAD/docs/help/index.md
+- DocumentLabel: 隐私与数据
+  DocumentUrl: https://github.com/ethan-blue/PopGlot/blob/HEAD/docs/help/privacy-and-security.md
+- DocumentLabel: 常见问题
+  DocumentUrl: https://github.com/ethan-blue/PopGlot/blob/HEAD/docs/help/troubleshooting.md
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
