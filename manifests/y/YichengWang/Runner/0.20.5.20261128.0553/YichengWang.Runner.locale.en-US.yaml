@@ -1,0 +1,45 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: YichengWang.Runner
+PackageVersion: 0.20.5.20261128.0553
+PackageLocale: en-US
+Publisher: wyc studios
+PublisherUrl: https://runnersh.dev/
+PublisherSupportUrl: https://github.com/yicheng47/runner/issues
+Author: Yicheng Wang
+PackageName: Runner
+PackageUrl: https://runnersh.dev/downloads/
+License: MIT
+LicenseUrl: https://github.com/yicheng47/runner/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Yicheng Wang (Jason Wang)
+ShortDescription: Runs Claude Code, Codex, Copilot CLI and other terminal coding agents together on one mission.
+Description: 'Runner is a native desktop application where terminal agents work together. Claude Code, Codex, OpenCode, Cursor CLI, Grok Build, Antigravity CLI, Copilot CLI and pi can take the same task in one mission, and each agent keeps its own TUI in a real terminal while the lead brings the decisions back to you. Everything in Runner is also a `runner` command: missions, crews, roles, projects, chats, sessions and messages are all addressable from the command line, with `runnerd` as the background service. Agents run natively on Windows without WSL, and PowerShell 7 is optional. Status: alpha, actively shipping. Native builds target macOS (Apple Silicon) and Windows (x64) on Windows 10 version 1809 or later; Intel Macs, Windows ARM64 and Linux are not supported. The installer, the application and the CLI sidecars are Authenticode-signed with a Certum open-source certificate issued to Open Source Developer Yicheng Wang.'
+Tags:
+- ai
+- claude-code
+- codex
+- command-line
+- console
+- terminal
+ReleaseNotes: |-
+  Runner 0.20.5 is a feature release for macOS, Windows and Linux on top of 0.20.4. It adds native image and SVG preview with Unified and Split image diffs, offline crew and role template import and export, a configurable default for terminal file links (Runner preview by default), an anonymous active-install heartbeat with Settings → Privacy, a redesigned app icon, an Antigravity CLI 1.5.8+ update gate, and several macOS and Windows fixes.
+  New
+  - Image and SVG preview and diffs in Files and Changes. Preview PNG, JPEG, GIF, WebP, BMP and SVG files directly in Files with a theme-aware transparency checkerboard, zoom stepper (fit to 800%), ⌘+/⌘− (Ctrl+=/Ctrl+−), continuous trackpad pinch zoom, double-click fit/100%, panning, per-tab zoom and pan state, live reload on edits, and an Image | Diff switch. SVGs re-rasterize sharply on zoom with a Rendered | Source toggle (⌘F switches to Source) and automatic Source fallback for broken files. Changes previews image and SVG diffs in Unified (stacked) or Split (side-by-side, auto-maximizing narrow panels) layouts at one shared scale with lockstep zoom and pan, one-sided Added / Deleted views and the Viewed footer. (#1460)
+  - Offline crew and role template import and export. Export and import .crew.toml and .role.toml templates from Crews and Roles (Import… / Export…, via drag-and-drop or Choose file…) and the CLI (runner crew export/import, runner role export/import). Imports stay completely offline and exclude environment variables, working directories and custom commands; the 3-step import dialog lets you edit names and handles, reassign missing runtimes per slot or in bulk, and read every system prompt and team convention in a Source-default Prompt Reader (showing invisible and bidi Unicode characters) before anything is created. Includes 8 curated example .crew.toml templates in examples/ across dev, social, video and fun categories. (#804, #1515)
+  - Choose where terminal file links open (Runner preview by default). Added Settings → General → File links so ⌘-click (Ctrl-click on Windows and Linux) on local terminal file paths opens previewable text, code, Markdown and image files in Runner preview by default, or in your chosen Editor (shared and synced with the viewer's Open in menu). Local files outside the Files root now preview in side-panel tabs without changing your project tree (without a Diff toggle); .html/.htm links open in your default browser, known binary files open in their default app, Changes dims and disables cleanly with a tooltip on non-git folders, and cannot-preview placeholders clearly explain binary (including NUL-free PDF) and over-10 MB limits. (#1458)
+  - Anonymous active-install heartbeat and Settings → Privacy. Added Settings → Privacy and a first-run onboarding checkbox to control an anonymous daily install ping (at most once per 24 hours with version, platform, random install ID and coarse feature flags — never prompts, code, paths, accounts or logged IP addresses). You can preview the exact JSON payload, pause telemetry (clearing the install ID), Reset ID, or disable it via DO_NOT_TRACK=1 or RUNNER_TELEMETRY=0. (#1341)
+  - Redesigned Frameless Glass app icon with post-update cache refresh. Replaced Runner's app icon with a frameless green-black phosphor glass tile and refined glow and sheen across macOS, Windows (16–256 px full-bleed tiles) and Linux. Bundled macOS .app builds now keep their native .icns bundle icon at runtime so Liquid Glass compositing and Dock sizing match neighboring apps, and updates refresh OS icon caches across macOS, Windows and Linux. (#1490, #1496, #1500)
+  - Antigravity CLI 1.5.8+ version gate and in-app updates. Runner now requires Antigravity CLI (agy) 1.5.8+. Older installs show Update needed and update directly via agy update (clearing any inherited AGY_CLI_DISABLE_AUTO_UPDATE override for explicit updates while keeping background auto-updates disabled in Windows sessions). Runner now checks Antigravity's per-platform release manifest alongside npm-based runtimes so optional updates appear in Settings → Agents. (#1479)
+  Bug fixes
+  - Local notification clicks never hijack remote windows. Clicking a local chat, mission, usage or pairing notification while viewing a remote host now focuses an existing local window — or opens a new local window when every open window is remote — instead of disconnecting or taking over the remote window, and ignores notifications whose target no longer exists. (#1413)
+  - Windows: restore minimized windows cleanly on the first taskbar click. Moved Windows toast notification permission queries off the OLE STA UI thread and deferred toast withdrawal until the window is visible, stopping Windows' COM modal loop from discarding SC_RESTORE with a beep when restoring via the taskbar, Alt+Tab, Win+Tab or Win+<n>, and eliminating RefCell already borrowed bursts on window activation. (#1424)
+  - Windows remote hosts: browse other drives and clean paths in the folder picker. Browsing folders on a remote Windows host now shows ordinary C:\… and \\server\share\… paths instead of \\?\ verbatim prefixes, and clicking Parent at a drive root opens a Drives list so you can reach D:\ and other drives. (#1394)
+  - Standalone ⌘T / Ctrl+Shift+T terminal tabs open in Recents at $HOME. Pressing ⌘T (Ctrl+Shift+T) from an occupied tab now starts a new standalone terminal tab under Recents in $HOME (or the remote host's home folder without taking over an unfocused empty sibling pane), while ⌘T inside an open launcher or focused empty split pane keeps using that launcher's or tab's folder. (#1502)
+  - macOS: aligned automatic update checks to every 6 hours. Set Sparkle's scheduled check interval to 6 hours across Stable, Nightly and Preview Nightly (arm64 and x64), matching Windows and Linux. (#1517)
+  - Upgraded GPUI to 0.3.14, cutting macOS idle CPU and wakeups. Upgraded gpui-pre from 0.3.7 to 0.3.14 (and Rust to 1.98.1), awaited in-flight system notification dismissals on quit, and brought upstream frame pacing (CAMetalDisplayLink on macOS 14+) and UAX #14 text wrapping, dropping single-window idle CPU and package-idle wakeups on macOS to zero (#1135). (#1481)
+  Nightly channel
+  - Preview Nightly builds are now cut automatically from a permanent preview branch (currently soaking the libghostty-vt terminal engine migration, #1508) instead of per-feature branch lists, and macOS Nightly and Preview Nightly builds now also check for updates every 6 hours. The regular nightly channel continues tracking main. (#1522, #1517)
+ReleaseNotesUrl: https://github.com/yicheng47/runner/releases/tag/v0.20.5
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
