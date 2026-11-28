@@ -1,0 +1,64 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.28.0.schema.json
+
+PackageIdentifier: hsingjui.Pilo
+PackageVersion: 0.5.2
+PackageLocale: zh-CN
+ShortDescription: 简洁的 Pi Coding Agent 桌面客户端，在一个工作区中管理 Local、WSL 与 SSH 项目。
+Description: |-
+  Pilo 是 Pi Coding Agent 的桌面客户端，不重新实现 Agent。它负责在统一工作区中呈现 Connection、Project 与 Pi Session，而会话状态和 Agent 行为仍由 Pi 负责。
+
+  核心能力
+
+  | 能力                               | 为什么重要                                                                                            |
+  | ---------------------------------- | ----------------------------------------------------------------------------------------------------- |
+  | Local、WSL、SSH 统一工作区         | 项目保留在原本的环境中；Pilo 会在所选环境中运行 pilo-server，不需要先把远程项目复制到桌面端。         |
+  | Pi 运行在代码所在环境              | 服务端以项目目录为工作目录启动 pi --mode rpc，Local、WSL 与 SSH 使用一致的交互方式。                  |
+  | Pi 保持事实来源                    | Session 直接读取 Pi 的 JSONL 文件；SQLite 只保存可重建的索引、缓存和桌面状态。                        |
+  | Chat、工具、终端、文件与 Diff 同窗 | Pilo 展示 Pi 的思考与工具调用，并整合 PTY 终端、文件操作、预览端口以及 Git 状态/Diff。                |
+  | 并行 Agent                         | 同一项目可以运行多个 Agent 流，并分别列出、发送消息或停止。                                           |
+  | 原生桌面更新                       | Release 构建会为 Windows x64 与 macOS arm64 生成 updater 产物，Pilo 可以从 GitHub Releases 检查更新。 |
+
+  架构
+
+  Pilo 由桌面应用和运行在目标 Connection 环境中的 pilo-server 组成。Local 直接运行，WSL 通过 wsl.exe，SSH 则向远端部署匹配平台的服务端二进制。桌面端与服务端通过 crates/pilo-protocol 定义的 protobuf Envelope 帧在 stdio 上通信。
+
+  ┌──────────────────────────────┐
+  │        Pilo Desktop          │
+  │       React + Tauri 2        │
+  └──────────────┬───────────────┘
+                │ pilo-protocol / stdio
+                ▼
+  ┌──────────────────────────────┐
+  │          pilo-server         │
+  │   Local | WSL | SSH target   │
+  └──────────────┬───────────────┘
+                │ pi --mode rpc
+                ▼
+  ┌──────────────────────────────┐
+  │       Pi Coding Agent        │
+  └──────────────────────────────┘
+Tags:
+- pi
+- pi-agent
+- 人工智能
+- 代码
+- 大语言模型
+- 智能体
+- 编程
+- 聊天机器人
+- 自主智能
+ReleaseNotes: |-
+  Pilo v0.5.2
+  新功能
+  - 会话归档：可在桌面侧边栏和移动端 WebUI 的抽屉中归档、查看和恢复会话。归档不会删除聊天记录。
+  - WebUI 外观设置：可在每个浏览器中单独设置浅色 / 深色模式和文字大小。
+  - 新增 Linux 安装包：除原有的 .tar.gz 外，还提供 .deb、.rpm 和 AppImage。
+  优化与修复
+  - 会话切换更可靠：未发送的草稿随会话保留，切换项目或断线重连后仍可返回临时会话；只在聊天可见时标记已读。
+  - 移动端输入更稳定：修复软键盘弹出、选取图片或跳到最新消息时，输入框丢失焦点或聊天列表意外滚动的问题。
+  - 页面和聊天更流畅：减少 WebUI 首次打开时需要加载的内容，降低长会话历史读取和流式回复的渲染开销。
+  - 工作区体验改善：改进 SSH / WSL 连接配置、远程配对、文件预览和 Git 工作区导航；修复终端复制粘贴和切换标签时丢失画面的问题。
+  完整变更：v0.5.1 → v0.5.2
+ManifestType: locale
+ManifestVersion: 1.28.0
