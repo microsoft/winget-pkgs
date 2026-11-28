@@ -1,0 +1,43 @@
+# winget installer manifest for the Mash desktop app, filled by packaging/render.py.
+# The installers are the NSIS installers Tauri builds: they install for the
+# current user without elevation, /S installs silently and /P shows only the
+# progress bar. ProductCode and AppsAndFeaturesEntries are what the installer
+# writes under the user's Uninstall registry key; release-check.yml's winget
+# job compares them with an installed copy.
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.10.0.schema.json
+PackageIdentifier: MashHQ.Mash
+PackageVersion: 0.3.1
+InstallerType: nullsoft
+Scope: user
+InstallModes:
+  - interactive
+  - silent
+  - silentWithProgress
+InstallerSwitches:
+  Silent: /S
+  SilentWithProgress: /P
+UpgradeBehavior: install
+Protocols:
+  - mash
+ProductCode: Mash
+AppsAndFeaturesEntries:
+  - DisplayName: Mash
+    Publisher: getmash
+    ProductCode: Mash
+# The app and the engine it carries are built against the Visual C++ runtime
+# for their architecture.
+Installers:
+  - Architecture: x64
+    InstallerUrl: https://github.com/mashhq/mash/releases/download/v0.3.1/mash-desktop-windows-x64-setup.exe
+    InstallerSha256: CCFFED28F69E02778419A60983DCDE35FFA04B9865E5C971CAD43E4D895CC9B7
+    Dependencies:
+      PackageDependencies:
+        - PackageIdentifier: Microsoft.VCRedist.2015+.x64
+  - Architecture: arm64
+    InstallerUrl: https://github.com/mashhq/mash/releases/download/v0.3.1/mash-desktop-windows-arm64-setup.exe
+    InstallerSha256: C8C0CA556F5BCF0DAD6D38E96ABF7EB9B88915BAEE55CF54927D224A8C869AB6
+    Dependencies:
+      PackageDependencies:
+        - PackageIdentifier: Microsoft.VCRedist.2015+.arm64
+ManifestType: installer
+ManifestVersion: 1.10.0
