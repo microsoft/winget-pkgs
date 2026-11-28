@@ -1,0 +1,53 @@
+# Created by Anthelion using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: FoxDenSoftware.WireFox
+PackageVersion: 1.0.10
+PackageLocale: en-US
+Publisher: FoxDen Software
+PublisherUrl: https://wirefox.foxdensoftware.dev/
+PublisherSupportUrl: https://github.com/TalviFox/WireFox/issues
+Author: FoxDen Software
+PackageName: WireFox
+PackageUrl: https://wirefox.foxdensoftware.dev/
+License: PolyForm Perimeter License 1.0.0
+LicenseUrl: https://github.com/TalviFox/WireFox/blob/main/LICENSE
+Copyright: Copyright (c) 2026 FoxDen Software
+ShortDescription: Automated roaming and watchdog manager for WireGuard on Windows
+Description: WireFox bridges the missing link of WireGuard on Windows with intelligent background roaming and kernel-level tunnel watchdog protection. Auto-disconnects on trusted home Wi-Fi and gateways, auto-connects on untrusted networks, and defends against ARP spoofing.
+Moniker: wirefox
+Tags:
+- wireguard
+ReleaseNotes: |-
+  WireFox bridges the missing link of WireGuard on Windows: intelligent background roaming and kernel-level tunnel watchdog protection.
+  📝 What's New in v1.0.10
+  Addressing app ux freezing
+  - UI Thread Decoupling & wg.exe Timeout Guard: Offloaded DiagnosticsViewModel summary/scan queries and SettingsViewModel tunnel discovery off the WPF UI thread, and replaced unbounded StandardOutput.ReadToEnd() calls in WireGuardCliService with a strict 3-second timeout + process termination guard so a wedged wg.exe pipe can never freeze the UI, tray icon, or background watchdog.
+  - Default-Off Debug Logging & Log Rotation: Added a Debug Logging toggle on the Diagnostics page (off by default) with a 5 MB rollover cap (app.log.old), streamed self-hash verification in UpdateService, and guarded all async void event handlers.
+  - Serialized WatchdogService State Machine: Unified OnNetworkSettled, OnPeriodicCheckAsync, OnConfigChanged, OnNotificationAction, and manual tunnel commands under a single SemaphoreSlim gate with a timer re-entrancy guard to prevent overlapping wake/reconnect races.
+  - Initial Setup Watchdog Gate: Deferred automatic tunnel activation and recovery until InitialSetupCompleted is true, preventing background watchdog races during first-run setup.
+  - Post-Wake Settling Window: Enforced a 4-second post-wake grace deadline in NetworkMonitorService so flapping NetworkAddressChanged events cannot prematurely shorten sleep-resume stabilization.
+  - Non-Blocking Dispatcher Audit: Replaced remaining synchronous Dispatcher.Invoke calls in TrustedNetworksViewModel, WatchdogService, and LoggingService with InvokeAsync, and offloaded tray ContextMenuStrip actions to background tasks.
+  - Tray, Offline Standby & About UX: Added a Tunnel Ready (Offline) gray standby indicator when physical uplinks drop with an armed tunnel, a Restart dropdown (Restart WireFox, Restart WireFox + WireGuard) and standalone About popup on the system tray menu, plus GitHub/Releases/Issues/Ko-fi links in Settings > About.
+  Run PowerShell as Administrator to install or seamlessly upgrade in place:
+  irm https://raw.githubusercontent.com/TalviFox/WireFox/main/install.ps1 | iex
+
+  🔒 Checksums & Binary Verification
+  ─────────────┬────────────────────────────────────────────────────────────────
+  File         │SHA-256 Checksum
+  ─────────────┼────────────────────────────────────────────────────────────────
+  WireFox.exe  │6465e4041befcf4eb44621566fb9601debde3cbd3977d297f7cf8bd990eb0830
+  ─────────────┼────────────────────────────────────────────────────────────────
+  uninstall.ps1│15f6db58ad6fa8ba300058e66a088546e421eb583331e8cddbb1a4e253330d4f
+  ─────────────┼────────────────────────────────────────────────────────────────
+  verify.ps1   │b62465441f23f42c5cab181ea67366349a5780e8535fab9c72a4870b789ae0d7
+  ─────────────┴────────────────────────────────────────────────────────────────
+  Verify integrity before running (PowerShell):
+  irm https://raw.githubusercontent.com/TalviFox/WireFox/main/verify.ps1 | iex
+ReleaseNotesUrl: https://github.com/TalviFox/WireFox/releases/tag/v1.0.10
+InstallationNotes: Requires WireGuard for Windows to manage tunnels.
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/TalviFox/WireFox/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
