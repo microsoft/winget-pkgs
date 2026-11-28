@@ -1,0 +1,64 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.28.0.schema.json
+
+PackageIdentifier: Ray-lea.Argus
+PackageVersion: 0.7.0
+PackageLocale: en-US
+ShortDescription: A fast, modern and informative task manager for Windows
+Description: |-
+  Argus reads Windows' native interfaces directly from Rust, with an interface built on Tauri 2 and SolidJS. Processes, performance, services, startup apps, network connections and the last 7 days of history share one window, and the charts move smoothly at the display's refresh rate; resident in the system tray, it uses about 1% of one CPU core. It is named after Argus Panoptes, the hundred-eyed giant of Greek myth.
+
+  ✨ Features
+  🧮Processes: View by app, as a process tree or as a list, including each process's GPU usage, plus network traffic when the privileged service is enabled or Argus runs as administrator. Sort, search, end a process or its whole tree; the details pane shows the command line, user, integrity level and more.
+  ⚡Priority and efficiency mode: Set them from the context menu, or create rules that apply them every time a program starts.
+  📈Performance: CPU (per core, P-cores and E-cores, frequency, temperature, power), memory, disks, network, GPU and battery.
+  🧩Services and startup apps: Start and stop services and change their startup type; enable or disable startup apps with the same switch as Windows Task Manager.
+  🌐Connections and ports: TCP and UDP endpoints with the processes they belong to; search by exact port and close connections.
+  🔍File locks: Drop a file or folder onto the window to find the processes using it, combining Restart Manager with handle enumeration, including processes' current directories; the privileged service can check more processes.
+  🕘History: Resource charts for the last 7 days; click any moment to see the busiest processes at that time.
+  📌System tray: Show or hide the window with the global shortcut Ctrl+Alt+Esc; it uses very little while hidden.
+  🔄In-app updates: Stable and beta channels, with optional GitHub proxies; only updates that pass signature verification are installed.
+  🎨Native look: Mica background and the system accent color; dark and light themes follow Windows by default or can be chosen in Settings.
+  🌍Languages: English and Simplified Chinese, following the Windows display language by default; a welcome guide sets up the essentials on first start.
+  👤No administrator rights needed: See the path and resource usage of every process as a standard user.
+  🛡️Optional privileged service: After a single administrator approval, Argus running as a standard user can also manage system processes, apply rules automatically, measure per-process network traffic, control services and close connections; it can be uninstalled in Settings.
+Tags:
+- system-monitor
+- task-manager
+ReleaseNotes: |-
+  Argus v0.7.0 introduces Windows ARM64 installer and portable builds, with the app, the privileged service and Task Manager replacement running natively on ARM64. Processes adds 27 optional columns and two actions, “Create memory dump file” and “Debug”. A new byte units setting arrives, the taskbar monitor supports vertical taskbars, and Argus can send a Windows notification when a new version is available. This release also reduces redrawing while the interface is idle and fixes issues including Ryzen 9000 sensors, the taskbar monitor covering the Start button and a privileged service that could not be reinstalled after its registration was deleted.
+  This release completely rewrites the documentation site; visit the documentation site (in Chinese) for detailed usage of each feature.
+  Breaking changes
+  - Column menu: The column header context menu on Processes no longer shows or hides columns by category. Click “Select columns…” in the menu and choose the columns to show in the dialog.
+  Features
+  - Windows ARM64: ARM64 installer and portable builds are available, with the app, the privileged service, administrator mode and Task Manager replacement running natively and in-app updates staying on the ARM64 build. Performance shows the vendor, model, instruction sets and virtualization status of ARM64 processors, and CPU power comes from Windows energy meters; kernel sensors are not available on ARM64 yet. (#172)
+  - Process columns: The “Select columns” dialog adds 27 optional columns, including running time, kernel and user CPU, context switches, shared working set, paged and non-paged pool, hard faults, and disk and I/O operation counts and totals. Sampling cost is unchanged while none of these columns is selected.
+  - Details pane: Lists the readings of every optional process column. The Resources and Totals sections add context switches, hard faults and requests per second, and readings such as working set and commit size show their peaks. “Copy details” includes these items as well.
+  - Memory dumps and debugging: The context menu of a single process adds “Create memory dump file” and “Debug”. Dump files are written to the temporary folder, and a notification shows the path when done; when a just-in-time debugger is registered, “Debug” starts it and attaches it to the process. (#169, #197)
+  - Byte units: “Settings → Data and history” adds “Byte units”, with Traditional (default), Binary IEC or Decimal SI. Memory, storage capacity, transfer rates, chart scales and monitor readings switch accordingly. (#156)
+  - Vertical taskbar: When the taskbar is on the left or right of the screen, the taskbar monitor stacks its readings along the taskbar. All four styles have a vertical layout and show only the readings that fit. (#177)
+  - New version notifications: When the window is hidden in the tray or not in the foreground, the installed version sends a Windows notification once a new version is downloaded and verified, and the portable version once a new version is found; clicking it opens the update dialog. With “Notify me when an update is available” turned off under “Settings → Updates”, the notice appears at the bottom right of the window when it is shown.
+  - Switching pages: Ctrl+Tab and Ctrl+Shift+Tab switch to the next or previous page, wrapping around at either end. (#185)
+  - Top navigation: When the page bar runs out of space, the top navigation tabs collapse to icons first, and hovering shows the page name and shortcut; only if space is still short do the page controls move to the next line. (#87)
+  - Documentation site: All documentation is rewritten. A new “Getting started” section covers Quick start, What is Argus, Installation and updates, and a comparison with Windows Task Manager; the user guide is split by app page into Processes, Performance, Services and startup apps, Connections, History and more, with descriptions checked and completed against the code.
+  Performance
+  - Redrawing: Visible windows whose content is unchanged no longer redraw on every screen refresh. On a 160 Hz display, CPU cycles per second with Settings idle drop by about half; the presented frame rates of animation and scrolling are unchanged.
+  Fixes
+  - Tray icon: The default style is now “App icon”, as “Trend” was hard to make out on dark taskbars; Components now selects the tray icon style from a drop-down list. (#178)
+  - Taskbar monitor: With centered taskbar buttons, readings no longer cover the Start button and app buttons; only the readings that fit are shown. When Group Policy disables widgets, the monitor no longer leaves a gap for the Widgets button.
+  - Desktop monitor: After Windows starts or Argus restarts, an enabled desktop monitor appears right away without being turned off and on again.
+  - Ryzen 9000: Models with disabled cores in a CCD (such as the Ryzen 9 9900X3D) no longer show “Unrecognized sensor table” and read the current values and limits of PPT and TDC. Once the core mapping is verified, per-core temperatures, voltages and C0/C1/CC6 residency also appear. (#203)
+  - GPU and CPU readings: While a discrete GPU sleeps, the GPU page keeps the last “Max core clock” it read. With kernel sensors on and a 30-second background refresh interval, CPU power and effective clock speed no longer come and go, and history recorded in the background no longer misses them.
+  - Privileged service and kernel sensors: When security software or a cleanup tool deletes the service's registration, the service can be reinstalled from Argus right away without restarting Windows first. After PawnIO is uninstalled or its device is removed, turning kernel sensors back on reinstalls the driver automatically if the installed driver is version 2.2.0 or earlier.
+  - Administrator mode: Administrator mode can be turned on even when Task Scheduler keeps a leftover registration with the same name; if registration is refused, the message points to possible blocking by security software such as 360. Error messages show each error code once, with HRESULTs in hexadecimal.
+  - Task Manager replacement: With replacement turned on, clicking “Open Windows Task Manager once” from an administrator account no longer does nothing. When Argus does not respond, Task Manager entry points fall back to Windows Task Manager without waiting through an extra timeout.
+  - Right-to-left text: Arabic, Hebrew and other right-to-left text in process names, descriptions and the search box no longer appears reversed. (#155)
+  - Menus and panes: Long submenus opened near the bottom of the window no longer have their last item cut off by the window edge. The details pane sizes its label column to the longest label, so labels such as “Dedicated GPU memory” no longer wrap. Dialog cards no longer flash white when closing in Mica windows.
+  - Icons after updating: After installing or updating, desktop shortcuts and Argus pinned to the taskbar show the new icon immediately, without restarting the PC.
+  Upgrading
+  - Privileged service: The communication protocol remains version 12. Ryzen 9000 readings, kernel sensor power in the background, the Task Manager replacement fixes and, on Windows versions before Windows 11 24H2 with standard permissions, disk operation counts take effect once the service is updated. Upgrading the installed version updates an installed service; with the portable version, click “Update service” under “Settings → Permissions → Privileged service”.
+  - Installed version on ARM64 PCs: On ARM64 PCs, version 0.6.0 still downloads the x64 installer, which asks for the ARM64 version and exits. Download Argus_0.7.0_arm64-setup.exe from the website and install it over the existing location; settings and history are kept, and later in-app updates use the ARM64 build.
+  - Portable version on ARM64 PCs: Exit Argus and replace the program with Argus_0.7.0_arm64.exe. If “Allow running as administrator” is on, turn it off first and turn it on again from the new version after replacing the file.
+  - Tray icon: A tray icon whose style was never changed shows the app icon after upgrading. To show live CPU usage, choose “Trend”, “Share” or “Number” under “Tray icon” on Components.
+ManifestType: locale
+ManifestVersion: 1.28.0
