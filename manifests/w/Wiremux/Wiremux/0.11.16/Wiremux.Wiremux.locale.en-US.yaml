@@ -1,0 +1,37 @@
+# Created with WinGet Releaser using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Wiremux.Wiremux
+PackageVersion: 0.11.16
+PackageLocale: en-US
+Publisher: Wiremux
+PublisherUrl: https://github.com/wiremuxhq/wiremux
+PublisherSupportUrl: https://github.com/wiremuxhq/wiremux/issues
+PackageName: Wiremux
+PackageUrl: https://github.com/wiremuxhq/wiremux
+License: MIT OR Apache-2.0
+LicenseUrl: https://github.com/wiremuxhq/wiremux/blob/v0.9.3/LICENSE
+ShortDescription: Wiremux maps Chat Completions, Messages, Responses, Gemini, and Converse through one IR.
+Moniker: wiremux
+Tags:
+- anthropic
+- llm
+- openai
+- proxy
+- rust
+ReleaseNotes: |-
+  wiremux 0.11.16
+  Highlights
+  A blank tool id now fails when you decode it, and a blank tool name now fails when you encode the call. A Chat custom tool stream that sends the id first and the name later stays one call.
+  Bug fixes
+  - A blank tool id decoded, then the next encode failed. Messages, Responses, and Gemini request decode now fail when a tool id is empty or only spaces. Response decode and stream decode fail the same way on every dialect. The error names the field and says it is empty. A Gemini functionCall that omits id still becomes name#index. A Chat stream chunk that omits the id field still decodes, so a later chunk can supply the name. A present blank id fails. Legacy Chat message.function_call, which has no id field, still decodes. Chat and Converse request decode already rejected a blank id. Encode of a blank id was already rejected in 0.11.15 (#759).
+  - A blank tool name was still sent. Encode fails when a function or custom tool call name is empty or only spaces. The error is hard-error at items[n]: tool call name is empty. A name that contains a real character, including a space, is left as written (#759).
+  - A split custom tool stream sent an empty name. ToolCallAssembler waits until a Chat custom tool call has both an id and a name before it emits the start. A function call on the same index stays a separate call (#761).
+  Upgrading
+  Set wiremux and wiremux-auth to 0.11.16. No public struct or enum field was added, so existing literals still compile.
+  Calls that used to succeed now fail when a tool id is blank or only spaces on decode, or when a function or custom tool name is blank or only spaces on encode.
+  Full changelog
+  v0.11.15...v0.11.16
+ReleaseNotesUrl: https://github.com/wiremuxhq/wiremux/releases/tag/v0.11.16
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
