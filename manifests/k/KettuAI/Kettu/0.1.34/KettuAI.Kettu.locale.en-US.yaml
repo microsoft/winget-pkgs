@@ -2,7 +2,7 @@
 # yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
 
 PackageIdentifier: KettuAI.Kettu
-PackageVersion: 0.1.33
+PackageVersion: 0.1.34
 PackageLocale: en-US
 Publisher: Amigoer
 PublisherUrl: https://www.kettu.sh/
@@ -79,20 +79,32 @@ Tags:
 - programming
 - terminal
 ReleaseNotes: |-
-  Adds manual cross-host task delegation to paired computers, quick queued-message steering with Cmd/Ctrl+Enter, stale-replay fixes and richer running details for Live Activity pushes, lower sustained CPU usage, remote sync flow control and incremental delta protocols, and Pi tool permission enforcement for workflows and routines.
+  Stops polling Google Antigravity plan limits to align with upstream policy, fixes blank Lock Screen Live Activity cards on iOS, adds independent official/self-hosted relays with manual node selection, adds in-app GLM Agent setup, adds non-destructive web cache refresh, and brings theme, outline, settings, and remote-host improvements.
   What changed
-  - Cross-host task delegation and quick queued-message steering: pick Delegate to another computer… from the composer + menu to start a visible session on an online paired computer under the same Kettu account and report results back, and press Cmd/Ctrl+Enter when the composer is empty to immediately steer the first queued message. (#3003, #2581, thanks @Ne1ther; #3013, #3005, thanks @Ariember)
-  - Live Activity stale-replay fixes, auto-expiry, and richer running status: cancels in-flight/retrying pushes superseded by newer state, re-validates alerts and activities before sending, tracks pending dismissal when a request finishes before the update token returns, honors Only while I'm away on Live Activity updates while the user is at the computer, guards push-to-start with automatic expiry cleanup, and carries running phase, tool activity kind, running count, and last completed plan step. (#3016, #3008, #3004, #3010)
-  - Remote sync flow control, incremental tool output, and session list deltas: adds byte-budget flow control with priority overtaking to Outbox and Channel, negotiates tool-output-append 64 KiB tail-window incremental patches with transparent fallback for older clients, and adds revision-based incremental sessions.list sync with delete tombstones. (#2956, #2953, #2958, #2954, #2960, #2955)
-  - Lower sustained CPU usage and host power telemetry: reduces sustained CPU usage in agent-host and renderer helpers, and includes unprivileged host power telemetry in load snapshots. (#3018, #3007, #3001)
-  - Pi tool permission enforcement in workflows and routines: enforces Pi tool permission checks consistently when running workflows and routines. (#3009, #2074)
+  - Stop polling Google Antigravity plan limits: Kettu no longer calls agy -p /usage or /credits to align with Google Antigravity's third-party integration policy. Local usage history and the plan tier badge remain intact; Antigravity users are recommended to update to v0.1.34. (#3053)
+  - Fix blank Lock Screen Live Activity cards on iOS: gates v2 multi-state Live Activity payloads for compatible clients and isolates end-push cancellation per update token so newer updates never abort in-flight end requests. (#3055, #3044, thanks @ShaoClean)
+  - Independent official and self-hosted relays with node selection: lets the official Kettu relay and your own relay run independently or together, probes all available nodes, and adds manual relay node selection. (#3054, #3026, #3049, thanks @Ariember, @songxff)
+  - In-app sign-in and API key setup for GLM Agent: adds in-app setup and Z.AI API key configuration with credential detection for GLM Agent in Settings › Agents. (#3019, #3012)
+  - Non-destructive Refresh web cache and Web version info: adds Refresh web cache and Web client version/mode details in Settings › About to pull the latest web files without clearing paired computers, sign-in, settings, or notifications. (#3030, #3024, thanks @xiaolfeng)
+  - Installed themes prose contrast and Chinese serif fallback: restores assistant prose contrast over collapsed tool summaries across installed themes and adds Chinese serif font fallbacks for serif themes such as Paper. (#3051, #3038, thanks @songxff)
+  - Message Outline copy prompt and resize sync: right-click an item in Message Outline to Copy prompt, and re-measure the outline layout automatically when resizing the session column width. (#3058, #3041, thanks @4xian; #3050, #3035, thanks @xiaolfeng)
+  - Accurate Send with newline hint: updates the newline hint under Send with in Settings › General to match the active send key (Shift+Enter or Enter). (#3045, #3031, thanks @Ariember)
+  - Sync outer sidebar plan-limit ring with Left view: keeps the outer sidebar plan-limit ring aligned with remaining percentage when switched to the Left view. (#3025, #3017, thanks @xiaolfeng)
+  - Physical iPhone setup checks: checks runner signing, developer trust, and UI Automation during physical iPhone setup. (#3032, #1429)
+  - Paired devices and remote host enhancements: streams JSON responses larger than 64 KiB (#3034), lists a session's browser tabs (#3047, #2260), exposes read-only host Computer Use status (#3046, #1597), host cloud state (#3033, #1584), and remote desktop diagnostics (#3056, #1596), and normalizes device platform names (#3052, #698).
   中文
-  - 跨电脑派发任务与空输入框快捷插队发送：可从输入框 + 菜单点击 派发到其他电脑…，将任务派发到同账号下在线的已配对电脑执行并回传结果；输入框为空且存在排队消息时，按 Cmd/Ctrl+Enter 可直接将第一条排队消息插队发送。(#3003, #2581，感谢 @Ne1ther；#3013, #3005，感谢 @Ariember)
-  - 灵动岛推送防延迟回弹、自动收尾与运行态信息增强：新状态到达时立即中止正在重试或排队的旧推送并在发送前二次校验，修复未收到 updateToken 前请求结束漏发关闭导致的孤儿灵动岛；开启 只在我离开时 且人在电脑前时停止向后台手机推送远程灵动岛更新（关闭开关即可随时实时推送）；为已结束、报错与限额态自动定时结束，并在运行中推送中补充阶段、工具类型、并行会话数及最近完成的计划步骤。(#3016, #3008, #3004, #3010)
-  - 远程同步流控、工具输出增量补丁与会话列表增量同步：为 Outbox 和 Channel 加入按字节预算流控与高优插队机制；支持 tool-output-append 64 KiB 尾窗增量追加补丁（向旧客户端自动降级）；支持基于修订号与删除墓碑的 sessions.list 增量同步。(#2956, #2953, #2958, #2954, #2960, #2955)
-  - 降低持续 CPU 占用与主机能耗遥测：优化 agent-host 与渲染辅助进程的持续 CPU 占用，并在主机负载快照中加入免特权能耗遥测指标。(#3018, #3007, #3001)
-  - 工作流与定时任务强制执行 Pi 工具权限：在工作流与定时任务执行期间统一落实 Pi 工具权限校验。(#3009, #2074)
-ReleaseNotesUrl: https://github.com/KettuAI/Kettu/releases/tag/v0.1.33
+  - 停止轮询 Google Antigravity 套餐额度：为遵守 Google Antigravity 的第三方集成政策，Kettu 不再调用 agy -p /usage 或 /credits；本地用量历史与套餐等级标识保持不变。建议 Antigravity 用户升级至 v0.1.34。(#3053)
+  - 修复 iOS 锁屏出现空白实时活动卡片：为 v2 多状态实时活动推送增加版本与开关校验，并按 updateToken 隔离结束推送取消键，避免后续更新中止正在发送的关闭请求。(#3055, #3044，感谢 @ShaoClean)
+  - 独立运行官方与自建中继并支持手动选择节点：官方 Kettu 中继与自建中继可分别独立开关或同时运行，并支持探测全部可用节点与手动选择中继节点。(#3054, #3026, #3049，感谢 @Ariember, @songxff)
+  - GLM Agent 应用内登录与 API Key 配置：在 设置 › 智能体 中为 GLM Agent 增加应用内配置入口、Z.AI API key 填写与凭据检测。(#3019, #3012)
+  - 不丢失状态的「刷新网页缓存」与网页版信息：在 设置 › 关于 中展示网页客户端版本与运行模式，并提供 刷新网页缓存 按钮，强制拉取最新网页文件且保留已配对电脑、登录状态、设置与通知订阅。(#3030, #3024，感谢 @xiaolfeng)
+  - 恢复外置主题正文对比度与中文衬线字体回退：恢复外置主题下回复正文相对折叠工具摘要的视觉对比度，并为 Paper 等衬线主题补充中文字体衬线回退。(#3051, #3038，感谢 @songxff)
+  - 消息大纲支持右键复制提示词及随列宽同步：在大纲项上右键可直接 复制提示词，并在调整会话列宽时自动重新测量并同步大纲显示状态。(#3058, #3041，感谢 @4xian；#3050, #3035，感谢 @xiaolfeng)
+  - 修正「设置 › 通用」发送快捷键换行提示：发送快捷键 下方的换行提示现在准确跟随当前发送键显示（Shift+Enter 或 Enter）。(#3045, #3031，感谢 @Ariember)
+  - 同步侧边栏外层限额圆环与「剩余」视图：切换套餐限额为 剩余 显示后，侧边栏外层圆环同步按剩余比例绘制。(#3025, #3017，感谢 @xiaolfeng)
+  - 实体 iPhone 配置前检查：在实体 iPhone 配置步骤中补充 Runner 签名、开发者信任与 UI Automation 检查。(#3032, #1429)
+  - 已配对设备与远程主机增强：支持流式传输大于 64 KiB 的 JSON 响应 (#3034)，支持向已配对设备返回会话浏览器标签页 (#3047, #2260)、主机 Computer Use 只读状态 (#3046, #1597)、主机云服务状态 (#3033, #1584) 与远程桌面诊断信息 (#3056, #1596)，并统一设备平台名称格式 (#3052, #698)。
+ReleaseNotesUrl: https://github.com/KettuAI/Kettu/releases/tag/v0.1.34
 Documentations:
 - DocumentLabel: Documentation
   DocumentUrl: https://www.kettu.sh/docs/
