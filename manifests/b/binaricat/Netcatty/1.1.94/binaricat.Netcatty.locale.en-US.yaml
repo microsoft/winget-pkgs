@@ -1,0 +1,67 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: binaricat.Netcatty
+PackageVersion: 1.1.94
+PackageLocale: en-US
+Publisher: binaricat
+PublisherUrl: https://github.com/binaricat
+PublisherSupportUrl: https://github.com/binaricat/Netcatty/issues
+PackageName: Netcatty
+PackageUrl: https://github.com/binaricat/Netcatty
+License: GPL-3.0
+LicenseUrl: https://github.com/binaricat/Netcatty/blob/HEAD/LICENSE
+Copyright: Copyright © 2026 binaricat
+ShortDescription: AI-powered SSH client, SFTP browser and terminal manager.
+Description: Netcatty is a beautiful, feature-rich SSH workspace built with Electron, React, and xterm.js. Built-in AI agent (Catty Agent), split terminals, vault views, SFTP workflows, and custom themes — all in one.
+Tags:
+- console
+- remote
+- sftp
+- ssh
+- terminal
+ReleaseNotes: |-
+  ✨ Release Highlights
+  Netcatty v1.1.94 delivers a major three-phase memory and startup optimization alongside an upgrade to Electron 45.5.0, adds Standard RDP Security (RC4 & FIPS) support with automatic fallback for legacy RDP hosts, prevents orphan MCP server processes on disconnect, and fixes JumpServer prompt readiness, SSH auto-auth ordering, RDP fullscreen click-through, and magnified-pane borders.
+  ⚡ Memory Optimization & Electron 45 Upgrade
+  - Three-phase memory & startup overhaul: cut cold-start idle memory by ~39.5% PSS (~27.8% Private Dirty) by deferring idle worker startup, enabling Chromium sandbox: true across BrowserWindows, reclaiming closed Settings windows, fixing hibernated terminal WeakRef leaks (halving hibernated multi-terminal memory), shrinking the renderer entry bundle by 74%, and slashing KeywordHighlighter heap/ArrayBuffer overhead (#4476).
+  - Leaner bundles & active terminal footprint: minified preload scripts, removed third-party npm packages from main/worker cold startup, eliminated eager idle mounts (TerminalLayer, AIChatSidePanel, Fig autocomplete specs), and lazy-loaded pinyin-pro plus Vault drawers, modals, importers, and sidebars to cut App bundle size by more than half and lower active multi-terminal memory (#4488).
+  - Electron 45.5.0 runtime: upgraded from Electron 42.11.12 to Electron 45.5.0 (Chromium 156, Node 24.22, V8 15.6) with full Electron 43–45 API migrations (async W3C Clipboard API, sandboxed preload Uint8Array staging, openAsHidden cleanup) for a smaller renderer V8 heap and leaner main-process footprint (#4491).
+  🖥️ Remote Desktop (RDP)
+  - Standard RDP Security & auto fallback: added 40/56/128-bit RC4 (standard/salted MAC and 4096-packet key updates) and FIPS (3DES-EDE3-CBC + HMAC-SHA1) encryption to the built-in IronRDP WASM client, fixed GCC ConferenceCreateRequest PER length encoding for legacy servers (including Windows Server 2003 R2), and added automatic auto-mode fallback with a toolbar security indicator (#4493).
+  - Fullscreen toolbar click-through: prevented the RDP session fullscreen toolbar wrapper from intercepting clicks aimed at the remote desktop's top-edge window controls; only the top hover strip and revealed/pinned pill now capture pointer events (#4487).
+  - Fixed-size resolution editing: stopped fixed-size RDP width/height inputs from clamping mid-keystroke, added inline 200–8192 range validation, and rendered the missing width/height inputs on companion RDP Host Details tabs (#4473).
+  🛠️ Terminal, SSH & External MCP
+  - JumpServer prompt readiness & nested target titles: recovered shell readiness from the visible terminal buffer when worker tracking reports SHELL_READINESS_UNKNOWN (unblocking terminal_execute and terminal_start without a manual redraw), and updated agent title mode to display nested JumpServer target hostnames while preserving configured labels for direct SSH sessions (#4479).
+  - SSH auto-auth priority: tried saved passwords (and MFA keyboard-interactive) ahead of discovered default ~/.ssh/id_* keys in automatic SSH, SFTP, and jump-host auth, avoiding "Too many authentication failures" disconnects on servers with strict MaxAuthTries limits (#4480).
+  - Clean MCP stdio server exit: wired stdin EOF/close, stdout disconnect, signal handlers, and a Windows parent-PID watchdog into netcatty-mcp-server so external MCP disconnects no longer leave orphan Netcatty.exe processes running (#4492).
+  - Magnified pane border: drew the 1px magnified-pane accent stroke as an inner overlay so it paints cleanly inside overflow-hidden rounded containers on both terminal split panes and side panels (#4489).
+  🔒 Release Supply Chain & CI
+  - Hardened release workflows: pinned GitHub Actions via actions.lock and Linux build containers by digest, removed unnecessary checkout token persistence, added weekly Dependabot updates for GitHub Actions, and fixed stale CI unit tests (#4485, #4490).
+  Code signing policy
+  Netcatty is applying to the SignPath Foundation open-source program. Once
+  approved, covered Windows release artifacts will use Free code signing provided by SignPath.io, certificate by SignPath Foundation.
+  See the
+  Code signing policy
+  and Privacy policy.
+  What's Changed
+  - Update Nix release metadata for v1.1.92 by @netcatty-bot in https://github.com/binaricat/Netcatty/pull/4467
+  - Update Nix release metadata for v1.1.93 by @netcatty-bot in https://github.com/binaricat/Netcatty/pull/4470
+  - perf(memory): implement Phase 1–2 idle, window, and terminal memory optimizations by @binaricat in https://github.com/binaricat/Netcatty/pull/4476
+  - perf(memory): Phase 3 deep business-code memory optimization (main, renderer & active terminals) by @binaricat in https://github.com/binaricat/Netcatty/pull/4488
+  - fix(rdp): keep fixed-size resolution editable without mid-type clamp (#4472) by @binaricat in https://github.com/binaricat/Netcatty/pull/4473
+  - fix(ui): paint 1px magnified chrome inside overflow-hidden by @binaricat in https://github.com/binaricat/Netcatty/pull/4489
+  - fix(ssh): try saved password before default keys in auto auth (#4478) by @binaricat in https://github.com/binaricat/Netcatty/pull/4480
+  - ci: lock the actions and containers that build the release packages by @Totara-thib in https://github.com/binaricat/Netcatty/pull/4485
+  - chore(electron): upgrade Electron to 45.5.0 (Chromium 156, Node 24.22) by @binaricat in https://github.com/binaricat/Netcatty/pull/4491
+  - fix(rdp): do not let fullscreen toolbar wrapper steal clicks (#4486) by @binaricat in https://github.com/binaricat/Netcatty/pull/4487
+  - fix(rdp): support Standard RDP Security (RC4 40/56/128-bit & FIPS) and auto fallback by @binaricat in https://github.com/binaricat/Netcatty/pull/4493
+  - fix(mcp): exit stdio server cleanly on client disconnect to prevent orphan leaks (#4475) by @binaricat in https://github.com/binaricat/Netcatty/pull/4492
+  - ci: configure Dependabot for GitHub Actions and fix failing CI unit tests by @binaricat in https://github.com/binaricat/Netcatty/pull/4490
+  - fix(terminal): rehydrate prompt readiness and show jump targets by @zjio26 in https://github.com/binaricat/Netcatty/pull/4479
+  New Contributors
+  - @Totara-thib made their first contribution in https://github.com/binaricat/Netcatty/pull/4485
+  Full Changelog: https://github.com/binaricat/Netcatty/compare/v1.1.93...v1.1.94
+ReleaseNotesUrl: https://github.com/binaricat/Netcatty/releases/tag/v1.1.94
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
