@@ -1,0 +1,66 @@
+# Created by Anthelion using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: HydrusNetwork.HydrusNetwork
+PackageVersion: '697'
+PackageLocale: en-US
+Publisher: Hydrus Network
+PublisherUrl: https://github.com/hydrusnetwork/hydrus
+PublisherSupportUrl: https://github.com/hydrusnetwork/hydrus/issues
+PrivacyUrl: https://hydrusnetwork.github.io/hydrus/privacy.html
+Author: Hydrus Network
+PackageName: Hydrus Network
+PackageUrl: https://github.com/hydrusnetwork/hydrus
+License: WTFPL
+LicenseUrl: https://github.com/hydrusnetwork/hydrus/blob/HEAD/LICENSE
+Copyright: Copyright (C) 2011 Hydrus Developer
+CopyrightUrl: https://github.com/hydrusnetwork/hydrus/blob/master/LICENSE
+ShortDescription: A personal booru-style media tagger that can import files and tags from your hard drive and popular websites. Content can be shared with other users via user-run servers.
+Description: |-
+  The hydrus network client is an application written for Anon and other internet-fluent media nerds who have large image/swf/webm collections.
+  It browses with tags instead of folders, a little like a booru on your desktop. Advanced users can share tags and files anonymously through custom servers that any user may run.
+  Everything is free and privacy is the first concern. Executable releases are available for Windows, Linux, and macOS.
+  The program is in python, so you can also run it straight from the source code.
+Moniker: hydrus-network
+Tags:
+- booru
+- cross-platform
+- image-database
+ReleaseNotes: |-
+  misc
+  - radically improved repository definition re-processing time. after the PTR definitions reprocess last week, I noticed it wasn't running as fast as I expected. content re-process uses some optimisations to handle the exact same situation, and after looking at it, I saw that definitions was not doing the same thing. I've now implemented this, and in my test situation, re-processing definitions went from 50k/s to 400k/s! I am sorry for those who sat through an hour or more slog with the PTR work--should be much nicer in future
+  - fixed system predicate parsing for 'system:has url' in regex and url class modes when the incoming regex or url class name includes uppercase letters. for regex, we'll read any (?P<name>...) stuff correctly, and url classes should match regardless of capitalisation (I think url classes actually did work before, but they didn't remember their capitalisation through the parse, so that's more of a display fix). this fixes such predicates sent through the Client API. also added some unit tests for this (issue #2122)
+  - fixed a harmless but not great error popup when you launch the media viewer with a file focused in a particular position (a bunch of categories like 'the first file in the thumbgrid when the n first files in the thumbgrid are selected', I think), delete that file in the media viewer such that it is removed from the original thumbgridview, and then close the media viewer and make a navigation step that relies on the 'previous focus' media. the 'slide this to a new valid position' logic for the 'previous focus' guy was simply bad and not clearing correctly in all cases. fixed now, and there's a guard to nullify similar errors in future (issue #2118)
+  - added a link in the Client API help to https://github.com/micnorian14/wd-e621-hydrus-tagger, which is a new and currently maintained fork of this AI tagging project for hydrus. if you use the old branch of this tech, check out this repo and review the updates
+  - same guy has forked and optimised the Hydrus Video Deduplicator, so this is added to the Client API help too: https://github.com/micnorian14/hydrus-video-deduplicator. it might get pulled back into the original project, and another user is working hard merging more improvements, so if you use this tool, watch this space
+
+  sessions and session cookies
+  - building on the recent session cookie clearing timer, network sessions are now only 'touched' to reset the cookie expiry when we actually do network work on them or change cookies. previously, any object lookup, including to consult for the 'review cookies' UI or stuff like login checks, was doing a touch, leading to this stuff to take longer to time out the more you checked to see if it had timed out yet
+  - the 'review session' UI now says when a session was last used/modified
+  - fixed editing cookies in the 'review cookies' panel when you edit the domain, path, or name (it was not deleting the old cookie correctly)
+  - I renamed 'review session cookies' and similar to 'review cookies'. the word 'session' refers to both the umbrella that holds all the gubbins for a network connection and it is a specific type of ephemeral cookie. it is valid to say a session's session cookies, but that's not helpful, so I'll try and phase out the former term when it is ambiguous
+
+  executable manager
+  - the 'send single file' and 'get metadata for a single file' executable types now support md5, sha1, and sha512 hashes as input parameters. if a file is missing this data on a call but is nonetheless local, the error handling schedules an 'other hash' regen and the message to the user says 'try again in a bit'
+  - the executable manager now only sends the required input parameters to a call. previously it would provide all possible params, but it is now more judicious. this saves a file system hit for a path check on file calls that only need the hash, and it allows calls on non-local files when only, say, a hash is needed
+  - missing file paths or file URIs on non-local files have some nicer handling, although I think you'd have to pull a rabbit out of your hat to trigger one of these
+  - fixed the 'file_id' parameter for 'send single file' commands IRL, outside of the options window test environment
+  - fixed an issue where edited local process calls that were not expecting a response were nonetheless defaulting to saving (and then doing nothing with) stdout to a temp file
+
+  dupe search
+  - the pair search optimisation that says 'do the rest of the search in one step', often seen in UI as something like '4,000/1,234,567' for a while before the result comes back, now considers how big the '1,234,567' side is. while the old optimisation is still faster than a block-based search, it seems to take about 1 second for each 100k pairs to set up. if the remaining search is larger than 200K and 10% of your total pair count, I now just use the master potential pair table and filter to the in-memory pair set. this will still take a couple seconds, and it may have bad performance in certain situations, but let's see how it goes IRL
+
+  boring stuff
+  - cleaned up some lazy job status logging for stuff like db table analyze work summaries
+  - cleaned up some of the 'upload pending' job to be cleaner and report nicer
+  - cleaned up some of the executable manager code with tighter type hinting
+  - cleaned up some duplicated code in 'review cookies'
+  - updated mkdocs-material to from 9.7.7 to 9.8.2 for standard security patches
+  - removed the old macOS app build files from static dir and the 'running from app' checks during program init
+ReleaseNotesUrl: https://github.com/hydrusnetwork/hydrus/releases/tag/v697
+PurchaseUrl: https://hydrusnetwork.github.io/hydrus/support.html
+Documentations:
+- DocumentLabel: FAQ
+  DocumentUrl: https://hydrusnetwork.github.io/hydrus/faq.html
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
