@@ -1,0 +1,49 @@
+# Rendered by .github/scripts/build_packages.py - do not edit the generated copy.
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.28.0.schema.json
+
+PackageIdentifier: DonislawDev.TestingFilesGenerator
+PackageVersion: 0.6.0
+ReleaseDate: 2026-11-28
+# Two installers, and their ORDER is load-bearing.
+#
+# Only the Windows installer puts the window in the Start menu. A portable
+# package cannot have a shortcut at all: the manifest schema has no field for
+# one, WinGet's portable installer makes none, and microsoft/winget-cli#2299
+# asking for it has been open since 2022. The installer comes FIRST because that
+# is what decides a fresh install: recent clients prefer it over portable when
+# the user has set no preference (microsoft/winget-cli#6123), and older ones keep
+# the first installer that applies when nothing else tells two apart.
+#
+# The archive stays SECOND. An upgrade only considers installers of the kind
+# that is installed, and portable is compatible with nothing but portable, so
+# without it an install made before this package had the installer could not
+# be upgraded at all. It is also what --scope user installs, for a person
+# without administrator rights - the installer is for the whole machine.
+Installers:
+- Architecture: x64
+  InstallerType: wix
+  Scope: machine
+  # Windows Installer asks for elevation itself.
+  ElevationRequirement: elevatesSelf
+  InstallerUrl: https://github.com/donislawdev/TestingFilesGenerator/releases/download/v0.6.0/tfg-setup_0.6.0_windows_amd64.msi
+  InstallerSha256: D796B626BBBC868283A6C4E7E9306510A63C2B72F53428786B2BE289002DB32F
+  # How WinGet recognises the installed program from one release to the next:
+  # the UpgradeCode never changes, while every build gets a new ProductCode.
+  AppsAndFeaturesEntries:
+  - UpgradeCode: '{7DB637B7-3BEB-4FBD-BE84-60822854AA2F}'
+- Architecture: x64
+  InstallerType: zip
+  NestedInstallerType: portable
+  NestedInstallerFiles:
+  - RelativeFilePath: tfg-gui.exe
+  # Load-bearing. Without it WinGet reaches the window through a symbolic link
+  # in its links folder, and the window started that way cannot find the
+  # software renderer in the opengl folder beside the real file - the program
+  # looks for it next to the path it was started from. With it, WinGet makes no
+  # link and puts this package's own folder on PATH instead (PortableInstaller.cpp
+  # in winget-cli, read 2026-09-25).
+  ArchiveBinariesDependOnPath: true
+  InstallerUrl: https://github.com/donislawdev/TestingFilesGenerator/releases/download/v0.6.0/tfg-gui_0.6.0_windows_amd64.zip
+  InstallerSha256: 27BCEAAE4AD4F715EFFC151328DF18015A65D4AE7C5DFFD0FB1AE921FFF4E6FE
+ManifestType: installer
+ManifestVersion: 1.28.0
