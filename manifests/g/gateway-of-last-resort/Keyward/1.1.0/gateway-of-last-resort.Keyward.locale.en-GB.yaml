@@ -1,0 +1,70 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: gateway-of-last-resort.Keyward
+PackageVersion: 1.1.0
+PackageLocale: en-GB
+Publisher: gateway-of-last-resort
+PublisherUrl: https://github.com/gateway-of-last-resort
+PublisherSupportUrl: https://github.com/gateway-of-last-resort/keyward/issues
+Author: gateway-of-last-resort
+PackageName: Keyward
+PackageUrl: https://github.com/gateway-of-last-resort/keyward
+License: MIT
+LicenseUrl: https://github.com/gateway-of-last-resort/keyward/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 gateway-of-last-resort
+ShortDescription: Terminal UI to manage SSH keys, edit your SSH config and audit SSH security.
+Description: |-
+  Your SSH setup is usually scattered across a pile of files: keys in ~/.ssh, hosts in ~/.ssh/config, permissions you hope are right, and no easy way to tell a strong key from a weak one. Keyward puts all of it behind a single keyboard-driven screen.
+
+  - See everything at once: every key with its type, size and fingerprint, and whether it is passphrase-protected, instead of listing a directory and running ssh-keygen -l by hand.
+  - Know if you are safe: a graded A-F security audit flags weak keys, missing passphrases, loose file permissions and risky config directives, each with a concrete fix.
+  - Edit config without breaking it: host-by-host editing with validation and byte-identical round-trip serialization, so your comments, spacing and ordering survive untouched, and the last 5 versions are backed up automatically.
+  - Encrypted by default: key metadata such as tags and notes, and full ~/.ssh backups, are encrypted at rest with a key derived from your master password.
+
+  Features cover key management (discover, inspect, generate, rotate and delete ed25519 and RSA keys), the ~/.ssh/config editor, the graded A-F security audit, a known_hosts viewer that rewrites the file atomically when you forget a host, age-encrypted .tar.age backups of ~/.ssh restorable from within the TUI, and an encrypted metadata vault.
+
+  Running keyward with no arguments launches the interactive TUI; keyward <command> [flags] runs a non-interactive command, and --version and --help are supported. On first launch you set a master password, which creates the encrypted vault at ~/.keyward/master.key. There is no daemon, no config file to learn and no network calls: Keyward is a single static binary that works offline.
+Tags:
+- encryption
+- key-management
+- security
+- ssh
+- ssh-config
+- ssh-keys
+- tui
+ReleaseNotes: |-
+  Fixes from a full code review of 1.0.3, several of which could lose or corrupt data, and a reworked way the TUI reports what happened. The on-disk formats are unchanged; keyward list now prints paths it used to leave blank.
+  Added
+  - One place for messages in the TUI. Errors, notices, results and confirmation questions now appear in a single area just above the key hints, instead of replacing the hints or being scattered across screens. Errors stay until you leave the tab, notices and results fade after six seconds, and a long message wraps to at most three lines. Actions that used to finish silently now say so: a key generated, imported, rotated or deleted, added to ssh-agent, a host forgotten.
+  Changed
+  - Backup tab works like the other lists. Backups are picked with the cursor and marked with the accent bar; r restores the selected one after a confirmation, with no number to type.
+  - Confirmation questions name what they act on (delete host *?, restore from 2026-10-22_12-00-00.tar.age?), and the key hints below turn yellow to show the answer keys.
+  - Long lists scroll only when the cursor reaches the top or bottom edge. The cursor used to stay pinned to the last row, so moving up scrolled the list instead of moving the cursor.
+  - Rotation is offered only for Ed25519 and RSA keys, the two kinds Keyward can generate. For other keys it failed every time; the audit now suggests generating a new Ed25519 key instead.
+  - A key generated outside the SSH directory is not added to the list. It used to appear and then vanish at the next rescan; a notice now says where it was saved.
+  - ~ and relative paths work in Settings and in the generate form. The SSH directory is stored as an absolute path, so it no longer depends on where Keyward is started.
+  Fixed
+  - Deleting one of two hosts with the same pattern deletes the selected one. With two Host * blocks, deleting the second removed the first.
+  - Quick metadata edits are no longer lost. Saves run in the background and could finish out of order, leaving an older version on disk.
+  - A crash right after rotating, generating, importing or restoring a key cannot leave an empty key file. Key files and the directories around them are now flushed to disk before the old key is replaced.
+  - An imported key is never paired with someone else's .pub. A public half left at the destination gave the new key the wrong fingerprint; a mismatched .pub next to the source is now rejected.
+  - Forgetting a host removes that host. If known_hosts was rewritten after the tab opened, the line number could point at a neighbour; Keyward now refuses and reloads the list.
+  - Saving keeps a symlinked config or known_hosts a symlink. The file was replaced by a regular one, cutting it off from a dotfiles repository.
+  - Backups include subdirectories of ~/.ssh, such as config.d/ used with Include. They were silently left out.
+  - Restore skips archive entries that are not regular files or that point at the SSH or vault directory itself.
+  - A config created with n survives switching tabs before it is saved.
+  - keyward list and keyward agent list print a path for every key. Public-only keys had an empty path, and a private file Keyward cannot read was shown as unencrypted; it is now labelled unparsed.
+  - The config editor keeps its cursor and the "saved" message after saving, and a failure to prune old config backups is reported as a warning rather than as a failed save.
+  - The audit understands IdentityFile none, quoted paths and % tokens instead of reporting them as missing files.
+  - import --force over an existing file leaves the key at 0600, whatever the replaced file's mode was.
+  - Host and Match can no longer be added as parameters or uncommented inside a block, which split the block once the file was read back.
+  - Duplicating a Match block rewrites its header, and adding or moving a block no longer drops the config's trailing newline.
+  - Two backups made in the same second no longer overwrite each other, and backup --out writes atomically at 0600.
+  - A leftover master.key.bak holding the old password is removed once the vault unlocks with the new one.
+  Security
+  - Text read from disk can no longer drive the terminal. Key comments, file names and known_hosts hosts are printed without control characters in both the TUI and the CLI; a crafted .pub could otherwise send escape sequences, for example to overwrite the clipboard.
+  - The ssh-agent passphrase is cleared from the TUI as soon as it is used.
+ReleaseNotesUrl: https://github.com/gateway-of-last-resort/keyward/blob/HEAD/CHANGELOG.md#110---2026-10-22
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
