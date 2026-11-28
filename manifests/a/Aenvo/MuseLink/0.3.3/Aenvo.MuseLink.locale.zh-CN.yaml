@@ -1,0 +1,46 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.28.0.schema.json
+
+PackageIdentifier: Aenvo.MuseLink
+PackageVersion: 0.3.3
+PackageLocale: zh-CN
+ShortDescription: 让 Muse 在你授权的文件夹和磁盘中搜索、读取、写入 Windows 本机文件，并按需在写受限沙箱与本机审批保护下执行项目命令。
+Description: |-
+  MuseLink 让 Muse 在你授权的文件夹和磁盘中搜索、读取、写入 Windows 本机文件，并按需在写受限沙箱与本机审批保护下执行项目命令。
+  文件授权：选择指定文件夹及其子目录，或从本机固定磁盘中选择授权范围，默认保护凭证与敏感系统路径。
+  本机文件工具：让 Muse 按文件名查找文件、列出目录、读取内容，并按需写入与建目录。
+  受控命令执行：默认关闭；按需开启后，让 Muse 在授权项目子目录内运行开发工具与受控 PowerShell/cmd，运行于每工作区独立 SID 的 Windows 写受限沙箱与三档审批弹窗下。
+  公网连接：默认使用 Tailscale Funnel，也支持 Cloudflare 命名隧道（自有域名）。
+  专用凭证：在「连接」生成并复制 Muse 接入说明与专用令牌，在「设置 → 数据」轮换、撤销或定位令牌文件，日志自动脱敏令牌。
+  桌面管理：按时间、结果、范围与关键词检索日志，在「设置 → 数据」查看占用、清除/导出（JSONL/CSV）日志与管理本机索引；支持开机静默自启、关闭时最小化到托盘、退出自动回收全部托管子进程，支持简体中文 / English。
+Tags:
+- cloudflare-tunnel
+- muse
+- tailscale
+- 人工智能
+- 文件共享
+- 文件搜索
+- 沙箱
+- 远程访问
+ReleaseNotes: |-
+  优化与新增
+  - 新增 Tailscale Serve（仅 Tailnet 内网）连接方式与可配置 HTTPS 端口：当 Muse 与目标设备位于同一 Tailnet 时，可在「连接」页切换为 Tailscale Serve 自动托管纯内网 HTTPS 转发、消除手动配置 tailscale serve 的黄色报警，并支持自定义对外 HTTPS 端口以避开 443 端口冲突。
+    - 新增 tailscale_serve 提供方与 https_port 配置（tunnel.rs、profile.rs、service.rs）：Tailscale Funnel 支持 443（默认）/ 8443 / 10000，Tailscale Serve 支持 443 / 8443 / 10000 及 1–65535 自定义端口；自动托管 --https=<port> 启停与按端口隔离的独占检查，不干涉其他端口上的既有服务，并无缝复用同端口手动 tailscale serve（443 省略端口、非 443 自动保留 :port）。
+    - 双向防误暴露保护：在 Tailscale Funnel 模式下检测到所选端口已存在同目标纯内网 tailscale serve 映射时，拒绝自动覆盖升级为公网 Funnel 并给出切换指引；在 Tailscale Serve 模式下检测到该端口已开启公网 Funnel 时，同样拒绝按纯内网接管。
+    - 连接页新增 HTTPS 端口选择器、常显提供方说明与 Tailscale Serve 内网说明卡片（内置 MagicDNS / HTTPS Certificates 悬停解释与 Tailscale DNS 管理台快捷入口）；概览页、首次配置指引与入口健康测试同步适配 Tailnet 语境与中 / 英 / 日三语文案。
+  安全与稳定性加固
+  - 加固命令审批的混淆命令与远程下载即执行检测（#15，感谢 @KammyAugust11）：命令审批新增识别 PowerShell -EncodedCommand 各类前缀缩写与常见下载即执行（download cradle）模式，命中时始终强制单次确认，避免绕过会话级免打扰。
+    - 覆盖 PowerShell -EncodedCommand 的长前缀（-enc / -enco 等）与 -ec，并将 -e / -en 等短缩写限定于 powershell / pwsh 调用上下文，避免误伤 pip install -e .、rg -e、node -e 等常规开发命令。
+    - 新增 download_cradle 风险标签及三语审批弹窗文案，拦截 Net.WebClient（DownloadString / DownloadData / DownloadFile）以及 Invoke-WebRequest / iwr / Invoke-RestMethod / irm / curl / wget 结合 iex 或管道送入解释器执行的命令；单纯下载到文件保持原审批级别。
+  - 受控命令子进程默认剥离凭证类环境变量（#14，感谢 @KammyAugust11）：构建沙箱子进程环境块时自动剔除常见第三方令牌与密钥类环境变量，避免宿主环境凭证被代理执行的命令读取。
+    - 新增平台无关模块 core/env_scrub.rs 并在 sandbox.rs 的 build_clean_env 接入，仅按变量名大小写不敏感匹配常见精确清单（如 GITHUB_TOKEN、AWS_SECRET_ACCESS_KEY、OPENAI_API_KEY 等）与敏感子串（TOKEN / SECRET / PASSWORD / PASSWD / API_KEY / APIKEY / PRIVATE_KEY / ACCESS_KEY / CREDENTIAL），绝不读取或记录变量值；PATH、SystemRoot、TEMP 等运行必需变量不受影响。
+  - 发布产物增加构建来源证明（#16，感谢 @KammyAugust11）：发布工作流为 Windows / Linux / macOS 三个平台的发布资产生成 GitHub 构建来源证明（build provenance attestation），用户可通过 gh attestation verify 校验下载的二进制确实由本仓库源码在 GitHub Actions 中构建，未被替换或篡改。
+  完整变更见 CHANGELOG.md，使用说明见 中文使用指南。
+ReleaseNotesUrl: https://github.com/Aenvo/MuseLink/releases/tag/v0.3.3
+Documentations:
+- DocumentLabel: 使用指南
+  DocumentUrl: https://github.com/Aenvo/MuseLink/blob/HEAD/README.md#使用指南
+- DocumentLabel: 更新日志
+  DocumentUrl: https://github.com/Aenvo/MuseLink/blob/HEAD/CHANGELOG.md
+ManifestType: locale
+ManifestVersion: 1.28.0
