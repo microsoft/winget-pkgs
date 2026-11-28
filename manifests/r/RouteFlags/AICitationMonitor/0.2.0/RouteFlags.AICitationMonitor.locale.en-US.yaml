@@ -1,0 +1,65 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: RouteFlags.AICitationMonitor
+PackageVersion: 0.2.0
+PackageLocale: en-US
+Publisher: ROUTE FLAGS Co., Ltd.
+PublisherUrl: https://routeflags.com/
+PublisherSupportUrl: https://github.com/routeflags/ai-citation-monitor/issues
+Author: ROUTE FLAGS Co., Ltd.
+PackageName: AI Citation Monitor
+PackageUrl: https://github.com/routeflags/ai-citation-monitor
+License: Apache-2.0
+LicenseUrl: https://github.com/routeflags/ai-citation-monitor/blob/HEAD/LICENSE
+ShortDescription: Measure how often AI-generated answers cite your website, from the command line.
+Description: |-
+  AI Citation Monitor is a Go-based command-line tool for measuring GEO (Generative Engine Optimization) and AEO (Answer Engine Optimization) outcomes. It runs a versioned set of questions against search-enabled AI APIs, stores citation evidence in SQLite, and reports visibility, competitor comparisons, and changes over time.
+
+  Key features:
+  - Citation tracking from provider response metadata instead of URLs guessed from answer text.
+  - Brand and question visibility through brand mentions, per-question citation rates, and question coverage.
+  - Competitor comparison measured under the same test conditions.
+  - Historical trends compared across periods in daily, weekly, or monthly buckets.
+  - Reproducibility through recorded question versions, model and API conditions, timestamps, and answer hashes, with optional retention of raw responses.
+  - Provider integrations for OpenAI, Google Gemini, Anthropic Claude, Perplexity, and xAI Grok.
+  - Local-first storage in SQLite with no hosted backend, machine-readable JSON output, stable exit codes, and CSV, JSON, and JSONL exports.
+
+  The reported rates are sample-based observations of the configured questions, providers, models, stages, and runs. They do not represent every user's experience of AI search.
+Tags:
+- aeo
+- ai
+- citation-tracking
+- geo
+- seo
+ReleaseNotes: |-
+  Added
+  - Perplexity Agent API provider (perplexity, agent/v1+web_search). It
+    sends POST {base_url}/agent with the server-side web_search tool and
+    records the search_results entries together with any url_citation
+    annotations, counting each URL once. The published web-search documentation
+    names search_results as the source of truth for citations, so an answer with
+    an empty annotations array still records the sources it used.
+  - xAI Grok Responses API provider (grok, responses/v1+web_search+xai).
+    It sends POST {base_url}/responses with web_search and records only
+    url_citation annotations that carry a non-empty span in the answer. The
+    top-level citations list (and an annotation with a 0..0 span) is the set of
+    sources the search saw, not an attribution, and is not counted.
+  - [providers.perplexity] and [providers.grok] configuration blocks,
+    PERPLEXITY_API_KEY / XAI_API_KEY defaults, aicm init output and
+    --provider perplexity|grok support.
+  - Adapter fixtures and httptest tests for cited / not cited / error / empty /
+    no-metadata / unpositioned shapes, plus one CLI end-to-end test per provider.
+  - One live single-question observation per new provider, recorded in
+    providers.LiveObservation: Perplexity openai/gpt-5.6-sol and Grok
+    grok-4.7, both on 2026-11-28.
+  Changed
+  - Provider docs, architecture, CLI reference, README (English and Japanese) and
+    the example configuration list the two new surfaces.
+  - aicm version reports the live observation for every supported provider.
+ReleaseNotesUrl: https://github.com/routeflags/ai-citation-monitor/blob/HEAD/CHANGELOG.md#020---2026-11-28
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://github.com/routeflags/ai-citation-monitor/tree/HEAD/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
