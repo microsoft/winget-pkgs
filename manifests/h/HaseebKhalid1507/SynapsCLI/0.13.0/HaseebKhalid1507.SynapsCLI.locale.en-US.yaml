@@ -1,0 +1,105 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: HaseebKhalid1507.SynapsCLI
+PackageVersion: 0.13.0
+PackageLocale: en-US
+Publisher: Haseeb Khalid
+PublisherUrl: https://github.com/HaseebKhalid1507
+PublisherSupportUrl: https://github.com/HaseebKhalid1507/SynapsCLI/issues
+Author: Haseeb Khalid
+PackageName: SynapsCLI
+PackageUrl: https://github.com/HaseebKhalid1507/SynapsCLI
+License: Apache-2.0
+LicenseUrl: https://github.com/HaseebKhalid1507/SynapsCLI/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Haseeb Khalid
+ShortDescription: Terminal-native AI agent runtime for parallel agent orchestration on any model.
+Description: |-
+  SynapsCLI is a terminal-native AI agent runtime written in Rust. Run a crew of AI agents in your terminal, on any model, from one small binary.
+
+  - Sessions outlive the window: a background daemon owns every session, /sessions lists them, and pinned ones come back after a restart.
+  - Every terminal is you: attach several clients to one session, and any of them can type, steer or take over.
+  - Run a crew: named subagents work in parallel, and any one of them can be opened in its own view and steered mid-flight.
+  - Any model: Claude, Codex, Grok, Copilot, Gemini, Kimi, Meta Muse, Azure, Bedrock, Vertex, any OpenAI-compatible endpoint, or Ollama.
+  - Credentials stay in the broker: agents get short-lived, scoped tokens rather than your keys, with several accounts per provider.
+  - Bounded turns when you want them: optional caps on rounds, tool calls, time, tokens and cost.
+  - Long sessions stay cheap: the prompt cache lasts an hour on a Claude subscription, large tool output waits on disk behind a short preview, re-reads of unchanged files are deduplicated, and workers roll their context over instead of filling the window.
+  - Memory that survives: project memory, /compact checkpoints, and sessions that chain across days.
+  - Sees what you see: the model reads images, and /attach adds images, PDFs and text to a turn.
+  - Build on it: extensions in any language, MCP servers, and the engine over JSON-RPC or the daemon socket.
+
+  Run synaps login to sign in with a provider subscription, an API key, a cloud identity or a local endpoint, then run synaps to start the TUI. synaps chat exposes the same engine on stdin and stdout for pipes, scripts and CI, synaps rpc speaks JSON-RPC over stdio, and synaps daemon manages the shared sessions.
+
+  The project treats agents as programs that happen to use language models rather than as chat products: the system prompt is a file on disk, the tool list is opt-out, and nothing phones home. Tools run as you, so SynapsCLI is not a sandbox.
+Tags:
+- agent
+- ai
+- coding-agent
+- llm
+- mcp
+- orchestration
+- tui
+ReleaseNotes: |-
+  Several clients can share a daemon session safely: a reply reaches only the
+  client that asked, a resolved prompt says what was applied, and the session
+  list shows a session's background workers and, over the socket, the saved
+  conversations on disk. Extension context from before_message is saved in
+  the conversation by default. Compaction summaries are written by the chat's
+  own model, and on a warm Anthropic cache they read the history from the
+  cache instead of paying for it again. Workers report what they used and can
+  default to a model of their own, every provider's models are priced at
+  their own list price, and a limit on one Claude model no longer blocks the
+  whole account. GPT-6.2 Sol and GPT-6.2 Astra join the Codex models; the
+  Gemini Code Assist sign-in is removed.
+  Read the Upgrade notes first if you write an extension with a
+  before_message hook, signed in with google-gemini, relied on the old
+  compaction model, or build a client on the daemon socket. Full notes:
+  docs/upgrading/0.13.0.md.
+  Upgrade notes
+  - Reload the daemon after installing: synaps daemon reload, then
+    restart attached TUIs. A reload stops running subagents (they can be
+    resumed), so let them finish first. Daemon protocol (v3) and extension
+    protocol (1) are unchanged; the new daemon contracts are additive
+    features in Welcome.features.
+  - Extensions: before_message inject is saved by default (#425).
+    Content an extension injects is now written into the stored conversation
+    and stays in history. Content meant for one turn only (recall, status
+    lines) must set "forget": true; it is then shown for every request of
+    that turn, never stored, and leaves a one-line marker. A saved part over
+    16 KiB is handled as forget. Hosts announce this with
+    features: ["inject.forget"] in initialize.
+  - google-gemini is removed (#460). synaps login --provider google-gemini refuses, google-gemini/... models no longer route, and a
+    saved google-gemini sign-in is dropped from auth.json at start. Use a
+    Google AI Studio API key instead: synaps login --provider google, then
+    a google/... model. Change any model, subagent_model,
+    compaction_model or favorite that names a google-gemini/... model.
+  - compaction_model no longer defaults to or falls back to
+    claude-sonnet-4-6. Unset, empty or match (the default) has the
+    chat's own model write summaries, so an Opus chat compacts with Opus.
+    Set compaction_model = claude-sonnet-4-6 to keep the old model,
+    or provider-small for the provider's small model (Haiku 5.5 on
+    Anthropic). Any other value warns at load and is match.
+  - Daemon replies reach only the client that asked (#448). A client that
+    read another client's QueryResult (or a command reply) off the shared
+    stream no longer gets it and has to ask itself. SettingChanged and
+    Resumed still reach every client, with the id
+    VIEW_CHANGED_SETTING_ID for all but the asker.
+  - New session ids end in 8 hex characters, not 4
+    (20261117-015328-1f2e3d4c). Ids from before stay valid; a script that
+    matches exactly 4 needs {4,}.
+  - synaps daemon sessions --json prints the daemon's rows as sent:
+    keys in alphabetical order, fields an older daemon doesn't send left out
+    instead of defaulted, and fields a newer daemon adds (workers) kept.
+    created_at is when the conversation began, and title is the saved
+    row's title.
+  - Credential broker: upgrade a synaps auth-broker and its clients
+    together; an older side treats one model's 429 as the whole account's.
+  - synaps rpc sessions no longer take shared-inbox mail (#455). A
+    bridge or script that relied on a synaps send without a session
+    reaching its rpc session must send to that session instead.
+ReleaseNotesUrl: https://github.com/HaseebKhalid1507/SynapsCLI/releases/tag/v0.13.0
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://github.com/HaseebKhalid1507/SynapsCLI/tree/HEAD/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
