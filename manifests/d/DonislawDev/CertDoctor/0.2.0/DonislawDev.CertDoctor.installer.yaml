@@ -1,0 +1,46 @@
+# Rendered by .github/scripts/build_packages.py - do not edit the generated copy.
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.28.0.schema.json
+
+PackageIdentifier: DonislawDev.CertDoctor
+PackageVersion: 0.2.0
+ReleaseDate: 2026-11-14
+# Two installers, and their ORDER is load-bearing.
+#
+# Only the Windows installer puts Cert Doctor in the Start menu. A portable
+# package cannot have a Start menu entry at all: the manifest schema has no
+# field for one and WinGet's portable installer makes none
+# (microsoft/winget-cli#2299, open since 2022). The installer comes FIRST
+# because that decides a fresh install: recent clients prefer it over portable
+# when the user has set no preference (microsoft/winget-cli#6123), and older
+# ones take the first installer that applies.
+#
+# The archive comes SECOND, for --scope user: the installer is for the whole
+# machine and asks for administrator rights, the archive needs neither.
+Installers:
+- Architecture: x64
+  InstallerType: wix
+  Scope: machine
+  # Windows Installer asks for elevation itself.
+  ElevationRequirement: elevatesSelf
+  InstallerUrl: https://github.com/donislawdev/certdoctor/releases/download/v0.2.0/certdoctor-setup_0.2.0_windows_amd64.msi
+  InstallerSha256: 4874098829B91E9B0A69D0679EB7A3509EC2E57707DC92B8522E3257BFCDF553
+  # How WinGet recognises the installed program from one release to the next:
+  # the UpgradeCode never changes, while every build gets a new ProductCode.
+  AppsAndFeaturesEntries:
+  - UpgradeCode: '{8078E22A-32AA-4080-B031-CA470D5D3EB7}'
+- Architecture: x64
+  InstallerType: zip
+  NestedInstallerType: portable
+  NestedInstallerFiles:
+  - RelativeFilePath: certdoctor-gui.exe
+  # Load-bearing. Without it WinGet reaches the window through a symbolic link
+  # in its links folder, and the window started that way finds neither the
+  # command line it runs nor the software renderer in the opengl folder - it
+  # looks for both beside the path it was started from (os.Executable). With
+  # it, WinGet makes no link and puts this package's own folder on PATH, which
+  # also puts the command line there (PortableInstaller.cpp in winget-cli).
+  ArchiveBinariesDependOnPath: true
+  InstallerUrl: https://github.com/donislawdev/certdoctor/releases/download/v0.2.0/certdoctor-gui_0.2.0_windows_amd64.zip
+  InstallerSha256: 33B2A46E06EB1986DFC7F90FED03CB02A0B732F08F792B6D00C617C88092E56D
+ManifestType: installer
+ManifestVersion: 1.28.0
