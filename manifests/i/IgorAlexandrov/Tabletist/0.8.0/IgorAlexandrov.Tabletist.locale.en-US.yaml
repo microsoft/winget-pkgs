@@ -1,0 +1,84 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: IgorAlexandrov.Tabletist
+PackageVersion: 0.8.0
+PackageLocale: en-US
+Publisher: Igor Alexandrov
+PublisherUrl: https://igor.works/
+PublisherSupportUrl: https://github.com/igor-alexandrov/tabletist/issues
+Author: Igor Alexandrov
+PackageName: Tabletist
+PackageUrl: https://igor.works/tabletist/
+License: MIT
+LicenseUrl: https://github.com/igor-alexandrov/tabletist/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Igor Alexandrov
+ShortDescription: A fast, native database client for PostgreSQL, MySQL, MariaDB, SQLite and BigQuery.
+Description: |-
+  A fast, native database client for PostgreSQL, MySQL (and MariaDB), SQLite and BigQuery. Written in Rust with egui; runs on Linux (Omarchy and Hyprland first), macOS and Windows. BigQuery connections sign in with a service-account key file or Google Cloud's default credentials, and open read-only (browse, filter and run SELECTs; BigQuery has no transactions to edit rows with).
+  - Saved connections grouped in a picker, each tagged with its environment (dev, staging, production) and when it was last used. Open more than one and each is a chip in the window's header: click one to switch.
+  - Direct connections, TLS (libpq's sslmode values, with allow read as prefer; verify-ca needs a CA file, and MySQL has no verify-ca yet), and SSH tunnels (password, key file or agent) with host keys trusted on first use. The agent is the one ~/.ssh/config names for the host (IdentityAgent, as for 1Password), else SSH_AUTH_SOCK.
+  - Passwords live in the system keyring, or are asked for once per connection tab (reconnecting in that tab reuses them).
+  - A connection opens read-only when its "Open read-only" box says so, which is the default for production. A writable one opens a read-write session, in which browsing, a raw WHERE and a SQL editor switched to Read-only still only read.
+  - On a writable connection a table's values are edited in its grid: changes stay pending until Save writes them in one transaction, which never overwrites a row someone else changed: a save that finds one writes nothing and asks about each such row, with what was loaded, what the server holds now and yours side by side (keep mine, use the server's values, or overwrite). Before saving, Review SQL shows the statements that will run (Cmd/Ctrl+Shift+D, or :diff on Omarchy) and copies them, and a save to production asks first, with them on screen.
+  - A sidebar of recent objects and one schema's tables and views, folded into prefix groups (book_) or listed flat; each table opens with a data grid (keys, foreign keys, value tags, JSON at a glance), a row panel showing every field in full with a jump along foreign keys, where a value of a writable table is edited in place (a click on it, or Cmd/Ctrl+I, Enter on Omarchy, to reach the row's fields, and Enter or typing to edit one), and a Structure view (columns, indexes, foreign keys).
+  - Server-side sorting and paging, a filter bar with a raw WHERE option, exact counts on demand, and cancel for any running query. MySQL sessions run in utf8mb4, with ANSI_QUOTES, the combination modes that imply it and NO_BACKSLASH_ESCAPES turned off: in a raw WHERE "..." is a string and names take backticks.
+  - A SQL editor per connection (Cmd/Ctrl+T): run the statement at the cursor (Cmd/Ctrl+Return) or the whole script, with a row limit and a timeout, and read a result row in full in the row panel. On a read-only connection, and on production, every run happens in a read-only transaction that is rolled back, and statements that would leave it are refused. On a writable connection that is not production's a tab opens in Read-write: a run that changes data is one transaction, committed when every statement succeeded and rolled back on the first error, cancel or timeout, and the Messages say which. A run of reads is read-only there too, and the toolbar's switch (or Cmd/Ctrl+Shift+M; :ro and :rw on Omarchy) sets the tab to Read-only and back. Format (Cmd/Ctrl+Shift+F; = on Omarchy) lays queries out in river style and uppercases reserved words, in the selection's statements or the whole script. Keywords, schemas, tables, views and the columns of a statement's tables are completed while typing (Ctrl+Space asks for the list anywhere).
+  - Cells, a block of them or whole rows are selected in a table's grid and in a SQL result, and copied as TSV (Cmd/Ctrl+C, y on Omarchy) or, with Copy as (Cmd/Ctrl+Alt+C, gy), as CSV, JSON, Markdown, SQL INSERT or column names. Export (Cmd/Ctrl+Shift+E, E) writes a table, a selection or a SQL result to CSV, TSV, JSON, JSON Lines, SQL INSERT or Markdown, in the background and several at once. Values are written as the database holds them, never as the grid formats them.
+  - Quick open (Cmd/Ctrl+P on macOS and Windows) and a full keyboard map: press ? in the app.
+  - Looks native on each platform: a macOS look in IBM Plex, and on Linux the Omarchy look (square, keyboard first, vim keys, the desktop's monospace font throughout). It follows the Omarchy theme live on Omarchy, and the system light/dark setting elsewhere.
+Tags:
+- bigquery
+- database
+- database-client
+- database-gui
+- mariadb
+- mysql
+- postgresql
+- sql
+- sqlite
+ReleaseNotes: |-
+  A release about files and languages: open a folder of data files as a database, join it with your saved connections and edit it, and use Tabletist in Russian or Brazilian Portuguese. Connections can now go in groups you name, and one connection can have two databases open at once.
+  Files connections
+  A new connection type, Files, opens a folder of data files, or a list of them, as tables. It reads CSV, TSV, Parquet, JSON, NDJSON, Excel and .duckdb files through DuckDB, inside the app. The sidebar, Structure, the DDL view, the SQL editor, History, Quick open, Export, Copy as and agents work on them as on any other connection. (#247)
+  - Reading CSV: choose the header row (Detect, Yes, No), the delimiter and how column types are guessed (the first 20,000 rows, all rows, or all text), for every CSV and TSV file of the connection. (#353)
+  - A file that doesn't read no longer hides the rest. The Test opens every file it can and says which it can't and why: "Read 3 of 4 files · returns.csv failed", with the row, the column and the value. For a value its column's type can't take there are three fixes: read the column as text, read the value as empty, or skip the file. Each is kept as an override under Reading CSV, with Reset to take it off. (#356)
+  - The same banner on the table when a file fails while you browse it, with the same three fixes. A fix is saved at once and the table reads again. On Omarchy, t, e and x run them. (#382)
+  - macOS: when the system's privacy settings haven't let Tabletist open the folder, the Test and the connect card say so, with Open Privacy & Security. (#385)
+  - Omarchy: typing a path in Source lists the folders and files it could be, as Export's save line does. ctrl+n and ctrl+p move, Enter takes one. (#386)
+  - Join with saved connections: attach saved PostgreSQL, MySQL and SQLite connections, read-only, and join a file to their live tables in one query (JOIN bookshop_development.publishers p ON ...). Each attached connection is a schema in the sidebar, with its environment badge. The connections list says what a Files connection joins. (#387, #388)
+  - Agents reach the connections a Files connection attaches only where that connection's own Agents setting is Read, with no hidden tables and no masked columns. The Files form names each one left out and why. No password goes to the agent. (#388)
+  - Edit the files: turn off Open read-only and a CSV, TSV, Parquet, JSON or NDJSON file's table is edited like any other: change values, add rows, delete rows, then save. A save rewrites the whole file, and the note says which file is largest. A file that changed on disk since you opened it isn't overwritten: your changes stay pending until you reload. Excel files and attached connections stay read-only, and the SQL editor only reads. (#389)
+  - .duckdb files are edited in place, in one transaction: a change that fails undoes the others. Tabletist holds the file read-only while it is open, so another program can read it but not write it. (#392)
+  Russian and Brazilian Portuguese
+  - Settings › General › Language chooses English, Português (Brasil) or Русский, or follows the system's first language. The window, the menu bar and the keymap's commands change at once. Also [interface] language in settings.toml: system, "en", "pt-BR" or "ru". (#352, #361)
+  - Russian: every message, with numbers, sizes, times and dates written the Russian way. (#352, #357, #358, #360)
+  - Brazilian Portuguese: all 2,379 messages, with Portuguese numbers («1.240,50») and dates. Every Portuguese system language chooses it, pt-PT included. The translation hasn't had a native speaker's review yet, so corrections are welcome. (#361, #362, #363, #364)
+  - The translating guide says how to add another language. (#365)
+  Connections
+  - Groups you name: a connection's form has a Group, with New group… to make one, and the Connections list shows each connection under its group. Search finds it by group. A connection with no group of its own is grouped as before. (#373)
+  - Two databases of one connection at once: in the database menu, ⌘-click or ⌘↩ opens a database in a new window (Ctrl on Windows and Linux, ctrl+enter on Omarchy). The new window connects without asking for the password again. In the connection picker, an open connection's row menu now says Open another, with ⇧↩ named on the row and in the footer. (#374, #380)
+  - At launch each window opens again on the database it was on, with its own tables and row panel. (#376)
+  - Close, not Disconnect: while a connection is lost or cancelled, the bar's button says Close, since there's no session left to end. (#372)
+  - The Type row of the connection dialog is a grid of choices, so all the types fit. (#351)
+  TLS and read-only
+  - MySQL and MariaDB verify-full with no CA file now trusts the system's certificates (the Keychain on macOS, the system store on Windows, the CA bundle on Linux), as PostgreSQL already did. A company CA trusted in the Keychain now works. (#384)
+  - PostgreSQL takes a CA file in binary DER (most .cer files), not only PEM. (#383)
+  - Amazon Aurora MySQL readers without write forwarding keep the session read-write. Read-only runs in the SQL editor and agents' reads failed there. They now run, checked against the reader's own innodb_read_only. (#391)
+  Smaller changes
+  - Exports are much faster far from the server: they now wait on it a few times in all, not once for every 5,000 rows on PostgreSQL. Through a 200 ms round trip, 200,000 rows to CSV took 10.6 s and now take 1.8 s. The SSH tunnel's window is wider too, so a far tunnel keeps the link full. (#375)
+  - A settings change that would make settings.toml too long to be read (over 1,000 lines or 64 KB) is no longer written. Before, the next start ignored the whole file. (#355)
+  - url is 2.5.9, for RUSTSEC-2026-0592. (#381)
+  - Once it holds a Files connection or a group, connections.toml is written as version 7 to 10 of the file, which Tabletist 0.7.0 can't read. Before going back to 0.7.0, remove the Files connections and the groups.
+  On the site
+  - A new Guide page, Speed and security, says how Tabletist stays fast far from the server and how it keeps connections, passwords and production safe. The home page and What is Tabletist? say the same in short, and name MariaDB. (#349)
+  - The guide and reference cover Files connections, the languages, groups and opening another database.
+  Full Changelog: https://github.com/igor-alexandrov/tabletist/compare/v0.7.0...v0.8.0
+ReleaseNotesUrl: https://github.com/igor-alexandrov/tabletist/releases/tag/v0.8.0
+Documentations:
+- DocumentLabel: Guide
+  DocumentUrl: https://igor.works/tabletist/what-is-tabletist/
+- DocumentLabel: Reference
+  DocumentUrl: https://igor.works/tabletist/connections/
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
