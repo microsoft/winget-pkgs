@@ -1,0 +1,73 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Skonester.Shiira
+PackageVersion: 0.5.0
+PackageLocale: en-US
+Publisher: Shiira Project
+PublisherUrl: https://github.com/skonester
+PublisherSupportUrl: https://github.com/skonester/Shiira/issues
+Author: Skonester
+PackageName: Shiira
+PackageUrl: https://github.com/skonester/Shiira
+License: GPL-3.0-only
+LicenseUrl: https://github.com/skonester/Shiira/blob/HEAD/LICENSE
+ShortDescription: A super dark browser inspired by the classic Shiira project.
+Description: |-
+  A modern Electron homage to the classic Shiira browser for Mac OS X — with a dark, customizable interface, powerful tab workflows, and practical privacy tools.
+  Shiira is in active development and is best used as a secondary browser while the project matures.
+  Why Shiira?
+  Shiira is built for people who want a browser that feels like their workspace. It pairs a focused dark interface with the browser features you depend on every day, without turning the window into a dashboard.
+  - Organize your attention: Spaces, favorites, pinned tabs, folders, split view, Peek, and an archive for tabs you have not used recently.
+  - Make it yours: Shiira Night, themes, a custom color wheel, flexible sidebar/top-tab layouts, and configurable startup behavior.
+  - Browse with confidence: Native ad blocking, cosmetic filtering, private tabs, site-permission controls, cache tools, and secure password storage.
+  - Keep your workflow moving: Command bar, Tab Expose, Chrome extension support, Arc import, bookmarks, history, RSS, and session restore.
+  A better way to manage tabs
+  - Spaces keep separate projects in their own tab sets, names, emoji, and colors.
+  - Profiles per Space separate website logins, storage, permissions, history, favorites and extensions. Create or rename a profile in the Space editor. Existing data stays in Default.
+  - Live sidebar updates share Spaces, pinned tabs, folders, favorites and the archive between windows, merging independent edits while each window keeps its active page.
+  - Favorites, pinned tabs, and folders stay available across restarts.
+  - Today tabs automatically move inactive tabs to the Archive.
+  - Split view places up to four pages in columns, stacked rows or a grid, while Peek previews links without interrupting the page you are reading.
+  - Tab sleep releases memory from tabs you are not using and reloads them when needed.
+  - Tab Expose gives you a visual overview of every open tab.
+  Practical browser tools
+  - Browser bookmark import from Chrome, Edge, Brave, Vivaldi, Opera, Chromium, Firefox, Safari or an HTML export. Arc migration also brings spaces, nested pinned tabs, all profiles' favorites, optional Today tabs and history, archived tabs, and cached icons into Shiira's Default profile.
+  - Manifest V3 Chrome extensions from the Chrome Web Store.
+  - Notes and Easels open from the pen button or command bar. Write formatted notes and checklists, or arrange text, drawings, shapes, images and page captures on a canvas. Documents autosave locally by profile.
+  - Bookmarks bar, favorites launcher, searchable history, RSS, and session restore.
+  - Cache, cookies, site storage, downloads, permissions, passwords, and update controls.
+  Privacy without ceremony
+  - Network and cosmetic ad blocking powered by a bundled filtering engine.
+  - Private tabs that keep extensions disabled.
+  - Optional clear-on-exit cache behavior and straightforward browsing-data controls.
+  - Password storage backed by the operating system keychain.
+  Notes, Easels and shared sidebars are local to this installation, with no cloud account or cross-device sync.
+Tags:
+- ad-blocker
+- browser
+- chromium
+- internet
+- split-view
+- web
+- webpage
+ReleaseNotes: |-
+  Version 0.5.0 makes YouTube playback reliable when signed out and replaces the old sign-in modal with real website popups.
+  YouTube playback
+  - Seeking works. Earlier releases built DASH streams from the iOS and visionOS clients. YouTube cuts those URLs off after about 1 MB unless the request carries a proof-of-origin token, so playback stopped and every seek outside the buffer failed with HTTP 403. Shiira now plays these clients' HLS manifests, which need neither a token nor the player-script solver.
+  - Fewer bot checks. visionOS requests carry a visitor ID issued by YouTube instead of a locally generated one. The iOS client rotates to a fresh visitor when YouTube leaves out the HLS manifest, and keeps the first one that works.
+  - Audio starts. YouTube labels every HLS segment seg.ts, whatever its real format. Shiira now reports each segment's container (MPEG-TS, fMP4 or packed AAC) so the player buffers audio correctly.
+  - visionOS and iOS now come first in the client order, ahead of the web clients.
+  In a signed-out live test of the same 16-minute video that failed in 0.4.0, Shiira played 1080p60 in about one second, completed all four seek scenarios, and made 92 media requests without one failure. 0.4.0 lost 90 of 295 requests to HTTP 403. Only that one video was tested. This approach follows Stream Tube (MIT).
+  Website sign-in
+  - Native site popups. Login and other popups that a page requests open as real windows in the originating page's profile, including private tabs. They keep window.opener, cross-origin messaging, referrers, form submissions and named windows. The old sign-in modal, which loaded popup URLs in an unrelated view, has been removed.
+  - Browser identity. Shiira reports the installed Chromium version and the real operating system, without Electron or Shiira product tokens, and disables Blink's automation indicator.
+  - Regular new-tab links still open in Shiira's tab strip.
+  Important
+  Google sign-in can still be rejected. Google may still answer "This browser or app may not be secure", for example on Scira's Continue with Google. The cause has not been found. See website sign-in compatibility.
+  Release checks
+  - The Windows release workflow runs a new sign-in smoke test against two local origins, covering popups, cross-origin messages, form POSTs and profile isolation.
+  - Local verification passed 240 unit tests and the YouTube Electron smoke test.
+ReleaseNotesUrl: https://github.com/skonester/Shiira/blob/HEAD/README.md#latest-release-050
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
