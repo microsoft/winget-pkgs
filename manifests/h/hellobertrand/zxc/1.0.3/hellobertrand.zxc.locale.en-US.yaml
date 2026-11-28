@@ -1,0 +1,50 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: hellobertrand.zxc
+PackageVersion: 1.0.3
+PackageLocale: en-US
+Publisher: Bertrand Lebonnois
+PackageName: zxc
+License: BSD-3-Clause
+ShortDescription: Asymmetric lossless compression built for ultra-fast decode
+ReleaseNotes: |-
+  # Release Notes
+
+  v1.0.3 is a maintenance release of the **Hydrogen** series：dictionary ID 0 is handled as a valid ID, frames without a dictionary no longer see the caller's dictionary, the block API checks block headers, and the stream engine and the CLI lose a few unsafe edges.
+
+  **Same format v9, same ABI.** Soname still `libzxc.so.6`. One function is added, `zxc_requires_dict()`. Nothing is removed and no signature changes, so binaries built against an earlier 1.0.x run unchanged.
+
+  ## Dictionaries
+
+  • **ID 0 is a valid dictionary ID (#619).** IDs are 32-bit hashes, and 0 is one of them. Until now, 0 also meant "no dictionary"：the encoder set the header's dictionary flag only for a non-zero ID, and the readers took ID 0 as "none". Now the flag alone decides, in the encoder, the decoders, the seekable reader and the CLI, which also lists ID 0 instead of `none`.
+  • **New `zxc_requires_dict()` (#619).** `zxc_get_dict_id()` returns 0 for both "none" and ID 0, so it cannot tell them apart. `zxc_requires_dict(src, size)` reads the 16-byte header, validates it, and returns 1 if the archive needs a dictionary, 0 if not, or a negative `zxc_error_t`. The bindings expose it as `requires_dict` (Python, Rust), `RequiresDict` (Go) and `requiresDict` (Node.js, WASM). A conformance vector covers a dictionary with ID 0.
+  • **Frames without the dictionary flag are decoded without the dictionary (#659).** One-shot decoding with a `zxc_dctx` (in-place decoding included) and `zxc_stream_decompress()` applied the attached dictionary to every frame, flagged or not. A frame without the flag could then copy up to 64 KiB of the dictionary or use its shared literal table. Now such a frame decodes as if no dictionary were attached：a match reaching before the frame start returns `ZXC_ERROR_BAD_OFFSET`, a block using the shared table returns `ZXC_ERROR_DICT_REQUIRED`. The seekable reader already behaved this way. In a concatenation that alternates frames with and without a dictionary, the stream decoder now restarts its workers at each switch.
+
+  ## Decoder
+
+  • **The block API checks block headers (#658).** `zxc_decompress_block()` and `zxc_decompress_block_safe()` skipped the header checksum and the zero check on Block Flags and Reserved, which framed decoding already did. A corrupt header now returns `ZXC_ERROR_BAD_HEADER` instead of reaching the decoder.
+  • **Stream engine races (#657).** The multi-threaded stream engine read its I/O error flag and the status of its jobs without holding the context lock, so a thread could see the flag before the error code that goes with it. Both are now read and written under the lock. A failed read of the footer reports `ZXC_ERROR_IO`, which a new test covers.
+
+  ## Portability
+
+  • **The fallback `ctz64` used a wrong De Bruijn constant (#655).** The multiplier did not match its table, so bit positions 42 to 56 came out wrong. The encoder uses this count to measure matches. GCC, Clang and MSVC use their own bit-scan builtins and never reach the fallback; only a compiler with none of them was affected, where the encoder could write archives that did not decode back to the input. Unit tests now check every bit position of both fallbacks.
+
+  ## CLI
+
+  • **stdin and stdout are buffered once.** The CLI attached a buffer to stdin and stdout for each operand, then detached and freed it after use, which C forbids once a stream has been read or written. With musl, stdin kept pointers into the freed buffer, so naming `-` twice (`zxc -dc - -`) read freed memory and could crash. Each standard stream now gets one buffer, set before its first read or write and kept until exit.
+
+  ## Changelog
+
+  • fix：Zero the compression context before init, so freeing it after a failed init is safe (#663)
+  • fix：Isolate frames without the dictionary flag from the attached dictionary (#659)
+  • fix：Accept dictionary ID 0 as a real dictionary (#619)
+  • fix：Reject corrupt block headers in the block API (#658)
+  • fix：Fix races on job status and io_error flags in the stream engine (#657)
+  • fix：Correct ctz64 De Bruijn constant (#655)
+  • cli：Buffer stdin/stdout safely
+
+  Full Changelog：[v1.0.2...v1.0.3](https://github.com/hellobertrand/zxc/compare/v1.0.2...v1.0.3)
+ReleaseNotesUrl: https://github.com/hellobertrand/zxc/releases/tag/v1.0.3
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
