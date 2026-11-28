@@ -1,0 +1,89 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: fwilhe2.Grind
+PackageVersion: 0.3.0
+PackageLocale: en-US
+Publisher: Florian Wilhelm
+PublisherSupportUrl: https://github.com/fwilhe2/grind/issues
+PackageName: grind
+PackageUrl: https://github.com/fwilhe2/grind
+License: AGPL-3.0-or-later
+LicenseUrl: https://github.com/fwilhe2/grind/blob/HEAD/LICENSES/AGPL-3.0-or-later.txt
+Copyright: Copyright (C) 2026 Florian Wilhelm
+ShortDescription: An ODF-native office suite with native clients for Windows, macOS, GTK, the browser, the terminal and the command line.
+Description: |-
+  grind is an ODF-native office suite written from scratch, with a native application for each platform rather than a cross-platform toolkit: a Windows program, a Mac program, GTK windows, a terminal UI, a browser client and a command line. Its native format is OpenDocument (odf).
+
+  - A plain-text projection of a document makes every cell a line, so a spreadsheet can live in git and be reviewed and audited as diff, and it still opens in the window.
+  - Formulas can be shown as self-documenting text instead of terse references, for example Future Value(Rate: Loan.B7/12, Number Of Periods: 10*12, Payment: -Loan.B6) in place of =FV(Loan.B7/12;10*12;-Loan.B6).
+  - A domain specific language based on rhai generates spreadsheets from dynamic data without a Turing complete language, and without macro support.
+  - A scratch calculator for the times where a calculator comes first and a spreadsheet would be easier later: define names, calculate line by line, and promote the tape to a real spreadsheet.
+  - The CLI is a first class citizen, whether it is used by a human, in shell scripts or by AI agents; discover it with grind --help.
+  - Excel workbooks are imported and their formulas recalculated, and their bar, line, pie and area charts are brought along.
+
+  The clients are the spreadsheet and the word processor for Windows, macOS, GTK and the browser, the terminal version grind-tui, the command line grind, and a VS Code extension for .grind and .rhai files.
+Tags:
+- docs
+- document
+- editor
+- odf
+- office
+- spreadsheet
+- word
+- word-processor
+- work
+ReleaseNotes: |-
+  What changed
+  Changes
+  - The spreadsheet, the word processor and every Linux package now come for 64-bit Arm too
+    (arm64 .deb, aarch64 .rpm).
+  - An Ansible role installs the latest released desktop apps and the grind command on
+    Debian, Ubuntu, Fedora, RHEL and openSUSE, and upgrades them when a new release comes out
+    (ansible-galaxy collection install 'git+https://github.com/fwilhe2/grind.git#/packaging/ansible,main').
+  - The browser version works on a phone: the bars scroll sideways, a finger scrolls the
+    spreadsheet and two fingers zoom it, a second tap on a cell edits it, and the text page fits
+    the screen and takes the phone's keyboard.
+  - grind calc --open reads a tape saved with --save back into the scratch calculator,
+    even after LibreOffice opened and saved it, and adds the lines given after it; :open does
+    the same at the interactive tape. A spreadsheet that is not a saved tape is refused with
+    what makes it not one. Every window's scratch calculator opens one too (Open Tape…, or
+    :open in the terminal version), and Undo brings back the lines it replaced.
+  - A Windows installer, grind-X.Y.Z-x86_64.msi: Grind in the Start menu and in Open with,
+    grind and grind-tui on your PATH, for you alone and without an administrator. The next
+    release's installer updates it in place, and Installed apps removes all of it.
+  - Homebrew installs grind on macOS and Linux and brew upgrade keeps it current:
+    brew install fwilhe2/grind/grind for the grind command and grind-tui,
+    brew install --cask fwilhe2/grind/grind-app for the Mac app.
+  - A GitHub Action puts the grind command on the path of a workflow, on Linux, macOS and
+    Windows, x64 and Arm, the latest release or a pinned one: uses: fwilhe2/grind@main.
+  - More of Excel's functions recalculate instead of showing #NAME?: RANK.EQ, RANK.AVG,
+    PERCENTILE.INC, PERCENTILE.EXC, QUARTILE.INC, QUARTILE.EXC, MODE.SNGL,
+    PERCENTRANK.INC, PERCENTRANK.EXC, FORECAST.LINEAR, NORM.DIST, NORM.INV, NORM.S.INV,
+    CEILING.PRECISE, ISO.CEILING, FLOOR.PRECISE, CEILING.MATH and FLOOR.MATH; and the
+    normal distribution in ODF's own names, NORMDIST, NORMINV, LEGACY.NORMSDIST and
+    STANDARDIZE.
+  - The scratch calculator takes currencies without their symbol: 1200 eur, EUR 1200 or $5
+    show as 1,200.00 € and $5.00, and the result of a calculation keeps the currency
+    (net * 19% is euros, net / net a plain number). Adding euros to dollars is refused. A
+    percentage shows as 19%, and a tape saved as a spreadsheet formats every cell the same way.
+  - grind-sheet-gtk --tape-from lines.txt opens the scratch calculator with a file's lines typed
+    in.
+  - Dates: DAYS, DAYS360, DATEDIF and YEARFRAC, and Excel's WORKDAY.INTL and
+    NETWORKDAYS.INTL for a working week that is not Monday to Friday.
+  - ROMAN, BASE, DECIMAL and the binary, octal and hexadecimal conversions (DEC2HEX,
+    HEX2DEC, BIN2DEC and the rest); NUMBERVALUE, CLEAN, AVERAGEA, MAXA, MINA,
+    SHEET, SHEETS, DB, XNPV, XIRR, RAND and RANDBETWEEN.
+  Fixes
+  - A span of tape lines, SUM(#1:#3), is shown as typed rather than as [.B1]:[.B3], and saved
+    as one range even when its first line has a name.
+  - Zooming the spreadsheet in the browser (Ctrl+wheel, Ctrl+plus and minus) changes the size the
+    cells are drawn at again, not only how many fit.
+  - PERCENTRANK rounds to significant digits, as LibreOffice does: a small rank such as 0.00333
+    no longer comes out as 0.003.
+ReleaseNotesUrl: https://github.com/fwilhe2/grind/releases/tag/v0.3.0
+Documentations:
+- DocumentLabel: User guide
+  DocumentUrl: https://github.com/fwilhe2/grind/blob/HEAD/doc/user-guide.md
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
