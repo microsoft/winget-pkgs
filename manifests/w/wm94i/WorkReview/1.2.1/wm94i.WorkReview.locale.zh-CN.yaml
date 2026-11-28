@@ -1,0 +1,55 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: wm94i.WorkReview
+PackageVersion: 1.2.1
+PackageLocale: zh-CN
+Publisher: workreview
+PublisherUrl: https://github.com/wm94i
+PublisherSupportUrl: https://github.com/wm94i/Work-Review/issues
+PackageName: Work Review
+PackageUrl: https://github.com/wm94i/Work-Review
+License: 免费软件
+Copyright: © 2026 WorkReview
+ShortDescription: 帮你自动记录一天中使用了哪些应用、浏览了哪些网页、在每个应用上花了多少时间
+Description: |-
+  Work Review 会在后台持续记录你当天使用过的应用、访问过的网站、关键窗口和屏幕内容，再把这些离散片段整理成一条可回看、可追问、可复盘的工作轨迹。
+  - 不需要手动打卡，也不用事后回忆今天干了什么
+  - 概览、时间线、日报、工作助手共用同一份底层记录
+  - 既能看统计，也能直接追到具体页面、窗口标题和上下文截图
+  - 支持简体中文 / English / 繁體中文三种界面语言，日报会按当前语言分别生成与切换
+  - 支持轻量模式、按小时活跃度视图、日报 Markdown 导出和多屏截图策略切换
+  - 现在还提供 桌面化身 Beta，用更轻量的桌宠状态反馈陪你工作
+  全部数据本地存储，不上传任何服务器。AI 功能可选，关掉也完全可用。
+Tags:
+- 时间
+- 计时器
+- 跟踪器
+ReleaseNotes: |-
+  English → | 繁體中文 →
+
+  维护更新，重点提升桌宠稳定性与启动性能、完善助手扩展（Personal Agent Harness）执行语义与安全边界，并优化时间线详情交互与浏览器 URL 采集。
+  助手扩展（Personal Agent Harness）可靠性与安全
+  - 自主任务状态语义修正：修复配置可用 AI 模型但调用失败降级时仍被误报 completed 的问题；绑定了个人技能的自主任务在缺少可用 AI 模型（如未授权云模型）时明确报 failed 并说明原因；透传账本的 timed_out / failed / cancelled 终态，未授权云模型降级为本机统计时在摘要中显式标注；修正每日定时判定改用 .earliest() 避免夏令时歧义。
+  - 个人技能建议工具生效与边界加固：allowed_tools（兼容 allowed-tools 连字符写法，并按合法工具名校验过滤）现会注入技能目录提示词与 load_skill 正文；load_skill 同时中和正文内嵌的伪造开始/结束边界前缀。
+  - 外部 MCP 发现缓存与脱敏：桌面工作复盘的外部 MCP 发现新增短时 TTL 缓存（命中 60 秒、空结果/离线 20 秒），按 (data_dir, blocked_self_port, enabled_servers) 的 SHA-256 指纹校验（静态缓存不滞留明文 Token，过期项在读路径即时清理），并在保存、删除或连通性测试完成后主动失效，减少每轮对话重复握手与离线服务阻塞。
+  - 执行器账本、超时与产物边界修复：RunLedgerRecorder 异步热路径的 SQLite 写入迁入 tokio::task::spawn_blocking 并记录任务异常告警；请求时长预算耗尽触发兜底文案时正确写入 RunStatus::TimedOut；上下文压缩估算同时计入 assistant 文本与 tool_calls；read_run_artifact 按原始来源工具采用 fail-closed 信任边界（外部联网、外部 MCP 与未知工具产物保持 <<<外部内容开始>>> 边界且不重复包裹）。
+  修复与体验
+  - Windows 浏览器地址栏采集扩大搜索深度并跳过网页内容，修复默认查询深度不足造成的 Chrome URL 漏采，同时避免整棵辅助功能树遍历耗尽 350ms 等待预算；包括 IP 与端口的页面沿用现有统计规则，保留地址栏缓存与超时保护。
+  - 未配置 AI 时不再将旧版 Ollama / Qwen3 预设自动迁移为模型档案；已有明确保存的模型继续兼容迁移。
+  - 时间线详情采用截图画布与扁平信息侧栏，提供网址复制、截图放大、分类与项目操作及底部删除入口，并适配深色主题与窄窗口；截图放大层与记录清理面板均支持独立键盘焦点约束、Escape 关闭与返回触发按钮。
+  - 助手中的「Personal Agent 引擎 / 引擎与技能」统一改称「助手扩展」，同步四种界面语言、功能说明与三份 README。
+  桌宠可靠性与性能
+  - 修复点击穿透、隐藏本体开关未保存，以及设置快照覆盖拖拽位置与待跟进项；重复「记住」操作不再重复写盘。
+  - 输入监听按生命周期启动与卸载，快速开关保持代次隔离；修正 Windows 标点与编辑键映射，隐藏本体时正确清理按键状态，并减少空闲唤醒与冗余系统查询。
+  - Windows 键盘 Hook 使用预分配的非阻塞队列，普通采样线程维护多键状态；鼠标回调只做原子汇聚。回归覆盖采样锁竞争、松键顺序、旧代次丢弃及缓冲溢出复位，避免回调等待可视状态锁。
+  - Linux Xlib 多线程初始化前移到 GUI 启动前并校验结果；穿透更新未送达主线程、原生设置失败或窗口未就绪时使缓存失效，以便后续重试。
+  - 主动 AI 在独立任务内使用请求截止时间，未配置模型时退避，情绪覆盖进入防抖前应用；会话查询移入阻塞线程、复用含隐私规则签名的缓存，跟进提示后的静默期跨帧生效，避免提醒连发。
+  - 展开与收起保留紧凑位置，容忍系统坐标舍入，尺寸相同时跳过窗口重设；取消过期尺寸纠正定时器，拖动结束后按当前窗口位置计算气泡方向。
+  - 桌宠改用独立透明页面入口，避免启动时加载主窗口路由与侧栏；首帧保持透明，保留文件拖放保护。隐藏窗口暂停动画，贝塞尔计算复用预计算系数，并为 Windows 透明恢复提供有界重试。
+  macOS 安装说明
+  首次打开可能提示「已损坏，无法打开」，请执行：
+  sudo xattr -rd com.apple.quarantine '/Applications/Work Review.app'
+ReleaseNotesUrl: https://github.com/wm94i/Work-Review/releases/tag/v1.2.1
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
