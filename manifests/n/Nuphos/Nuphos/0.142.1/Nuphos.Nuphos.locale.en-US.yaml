@@ -2,7 +2,7 @@
 # yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
 
 PackageIdentifier: Nuphos.Nuphos
-PackageVersion: 0.142.0
+PackageVersion: 0.142.1
 PackageLocale: en-US
 Publisher: Nuphos, Inc.
 PublisherUrl: https://nuphos.ai/
@@ -29,12 +29,14 @@ Tags:
 - team-collaboration
 - workspace
 ReleaseNotes: |-
-  New
-  - Computer use on a Mac no longer needs the Codex App. Desktop now ships Cua Driver (cua-driver-rs 0.64.3, MIT) on macOS. An agent's local_cua tool can run one Cua Driver tool per call (get_desktop_state, click, type_text, run_steps and others), one driver process per conversation. Calls that run code through the Codex App work as before. Before the driver starts, Desktop asks macOS for Accessibility for itself. The driver's telemetry and update check are turned off. The macOS download grows by about 11 MB. Fixes #5316. (#5324)
+  Fixes
+  - Any Linux computer can host desktops for agents. The local runtime used to start a helper that ships only in the Nuphos Box image, so on other Linux computers the agent's desktop tools failed on their first call and a computer card could not be offered. It now runs open-computer-use mcp from PATH and looks for Xvnc, xfce4-session and open-computer-use on PATH. When one is missing, the log says what to install. Input tools (click, type, scroll, drag, key presses) are refused while a person holds the desktop; looking still works. (#5328)
+  - A Linux computer used at its own X11 screen can hand that screen over. When no desktop pool runs and TigerVNC's x0vncserver is on PATH, the computer shares its own screen the way a Mac does, so a person away from it can finish a sign-in from a computer card, including on a phone. The screen is served on a local unix socket only, and the stream still refuses any viewer who is not the signed-in account. (#5331)
+  - Text about a shared screen now says "this computer" instead of "this Mac", in every language. (#5331)
   Known limits
-  - The first-run macOS permission prompt and Gatekeeper behaviour with the bundled driver were not tested on a clean Mac before this release. The macOS builds were signed and notarized by the release workflow as usual.
-  - Windows and Linux are unchanged: the driver is bundled on macOS only.
-ReleaseNotesUrl: https://github.com/nuphos/nuphos/releases/tag/v0.142.0
+  - Wayland sessions are not supported yet (tracked in #5321).
+  - The first-run macOS permission prompt with the bundled Cua Driver is still not tested on a clean Mac. macOS and Windows behave as in v0.142.0 apart from the wording change.
+ReleaseNotesUrl: https://github.com/nuphos/nuphos/releases/tag/v0.142.1
 Documentations:
 - DocumentLabel: Documentation
   DocumentUrl: https://docs.nuphos.ai
