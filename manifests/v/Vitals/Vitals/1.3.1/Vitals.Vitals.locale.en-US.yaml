@@ -1,0 +1,110 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Vitals.Vitals
+PackageVersion: 1.3.1
+PackageLocale: en-US
+Publisher: Vitals contributors
+PublisherUrl: https://github.com/dragoscv
+PublisherSupportUrl: https://github.com/dragoscv/vitals/issues
+PrivacyUrl: https://github.com/dragoscv/vitals/blob/main/PRIVACY.md
+Author: Dragos Catalin Vladulescu
+PackageName: Vitals
+PackageUrl: https://github.com/dragoscv/vitals
+License: MIT
+LicenseUrl: https://github.com/dragoscv/vitals/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Vitals contributors
+ShortDescription: Lightweight, private Windows system monitor.
+Description: |-
+  Vitals shows what is slowing your computer down, in plain language: CPU, GPU, memory, disks,
+  network, temperatures and per-process usage, with history, alerts and a compact overlay.
+  Optional read-only access from your phone on the local network. No account, no telemetry.
+Moniker: vitals
+Tags:
+- cpu
+- gpu
+- hardware-monitor
+- performance
+- system-monitor
+- task-manager
+ReleaseNotes: |-
+  Added
+  - Settings → Remote access → MQTT: publish the readings Vitals measures to a
+    broker of your own, with Home Assistant discovery, from a screen instead of a
+    command-line flag. Off until you turn it on, and the address has to be an
+    mqtt:// or mqtts:// URL with a host — a username and password smuggled
+    into the address are refused, because the address is written to the settings
+    file and a password is not. The password goes to your operating system's
+    secret store, and the uninstaller removes it. What is published is the
+    readings (processor, memory, temperature, battery, and how many alerts are
+    active) — not the process list, and not which programs you run.
+  Fixed
+  - Home Assistant created no entity at all from the MQTT integration. Each
+    announcement carried its availability topic inside the device block, and
+    Home Assistant checks that block against a schema with no place for it, so
+    it discarded the whole announcement and logged not a valid option at 'device.availability_topic'. The reading topics Vitals published were
+    correct and the broker kept them; there was simply nothing on the other end
+    to receive them. Availability now travels on the entity, where Home
+    Assistant expects it. Every 1.3.0 desktop build — Windows and the macOS
+    download — carries the old payload. The phone and watch apps never publish
+    MQTT themselves, so they are unaffected.
+  - A reading the hardware cannot report no longer arrives as a zero. The
+    computer's processor count, thread count and disk activity, the graphics
+    memory and temperature of a card whose driver does not answer, a desktop's
+    battery, a disconnected adapter's counters — each was a plausible-looking
+    0 on at least one surface, and a zero is not an absence: it is a
+    measurement, and it poisons every average drawn from it. They now stay
+    absent all the way out — the em dash in the app, no series in Prometheus
+    (which has absent() for exactly this), no entity attribute in Home
+    Assistant, no point in the history chart — on all five clients, including
+    the phone and the watch.
+  - Android: the phone build no longer requires Wi-Fi or a camera, and the TV
+    build no longer declares a camera it does not use. Android marks a hardware
+    feature required when a permission implies it (ACCESS_WIFI_STATE →
+    android.hardware.wifi, CAMERA → android.hardware.camera) unless the
+    manifest says otherwise, and Play then hides the app from every device that
+    lacks it — Ethernet-only phones and tablets, camera-less Chromebooks and
+    Android XR. Both are declared optional now, so the next bundle is offered to
+    those users. The 1.3.0 build already in review was made from the old
+    manifest and keeps the restriction.
+  Downloads
+  ──────────────────────────────────┬───────────────────────────────
+  Platform                          │Download
+  ──────────────────────────────────┼───────────────────────────────
+  Windows, Intel / AMD (x64)        │Vitals_x64-setup.exe
+  ──────────────────────────────────┼───────────────────────────────
+  Windows, ARM64 (Snapdragon)       │Vitals_arm64-setup.exe
+  ──────────────────────────────────┼───────────────────────────────
+  macOS 13+, Apple silicon and Intel│Vitals_universal.dmg
+  ──────────────────────────────────┼───────────────────────────────
+  Android phone (APK)               │Vitals_1.3.1_android.apk
+  ──────────────────────────────────┼───────────────────────────────
+  Android watch, Wear OS (APK)      │Vitals_1.3.1_wear.apk
+  ──────────────────────────────────┼───────────────────────────────
+  Android TV (APK)                  │Vitals_1.3.1_tv.apk
+  ──────────────────────────────────┼───────────────────────────────
+  Windows command line (x64)        │vitals-cli_1.3.1_x64.zip
+  ──────────────────────────────────┼───────────────────────────────
+  Windows command line (ARM64)      │vitals-cli_1.3.1_arm64.zip
+  ──────────────────────────────────┴───────────────────────────────
+  The Android downloads are the github flavour — the one allowed to scan
+  folders; the Play builds have no all-files access.
+  Verifying this download
+  Windows may show a SmartScreen warning on first run (Windows protected your
+  PC) because the installer is not yet signed with a commercial certificate.
+  Choose More info → Run anyway. That is expected — see
+  docs/distribution.md.
+  You do not have to take our word for what is in the binary. With the
+  GitHub CLI:
+  gh attestation verify .\Vitals_x64-setup.exe --repo dragoscv/vitals
+  This proves the file was built by this repository's release workflow from the
+  tagged commit, and nowhere else. Checksums for every file are in
+  SHA256SUMS.txt:
+  (Get-FileHash .\Vitals_x64-setup.exe -Algorithm SHA256).Hash.ToLower()
+  Software bills of materials (CycloneDX) for the Rust and JavaScript
+  dependencies are attached as sbom-rust.cdx.json and sbom-js.cdx.json,
+  and one for the command-line tool as sbom-cli.cdx.json.
+  Full Changelog: v1.3.0...v1.3.1
+ReleaseNotesUrl: https://github.com/dragoscv/vitals/releases/tag/v1.3.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
