@@ -1,0 +1,44 @@
+# Installer manifest: portable zip for x64 and arm64 (no MSI/NSIS - the
+# executables are simply on PATH after install via NestedInstallerFiles aliases).
+PackageIdentifier: AufsichtAI.Aufsicht
+PackageVersion: 0.1.4
+MinimumOSVersion: 10.0.17763.0
+Installers:
+  - Architecture: x64
+    InstallerType: zip
+    InstallerUrl: https://github.com/Fachryxyf/aufsicht-releases/releases/download/v0.1.4/aufsicht-v0.1.4-windows-x86_64.zip
+    InstallerSha256: a0f97b0e9b17e21fb24ae2690b3629800f893d5a76b1bf5c5faae984306aeb88
+    NestedInstallerType: portable
+    NestedInstallerFiles:
+      - RelativeFilePath: aufsicht.exe
+        PortableCommandAlias: aufsicht
+    # Only the CLI is exposed as a portable command. `aufsicht daemon` and
+    # `aufsicht tui` spawn the sibling binaries from the package directory, so
+    # the daemon and TUI do not need their own PATH aliases (and dynamic
+    # validation has one primary executable to check).
+    Commands:
+      - aufsicht
+    # zip + portable installs need no custom switches.
+    # ProductCode: intentionally omitted. Winget tracks NestedInstallerType
+    # "portable" apps by their alias/link paths, not by an installer product
+    # code; emitting one would fail winget-pkgs validation.
+    Platform:
+      - Windows.Desktop
+  - Architecture: arm64
+    InstallerType: zip
+    InstallerUrl: https://github.com/Fachryxyf/aufsicht-releases/releases/download/v0.1.4/aufsicht-v0.1.4-windows-aarch64.zip
+    InstallerSha256: 291dd34f6e294c8e152e75d49f4708dbea2cfa038e7487cf467296dfb99fb825
+    NestedInstallerType: portable
+    NestedInstallerFiles:
+      - RelativeFilePath: aufsicht.exe
+        PortableCommandAlias: aufsicht
+    # Only the CLI is exposed as a portable command. `aufsicht daemon` and
+    # `aufsicht tui` spawn the sibling binaries from the package directory, so
+    # the daemon and TUI do not need their own PATH aliases (and dynamic
+    # validation has one primary executable to check).
+    Commands:
+      - aufsicht
+    Platform:
+      - Windows.Desktop
+ManifestType: installer
+ManifestVersion: 1.5.0
