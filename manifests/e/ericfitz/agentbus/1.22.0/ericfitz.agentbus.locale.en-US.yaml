@@ -1,0 +1,81 @@
+# Created with komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: ericfitz.agentbus
+PackageVersion: 1.22.0
+PackageLocale: en-US
+Publisher: Trojan Unicorn Ventures LLC
+PublisherUrl: https://www.trojanunicorn.com/
+PublisherSupportUrl: https://github.com/ericfitz/agentbus/issues
+Author: Eric Fitzgerald
+PackageName: agentbus
+PackageUrl: https://github.com/ericfitz/agentbus
+License: Apache-2.0
+LicenseUrl: https://github.com/ericfitz/agentbus/blob/HEAD/LICENSE
+Copyright: Copyright (c) Trojan Unicorn Ventures LLC
+ShortDescription: A local message bus, ecosystem-independent shared memory, and shared task queue that allow multiple agents to work together to accomplish your goals.
+Description: Enable your coding agents to "swarm" locally by giving them a communication channel, shared memory and shared task queues.
+Moniker: agentbus
+Tags:
+- ai-agent
+- ai-agents
+- ai-coding
+- ai-security
+- ai-tools
+ReleaseNotes: |-
+  Breaking: tags filters match all tags
+  - tags on search and history now matches only messages that carry
+    every given tag (or prefix pattern such as env:*); it used to match any
+    of them. Callers that want any-of run one search per tag. See ADR 0031.
+  - A search may now give tags and no words: the matches come back newest
+    first. The TUI search overlay gains tag: tokens.
+  Memory hygiene
+  - New MCP tool memory_feedback: report the memories a task relied on in
+    one call, 1 to 50 {memory_id, verdict} pairs, where the verdict is
+    USED or INCORRECT. Nothing is applied unless every item is valid.
+    Correct a wrong memory with edit_memory (which clears an INCORRECT
+    flag); flag it INCORRECT only when you do not know the right answer.
+  - Search hits and get_memory carry incorrect: true on a flagged
+    memory, and flagged hits rank after every unflagged hit.
+  - Maintenance now soft-prunes memories that are noise (served
+    memory_noise_serves = 20 times with no USED report, after a
+    memory_noise_grace_hours = 720 grace) or flagged INCORRECT and left
+    uncorrected (memory_incorrect_prune_hours = 336, while served more than
+    memory_incorrect_prune_serves = 5 times since the flag). Setting either
+    key of a rule to 0 turns that rule off. A pruned memory behaves as
+    deleted for agents but stays in the database. Memories that exist when
+    you upgrade start their grace period at the upgrade.
+  - TUI: memory headers show pruned and incorrect markers (🗑️ and ❌;
+    icon names memory_pruned and memory_incorrect for icon_map), then
+    served and used counts; pruned memories are shown dimmed. R restores a
+    pruned memory, f clears an incorrect flag, x deletes a memory after
+    you confirm with y.
+  - New CLI: agentbus export-memories [-pruned] writes one JSON object per
+    memory, with its counters, for analysis.
+  - The 1-year memory_expiry_hours rule is unchanged, and a USED report
+    now counts as access. See ADR 0033.
+  Search
+  - search gains kinds (memories, chat, tasks; default all) and
+    single-channel scope with channel. The TUI search overlay gains in:
+    and channel: tokens, and task hits open in the task tree.
+  - Semantic search now covers chat, direct messages and tasks, not only
+    memories. Their text is sent to the configured embedding endpoint, as
+    memory text already was. See ADR 0032.
+  Fixes
+  - release.sh syncs the winget-pkgs fork before komac submits.
+  Windows packages
+  The Windows zips and install.ps1 are in this release, and the Scoop
+  bucket is updated. This version is submitted to winget
+  (ericfitz.agentbus); it reaches winget upgrade after Microsoft's
+  review, which has taken about two weeks.
+  Upgrading
+  The schema moves from 13 to 15. After upgrading, restart every harness
+  session and the TUI: a binary older than 1.22.0 refuses the upgraded
+  database, and one that is still running is not stopped until it reopens it.
+  Upgrade with brew upgrade agentbus, winget upgrade ericfitz.agentbus or
+  the install script, then run agentbus install to refresh the skill, hooks
+  and prompts.
+  The Windows binaries in this release are not Authenticode-signed; they are covered by the signed SHA256SUMS and by build attestations.
+ReleaseNotesUrl: https://github.com/ericfitz/agentbus/releases/tag/v1.22.0
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
