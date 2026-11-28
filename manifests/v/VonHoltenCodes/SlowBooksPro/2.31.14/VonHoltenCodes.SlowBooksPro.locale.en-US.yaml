@@ -1,0 +1,50 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: VonHoltenCodes.SlowBooksPro
+PackageVersion: 2.31.14
+PackageLocale: en-US
+Publisher: VonHoltenCodes
+PublisherUrl: https://github.com/VonHoltenCodes
+PublisherSupportUrl: https://www.slowbookspro.com/support/
+Author: Trent Von Holten
+PackageName: SlowBooks Pro 2026
+PackageUrl: https://www.slowbookspro.com/
+License: Freeware
+LicenseUrl: https://github.com/VonHoltenCodes/SlowBooks-Pro-2026/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Trent Von Holten
+ShortDescription: Free bookkeeping and accounting software with payroll, inventory, and invoicing.
+Description: |-
+  SlowBooks Pro 2026 is free, source-available bookkeeping and accounting software. Double-entry books, invoicing, bills, banking, US payroll and tax forms, perpetual inventory, and an analytics dashboard run locally with no subscription, no usage telemetry, and no account to sign into. Each company is a single file stored on your own computer.
+  Free, every feature: no trial, no paid tier, no invoice cap, and nothing to cancel. Free for personal and business use, including large companies.
+  Completely local: no SaaS backend and no third-party cloud. Each company is one file on your computer, or a PostgreSQL database on a server you run.
+  You own the data: backups you can download and restore, IIF, CSV, and PDF exports, and no contract keeping you in. Optional file encryption stays off until you turn it on, and backups of an encrypted company stay encrypted.
+  Server Edition is built into the same Windows installer. One office PC serves everyone in a browser with per-user logins, roles (admin, bookkeeper, accountant, read-only), and an audit trail that names who changed what. Docker with PostgreSQL on a Linux server or VPS is an optional alternative.
+  The analytics dashboard shows KPI cards, a 12-month revenue trend, A/R and A/P aging, a 90-day cash forecast, and an expense chart, with CSV and PDF export.
+  Move in from QuickBooks: imports IIF files exported from QuickBooks Desktop, and QuickBooks Online companies move in from QuickBooks' own Export data zip with open invoices included. Xero, MYOB, Sage 50, Wave, Zoho Books, and GnuCash import too, with a dry run that shows what will come in before anything does. Stripe, PayPal, or Square add a Pay Online button to emailed invoices and post payments back to the ledger.
+  Bring your own AI, if you want it: optional AI Insights are bring-your-own-key across Anthropic Claude, xAI Grok, Groq, OpenAI, Google Gemini, Cloudflare Workers AI, and any OpenAI-compatible endpoint. Nothing is sent until you add a key and click, and keys are encrypted at rest.
+  Nonprofit mode tracks funds with donor restrictions and program, management, and fundraising expenses, and produces statements of activities, financial position, fund balances, and functional expenses, plus donor receipts and year-end giving statements.
+  Accessible in both themes: WCAG AA contrast in the light and dark themes, every form field announced with its label to screen readers, and tagged PDFs (PDF/UA-1) for invoices and tax forms.
+Tags:
+- accounting
+- bookkeeping
+- double-entry
+- inventory
+- invoicing
+- payroll
+- quickbooks
+ReleaseNotes: |-
+  A patch release: six fixes, no migration (the chain head stays f3b9d2e6a1c7).
+  - Cash basis and retainage (#778). A payment recorded before 2.31.11 on a pay application that holds retainage, or on a retainage-release bill, kept the cash lines the old rule wrote: held retainage counted as income, and a paid release sat on 6990 with no job. The upgrade rewrites those cash lines once so they read as a fresh posting does; a payment on or before the closing date is left as it was and counted, the start-up log says how many of each, and the pass also runs after an import or a backup restore. The accrual books do not move.
+  - Purchase lines on the control accounts (#785). The server now refuses a bill, expense, card charge, quick-entry or memorized-bill line, and a bill made from a purchase order, on Accounts Receivable, Accounts Payable, Undeposited Funds or Inventory, in a sentence naming the account and where such a posting belongs. A line already saved there keeps its account until it is moved.
+  - A quantity or rate past its column (#782). A huge quantity at a rate of 0 was a 500. A quantity, rate or unit cost too large for its column is refused with a sentence before anything rounds it, on every document with lines.
+  - The forms' cents (#783). The estimate, sales and purchase forms round half away from zero on the value's own digits, as the server does, so a deduct alternate on a half cent, or a product like 0.3 × 2.15, reads the same on the form, in the API and on the PDF.
+  - Recurring frequency (#779). POST/PUT /api/recurring take only daily, weekly, semimonthly, monthly, quarterly or yearly, refuse anything else with a sentence, and the OpenAPI schema lists the six.
+  - Email record and log (#780, #781). GET /api/invoices/{id} carries last_emailed_at and last_emailed_to; GET /api/email-log answers a bookkeeper, accountant or read-only sign-in or token with the failure's sentence in place of the raw SMTP error, and every row names the document it was sent for.
+  The update is offered on the app's next start; the Mac DMG and the Windows installer are below.
+ReleaseNotesUrl: https://github.com/VonHoltenCodes/SlowBooks-Pro-2026/releases/tag/v2.31.14
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://www.slowbookspro.com/docs/
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
