@@ -1,0 +1,60 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Ciao1019.ArcMD
+PackageVersion: 0.5.2
+PackageLocale: en-US
+Publisher: Ciao1019
+PublisherUrl: https://github.com/Ciao1019
+PublisherSupportUrl: https://github.com/Ciao1019/ArcMD/issues
+PackageName: ArcMD
+PackageUrl: https://github.com/Ciao1019/ArcMD
+License: MIT
+LicenseUrl: https://github.com/Ciao1019/ArcMD/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 ArcMD contributors
+ShortDescription: A native Markdown rich-text editor written entirely in Go that organizes local-first notes into colorful Spaces.
+Description: |-
+  ArcMD brings Markdown's familiar writing flow onto a calm, expressive native canvas.
+  Built entirely in Go with MyGo's Native UI — windows, GPU drawing, glyph shaping, and input handling run directly from Go with no HTML, JavaScript, WebView, Electron, or cgo.
+  Spaces & live themes: colors, gradients, translucency, and dark paper
+
+  Each space maps to a local folder with its own name, icon, persistent Pinned tabs, and last-open page. Swipe with two fingers on the sidebar or press ⌃1…⌃9 to glide into the next space, while global Favorites at the top open right in place without switching spaces. Open Edit Theme Colors… to blend one to three gradient stops, dial in frosted translucency and subtle grain, or flip between Light and Feishu-inspired Dark paper (#1F2023) with balanced color remapping.
+  The Library: every space at a glance
+
+  Click the Library icon in the bottom-left corner or press ⇧⌘L. The sidebar widens into a row of space cards painted in each space's own theme colors, with folders and pages ready to jump straight into. Plugins and the 30-day Recently Deleted collection live here too.
+  A sidebar that steps aside — and peeks on demand
+
+  Press ⌘\ (or narrow the window) and your page fills the entire window. Whenever you need another file, move the pointer to the left edge: the frosted floating sidebar glides out over your page, shows live miniature page thumbnails on hover, and tucks itself away the moment you return to writing.
+  Hand-drawn marks: give your ideas a human touch
+
+  Select a phrase and pick from 12 hand-drawn stroke styles and palette colors in the floating toolbar — circle what matters, cross out hesitation, or point an arrow at the next step. Every stroke draws itself in smoothly and round-trips losslessly in .md (and legacy .arcmd) files. Try the idea journal sample, or start with a line of your own.
+  Margin bookmarks: pick up right where you left off
+
+  Hover any block to reveal a margin bookmark, or press ⌘D. Your marks appear automatically in the document outline (with rendered TeX previews for math blocks), ⌃⌘↑ / ⌃⌘↓ hop smoothly between them, and ⇧⌘D searches bookmarks across every space — without ever modifying the .md file itself.
+
+  ArcMD edits and autosaves standard .md Markdown files (.md, .markdown, .mdx) directly in place in the background — no proprietary database and no sidecar .arcmd duplicates. Every note is a plain local file with its images in a nearby assets/ folder, ready for Obsidian, Typora, VS Code, or Git.
+  - Untouched blocks stay untouched: block-level source diffing (ImportSource) preserves your original indentation, list markers, and link syntax on paragraphs you didn't edit.
+  - 100% lossless rich round-trips: text colors, highlights, hand-drawn marks, five-tone callouts (GitHub > [!NOTE] alerts), <details> toggles, merged/colored tables, custom-width two-column layouts (data-widths), and page icons/covers/word goals degrade cleanly via standard Markdown + semantic HTML + YAML frontmatter and restore completely in ArcMD.
+  - Backward compatible: existing legacy .arcmd files and history snapshots continue to open and edit seamlessly.
+Tags:
+- knowledge-base
+- markdown
+- markdown-editor
+- note-taking
+- notes
+- writing
+ReleaseNotes: |-
+  本版本正式推出 浏览器剪藏宿主（Web Clipper Native Messaging Host）与全链路剪藏接入（#65、#95，感谢 @tajiaoyezi），搭配官方扩展 Ciao1019/arcmd-clipper 即可将网页正文、4 色高亮批注与防盗链图片一键剪藏至本地空间或多维数据库；同时围绕个性化写作体验带来 5 档内置浅/深纸面配色预设与 style.json 实时样式定制、可自定义文档右上角快捷工具栏、正文与 1–6 级标题快捷键自定义（含 Typora ⌘1–⌘6 预设） 以及 首块原生 H2–H6 标题与默认一级标题开关（#92）。
+  新功能与桌面体验
+  - 浏览器剪藏宿主与全链路剪藏接入（internal/clipper、internal/app/clipper.go、cmd/arcmd/control.go、internal/app/agentctl*.go、internal/app/qasettings.go）：纯 Go 零常驻端口实现标准 Chrome Native Messaging 4-byte 帧协议（com.cizai.arcmd.clipper，入站 16 MiB / 出站 900 KiB 上限，自动识别 chrome-extension:// 启动参数，不弹窗口、无 macOS Dock 跳动），支持在「设置 › AI › 浏览器剪藏」或通过 arcmd clipper [status|install|uninstall] 免管理员权限一键为用户态 Chrome、Arc、Edge、Brave、Vivaldi 与 Chromium 注册连接；提供 clip.ping、clip.context、clip.check_url、clip.upload_asset、clip.save 与后台非阻塞 clip.ai 六项控制端点，搭配 Ciao1019/arcmd-clipper 支持网页正文、划选内容、网页高亮批注与防盗链图片（魔数栅格图像校验与同目录字节级去重复用）写入新建文档、今日笔记、追加文档或 .db.md 多维数据库（含类型化字段与记录封面写入），支持跨空间 URL 归一化查重与 AI 摘要/标签生成，窗口打开时实时同步并保留 ⌘Z 撤销栈，关闭时静默直写磁盘（#65、#95，感谢 @tajiaoyezi）。
+  - 5 档内置浅/深纸面配色预设与 style.json 实时样式定制（internal/prefs/style.go、internal/app/stylecfg.go、internal/app/theme.go、internal/editor/style.go、internal/editor/view.go）：「设置 › 外观 › 纸面配色」与命令栏新增 默认 / 暖米（warm）/ 宣纸（sepia）/ 竹青（sage）/ 雾灰（slate） 5 档浅色与深色成对纸面配色，外观预览卡与正文实时同步；同时支持在配置目录通过 style.json 在预设之上精细覆盖浅/深纸面色板（纸面、正文、次要文字、代码块底色、引用竖线、表头底色、表格边框与斑马纹）、标题与粗体字重、表格与表头默认对齐方式及默认荧光笔高亮色，每 1.5s 按修改时间自动热重载，配置有误时保留上次有效样式并给出提示，支持从设置页或命令栏一键创建/打开与重新载入（#92）。
+  - 可自定义文档右上角快捷工具栏（internal/app/custom_toolbar.go、internal/editor/quickactions.go、internal/prefs/prefs.go、internal/app/view.go）：支持在文档右上角工具栏按自定义顺序放置常用写作按钮（涵盖表格、代码块、链接、图片、公式块、行内公式、高亮块、任务/无序/有序列表、引用、折叠块、分隔线、双栏、Mermaid、白板、粗斜体、下划线、删除线、行内代码、手绘标注与源码模式共 23 项），窄窗自动折叠避让，只读与非 Markdown 视图自动隐藏编辑项；可从右上角 T 更多格式菜单、工具栏右键菜单、⌘K 命令栏或「设置 › 通用 › 写作」打开自定义弹窗，一键套用「常用写作工具」或自由增删调序，实时生效并持久化至 prefs.json（#92）。
+  - 正文与 1–6 级标题快捷键自定义及 Typora ⌘1–⌘6 预设（internal/app/keymap.go、internal/app/settings.go、internal/editor/commands.go、internal/editor/keys.go、internal/document/engine.go）：「设置 › 键盘快捷键」新增「正文」与「标题 1–6」快捷键绑定，放开 ⌘1–⌘6（Windows / Linux Ctrl+1–Ctrl+6）供标题绑定并在冲突时自动让出空间切换（⌃1–⌃9 始终可用），提供一键「Typora 标题键」预设；支持对当前块、跨多块选区及块选状态一键切换正文或各级标题并单步撤销（#92）。
+  - 首块原生支持 H2–H6 标题与默认一级标题开关（internal/document/page.go、internal/editor/starter.go、internal/editor/input.go、internal/editor/view.go、internal/app/settings.go）：允许文档首块（Blocks[0]）直接作为二级至六级标题（按 26/22/20/18/16px 正常级别渲染，不再强制放大为 34px 页面标题），空首块可直接输入 ## 、通过块手柄菜单、斜杠菜单、退格键或标题快捷键转为 H2–H6 或正文，文档无 H1 时自动回退提取首个 H2 作为未命名建议标题；「设置 › 通用 › 写作」新增「新建文档默认使用一级标题」开关，关闭后新建空白文档直接从空正文开始（#92）。
+  贡献者
+  - 特别感谢 @tajiaoyezi（#95）对本版本的贡献！
+  下载说明
+  提供 macOS（Apple Silicon / Intel）、Windows x64 与 Linux（x64 .deb / .tar.gz / Arch Linux .pkg.tar.zst，ARM64 .deb / .tar.gz）原生安装包，可使用 SHA256SUMS.txt 校验完整性，已安装版本支持应用内签名自动更新。官方插件可在应用「设置 › 插件」按需从 Ciao1019/arcmd-plugins 下载或更新。
+ReleaseNotesUrl: https://github.com/Ciao1019/ArcMD/releases/tag/v0.5.2
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
