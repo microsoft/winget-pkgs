@@ -1,0 +1,77 @@
+# Created with komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: AmariahAK.AtlarixCLI
+PackageVersion: 15.21.1
+PackageLocale: en-US
+Publisher: Atlarix
+PublisherUrl: https://atlarix.dev/
+PublisherSupportUrl: https://github.com/AmariahAK/atlarix-releases/issues
+Author: Amariah Kamau
+PackageName: Atlarix CLI
+PackageUrl: https://atlarix.dev/cli
+License: Proprietary
+LicenseUrl: https://atlarix.dev/terms
+Copyright: Copyright (c) 2026 Atlarix
+ShortDescription: 'Atlarix in your terminal: the AI coding agent that works with any model.'
+Description: |-
+  Atlarix CLI is an AI coding agent in your terminal. It plans, builds, reviews and tests code
+  with you in any project folder, and runs unattended with `atlarix run` for CI and scripts. It
+  works with any model: Atlarix Auto, your own API key (Anthropic, OpenAI, DeepSeek, OpenRouter
+  and more) or a local model through Ollama or LM Studio, and shares the Atlarix desktop app's
+  sessions, keys and settings.
+Moniker: atlarix
+Tags:
+- ai-agents
+- ai-coding-agent
+- ai-coding-assistant
+- byok
+- cli
+- coding-agent
+- developer-productivity
+- developer-tools
+- local-llm
+- multi-llm
+- privacy
+- terminal
+ReleaseNotes: |-
+  Auto-approve for commands. On Pro or pay-as-you-go, with an Atlarix Core model, a command that would ask first goes to a quick safety check. A safe command runs with no card. Anything else shows the normal card with the check's reason. The check reads only your messages and the command: tool output and attached files never reach it. It never overrides your own deny or ask rules, system-scope commands, Plan, or unattended runs. After 3 blocks in a row, or 20 in a chat, it goes back to asking. If the check fails or times out, you get the normal card.
+  Command rules in files. permissions.json now takes allow and ask rules for commands, beside deny. Your allow rules are read only from your own Atlarix folder, never from the repository, so a repo can add ask and deny rules but can't allow anything. "Always allow" saves the subcommand (git status, npm run dev), and options like git -c never slip past an allow rule.
+  Install Claude plugins. atlarix silks install <repo|url|folder> installs a silk or a Claude plugin. For one plugin in a Claude marketplace, use <plugin>@<marketplace>, as in commit-commands@claude-plugins-official, or name the marketplace's repository or folder in place of its name. It shows what the plugin adds and asks before installing, then lists the commands it runs and asks again. Pass --yes to answer both in a script. You can also ask Atlarix to install one, in the app, the CLI, VS Code or another editor: its card shows where the plugin is from, what it adds and what it runs when it loads, and Yes installs exactly that copy. Settings → Silks takes the same names. As in Claude Code, links inside a silk work, and anything reached through a link that leads outside the silk isn't loaded (Settings → Silks, /silks in the CLI and the install card say which).
+  Long tasks keep their context. In a long turn with many tool results, compaction now keeps the newest steps by size instead of by count. It clips older tool results to their start and end during the turn, so the history really gets smaller. A request is never sent over the model's window. The CLI's context bar updates when you switch models.
+  Clearer approvals.
+  - A tool card has two Nos: one carries on without the action, the other stops the turn so you can say what to do instead. Esc is the one that stops.
+  - The model is told plainly that you pressed Deny, and what to do next.
+  - A step you said no to reads "Declined: …" in the app, the CLI and editors, not "Failed: …", which stays for real errors.
+  - The waiting-approvals bar has Deny (Deny all when several wait), and the parked "Waiting on…" chip has Stop, which ends that chat's sub-agents and background commands.
+  - Pressing Stop just as a command starts now stops it. Before, the command could start anyway and move to the background.
+  Plan mode is shorter. One short set of instructions: read and research without changing the project, answer a question directly with file and line evidence, and write a complete plan when you ask for one.
+  Models and connectors.
+  - The CLI's line under the prompt, the app's model chip, VS Code and ACP show the model and who serves it, for example "grok-4.6 · Microsoft Azure".
+  - You can add the same MCP server more than once under its own name, each with its own sign-in. The connect page asks "Finish connecting?" and names the connector and its host, then shows "Connected". The local sign-in page says it worked only when it did.
+  - Sub-agents get web search and page reading only when their parent turn has them.
+  - A missing-key hint says where to fix it: /keys in the CLI and editors, Settings in the app.
+  - A model for each task (Plan, Build, Sub-agents) can now be set from /config in the CLI and from Settings → Models & keys in VS Code, as in the app's Models & providers. Unset tasks use the chat's model. Ask Atlarix to change one and it shows a card before anything is saved.
+  - On Pro or pay-as-you-go with an Atlarix Core model, when the agent reads a long web page to answer a question, it now gets the answer from much more of the page.
+  Themes. Mods can set success and warning colours, and use animated SVG scenes as a background, kept readable and paused when motion is reduced or the window isn't focused.
+  Linux. The desktop app's packages are now atlarix-desktop (command atlarix-desktop), next to the CLI's atlarix in the apt and dnf repositories, and the desktop app is on Snap as atlarix-desktop. Updates from 15.20 keep working. If you installed the Atlarix CLI with apt or dnf before 15.21, installing the desktop app removes it: run sudo apt install atlarix (or sudo dnf install atlarix) again.
+  Fixes.
+  - A Claude plugin's edict with an if rule, such as one that should run only on git commit, now runs only when that rule matches. Before, it ran after every matching tool call. Silks you already installed that use if ask you to approve what they run again.
+  - On Windows, a Read(//**/.env) deny rule now covers every drive.
+  - On Windows, edicts run in Git Bash, so one that blocks a call (exit 1) really blocks it.
+  - The read-only command list is judged in the folder where the command runs.
+  - The Docker image for arm64 now holds the arm64 binary.
+  - The free label no longer flips between "today" and "this month".
+  - The Relics tab refreshes when a relic is made.
+  - On Linux without xdg-open, sign-in offers the code and the link at once.
+  - "Open in your editor" lists only editors this computer has.
+  - The sidebar's session list fits, and a row's age hides behind its menu button.
+  - A /command at the start of the message box shows as a code chip, in the app and VS Code.
+  - In VS Code, Settings → Default model's Change opens the model picker again. Before, it closed as soon as it opened.
+  - The same message steered twice into a turn keeps each place in the CLI.
+  - Reloading the app window keeps it working.
+  - A custom model with no known price no longer shows "Free"; the latest reply's Copy and Revert are always shown; a long plan keeps its status and Build in view; a command stopped on its card shows as stopped right away.
+  - In Build, PR descriptions Atlarix writes end with "Made with Atlarix". Ask it to stop and it stops.
+ReleaseNotesUrl: https://github.com/AmariahAK/atlarix-releases/releases/tag/v15.21.1
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
