@@ -1,0 +1,65 @@
+# Created by Anthelion using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: CycloneDX.cdxgen
+PackageVersion: 13.9.0
+PackageLocale: en-US
+Publisher: OWASP Foundation
+PublisherUrl: https://owasp.org/
+PublisherSupportUrl: https://github.com/CycloneDX/cdxgen/issues
+Author: CycloneDX
+PackageName: CycloneDX Generator (cdxgen)
+PackageUrl: https://github.com/CycloneDX/cdxgen
+License: Apache-2.0
+LicenseUrl: https://github.com/CycloneDX/cdxgen/blob/HEAD/LICENSE
+ShortDescription: A polyglot tool and a library for generating various Bill of Materials in CycloneDX specification.
+Description: Generate Software Bill of Materials (SBOM) for most applications and container images with a single command. Generate Operations Bill of Materials (OBOM) for Linux and Windows hosts. Integrate with any CI/CD pipeline. Automatically submit the generated BOM to your dependency track server for analysis.
+Moniker: cdxgen
+Tags:
+- bom
+- cbom
+- containers
+- cyclonedx
+- docker
+- oci
+- owasp
+- package-url
+- purl
+- saasbom
+- sbom
+- sca
+- software-bill-of-materials
+- supply-chain
+ReleaseNotes: |-
+  13.9.0
+  This is another security release. A response to Anthropic's OSS Scanner scan cdxgen-20261117-013 closes ten advisories covering roughly 310 security findings and 35 ordinary bugs, described under Security below. Alongside it, cdxgen reads the GitHub Actions lockfiles that projects commit, identifies installed JDKs and flags Java4Shell exposure, supports Quarkus 4 including the SBOMs that Quarkus jars embed, keeps AI model artifacts apart from the models they hold, and gives cdx-audit the registry rules dep-scan 7 needs. pnpm workspaces report optional and peer dependencies more accurately, the cryptographic inventory covers twice as many algorithm names, and the container images move to AlmaLinux 10.3 and work under a non-root user. The default spec version stays 1.7, and 1.6 and 1.7 output is unchanged apart from the fixes described here.
+
+  Security
+  Scanned content can no longer direct credentials or execution: registry, API and forge credentials such as the Docker login, the Dependency-Track API key, the TEA token and the gem server key are spent only on hosts the operator or cdxgen chose, and a hostile OCI referrer descriptor can no longer point them at its own host (GHSA-374f-wc4j-7gvh). With installs off, a scanned tree can no longer start project tooling, a gpg program or project code through the cdxi create command, pnpx, quoted .npmrc keys, the piptree helper's imports, go or sourcekitten options, or a planted .git/config (GHSA-qp92-6qfc-m3qp). Secrets from scanned content stay out of BOMs, logs and reports: $env{} expansions in CMake presets, $(NAME) in MSBuild, .npmrc interpolation and the operator's own options no longer reach the output (GHSA-9p6r-xq8f-m9jp).
+  Files and hosts outside the scan stay closed: discovery refuses matches that resolve outside the searched directory, which secure mode enforces and other modes allow back with CDXGEN_FOLLOW_EXTERNAL_SYMLINKS=true (GHSA-xf67-rmrx-h6mp), and evidence, output and cache paths can no longer be steered by planted symlinks, the slices output name, /proc/self/cwd or a .. cache host into overwriting or deleting files (GHSA-5pc2-gg7c-37c9).
+  Work is bounded on every front. Crafted manifests, lock files, build and CI files, archives and container images can no longer drive quadratic or exponential parsing, grow memory without limit, inflate the BOM or fill the temp directory; the input caps are documented in docs/ADVANCED.md and docs/THREAT_MODEL.md (GHSA-6vww-36x2-c89f). Server requests, git hosts, registries, TEA servers, remote documents and crafted BOMs carry deadlines and size bounds that also protect cdx-verify, cdx-convert, cdx-validate, cdx-audit and the SPDX export (GHSA-rwjh-mqfm-9qxr). In server mode, scans of different clients no longer share slices, caches or credentials, one client's HTTP 429 no longer pauses later scans, and the git clones a client can request are capped at 1 GiB, 200000 entries and five minutes (GHSA-9232-cjmp-gg6q).
+  Verification and audit report what they find. cdx-sign and cdx-verify reject a BOM whose root signature was stripped, a nesting around 4470 levels deep, or a nested BOM that can be lifted out; an embedded SBOM can no longer set cdx: properties on other components to hide audit findings; and scanned text no longer reaches the terminal with control characters (GHSA-367g-m2q9-pwqh). A purl of __proto__ in an evinse input BOM or a .NET repository scanned in server mode no longer writes onto Object.prototype (GHSA-v934-7hh4-p7gh).
+  Several behaviour changes come with these fixes and are recorded on the advisories: .cdxgen.json can no longer set the TUI, audit rules directory, compile commands, server URL, host crypto in formulation or path options in secure mode, project .npmrc proxy and TLS settings no longer override the ones cdxgen composes for its automatic installs, DOCKER_AUTH is sent only to DOCKER_SERVER_ADDRESS, URLs in external references and properties keep the query parameters that name the target, and ASAR file-entry bom-refs are relative to the scan root with a header digest, so stored references change once. Auditing a saved BOM with cdx-audit --bom reads git history only under --workspace-dir, so findings can no longer come from whatever repository the command happens to run in (#4878).
+  Go scans run golem with CGO_ENABLED=0 unless evinse --golem-cgo opts back in, so a package's #cgo directives cannot run the C compiler on the analysed machine; this follows the Go 1.27.4 and 1.26.11 cgo security releases, CVE-2026-97033 through CVE-2026-97043 (#4851). Every scan type now identifies the installed JDKs from their release file without executing anything, and flags Java4Shell exposure (CVE-2026-114938); the container images move to the vendor builds that fix it and set JAVA_TOOL_OPTIONS to disable the HotSpot Base64 intrinsic on builds that have no fixed JDK yet (#4863, #4867, #4885).
+
+  GitHub Actions lockfiles
+  The -t github scan reads a committed .github/workflows/actions.lock offline, in the format the gh actions-lock extension writes. Locked steps carry cdx:github:lock:* properties and cdx:github:action:isLocked, the transitive actions of locked composite actions join the BOM as components, and drift is reported through isLocked=false, lockRefMismatch, lockStalePins and lockfileOnboarded=false with counts in the metadata properties. Four new audit rules, CI-025 to CI-028, check pinning and lockfile coverage, and the REPL gains an .actionslock pivot. Two small output changes come with this: a sub-action reference now produces a repository-scoped purl such as pkg:github/actions/cache@v4, and a reference without a namespace no longer aborts the whole workflow file (#4864). cdxgen's own repository is onboarded to the same lockfile, and release builds now attach a signed source SBOM generated with the github project type (#4872).
+
+  Java and Quarkus 4
+  A jar built by Quarkus 4 with quarkus.cyclonedx.embedded.enabled carries its dependency SBOM at META-INF/sbom/dependency.cdx.json, and cdxgen now reads any CycloneDX document under that directory, up to 32 MiB, merging its components and dependency graph and recording the entry in internal:SrcFile and identity evidence. Jackson 3 jars keep the group they declare themselves, tools.jackson.core, instead of being aliased to com.fasterxml.jackson.core, and the manifest fallback that produced that alias now applies only when the jar's Bundle-SymbolicName is exactly the alias's group plus artifact. In -t quarkus mode the scan reads only the *-dependency-cyclonedx.json files the Maven goal writes and falls back to the dependency tree, so a distribution SBOM left next to them no longer pollutes the result. GraalVM native images continue to expose their embedded SBOM through blint (#4912). The Quarkus 4.0.1 quickstart is covered by repotests.
+  The JDK identification described under Security also adds each JDK as a component with a vendor, build, architecture and VM properties and a purl such as pkg:generic/temurin-jdk@17.0.19%2B10.
+
+  AI-BOM
+  Model artifacts are kept apart from the models they hold. Header facts such as cdx:onnx:* and cdx:safetensors:* and the SHA-256 of files up to 4 GiB sit on file components, while the model keeps its logical facts, one cdx:ai:confidence and one cdx:ai:parameterCount. Files that share a stem but not a directory no longer merge, the dependency direction is model to artifact everywhere, and the ONNX and safetensors readers validate against the format specifications, so a malformed file is reported as unparsed with low confidence instead of inventing numbers (#4888, #4887).
+
+  Cryptographic inventory
+  OpenSSL-style algorithm names now map onto the OID table, whose coverage grows from 60 to 128 names with SHA-512/224 and /256, RSA-SHA3, AES-XTS, BLAKE2 and SM3/SM4 among the additions, so Node.js detections such as aes-256-gcm and chacha20-poly1305 are no longer dropped. RSA and EC keys record a parameterSetIdentifier, which separates RSA-2048 from RSA-4096 and names the curve for EC keys. WebCrypto, jwt.verify and jwt.sign, createECDH and the DH constructors are covered, and algorithm names read from process.env or Deno.env gain a cdx:crypto:runtimeConfigurable property (#4904).
+
+  JavaScript and pnpm
+  A pnpm package stored under a peer resolution, such as ajv-keywords@5.1.0(ajv@8.20.0), is found in the virtual store with its description, license and install path (#4844). Packages whose store directory name pnpm shortened and hashed are found by recomputing pnpm's exact directory name across both hash generations (#4890). Imports of optional and peer dependencies are credited to the version the workspace member or root actually uses, and a devDependency that another package lists as an optional peer is no longer marked optional, which keeps typescript in --required-only output for ng new workspaces (#4895, #4902). A scoped package no longer takes the evidence of its bare name, an optional dependency stays optional despite usage evidence, and a component nothing uses carries its declaring manifests as evidence occurrences under the new cdx:evidence:occurrences:declaration property (#4891). Subpath package.json manifests shipped for deep imports, by dom-helpers and styled-components for example, no longer become versionless components in projects without a lockfile (#4883).
+  The install gets lighter: ajv and ajv-formats move to devDependencies with the generated validators taking their format checks from cdxgen, ssri is replaced by node:crypto, and @bufbuild/protobuf drops from the optional dependencies since @cdxgen/cdx-proto already carries it. A production install sheds about 1.3 MB (#4895).
+
+  cdx-audit
+ReleaseNotesUrl: https://github.com/cdxgen/cdxgen/releases/tag/v13.9.0
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
