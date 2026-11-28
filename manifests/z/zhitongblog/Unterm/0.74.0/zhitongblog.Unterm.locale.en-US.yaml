@@ -2,7 +2,7 @@
 # yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
 
 PackageIdentifier: zhitongblog.Unterm
-PackageVersion: 0.73.1
+PackageVersion: 0.74.0
 PackageLocale: en-US
 Publisher: Alex
 PublisherUrl: https://github.com/zhitongblog
@@ -37,11 +37,15 @@ Tags:
 - worktree
 ReleaseNotes: |-
   Added
-  - Direct Selection Delete & Cut Inside Active Input Lines (unterm-app/src/select.rs, window.rs).
-    - Drag-selecting text inside the active shell or AI Coding CLI input line (Claude Code, Codex, Agy) and pressing Backspace or Delete now deletes only the selected span directly (computing exact cursor moves and backspaces, handling CJK wide-character cells and soft-wrapped multi-line inputs cleanly).
-    - Added Cmd+X (macOS) / Ctrl+Shift+X (Windows & Linux) to cut the selected input span to the clipboard and delete it in one step.
-    - Automatically ignores selections in historical scrollback output or alternate-screen apps (vim, less, htop, tmux) so prompts are never accidentally edited.
-ReleaseNotesUrl: https://github.com/zhitongblog/unterm/blob/HEAD/CHANGELOG.md#v0731--2026-11-27
+  - IDE-Grade Input Line Editing (unterm-app/src/select.rs, window.rs).
+    - Retained active selection after mouse release: dragging to select text keeps the highlight visible after releasing the mouse button so pressing Backspace, Delete, or Cmd+X / Ctrl+Shift+X immediately edits the selection cleanly.
+    - Click-to-move cursor inside active input lines: clicking any character on the active shell or AI Coding CLI input line (Claude Code, Codex, Agy) moves the cursor directly to that column (handling CJK wide characters and soft-wrapped multi-line inputs while ignoring links, historical scrollback, and alternate-screen apps).
+    - Type-to-replace & paste-to-replace selection: typing printable characters or pasting (Cmd+V / Ctrl+Shift+V) while an input-line selection is active automatically deletes the selected span and inserts the new text.
+  - Daily Cost Budget Alerts in Telemetry HUD (unterm-app/src/telemetry.rs, window.rs).
+    - Wired UNTERM_DAILY_BUDGET_USD and DailyTelemetrySummary::budget_alert() directly into the Cross-Session Daily Telemetry Summary palette, surfacing live normal (✓), 80% warning (⚠), and 100% exceeded (⛔) budget status rows.
+  - AI Prompt Template Library (unterm-app/src/prompts.rs, palette.rs, window.rs).
+    - Added Command Palette ✨ AI Prompt Templates with 6 built-in bilingual developer templates (Git Diff Code Review, Regression Tests, Root-Cause Debug, Performance Audit, Security Audit, PR Summary) plus custom user templates loaded from ~/.unterm/prompts.json.
+ReleaseNotesUrl: https://github.com/zhitongblog/unterm/blob/HEAD/CHANGELOG.md#v0740--2026-11-28
 Documentations:
 - DocumentLabel: Documentation
   DocumentUrl: https://unterm.app/docs/
